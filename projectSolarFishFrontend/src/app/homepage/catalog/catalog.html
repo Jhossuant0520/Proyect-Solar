@@ -1,0 +1,34 @@
+
+<section class="catalog-section">
+  <div class="animated-bg"></div>
+
+  <div class="container">
+    <h2 class="section-subtitle">Catálogo</h2>
+    <h1 class="section-title">Equipos de Energía Solar en Venta</h1>
+
+    <div class="catalog-grid">
+      <div class="catalog-card" [class.featured]="equipo.destacado"
+      *ngFor="let equipo of equipos">
+        <div class="card-image">
+          <img [src]="equipo.imagen" [alt]="equipo.nombre" />
+        </div>
+        <div class="card-content">
+          <h3>{{ equipo.nombre }}</h3>
+          <p class="precio">{{ equipo.precio | currency:'USD' }}</p>
+          <ul class="caracteristicas">
+            <li *ngFor="let c of equipo.caracteristicas">{{ c }}</li>
+          </ul>
+          <a 
+          [href]="getWhatsAppLink(equipo)" 
+          target="_blank"
+          rel="noopener noreferrer"
+          class="ver-detalle"
+        >
+          Ver detalles
+        </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+

@@ -1,0 +1,191 @@
+/* --- Estilos existentes para .login-bg y .login-panel (se mantienen con pequeños ajustes) --- */
+.login-bg {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: url('/a12.svg') no-repeat center center fixed;
+  background-size: cover;
+  padding: 1rem;
+  font-family: 'Inter', sans-serif; /* APLICAMOS LA FUENTE AQUÍ */
+}
+
+.login-panel {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 2.2rem 2.8rem; /* Aumentamos un poco el padding para más espacio */
+  border-radius: 15px; /* Consistente con las tarjetas del dashboard */
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada y suave */
+  max-width: 400px; /* Un poco más ancho para mejor proporción */
+  width: 100%;
+  animation: fadeIn 0.6s ease-in-out;
+  box-sizing: border-box;
+
+  h1 {
+    font-size: 2rem; /* Título más grande */
+    margin-bottom: 0.5rem;
+    color: #333;
+    text-align: center;
+    font-weight: 600; /* Un poco más de peso para el título */
+  }
+
+  .sub {
+    font-size: 1rem; /* Subtítulo más legible */
+    color: #666;
+    margin-bottom: 1.8rem; /* Más espacio debajo del subtítulo */
+    text-align: center;
+  }
+
+  .logo {
+    width: 180px; /* Logo un poco más grande */
+    margin: 0 auto 1.5rem auto; /* Más espacio debajo del logo */
+    display: block;
+    animation: fadeIn 0.6s ease-in-out;
+  }
+
+  .full-width {
+    width: 100%;
+    margin-bottom: 1.2rem; /* Espacio entre campos */
+  }
+
+  /* --- CAMBIOS EN EL BOTÓN DE LOGIN --- */
+  .login-btn {
+    width: 100%;
+    background-color: #007bff; /* Mismo azul vibrante que los iconos del dashboard */
+    color: white;
+    padding: 0.9rem 1rem; /* Más padding para que sea más grande */
+    font-size: 1.1rem; /* Texto del botón más grande */
+    border-radius: 10px; /* Un poco menos redondeado que las tarjetas, pero más que los inputs */
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.25); /* Sombra para el botón */
+
+    &:hover {
+      background-color: #0056b3; /* Azul más oscuro al pasar el ratón */
+      transform: translateY(-3px); /* Efecto de levantamiento más notorio */
+      box-shadow: 0 8px 25px rgba(0, 123, 255, 0.35); /* Sombra más fuerte al hacer hover */
+    }
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+    }
+  }
+
+  .bottom-links {
+    margin-top: 1.2rem; /* Más espacio sobre los enlaces inferiores */
+    text-align: center;
+
+    a {
+      font-size: 0.95rem; /* Texto del enlace más legible */
+      color: #007bff; /* Mismo azul que el botón */
+      text-decoration: none;
+      transition: color 0.3s ease;
+
+      &:hover {
+        text-decoration: underline;
+        color: #0056b3;
+      }
+    }
+  }
+
+  .error {
+    color: #dc3545;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    text-align: center;
+    font-weight: 500; /* Un poco más de peso para el mensaje de error */
+  }
+}
+
+/* Animación (se mantiene) */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- CAMBIOS EN MAT-FORM-FIELD Y INPUTS --- */
+mat-form-field {
+  width: 100%;
+  margin-bottom: 1.5rem; /* Más espacio entre los campos */
+
+  .mat-form-field-wrapper {
+    padding-bottom: 0 !important; /* Elimina padding inferior extra */
+  }
+
+  .mat-form-field-flex {
+    background-color: #f8f9fa; /* Fondo ligeramente gris para los inputs */
+    border-radius: 10px; /* Bordes más redondeados para los inputs */
+    border: 1px solid #e0e0e0; /* Borde suave */
+    padding: 0.8rem 1.2rem; /* Más padding interno para los inputs */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .mat-input-element {
+    font-size: 1rem; /* Tamaño de fuente estándar para los inputs */
+    color: #333;
+    background: transparent;
+  }
+
+  /* Estilo al pasar el ratón por el campo */
+  .mat-form-field-flex:hover {
+    border-color: #007bff; /* Borde azul al pasar el ratón */
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1); /* Sombra sutil azul */
+  }
+
+  /* Estilo cuando el input está enfocado */
+  .mat-form-field-flex.mat-focused {
+    border-color: #007bff; /* Borde azul fuerte al enfocar */
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.2); /* Resplandor azul más notorio */
+  }
+
+  /* Estilo cuando el input tiene un error (borde rojo) */
+  &.mat-form-field-invalid {
+    .mat-form-field-flex {
+      border-color: #dc3545; /* Borde rojo para error */
+      box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.2); /* Resplandor rojo para error */
+    }
+  }
+
+  .mat-form-field-label {
+    font-weight: 500; /* Un poco más de peso para la etiqueta */
+    color: #888; /* Color suave para la etiqueta */
+    font-size: 1rem; /* Tamaño de fuente estándar para la etiqueta */
+  }
+
+  .mat-error {
+    font-size: 0.8rem; /* Texto de error un poco más grande y legible */
+    color: #dc3545;
+    margin-top: 0.4rem; /* Más espacio arriba del mensaje de error */
+  }
+
+  .mat-form-field-appearance-outline .mat-form-field-outline {
+    color: transparent !important; /* Oculta el outline por defecto de Material */
+  }
+}
+
+/* --- Estilos para el FOOTER (se mantienen con ajustes de tipografía) --- */
+.login-footer {
+  text-align: center;
+  font-size: 0.9rem; /* Un poco más grande para mejor legibilidad */
+  color: #888; /* Un gris un poco más oscuro */
+  margin-top: 2rem; /* Más espacio desde el panel de login */
+  padding-bottom: 1.5rem; /* Más padding inferior */
+  font-family: 'Inter', sans-serif; /* APLICAMOS LA FUENTE AQUÍ */
+}
+
+.footer-contact {
+  display: block;
+  margin-top: 0.4rem; /* Más espacio para el contacto */
+  color: #999; /* Un gris suave */
+  font-size: 0.85rem; /* Un poco más grande */
+}
+
+/* Ajuste general del body si no lo tienes ya */
+body {
+  margin: 0;
+  background-color: #f0f2f5; /* Fondo gris claro consistente */
+}

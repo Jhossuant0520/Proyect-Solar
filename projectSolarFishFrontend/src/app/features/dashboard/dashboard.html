@@ -1,0 +1,47 @@
+<div class="dashboard-container">
+  <div class="animated-bg"></div>
+
+  <div class="dashboard-content">
+    <div class="welcome-section">
+      <h2>¡Bienvenido, {{ nombreUsuario }}!</h2>
+      <p>Nos alegra tenerte de nuevo. Desde aquí puedes gestionar las diferentes funcionalidades del sistema.</p>
+    </div>
+
+    <div class="dashboard-wrapper">
+      <mat-card class="dashboard-card" routerLink="/finca">
+        <mat-icon>add_home</mat-icon>
+        <p>Registrar Finca</p>
+      </mat-card>
+
+      <mat-card class="dashboard-card" routerLink="/listafinca">
+        <mat-icon>home_work</mat-icon>
+        <p>Listado de Fincas</p>
+      </mat-card>
+
+      <mat-card class="dashboard-card" routerLink="/componentesenergeticos">
+        <mat-icon>add_bolt</mat-icon>
+        <p>Registrar Componente Energetico</p>
+      </mat-card>
+
+      <mat-card class="dashboard-card" routerLink="/listcomponet">
+        <mat-icon>power_settings_new</mat-icon>
+        <p>Listado Componentes</p>
+      </mat-card>
+
+      <mat-card class="dashboard-card" routerLink="/demanda">
+        <mat-icon>analytics</mat-icon>
+        <p>Calulo de Demanda Energetica</p>
+      </mat-card>
+
+      <mat-card class="dashboard-card" disabled>
+        <mat-icon>wb_sunny</mat-icon>
+        <p>Parametros Solares</p>
+      </mat-card>
+
+      <mat-card class="dashboard-card logout-card" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <p>Cerrar Sesión</p>
+      </mat-card>
+    </div>
+  </div>
+</div>

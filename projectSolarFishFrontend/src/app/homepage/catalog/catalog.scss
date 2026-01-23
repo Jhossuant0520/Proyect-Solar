@@ -1,0 +1,614 @@
+@use 'breakpoints' as *;
+
+.catalog-section {
+  position: relative;
+  background: linear-gradient(135deg, #E0E0E0, #f5f5f5); // Fondo claro con gris
+  padding: 100px 60px;
+  text-align: center;
+  overflow: hidden;
+  min-height: 800px;
+
+  /* Fondo animado */
+  .animated-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+      url('https://www.transparenttextures.com/patterns/cubes.png'),
+      radial-gradient(circle at 25% 25%, rgba(77, 182, 172, 0.15), transparent 60%), // Turquesa
+      radial-gradient(circle at 80% 70%, rgba(179, 229, 252, 0.12), transparent 60%); // Azul claro
+    opacity: 0.4;
+    animation: move-bg 28s ease-in-out infinite alternate;
+    z-index: 0;
+  }
+
+  @keyframes move-bg {
+    0% {
+      background-position: 0 0, 0 0, 0 0;
+      opacity: 0.4;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% {
+      background-position: 100px 100px, 250px 250px, 400px 400px;
+      opacity: 0.4;
+    }
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(77, 182, 172, 0.12), transparent 70%); // Turquesa
+    border-radius: 50%;
+    transform: translateY(-50%);
+    animation: float-pulse 10s ease-in-out infinite;
+    z-index: 0;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -50px;
+    left: 0;
+    width: 100%;
+    height: 120px;
+    background: linear-gradient(180deg, transparent, #fafafa);
+    transform: skewY(2deg);
+    z-index: 1;
+  }
+
+  @keyframes float-pulse {
+    0%, 100% {
+      transform: translateY(-50%) scale(1);
+      opacity: 0.6;
+    }
+    50% {
+      transform: translateY(-55%) scale(1.1);
+      opacity: 0.8;
+    }
+  }
+
+  .container {
+    position: relative;
+    z-index: 2;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+
+    .section-subtitle {
+      color: #4DB6AC; // Turquesa
+      font-weight: 700;
+      font-size: clamp(1.2rem, 3vw, 1.5rem);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      opacity: 0;
+      transform: translateY(-20px);
+      animation: fadeInDown 0.8s ease forwards;
+      animation-delay: 0.2s;
+    }
+
+    .section-title {
+      color: #1A2338; // Azul marino oscuro
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      font-weight: 700;
+      margin-bottom: 60px;
+      position: relative;
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(-20px);
+      animation: fadeInDown 0.8s ease forwards;
+      animation-delay: 0.4s;
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg, #4DB6AC, #FFD700, #B3E5FC); // Turquesa, Amarillo, Azul claro
+        border-radius: 2px;
+        box-shadow: 0 2px 8px rgba(77, 182, 172, 0.3); // Sombra turquesa
+      }
+    }
+
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 35px;
+      max-width: 1200px;
+      margin: 0 auto;
+      align-items: stretch;
+    }
+
+    .catalog-card {
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(77, 182, 172, 0.12); // Sombra turquesa
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeInUp 0.8s ease forwards;
+      padding: 10px 10px 20px;
+
+      // ✨ animación escalonada
+      @for $i from 1 through 10 {
+        &:nth-child(#{$i}) {
+          animation-delay: #{0.5 + ($i * 0.1)}s;
+        }
+      }
+
+      &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, #4DB6AC, #FFD700, #B3E5FC); // Turquesa, Amarillo, Azul claro
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.5s ease;
+        z-index: 1;
+      }
+
+      &:hover {
+        transform: translateY(-12px) scale(1.02);
+        box-shadow: 0 15px 45px rgba(77, 182, 172, 0.3); // Sombra turquesa
+
+        &::before {
+          transform: scaleX(1);
+        }
+
+        .card-image {
+          &::before {
+            opacity: 1;
+          }
+
+          img {
+            transform: scale(1.1) rotate(2deg);
+          }
+        }
+      }
+
+      // ✅ fuerza estructura vertical estable
+      .card-image {
+        flex-shrink: 0;
+        width: 100%;
+        height: 240px;
+        background: linear-gradient(135deg, #f8f8ff, #f0f0ff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+
+        &::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: radial-gradient(circle at center, rgba(77, 182, 172, 0.1), transparent 70%); // Turquesa
+          opacity: 0;
+          transition: opacity 0.4s ease;
+        }
+
+        img {
+          max-width: 85%;
+          max-height: 200px;
+          object-fit: contain;
+          transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.1));
+          position: relative;
+          z-index: 1;
+        }
+      }
+
+      .card-content {
+        padding: 25px;
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        box-sizing: border-box;
+        overflow: hidden; // ✅ evita desbordes
+        flex-grow: 1;
+        position: relative;
+      
+        h3 {
+          color: #1A2338; // Azul marino oscuro
+          font-size: 1.3rem;
+          font-weight: 700;
+          margin-bottom: 10px;
+          line-height: 1.3;
+          transition: color 0.3s ease;
+      
+          &:hover {
+            color: #4DB6AC; // Turquesa
+          }
+        }
+      
+        .precio {
+          color: #4DB6AC; // Turquesa
+          font-weight: 700;
+          font-size: 1.4rem;
+          margin-bottom: 15px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+      
+          &::before {
+            content: "💰";
+            font-size: 1.2rem;
+          }
+        }
+      
+        .caracteristicas {
+          list-style: none;
+          padding: 0;
+          margin: 0 0 20px 0;
+          flex-grow: 1; // ✅ deja que esta parte se adapte sin empujar el botón
+      
+          li {
+            position: relative;
+            padding-left: 28px;
+            margin-bottom: 8px;
+            color: #4a4a4a;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            transition: transform 0.3s ease, color 0.3s ease;
+      
+            &::before {
+              content: "✓";
+              color: #fff;
+              background: linear-gradient(135deg, #5d2eff, #7448ff);
+              width: 20px;
+              height: 20px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 0.7rem;
+              font-weight: bold;
+              position: absolute;
+              left: 0;
+              top: 1px;
+              box-shadow: 0 2px 6px rgba(77, 182, 172, 0.3); // Sombra turquesa
+            }
+      
+            &:hover {
+              transform: translateX(5px);
+              color: #1A2338; // Azul marino oscuro
+            }
+          }
+        }
+      
+        .ver-detalle {
+          background: linear-gradient(135deg, #4DB6AC, #4DB6AC); // Turquesa
+          color: #fff;
+          border: none;
+          border-radius: 40px;
+          padding: 13px 28px;
+          cursor: pointer;
+          font-weight: 600;
+          font-size: 1rem;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+          box-shadow: 0 4px 15px rgba(77, 182, 172, 0.3); // Sombra turquesa
+          width: 100%;
+          text-align: center;
+          margin-top: auto; // ✅ siempre lo empuja hacia abajo pero dentro
+          align-self: center; // ✅ centrado
+          flex-shrink: 0; // ✅ no se deforma ni empuja el contenedor
+          z-index: 2;
+          text-decoration: none;  
+      
+          &::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(
+              120deg,
+              rgba(255, 255, 255, 0),
+              rgba(255, 255, 255, 0.3),
+              rgba(255, 255, 255, 0)
+            );
+            transition: left 0.5s ease;
+          }
+      
+          &:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(77, 182, 172, 0.5); // Sombra turquesa
+            background: linear-gradient(135deg, #5dc5bb, #4ab5ab); // Turquesa más claro
+      
+            &::before {
+              left: 100%;
+            }
+          }
+      
+          &:active {
+            transform: translateY(-1px);
+          }
+      
+          &:focus-visible {
+            outline: 2px solid #4DB6AC; // Turquesa
+            outline-offset: 3px;
+          }
+        }
+      }      
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* 🔹 Responsive tablet */
+  @include responsive(md) {
+    padding: 80px 30px;
+    min-height: auto;
+
+    &::before {
+      width: 280px;
+      height: 280px;
+    }
+
+    .container {
+      .section-title {
+        margin-bottom: 50px;
+      }
+
+      .catalog-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 30px;
+      }
+
+      .catalog-card {
+        .card-image {
+          height: 220px;
+
+          img {
+            max-height: 180px;
+          }
+        }
+
+        .card-content {
+          padding: 22px;
+
+          h3 {
+            font-size: 1.2rem;
+          }
+
+          .precio {
+            font-size: 1.3rem;
+          }
+        }
+      }
+    }
+  }
+
+  /* ✅ Responsive móvil */
+  @include responsive(sm) {
+    padding: 60px 20px;
+
+    &::before {
+      width: 200px;
+      height: 200px;
+      left: 5%;
+    }
+
+    &::after {
+      height: 80px;
+      bottom: -30px;
+    }
+
+    .container {
+      .section-subtitle {
+        font-size: 1rem;
+        margin-bottom: 8px;
+      }
+
+      .section-title {
+        font-size: 2rem;
+        margin-bottom: 40px;
+
+        &::after {
+          width: 70px;
+          bottom: -12px;
+        }
+      }
+
+      .catalog-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+      }
+
+      .catalog-card {
+        &:hover {
+          transform: translateY(-8px) scale(1.01);
+        }
+
+        .card-image {
+          height: 200px;
+
+          img {
+            max-height: 160px;
+          }
+        }
+
+        .card-content {
+          padding: 20px;
+
+          h3 {
+            font-size: 1.15rem;
+          }
+
+          .precio {
+            font-size: 1.25rem;
+
+            &::before {
+              font-size: 1rem;
+            }
+          }
+
+          .caracteristicas {
+            margin-bottom: 18px;
+
+            li {
+              font-size: 0.9rem;
+              margin-bottom: 6px;
+              padding-left: 26px;
+
+              &::before {
+                width: 18px;
+                height: 18px;
+                font-size: 0.65rem;
+              }
+            }
+          }
+
+          .ver-detalle {
+            padding: 12px 24px;
+            font-size: 0.95rem;
+          }
+        }
+      }
+    }
+  }
+}
+
+/* 🔹 Media query para tablets grandes (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .catalog-section {
+    .container {
+      .catalog-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+      }
+    }
+  }
+}
+
+/* 🔹 Media query para móviles pequeños (< 400px) */
+@media (max-width: 400px) {
+  .catalog-section {
+    padding: 50px 15px;
+
+    .container {
+      .section-title {
+        font-size: 1.8rem;
+        margin-bottom: 35px;
+      }
+
+      .catalog-card {
+        .card-image {
+          height: 180px;
+
+          img {
+            max-height: 140px;
+          }
+        }
+
+        .card-content {
+          padding: 18px;
+
+          h3 {
+            font-size: 1.1rem;
+          }
+
+          .precio {
+            font-size: 1.2rem;
+          }
+
+          .caracteristicas li {
+            font-size: 0.85rem;
+          }
+
+          .ver-detalle {
+            font-size: 0.9rem;
+            padding: 11px 20px;
+          }
+        }
+      }
+    }
+  }
+}
+
+/* 🔹 Media query para pantallas muy grandes (> 1400px) */
+@media (min-width: 1400px) {
+  .catalog-section {
+    .container {
+      .catalog-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 40px;
+      }
+
+      .catalog-card {
+        .card-image {
+          height: 260px;
+
+          img {
+            max-height: 220px;
+          }
+        }
+
+        .card-content {
+          padding: 30px;
+        }
+      }
+    }
+  }
+}
+
+/* ✨ NUEVO: Clase auxiliar para productos destacados */
+.catalog-card.featured {
+  border: 2px solid #4DB6AC; // Turquesa
+  
+  &::after {
+    content: "⭐";
+    opacity: 1;
+    transform: scale(1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+}

@@ -1,0 +1,17 @@
+@import 'breakpoints';
+
+// --- Reglas globales para secciones ---
+section, .section {
+  padding: 80px 40px;
+
+  @include mobile {
+    padding: 50px 20px;
+  }
+}
+
+// --- Reglas globales para grids ---
+.catalog-grid, .services-grid, .about-grid {
+  @include mobile {
+    grid-template-columns: 1fr !important;
+  }
+}

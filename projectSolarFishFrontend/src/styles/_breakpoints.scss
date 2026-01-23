@@ -1,0 +1,18 @@
+// Tamaños comunes de dispositivos
+$breakpoint-xs: 480px;  // móviles pequeños
+$breakpoint-sm: 768px;  // tablets
+$breakpoint-md: 1024px; // laptops
+$breakpoint-lg: 1280px; // escritorio grande
+
+// Mixin para usar más fácil
+@mixin responsive($size) {
+  @if $size == xs {
+    @media (max-width: $breakpoint-xs) { @content; }
+  } @else if $size == sm {
+    @media (max-width: $breakpoint-sm) { @content; }
+  } @else if $size == md {
+    @media (max-width: $breakpoint-md) { @content; }
+  } @else if $size == lg {
+    @media (max-width: $breakpoint-lg) { @content; }
+  }
+}

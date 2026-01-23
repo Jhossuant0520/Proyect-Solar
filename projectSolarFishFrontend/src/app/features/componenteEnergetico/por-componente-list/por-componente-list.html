@@ -1,0 +1,106 @@
+<div class="energia-list-container">
+    <div class="animated-bg"></div>
+  
+    <mat-card class="energia-card">
+      <header class="form-header">
+        <div class="header-left">
+          <mat-icon class="iconoList">battery_charging_full</mat-icon>
+          <div class="header-text">
+            <h2>Componentes Energéticos Registrados</h2>
+            <p>Selecciona una finca para ver los equipos asociados</p>
+          </div>
+        </div>
+  
+        <div class="header-right">
+          <mat-form-field appearance="outline" class="selector-finca">
+            <mat-label>Finca</mat-label>
+            <mat-select [(value)]="fincaSeleccionada" (selectionChange)="listarPorFinca()">
+              <mat-option *ngFor="let finca of fincas" [value]="finca.id">
+                {{ finca.nombreFinca }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </header>
+  
+      @if (dataSource.data.length > 0) {
+        <div class="search-container">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Buscar componente</mat-label>
+            <input matInput (keyup)="applyFilter($event)" placeholder="Buscar por nombre, finca, tipo..." />
+            <mat-icon matPrefix>search</mat-icon>
+          </mat-form-field>
+        </div>
+      }
+
+      <div class="energia-table-wrapper">
+        <table mat-table [dataSource]="dataSource" class="energia-table">
+  
+          <ng-container matColumnDef="finca">
+            <th mat-header-cell *matHeaderCellDef> Finca </th>
+            <td mat-cell *matCellDef="let element"> {{ element.finca?.nombreFinca }} </td>
+          </ng-container>
+  
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef> Componente </th>
+            <td mat-cell *matCellDef="let element"> {{ element.nombre }} </td>
+          </ng-container>
+  
+          <ng-container matColumnDef="tipoEnergia">
+            <th mat-header-cell *matHeaderCellDef> Energía </th>
+            <td mat-cell *matCellDef="let element" class="energia-type">
+              <mat-icon [ngClass]="element.tipoEnergia === 'AC' ? 'ac-icon' : 'dc-icon'">
+                {{ element.tipoEnergia === 'AC' ? 'electrical_services' : 'power_settings_new' }}
+              </mat-icon>
+              {{ element.tipoEnergia }}
+            </td>
+          </ng-container>
+  
+          <ng-container matColumnDef="potencia">
+            <th mat-header-cell *matHeaderCellDef> Potencia (W) </th>
+            <td mat-cell *matCellDef="let element"> {{ element.potencia | number:'1.0-0' }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="cantidad">
+            <th mat-header-cell *matHeaderCellDef> Cantidad </th>
+            <td mat-cell *matCellDef="let element"> {{ element.cantidad }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="horasOperacion">
+            <th mat-header-cell *matHeaderCellDef> Horas/Día </th>
+            <td mat-cell *matCellDef="let element"> {{ element.horasOperacion | number:'1.1-2' }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="coeficienteArranque">
+            <th mat-header-cell *matHeaderCellDef> C. Arranque </th>
+            <td mat-cell *matCellDef="let element"> {{ element.coeficienteArranque | number:'1.1-2' }} </td>
+          </ng-container>
+  
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef> Acciones </th>
+            <td mat-cell *matCellDef="let element" class="acciones-cell">
+              <button mat-icon-button color="primary" (click)="editarComponente(element)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="eliminarComponente(element.id!)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+  
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell no-data-cell" [attr.colspan]="displayedColumns.length">
+              <div class="no-data-message">
+                <mat-icon>info</mat-icon>
+                <span>{{ dataSource.filter ? 'No se encontraron componentes con ese criterio' : 'No hay componentes para esta finca' }}</span>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </mat-card>
+  </div>
+  

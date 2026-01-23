@@ -1,0 +1,79 @@
+<div class="energia-form-wrapper">
+    <div class="animated-bg"></div>
+  
+    <mat-card class="energia-card">
+      <header class="form-header">
+        <div class="header-left">
+          <mat-icon>bolt</mat-icon>
+          <div class="header-text">
+            <h2>{{ modoEdicion ? 'Editar Componente Energético' : 'Registro de Componentes Energéticos' }}</h2>
+            <p *ngIf="!modoEdicion">Agrega los equipos eléctricos de tu finca y define su consumo diario</p>
+            <span *ngIf="modoEdicion" class="componente-id">
+              ID: {{ componenteId }}
+            </span>
+          </div>
+        </div>
+      </header>
+  
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="energia-form">
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Finca asociada</mat-label>
+            <mat-select formControlName="fincaId">
+              <mat-option *ngFor="let finca of fincas" [value]="finca.id">
+                {{ finca.nombreFinca }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre del componente</mat-label>
+            <input matInput formControlName="nombre" placeholder="Ej: Bomba de agua" />
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline">
+            <mat-label>Cantidad</mat-label>
+            <input type="number" matInput formControlName="cantidad" />
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline">
+            <mat-label>Potencia (W)</mat-label>
+            <input type="number" matInput formControlName="potencia" />
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline">
+            <mat-label>Horas de operación</mat-label>
+            <input type="number" matInput formControlName="horasOperacion" />
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline">
+            <mat-label>Coeficiente de arranque</mat-label>
+            <input type="number" matInput step="0.1" formControlName="coeficienteArranque" />
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline">
+            <mat-label>Horas reales del periodo</mat-label>
+            <input type="number" matInput formControlName="horasRealesPeriodo" />
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo de energía</mat-label>
+            <mat-select formControlName="tipoEnergia">
+              <mat-option value="AC">Corriente Alterna (AC)</mat-option>
+              <mat-option value="DC">Corriente Continua (DC)</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+  
+        <div class="botones">
+          <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+            {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
+          </button>
+          <button mat-stroked-button color="warn" type="button" (click)="onCancel()">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </mat-card>
+  </div>
+  

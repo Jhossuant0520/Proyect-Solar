@@ -1,0 +1,458 @@
+@use 'breakpoints' as *;
+
+.hero-home {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5rem 2rem;
+  background: linear-gradient(135deg, #1A2338, #003d7a); // Azul marino oscuro
+  color: #fff;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden; // Cambio: hidden en lugar de overflow-x para mejorar rendimiento
+  margin-top: -1px;
+  position: relative;
+
+  .animated-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+      url('https://www.transparenttextures.com/patterns/cubes.png'),
+      radial-gradient(circle at 25% 30%, rgba(77, 182, 172, 0.15), transparent 60%), // Turquesa
+      radial-gradient(circle at 80% 70%, rgba(179, 229, 252, 0.12), transparent 60%); // Azul claro
+    opacity: 0.4;
+    animation: move-bg 25s ease-in-out infinite alternate;
+    z-index: 0;
+  }
+
+  @keyframes move-bg {
+    0% { 
+      background-position: 0 0, 0 0, 0 0;
+      opacity: 0.4;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% { 
+      background-position: 100px 100px, 300px 250px, 400px 400px;
+      opacity: 0.4;
+    }
+  }
+
+  // ✨ NUEVO: Overlay decorativo con círculos animados
+  &::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(77, 182, 172, 0.15), transparent 70%); // Turquesa
+    border-radius: 50%;
+    animation: float 8s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -30%;
+    left: -5%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(179, 229, 252, 0.1), transparent 70%); // Azul claro
+    border-radius: 50%;
+    animation: float 10s ease-in-out infinite reverse;
+    pointer-events: none;
+  }
+
+  .hero-content {
+    max-width: 1200px;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    gap: 3rem;
+    z-index: 1;
+    opacity: 0;
+    transform: translateY(40px);
+    animation: fadeInUp 1s ease forwards;
+
+    .text-container {
+      flex: 1 1 500px;
+      padding: 20px;
+      animation: fadeInLeft 1.2s ease forwards;
+
+      .subtitle {
+        font-size: 0.9rem; // Mejora: tamaño más proporcionado
+        color: #B3E5FC; // Azul claro suave
+        letter-spacing: 2px; // Mejora: más espaciado para elegancia
+        text-transform: uppercase; // ✨ NUEVO: mayúsculas para mejor estilo
+        margin-bottom: 10px;
+        font-weight: 600; // ✨ NUEVO: más peso
+        animation: slideIn 1s ease forwards;
+      }
+
+      .title {
+        font-size: clamp(2rem, 5vw, 2.5rem); // ✨ NUEVO: responsive fluido
+        font-weight: 700;
+        margin-bottom: 20px;
+        line-height: 1.2; // ✨ NUEVO: mejor legibilidad
+        animation: fadeInLeft 1.2s ease forwards;
+      }
+
+      .description {
+        font-size: 1rem;
+        margin-bottom: 30px;
+        color: #E0E0E0; // Gris claro
+        line-height: 1.7; // Mejora: mejor espaciado de líneas
+        max-width: 550px; // ✨ NUEVO: limita ancho para mejor lectura
+        animation: fadeInLeft 1.4s ease forwards;
+      }
+
+      .buttons {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap; // ✨ NUEVO: permite wrap en pantallas pequeñas
+        
+
+        .hero-button {
+          position: relative;
+          overflow: hidden;
+          padding: 14px 32px; // Mejora: padding más balanceado
+          border-radius: 40px;
+          font-weight: 600;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          animation: fadeInUp 1.6s ease forwards;
+          border: none; // ✨ NUEVO: reset de border por defecto
+          white-space: nowrap; // ✨ NUEVO: evita saltos de línea en botones
+          text-decoration: none;
+
+          &::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(
+              120deg,
+              rgba(255, 255, 255, 0.2), // Mejora: más visible
+              rgba(255, 255, 255, 0)
+            );
+            transition: left 0.5s ease;
+            z-index: 0;
+          }
+
+          &:hover::after {
+            left: 100%;
+          }
+
+          &:hover {
+            transform: translateY(-3px);
+          }
+
+          // ✨ NUEVO: efecto de click/active
+          &:active {
+            transform: translateY(-1px);
+          }
+
+          // ✨ NUEVO: mejor accesibilidad
+          &:focus-visible {
+            outline: 2px solid #4DB6AC; // Turquesa
+            outline-offset: 3px;
+          }
+
+          span {
+            position: relative;
+            z-index: 1; // ✨ NUEVO: asegura que el texto esté sobre el efecto
+          }
+
+          &.primary {
+            background: linear-gradient(135deg, #4DB6AC, #4DB6AC); // Turquesa
+            color: white;
+            box-shadow: 0 4px 14px rgba(77, 182, 172, 0.4); // Sombra turquesa
+
+            &:hover {
+              box-shadow: 0 6px 20px rgba(77, 182, 172, 0.6); // Sombra turquesa
+              background: linear-gradient(135deg, #5dc5bb, #4ab5ab); // Turquesa más claro
+            }
+          }
+
+          &.secondary {
+            padding: 14px 32px; // Mejora: mismo padding que primary
+            border: 2px solid #4DB6AC; // Turquesa
+            background: transparent;
+            color: #4DB6AC; // Turquesa
+            position: relative;
+            transition: all 0.3s ease;
+
+            &:hover {
+              background: linear-gradient(
+                90deg,
+                rgba(77, 182, 172, 0.25), // Turquesa
+                rgba(255, 255, 255, 0.1)
+              );
+              color: #ffffff;
+              border-color: #B3E5FC; // Azul claro
+              transform: translateY(-3px);
+              box-shadow: 0 4px 15px rgba(77, 182, 172, 0.4); // Sombra turquesa
+            }
+          }
+        }
+      }
+    }
+
+    .image-container {
+      flex: 1 1 400px;
+      text-align: center;
+      animation: fadeInRight 1.2s ease forwards;
+
+      img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); // Mejora: sombra más profunda
+        transform: scale(0.9);
+        opacity: 0;
+        animation: zoomIn 1s ease forwards 0.6s;
+        transition: transform 0.4s ease, box-shadow 0.4s ease;
+        object-fit: cover; // ✨ NUEVO: mejor manejo de imágenes
+
+        &:hover {
+          transform: scale(1.05);
+          box-shadow: 0 12px 35px rgba(77, 182, 172, 0.4); // Sombra turquesa
+        }
+      }
+    }
+  }
+   
+  
+  @keyframes wave-animation {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(-10px);
+    }
+  }
+
+  /* Animaciones */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fadeInRight {
+    from {
+      opacity: 0;
+      transform: translateX(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes zoomIn {
+    from {
+      transform: scale(0.9);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(-10px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  // ✨ NUEVA: Animación de flotación para círculos
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      transform: translateY(-30px) scale(1.05);
+    }
+  }
+
+
+  
+  @keyframes wave-animation {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(-10px);
+    }
+  }
+
+  /* 🔹 Responsive tablet */
+  @include responsive(md) {
+    padding: 4rem 2rem;
+    
+    .hero-content {
+      flex-direction: column;
+      text-align: center;
+      gap: 2rem;
+
+      .text-container {
+        order: 1;
+
+        .description {
+          max-width: 100%; // Mejora: usa todo el ancho disponible
+        }
+
+        .buttons {
+          justify-content: center; // ✨ NUEVO: centra botones
+        }
+      }
+
+      .image-container {
+        order: 2;
+
+        img {
+          max-width: 320px; // Mejora: tamaño más grande en tablet
+        }
+      }
+    }
+  }
+
+  /* ✅ Responsive móvil */
+  @include responsive(sm) {
+    padding: 3rem 1.5rem 4rem; // Aumentado padding bottom para la onda
+
+    &::before,
+    &::after {
+      width: 300px; // Reduce círculos decorativos en móvil
+      height: 300px;
+    }
+
+    .hero-content {
+      gap: 1.5rem;
+
+      .text-container {
+        padding: 0; // Mejora: elimina padding innecesario
+
+        .subtitle {
+          font-size: 0.8rem;
+        }
+
+        .title {
+          font-size: 1.8rem;
+          margin-bottom: 15px; // Mejora: reduce espacio
+        }
+
+        .description {
+          font-size: 0.95rem;
+          margin-bottom: 20px; // Mejora: reduce espacio
+        }
+
+        .buttons {
+          flex-direction: column;
+          gap: 0.8rem;
+          width: 100%; // ✨ NUEVO: ocupa todo el ancho
+
+          .hero-button {
+            width: 100%; // ✨ NUEVO: botones de ancho completo
+            max-width: 280px; // ✨ NUEVO: limita ancho máximo
+            margin: 0 auto; // ✨ NUEVO: centra botones
+          }
+        }
+      }
+
+      .image-container img {
+        max-width: 240px; // Mejora: tamaño optimizado
+      }
+    }
+  }
+}
+
+/* 🔹 Media query intermedia - mejor transición */
+@media (min-width: 601px) and (max-width: 900px) {
+  .hero-home {
+    padding: 4rem 2rem;
+
+    .hero-content {
+      flex-direction: column;
+      text-align: center;
+      gap: 2.5rem;
+
+      .text-container {
+        .title {
+          font-size: 2.2rem;
+        }
+
+        .buttons {
+          justify-content: center;
+        }
+      }
+
+      .image-container img {
+        max-width: 350px;
+      }
+    }
+  }
+}
+
+/* 🔹 Diseño móvil pequeño (< 400px) */
+@media (max-width: 400px) {
+  .hero-home {
+    padding: 2.5rem 1rem;
+
+    .hero-content {
+      .text-container {
+        .title {
+          font-size: 1.6rem;
+        }
+
+        .description {
+          font-size: 0.9rem;
+        }
+
+        .buttons .hero-button {
+          padding: 12px 24px;
+          font-size: 0.95rem;
+        }
+      }
+
+      .image-container img {
+        max-width: 200px;
+      }
+    }
+  }
+}

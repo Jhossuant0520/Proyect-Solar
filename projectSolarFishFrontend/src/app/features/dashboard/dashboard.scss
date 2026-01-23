@@ -1,0 +1,284 @@
+
+:host {
+  --color-acento: #4DB6AC; /* Turquesa - Color de icono*/
+  --color-acento-hover: #3a9d94;
+  --color-texto-principal: #1A2338; /* Azul marino oscuro */
+  --color-texto-secundario: #555;
+  --color-tarjeta: #FFFFFF;
+  --sombra-tarjeta: 0 8px 25px rgba(77, 182, 172, 0.12);
+  --sombra-tarjeta-hover: 0 15px 40px rgba(77, 182, 172, 0.25);
+}
+
+@keyframes move-bg {
+  0% { background-position: 0 0, 0 0, 0 0; }
+  100% { background-position: 120px 120px, 250px 250px, 400px 400px; }
+}
+
+.dashboard-container {
+  position: relative;
+  min-height: calc(100vh - 64px); /* Ajuste para el toolbar */
+  overflow: hidden;
+  background: linear-gradient(135deg, #f5f5f5, #E0E0E0);
+}
+
+.animated-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    url('https://www.transparenttextures.com/patterns/cubes.png'),
+    radial-gradient(circle at 20% 20%, rgba(77, 182, 172, 0.15), transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(179, 229, 252, 0.12), transparent 50%);
+  opacity: 0.4;
+  animation: move-bg 25s ease-in-out infinite alternate;
+  z-index: 0;
+}
+
+@keyframes move-bg {
+  0% { 
+    background-position: 0 0, 0 0, 0 0;
+    opacity: 0.4;
+  }
+  100% { 
+    background-position: 120px 120px, 250px 250px, 400px 400px;
+    opacity: 0.5;
+  }
+}
+
+
+.welcome-section, .dashboard-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
+.welcome-section {
+  text-align: center;
+  padding: 2.5rem;
+  margin: 0 auto 3rem auto;
+  max-width: 1000px;
+  background: linear-gradient(135deg, #FFFFFF, #f8f9fa);
+  border-radius: 20px;
+  box-shadow: var(--sombra-tarjeta);
+  border: 1px solid rgba(77, 182, 172, 0.1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #4DB6AC, #FFD700, #B3E5FC);
+    border-radius: 20px 20px 0 0;
+  }
+}
+
+.welcome-section h2 {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  color: var(--color-texto-principal);
+  margin-bottom: 1rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1A2338, #4DB6AC);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, #4DB6AC, #FFD700);
+    border-radius: 2px;
+  }
+}
+
+.welcome-section p {
+  font-size: 1.1rem;
+  color: #555;
+  line-height: 1.7;
+  max-width: 700px;
+  margin: 1.5rem auto 0;
+}
+
+.dashboard-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: auto;
+  
+}
+
+.dashboard-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 2rem 1.5rem;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #FFFFFF, #f8f9fa);
+  box-shadow: var(--sombra-tarjeta);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+  border: 1px solid rgba(77, 182, 172, 0.1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #4DB6AC, #FFD700, #B3E5FC);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, rgba(77, 182, 172, 0.1), transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+    z-index: 0;
+  }
+}
+
+.dashboard-card mat-icon {
+  font-size: 56px;
+  height: 56px;
+  width: 56px;
+  color: var(--color-acento);
+  margin-bottom: 1.25rem;
+  transition: all 0.4s ease;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 4px 8px rgba(77, 182, 172, 0.2));
+}
+
+.dashboard-card p {
+  font-size: 1.1rem;
+  color: var(--color-texto-principal);
+  font-weight: 600;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  margin: 0;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: var(--sombra-tarjeta-hover);
+  border-color: rgba(77, 182, 172, 0.3);
+
+  &::before {
+    transform: scaleX(1);
+  }
+
+  &::after {
+    width: 300px;
+    height: 300px;
+  }
+
+  mat-icon {
+    transform: scale(1.15) rotate(5deg);
+    color: #3a9d94;
+    filter: drop-shadow(0 6px 12px rgba(77, 182, 172, 0.4));
+  }
+
+  p {
+    color: #1A2338;
+  }
+}
+
+.dashboard-card[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: linear-gradient(135deg, #E0E0E0, #f0f0f0);
+  transform: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.05);
+
+  mat-icon {
+    color: #999;
+    filter: none;
+  }
+
+  p {
+    color: #999;
+  }
+
+  &:hover {
+    transform: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+
+    &::before,
+    &::after {
+      display: none;
+    }
+
+    mat-icon {
+      transform: none;
+    }
+  }
+}
+
+.logout-card {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05)) !important;
+  border: 1px solid rgba(255, 215, 0, 0.2) !important;
+
+  &::before {
+    background: linear-gradient(90deg, #FFD700, #ffed4e) !important;
+  }
+
+  mat-icon {
+    color: #FFD700 !important;
+    filter: drop-shadow(0 4px 8px rgba(255, 215, 0, 0.3)) !important;
+  }
+
+  p {
+    color: #1A2338 !important;
+    font-weight: 600;
+  }
+
+  &:hover {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.1)) !important;
+    border-color: rgba(255, 215, 0, 0.4) !important;
+    box-shadow: 0 15px 40px rgba(255, 215, 0, 0.3) !important;
+
+    mat-icon {
+      color: #FFD700 !important;
+      transform: scale(1.15) rotate(-10deg) !important;
+      filter: drop-shadow(0 6px 12px rgba(255, 215, 0, 0.5)) !important;
+    }
+
+    &::after {
+      background: radial-gradient(circle, rgba(255, 215, 0, 0.15), transparent 70%) !important;
+    }
+  }
+}
+.dashboard-content {
+  padding: 2rem 1.5rem;
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+}

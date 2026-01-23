@@ -1,0 +1,528 @@
+@use 'breakpoints' as *;
+
+.navbar {
+  background: linear-gradient(135deg, #1A2338, #003d7a); // Azul marino oscuro
+  color: white;
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+
+  &.scrolled {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    background: linear-gradient(135deg, #0f1520, #1A2338); // Azul marino más oscuro
+  }
+
+  .navbar-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 100%;
+    margin: 0 auto;
+    height: 80px;
+    padding: 0;
+    position: relative;
+  }
+
+  .navbar-logo-wrapper {
+    width: 380px;
+    height: 100%;
+    background: linear-gradient(135deg, #ffffff, #f8f8ff);
+    clip-path: polygon(0 0, 90% 0, 75% 100%, 0% 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 10px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(77, 182, 172, 0.1), // Turquesa
+        transparent
+      );
+      transition: left 0.6s ease;
+    }
+
+    &:hover::before {
+      left: 100%;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      right: -2px;
+      top: 0;
+      width: 3px;
+      height: 100%;
+      background: linear-gradient(180deg, #4DB6AC, transparent); // Turquesa
+      opacity: 0.5;
+    }
+  }
+
+  .logo-img {
+    height: 120px;
+    object-fit: contain;
+    margin-left: -50px;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
+
+    &:hover {
+      transform: scale(1.05) rotate(-2deg);
+    }
+  }
+
+  .menu-toggle {
+    display: none;
+    font-size: 1.8rem;
+    color: white;
+    cursor: pointer;
+    padding: 10px;
+    z-index: 1001;
+    transition: all 0.3s ease;
+    background: rgba(77, 182, 172, 0.1); // Turquesa
+    border-radius: 8px;
+    border: 1px solid rgba(77, 182, 172, 0.2); // Turquesa
+
+    &:hover {
+      background: rgba(77, 182, 172, 0.2); // Turquesa
+      transform: scale(1.1);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    i {
+      transition: transform 0.3s ease;
+    }
+
+    &.active i {
+      transform: rotate(90deg);
+    }
+  }
+
+  .nav-links {
+    list-style: none;
+    display: flex;
+    gap: 25px;
+    padding-right: 30px;
+    margin: 0;
+
+    // Ocultar el item del botón móvil en desktop
+    .mobile-login-item {
+      display: none;
+    }
+
+    li {
+      position: relative;
+      
+      a {
+        color: #e2e2e2;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 8px 12px;
+        border-radius: 6px;
+        display: inline-block;
+        position: relative;
+
+        &::after {
+          content: "";
+          position: absolute;
+          bottom: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 0;
+          height: 2px;
+          background: linear-gradient(90deg, #4DB6AC, #FFD700); // Turquesa a amarillo
+          transition: width 0.3s ease;
+          border-radius: 2px;
+        }
+
+        &:hover {
+          color: #ffffff;
+          background: rgba(77, 182, 172, 0.1); // Turquesa
+
+          &::after {
+            width: 80%;
+          }
+        }
+
+        &.active {
+          color: #4DB6AC; // Turquesa
+          background: rgba(77, 182, 172, 0.15); // Turquesa
+          
+          &::after {
+            width: 80%;
+          }
+        }
+      }
+    }
+  }
+
+  .login-button-animated {
+    position: relative;
+    overflow: hidden;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 40px;
+    font-weight: 600;
+    font-size: 1rem;
+    background: linear-gradient(135deg, #4DB6AC, #4DB6AC); // Turquesa
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px rgba(77, 182, 172, 0.4); // Sombra turquesa
+    white-space: nowrap;
+
+    // Desktop: mostrar solo .desktop-login
+    &.desktop-login {
+      display: inline-block;
+      margin-right: 30px;
+    }
+
+    // Móvil: ocultar por defecto
+    &.mobile-login {
+      display: none;
+    }
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(77, 182, 172, 0.6); // Sombra turquesa
+      background: linear-gradient(135deg, #5dc5bb, #4ab5ab); // Turquesa más claro
+    }
+
+    &:active {
+      transform: translateY(-1px);
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 200%;
+      height: 100%;
+      background: linear-gradient(
+        120deg,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, 0.3),
+        rgba(255, 255, 255, 0)
+      );
+      transition: left 0.5s ease;
+      z-index: 0;
+    }
+
+    &:hover::after {
+      left: 100%;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #4DB6AC; // Turquesa
+      outline-offset: 3px;
+    }
+
+    span {
+      position: relative;
+      z-index: 1;
+    }
+  }
+
+  // 🔹 Tablet
+  @include responsive(md) {
+    .navbar-container {
+      height: 75px;
+    }
+
+    .navbar-logo-wrapper {
+      width: 280px;
+      clip-path: polygon(0 0, 92% 0, 80% 100%, 0% 100%);
+    }
+
+    .logo-img {
+      height: 100px;
+      margin-left: -40px;
+    }
+
+    .nav-links {
+      gap: 18px;
+      padding-right: 20px;
+
+      li a {
+        font-size: 0.95rem;
+        padding: 6px 10px;
+      }
+    }
+
+    .login-button-animated.desktop-login {
+      padding: 10px 22px;
+      margin-right: 20px;
+      font-size: 0.95rem;
+    }
+  }
+
+  // 🔹 Móvil
+  @media (max-width: 768px) {
+    .navbar-container {
+      height: 70px;
+      padding: 0;
+      position: relative;
+    }
+
+    .navbar-logo-wrapper {
+      width: 200px;
+      height: 70px;
+      clip-path: polygon(0 0, 85% 0, 70% 100%, 0% 100%);
+      padding-left: 15px;
+      padding-right: 10px;
+
+      &:hover::before {
+        left: 0;
+      }
+    }
+
+    .logo-img {
+      height: 100px;
+      width: auto;
+      max-width: none;
+      max-height: none;
+      margin-left: -45px;
+    }
+
+    .menu-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 45px;
+      height: 45px;
+    }
+
+    .nav-links {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      right: 0;
+      width: 100%;
+      background: linear-gradient(180deg, #1A2338, #003d7a); // Azul marino oscuro
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      padding: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                  padding 0.4s ease,
+                  box-shadow 0.4s ease;
+      box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+      backdrop-filter: blur(10px);
+
+      &.active {
+        max-height: 500px;
+        padding: 25px 0;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      }
+
+      // Mostrar el item del botón móvil
+      .mobile-login-item {
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding: 15px 20px 20px;
+        border-bottom: none !important;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.3s ease;
+
+        .mobile-login {
+          display: block;
+          width: 100%;
+          max-width: 280px;
+          margin: 0 auto;
+          padding: 14px 28px;
+          font-size: 1rem;
+        }
+      }
+
+      li {
+        width: 100%;
+        text-align: center;
+        padding: 0;
+        border-bottom: 1px solid rgba(77, 182, 172, 0.15); // Turquesa
+        opacity: 0;
+        transform: translateX(-30px);
+        transition: all 0.3s ease;
+
+        @for $i from 1 through 6 {
+          &:nth-child(#{$i}) {
+            transition-delay: #{$i * 0.05}s;
+          }
+        }
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        a {
+          display: block;
+          font-size: 1.05rem;
+          padding: 16px 20px;
+          width: 100%;
+          border-radius: 0;
+
+          &::after {
+            display: none;
+          }
+
+          &:hover {
+            background: rgba(77, 182, 172, 0.2); // Turquesa
+            color: #ffffff;
+          }
+
+          &:active {
+            background: rgba(77, 182, 172, 0.3); // Turquesa
+          }
+        }
+      }
+
+      &.active li {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      // Animación especial para el botón de login móvil
+      &.active .mobile-login-item {
+        opacity: 1;
+        transform: translateY(0);
+        transition-delay: 0.35s;
+      }
+    }
+
+    // Ocultar botón de desktop en móvil
+    .login-button-animated.desktop-login {
+      display: none;
+    }
+  }
+
+  // 🔹 Móviles 
+  @media (max-width: 480px) {
+    .navbar-container {
+      height: 65px;
+    }
+
+    .navbar-logo-wrapper {
+      width: 170px;
+      height: 65px;
+      clip-path: polygon(0 0, 82% 0, 67% 100%, 0% 100%);
+    }
+
+    .logo-img {
+      height: 90px;
+      margin-left: -40px;
+    }
+
+    .menu-toggle {
+      font-size: 1.6rem;
+      width: 30px;
+      height: 30px;
+      right: 10px;
+    }
+
+    .nav-links {
+      top: 65px;
+
+      &.active {
+        max-height: 480px;
+        padding: 20px 0;
+      }
+
+      li a {
+        font-size: 1rem;
+        padding: 14px 18px;
+      }
+
+      .mobile-login-item .mobile-login {
+        max-width: 250px;
+        padding: 13px 24px;
+        font-size: 0.95rem;
+      }
+    }
+  }
+
+  // 🔹 Móviles muy muy pequeños
+  @media (max-width: 360px) {
+    .navbar-logo-wrapper {
+      width: 150px;
+    }
+
+    .logo-img {
+      height: 100px;
+      margin-left: -35px;
+    }
+
+    .menu-toggle {
+      font-size: 1.4rem;
+      width: 38px;
+      height: 38px;
+    }
+
+    .nav-links .mobile-login-item .mobile-login {
+      max-width: 220px;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+/* Overlay oscuro cuando el menú móvil está abierto */
+.menu-overlay {
+  display: none;
+  position: fixed;
+  top: 70px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  backdrop-filter: blur(2px);
+
+  &.active {
+    display: block;
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    display: none;
+    
+    &.active {
+      display: block;
+    }
+  }
+}
+
+/* Prevenir scroll cuando el menú móvil está abierto */
+body.menu-open {
+  @media (max-width: 768px) {
+    overflow: hidden;
+  }
+}

@@ -1,0 +1,36 @@
+<div class="login-bg">
+  <div class="login-panel">
+    <img src="/logoLogin.png" class="logo" alt="Logo empresa" />
+
+    <h1>Iniciar sesión</h1>
+    <p class="sub">Usa tu cuenta institucional.</p>
+
+    <form (ngSubmit)="login()" class="login-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Usuario</mat-label>
+        <input matInput [(ngModel)]="usuarioLogin" name="username" required />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Contraseña</mat-label>
+        <input matInput [(ngModel)]="passwordLogin" name="password" type="password" required />
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" class="login-btn" type="submit">
+        Ingresar
+      </button>
+
+      <p class="error" *ngIf="error">{{ error }}</p>
+    </form>
+
+    <div class="bottom-links">
+      <a href="#">¿Olvidaste tu contraseña?</a>
+    </div>
+  </div>
+  
+</div>
+
+<footer class="login-footer">
+  © 2025 Computer & Electronic — Todos los derechos reservados<br />
+  <span class="footer-contact">SoporteComputer</span>
+</footer>

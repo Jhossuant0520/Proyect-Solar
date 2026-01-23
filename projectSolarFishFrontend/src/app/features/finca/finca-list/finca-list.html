@@ -1,0 +1,82 @@
+<div class="finca-list-container">
+    <div class="animated-bg"></div>
+  
+    <mat-card class="finca-card">
+      <!-- HEADER LISTADO -->
+      <header class="form-header">
+        <div class="header-left">
+          <mat-icon class="iconoList">agriculture</mat-icon>
+          <div class="header-text">
+            <h2>Listado de Fincas</h2>
+            <p>Aquí puedes buscar, filtrar y gestionar las fincas registradas</p>
+          </div>
+        </div>
+  
+        <!-- FILTRO -->
+        <div class="header-right">
+          <mat-form-field appearance="outline" class="filtro-form-field">
+            <mat-label>Filtrar</mat-label>
+            <input matInput (keyup)="applyFilter($event)" placeholder="Ej: Tolima" #input />
+            <button mat-icon-button matSuffix>
+              <mat-icon>search</mat-icon>
+            </button>
+          </mat-form-field>
+        </div>
+      </header>
+  
+      <!-- TABLA -->
+      <div class="finca-table-wrapper">
+        <table mat-table [dataSource]="dataSource" class="finca-table" matSort>
+  
+          <!-- Columnas -->
+          <ng-container matColumnDef="nombreFinca">
+            <th mat-header-cell *matHeaderCellDef> Nombre </th>
+            <td mat-cell *matCellDef="let element"> {{element.nombreFinca}} </td>
+          </ng-container>
+  
+          <ng-container matColumnDef="ubicacionFinca">
+            <th mat-header-cell *matHeaderCellDef> Ubicación </th>
+            <td mat-cell *matCellDef="let element"> {{element.ubicacionFinca}} </td>
+          </ng-container>
+  
+          <ng-container matColumnDef="propietarioFinca">
+            <th mat-header-cell *matHeaderCellDef> Propietario </th>
+            <td mat-cell *matCellDef="let element"> {{element.propietarioFinca}} </td>
+          </ng-container>
+  
+          <ng-container matColumnDef="superficieFinca">
+            <th mat-header-cell *matHeaderCellDef> Superficie (m²) </th>
+            <td mat-cell *matCellDef="let element"> {{element.superficieFinca}} </td>
+          </ng-container>
+  
+          <ng-container matColumnDef="actividadPrincipal">
+            <th mat-header-cell *matHeaderCellDef> Actividad </th>
+            <td mat-cell *matCellDef="let element"> {{element.actividadPrincipal}} </td>
+          </ng-container>
+  
+          <!-- Acciones -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef> Acciones </th>
+            <td mat-cell *matCellDef="let element" class="acciones-cell">
+              <button mat-icon-button color="primary" (click)="editarFinca(element)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="eliminarFinca(element.id)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+  
+          <!-- Filas -->
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  
+          <!-- Sin datos -->
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell" colspan="6">No hay coincidencias para "{{input.value}}"</td>
+          </tr>
+        </table>
+      </div>
+    </mat-card>
+  </div>
+  

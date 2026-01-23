@@ -1,0 +1,123 @@
+<div class="demanda-wrapper">
+  <div class="animated-bg"></div>
+
+  <mat-card class="demanda-card">
+    <header class="form-header">
+      <div class="header-left">
+        <mat-icon>flash_on</mat-icon>
+        <div class="header-text">
+          <h2>Demanda Energética de la Finca</h2>
+          <p>Selecciona una finca y calcula su consumo total de energía</p>
+        </div>
+      </div>
+    </header>
+
+    <section class="selector-section">
+      <mat-form-field appearance="outline" class="selector-finca">
+        <mat-label>Seleccionar Finca</mat-label>
+        <mat-select [(value)]="fincaSeleccionada">
+          <mat-option *ngFor="let finca of fincas" [value]="finca.id">
+            {{ finca.nombreFinca }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" (click)="calcularDemanda()">
+        <mat-icon>bolt</mat-icon>
+        Calcular Demanda
+      </button>
+    </section>
+
+    <!-- Pantalla de carga completa -->
+    <div class="loading-overlay" *ngIf="cargando">
+      <div class="loading-content">
+        <div class="loading-icon-wrapper">
+          <mat-icon class="loading-icon">bolt</mat-icon>
+          <div class="loading-pulse"></div>
+        </div>
+        <mat-spinner diameter="80" class="loading-spinner"></mat-spinner>
+        <h3 class="loading-title">
+          {{ faseCarga === 'calculando' ? 'Calculando Demanda Energética' : 'Generando Visualización' }}
+        </h3>
+        <p class="loading-message">
+          {{ faseCarga === 'calculando' ? 'Estamos procesando los datos de la finca...' : 'Preparando gráficos y tablas...' }}
+        </p>
+        <div class="loading-steps">
+          <div class="loading-step" [class.active]="faseCarga === 'calculando'">
+            <mat-icon class="step-icon">{{ faseCarga === 'calculando' ? 'sync' : 'check_circle' }}</mat-icon>
+            <span>Recopilando información</span>
+          </div>
+          <div class="loading-step" [class.active]="faseCarga === 'calculando'">
+            <mat-icon class="step-icon">{{ faseCarga === 'calculando' ? 'sync' : 'check_circle' }}</mat-icon>
+            <span>Procesando cálculos</span>
+          </div>
+          <div class="loading-step" [class.active]="faseCarga === 'renderizando'">
+            <mat-icon class="step-icon">{{ faseCarga === 'renderizando' ? 'sync' : 'analytics' }}</mat-icon>
+            <span>Generando resultados</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resultados -->
+    <div class="resultado-section" *ngIf="demanda && !cargando">
+      <h3 class="titulo-resultados">
+        Resultados de Demanda Energética
+      </h3>
+
+      <!-- Tabla de resultados -->
+      <div class="tabla-container" *ngIf="demanda">
+        <table mat-table [dataSource]="[demanda]" class="tabla-demanda">
+          <ng-container matColumnDef="demandaDiaria">
+            <th mat-header-cell *matHeaderCellDef> Demanda Diaria (Wh/día) </th>
+            <td mat-cell *matCellDef="let d">{{ d.demandaDiaria | number:'1.0-2' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="demandaMensual">
+            <th mat-header-cell *matHeaderCellDef> Demanda Mensual (Wh/mes) </th>
+            <td mat-cell *matCellDef="let d">{{ d.demandaMensual | number:'1.0-2' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="demandaAnual">
+            <th mat-header-cell *matHeaderCellDef> Demanda Anual (Wh/año) </th>
+            <td mat-cell *matCellDef="let d">{{ d.demandaAnual | number:'1.0-2' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="demandaAC">
+            <th mat-header-cell *matHeaderCellDef> Cargas AC (Wh/día) </th>
+            <td mat-cell *matCellDef="let d">{{ d.demandaAC | number:'1.0-2' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="demandaDC">
+            <th mat-header-cell *matHeaderCellDef> Cargas DC (Wh/día) </th>
+            <td mat-cell *matCellDef="let d">{{ d.demandaDC | number:'1.0-2' }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+
+      <!-- Gráfico de barras -->
+      <div class="grafico-container" *ngIf="barChartData">
+        <h4 class="grafico-title">Distribución de la Demanda Energética</h4>
+        <div class="chart-wrapper">
+          <canvas
+            #chart
+            baseChart
+            [data]="barChartData"
+            [options]="chartOptions"
+            type="bar"
+            [legend]="true">
+          </canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estado vacío -->
+    <div class="estado-vacio" *ngIf="!cargando && !demanda">
+      <mat-icon>info</mat-icon>
+      <p>Selecciona una finca y calcula la demanda para ver resultados.</p>
+    </div>
+  </mat-card>
+</div>

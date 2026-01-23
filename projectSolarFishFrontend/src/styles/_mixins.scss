@@ -1,0 +1,13 @@
+/*@use 'variables' as *;
+
+/// Aplica fondo y texto según el tema
+@mixin theme-surface($bg, $text) {
+  background-color: $bg;
+  color: $text;
+}
+
+/// Transición suave entre temas
+@mixin theme-transition {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+*/

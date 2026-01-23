@@ -1,0 +1,237 @@
+.energia-form-wrapper {
+  position: relative;
+  min-height: calc(100vh - 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f5f5f5, #E0E0E0);
+  overflow: hidden;
+}
+
+.animated-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    url('https://www.transparenttextures.com/patterns/cubes.png'),
+    radial-gradient(circle at 25% 25%, rgba(77, 182, 172, 0.15), transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(179, 229, 252, 0.12), transparent 50%);
+  opacity: 0.4;
+  z-index: 0;
+  animation: move-bg 25s ease-in-out infinite alternate;
+}
+
+@keyframes move-bg {
+  0% { 
+    background-position: 0 0, 0 0, 0 0;
+    opacity: 0.4;
+  }
+  100% { 
+    background-position: 120px 120px, 250px 250px, 400px 400px;
+    opacity: 0.5;
+  }
+}
+
+.energia-card {
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(135deg, #FFFFFF, #f8f9fa);
+  padding: 0;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(77, 182, 172, 0.15);
+  width: 100%;
+  max-width: 950px;
+  border: 1px solid rgba(77, 182, 172, 0.1);
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #4DB6AC, #FFD700, #B3E5FC);
+    z-index: 1;
+  }
+}
+  
+.form-header {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.75rem 2rem;
+  background: linear-gradient(135deg, #1A2338, #4DB6AC);
+  color: white;
+  margin-bottom: 0;
+  box-shadow: 0 4px 16px rgba(26, 35, 56, 0.2);
+  position: relative;
+  z-index: 1;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    
+    mat-icon {
+      font-size: 2rem;
+      width: 2rem;
+      height: 2rem;
+      color: #FFD700;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+  }
+
+  .header-text {
+    flex: 1;
+
+    h2 {
+      margin: 0;
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    p {
+      margin: 0.5rem 0 0;
+      font-size: 0.95rem;
+      opacity: 0.95;
+      font-weight: 400;
+    }
+    .componente-id {
+      display: inline-block;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      opacity: 0.9;
+      padding: 0.25rem 0.75rem;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+    }
+  }
+}
+  
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+mat-form-field {
+  width: 100%;
+
+  ::ng-deep {
+    .mat-mdc-text-field-wrapper {
+      background-color: #ffffff;
+      border-radius: 8px;
+    }
+
+    .mat-mdc-form-field-focus-overlay {
+      background-color: rgba(77, 182, 172, 0.05);
+    }
+
+    .mdc-text-field--focused {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: #4DB6AC !important;
+      }
+    }
+
+    .mat-mdc-form-field-subscript-wrapper {
+      margin-top: 4px;
+    }
+  }
+}
+
+.botones {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+  padding: 0 2rem 2rem;
+  position: relative;
+  z-index: 1;
+
+  button {
+    min-width: 150px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+    }
+
+    &:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+  }
+
+  button[color='primary'] {
+    background: linear-gradient(135deg, #4DB6AC, #3a9d94);
+    color: #FFFFFF;
+    border: none;
+    
+    &:hover {
+      background: linear-gradient(135deg, #3a9d94, #2d7a73);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(77, 182, 172, 0.4);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  button[color='warn'] {
+    background: transparent;
+    border: 2px solid #FFD700;
+    color: #1A2338;
+    
+    &:hover {
+      background: linear-gradient(135deg, #FFD700, #ffed4e);
+      color: #1A2338;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+      border-color: #FFD700;
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+  

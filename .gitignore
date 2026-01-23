@@ -1,0 +1,31 @@
+# =========================
+# FRONTEND (Angular / Node)
+# =========================
+node_modules/
+dist/
+.angular/
+npm-debug.log
+
+# =========================
+# BACKEND (Spring Boot / Java)
+# =========================
+target/
+*.class
+*.log
+
+# =========================
+# IDEs / Editores
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# SISTEMA OPERATIVO
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# VARIABLES DE ENTORNO
+# =========================
+.env
