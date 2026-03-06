@@ -2,13 +2,6 @@ package com.newproject.jhocadi.projectSolarFishBackend.controller;
 
 public class DemandaReciboController {
     
-    karen holaa
-    como estas
-    karen responda
+   HOLA JAFET 
+}
 
-
-
-
-    Jafet hola
-    
-    
