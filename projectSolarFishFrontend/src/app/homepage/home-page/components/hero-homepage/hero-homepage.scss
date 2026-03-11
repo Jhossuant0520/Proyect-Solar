@@ -1,122 +1,133 @@
-.hero{
-background: linear-gradient(135deg,#0D0221,#14068c);
-min-height:100vh;
+.sun-system{
+
+position:relative;
+width:260px;
+height:260px;
 display:flex;
 align-items:center;
-padding:80px;
-color:white;
+justify-content:center;
+
 }
 
-.hero-container{
-display:flex;
-justify-content:space-between;
-align-items:center;
-max-width:1200px;
-margin:auto;
-gap:60px;
-}
+/* NUCLEO DEL SOL */
 
-/* TEXTO */
+.sun-core{
 
-.hero-text h1{
-font-size:55px;
-line-height:1.1;
-}
-
-.hero-text span{
-color:#2ED3B7;
-}
-
-.hero-text p{
-margin-top:20px;
-color:#cfd8dc;
-font-size:18px;
-max-width:420px;
-}
-
-.hero-buttons{
-margin-top:30px;
-display:flex;
-gap:15px;
-}
-
-.btn-primary{
-background:#2ED3B7;
-border:none;
-padding:12px 25px;
-border-radius:30px;
-font-weight:600;
-cursor:pointer;
-}
-
-.btn-outline{
-border:2px solid #2ED3B7;
-background:transparent;
-color:white;
-padding:12px 25px;
-border-radius:30px;
-}
-
-/* DASHBOARD */
-
-.dashboard{
-display:grid;
-grid-template-columns:repeat(2,180px);
-gap:20px;
-}
-
-.card{
-background:rgba(255,255,255,0.05);
-backdrop-filter:blur(10px);
-border-radius:15px;
-padding:20px;
-box-shadow:0 10px 30px rgba(0,0,0,0.4);
-}
-
-.card h3{
-font-size:14px;
-color:#a0aec0;
-}
-
-.value{
-font-size:28px;
-font-weight:bold;
-margin-top:10px;
-}
-
-/* GRAFICO */
-
-.chart{
-grid-column:span 2;
+width:120px;
 height:120px;
-display:flex;
-align-items:flex-end;
+border-radius:50%;
+background:radial-gradient(circle,#FFD93D,#FF7A00,#FF3C00);
+box-shadow:
+0 0 40px #FFD93D,
+0 0 80px #FF8C00,
+0 0 120px #FF3C00;
+
+z-index:3;
+position:absolute;
+
 }
 
-.bars{
-display:flex;
-gap:10px;
-width:100%;
+/* HALO DE ENERGIA */
+
+.solar-glow{
+
+position:absolute;
+width:220px;
+height:220px;
+border-radius:50%;
+
+background:radial-gradient(circle,
+rgba(255,217,61,0.5),
+rgba(255,140,0,0.2),
+transparent);
+
+animation:solarPulse 4s infinite;
+
 }
 
-.bar{
-width:100%;
-background:#2ED3B7;
-height:40%;
-animation:energy 2s infinite alternate;
-border-radius:5px;
+/* ANILLOS */
+
+.solar-ring{
+
+position:absolute;
+border-radius:50%;
+border:2px solid rgba(255,217,61,0.3);
+
 }
 
-.bar:nth-child(2){ animation-delay:.3s }
-.bar:nth-child(3){ animation-delay:.6s }
-.bar:nth-child(4){ animation-delay:.9s }
-.bar:nth-child(5){ animation-delay:1.2s }
+.ring1{
 
-@keyframes energy{
-from{
-height:30%;
+width:200px;
+height:200px;
+animation:rotateSolar 18s linear infinite;
+
 }
-to{
-height:90%;
+
+.ring2{
+
+width:250px;
+height:250px;
+animation:rotateSolar 30s linear infinite reverse;
+
 }
+
+/* DESTELLOS */
+
+.solar-flare{
+
+position:absolute;
+width:6px;
+height:40px;
+background:linear-gradient(#FFD93D,transparent);
+border-radius:10px;
+
+}
+
+.flare1{ transform:rotate(30deg) translateY(-120px); }
+.flare2{ transform:rotate(120deg) translateY(-120px); }
+.flare3{ transform:rotate(210deg) translateY(-120px); }
+
+/* PARTICULAS */
+
+.solar-particles span{
+
+position:absolute;
+width:6px;
+height:6px;
+background:#FFD93D;
+border-radius:50%;
+box-shadow:0 0 10px #FFD93D;
+
+animation:floatSolar 6s infinite;
+
+}
+
+.solar-particles span:nth-child(1){top:5%;left:40%;}
+.solar-particles span:nth-child(2){top:70%;left:10%;}
+.solar-particles span:nth-child(3){top:20%;left:90%;}
+.solar-particles span:nth-child(4){top:80%;left:60%;}
+.solar-particles span:nth-child(5){top:40%;left:5%;}
+
+/* ANIMACIONES */
+
+@keyframes rotateSolar{
+
+from{transform:rotate(0deg);}
+to{transform:rotate(360deg);}
+
+}
+
+@keyframes solarPulse{
+
+0%{transform:scale(1);opacity:0.6;}
+100%{transform:scale(1.4);opacity:0;}
+
+}
+
+@keyframes floatSolar{
+
+0%{transform:translateY(0);}
+50%{transform:translateY(-15px);}
+100%{transform:translateY(0);}
+
 }
