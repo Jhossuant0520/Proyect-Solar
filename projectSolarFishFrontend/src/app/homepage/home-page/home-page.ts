@@ -11,7 +11,7 @@ import { FooterHomepage } from "./components/footer-homepage/footer-homepage";
 
 @Component({
   selector: 'app-home-page',
-  imports: [MatCardModule, HeroHomepage, AboutHomepage, NavbarHomepage, ServicesHomepage, Catalog, FooterHomepage, CommonModule],
+  imports: [MatCardModule, HeroHomepage, AboutHomepage, NavbarHomepage, ServicesHomepage, Catalog, FooterHomepage, CommonModule, Contact],
   templateUrl: './home-page.html',
   styleUrl: './home-page.scss'
 })
