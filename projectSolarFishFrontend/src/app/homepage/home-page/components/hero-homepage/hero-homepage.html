@@ -1,299 +1,49 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>SolarFish</title>
-
-<style>
-
-/* FONDO */
-
-body{
-margin:0;
-font-family:Arial, Helvetica, sans-serif;
-background:radial-gradient(circle at top,#26408B,#0F084B,#0D0221);
-color:white;
-text-align:center;
-}
-
-/* HERO */
-
-.hero{
-
-min-height:100vh;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-padding:60px;
-position:relative;
-
-}
-
-/* LOGO */
-
-.logo-container{
-
-position:absolute;
-top:30px;
-left:40px;
-
-}
-
-.logo-container img{
-
-width:120px;
-
-}
-
-/* SISTEMA SOLAR */
-
-.sun-system{
-
-position:relative;
-width:260px;
-height:260px;
-display:flex;
-align-items:center;
-justify-content:center;
-margin-bottom:40px;
-
-}
-
-/* NUCLEO */
-
-.sun-core{
-
-width:120px;
-height:120px;
-border-radius:50%;
-background:radial-gradient(circle,#FFD93D,#FF7A00,#FF3C00);
-
-box-shadow:
-0 0 40px #FFD93D,
-0 0 80px #FF8C00,
-0 0 120px #FF3C00;
-
-z-index:3;
-position:absolute;
-
-}
-
-/* HALO */
-
-.solar-glow{
-
-position:absolute;
-width:220px;
-height:220px;
-border-radius:50%;
-
-background:radial-gradient(circle,
-rgba(255,217,61,0.5),
-rgba(255,140,0,0.2),
-transparent);
-
-animation:solarPulse 4s infinite;
-
-}
-
-/* ANILLOS */
-
-.solar-ring{
-
-position:absolute;
-border-radius:50%;
-border:2px solid rgba(255,217,61,0.3);
-
-}
-
-.ring1{
-
-width:200px;
-height:200px;
-animation:rotateSolar 18s linear infinite;
-
-}
-
-.ring2{
-
-width:250px;
-height:250px;
-animation:rotateSolar 30s linear infinite reverse;
-
-}
-
-/* FLARES */
-
-.solar-flare{
-
-position:absolute;
-width:6px;
-height:40px;
-background:linear-gradient(#FFD93D,transparent);
-border-radius:10px;
-
-}
-
-.flare1{ transform:rotate(30deg) translateY(-120px); }
-.flare2{ transform:rotate(120deg) translateY(-120px); }
-.flare3{ transform:rotate(210deg) translateY(-120px); }
-
-/* PARTICULAS */
-
-.solar-particles span{
-
-position:absolute;
-width:6px;
-height:6px;
-background:#FFD93D;
-border-radius:50%;
-box-shadow:0 0 10px #FFD93D;
-
-animation:floatSolar 6s infinite;
-
-}
-
-.solar-particles span:nth-child(1){top:5%;left:40%;}
-.solar-particles span:nth-child(2){top:70%;left:10%;}
-.solar-particles span:nth-child(3){top:20%;left:90%;}
-.solar-particles span:nth-child(4){top:80%;left:60%;}
-.solar-particles span:nth-child(5){top:40%;left:5%;}
-
-/* TEXTO */
-
-.hero h1{
-
-font-size:64px;
-line-height:1.1;
-
-}
-
-.hero span{
-
-color:#2ED3B7;
-
-}
-
-.hero p{
-
-margin-top:20px;
-font-size:18px;
-color:#cfd8dc;
-max-width:500px;
-margin-left:auto;
-margin-right:auto;
-
-}
-
-/* BOTONES */
-
-.buttons{
-
-margin-top:35px;
-display:flex;
-justify-content:center;
-gap:20px;
-
-}
-
-.btn-main{
-
-background:#2ED3B7;
-border:none;
-padding:14px 32px;
-border-radius:30px;
-font-weight:600;
-cursor:pointer;
-
-}
-
-.btn-outline{
-
-border:2px solid #2ED3B7;
-background:transparent;
-color:white;
-padding:14px 32px;
-border-radius:30px;
-
-}
-
-/* ANIMACIONES */
-
-@keyframes rotateSolar{
-
-from{transform:rotate(0deg);}
-to{transform:rotate(360deg);}
-
-}
-
-@keyframes solarPulse{
-
-0%{transform:scale(1);opacity:0.6;}
-100%{transform:scale(1.4);opacity:0;}
-
-}
-
-@keyframes floatSolar{
-
-0%{transform:translateY(0);}
-50%{transform:translateY(-15px);}
-100%{transform:translateY(0);}
-
-}
-
-</style>
-</head>
-
-<body>
-
 <section class="hero">
 
-<div class="logo-container">
-<img src="assets/logo.png" alt="SolarFish">
-</div>
+  <!-- LOGO -->
+  <div class="logo">
+    <img src="assets/logo.png" alt="SolarFish">
+  </div>
 
-<div class="sun-system">
+  <!-- TEXTO -->
+  <div class="content">
 
-<div class="solar-glow"></div>
+    <h1>Energía Solar Inteligente</h1>
 
-<div class="solar-ring ring1"></div>
-<div class="solar-ring ring2"></div>
+    <p>
+      Transformamos la energía del sol en innovación
+      sostenible para el futuro.
+    </p>
 
-<div class="sun-core"></div>
+    <div class="buttons">
+      <button class="btn-main">Explorar</button>
+      <button class="btn-outline">Tecnología</button>
+    </div>
 
-<div class="solar-flare flare1"></div>
-<div class="solar-flare flare2"></div>
-<div class="solar-flare flare3"></div>
+  </div>
 
-<div class="solar-particles">
-<span></span>
-<span></span>
-<span></span>
-<span></span>
-<span></span>
-</div>
+  <!-- SOL ANIMADO -->
+  <div class="solar-system">
 
-</div>
+    <div class="sun"></div>
 
-<h1>
-Energía inteligente para un
-<span>futuro sostenible</span>
-</h1>
+    <div class="ring ring1"></div>
+    <div class="ring ring2"></div>
+    <div class="ring ring3"></div>
 
-<p>
-SolarFish impulsa el futuro de la energía renovable
-con soluciones inteligentes para sistemas solares.
-</p>
+    <div class="energy-line line1"></div>
+    <div class="energy-line line2"></div>
+    <div class="energy-line line3"></div>
 
-<div class="buttons">
+  </div>
 
-<button class="btn-main">Explorar</button>
-<button class="btn-outline">Conocer más</button>
-
-</div>
+  <!-- PARTICULAS -->
+  <div class="particles">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
 
 </section>
-
-</body>
-</html>
