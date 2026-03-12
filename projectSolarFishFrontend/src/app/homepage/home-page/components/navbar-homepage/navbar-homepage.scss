@@ -119,32 +119,28 @@
   }
 
   .menu-toggle {
-    display: none;
-    font-size: 1.8rem;
-    color: white;
-    cursor: pointer;
-    padding: 10px;
-    z-index: 1001;
-    transition: all 0.3s ease;
-    background: rgba(77, 182, 172, 0.1); // Turquesa
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 45px;
+    height: 45px;
+    border: none;
     border-radius: 8px;
-    border: 1px solid rgba(77, 182, 172, 0.2); // Turquesa
+    transition: all 0.3s ease;
 
-    &:hover {
-      background: rgba(77, 182, 172, 0.2); // Turquesa
-      transform: scale(1.1);
-    }
-
-    &:active {
-      transform: scale(0.95);
-    }
-
-    i {
-      transition: transform 0.3s ease;
-    }
-
-    &.active i {
-      transform: rotate(90deg);
+    &.active {
+      background: rgba(15, 23, 42, 0.65); // Fondo activo
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      color: white;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transition: all 0.3s ease;
     }
   }
 
@@ -183,17 +179,18 @@
           transform: translateX(-50%);
           width: 0;
           height: 2px;
-          background: linear-gradient(135deg, #ffd60a, #ff9f1c); // Turquesa a amarillo
+          background: linear-gradient(135deg, #ffe066, #ff9f1c);
           transition: width 0.3s ease;
           border-radius: 2px;
         }
 
         &:hover {
           color: #ffffff;
-          background: rgba(77, 182, 172, 0.1); // Turquesa
+          background: rgba(255, 224, 102, 0.1); // Turquesa
 
           &::after {
             width: 80%;
+            background: linear-gradient(135deg, #ffd60a, #ff9f1c);
           }
         }
 
@@ -217,11 +214,11 @@
     border-radius: 40px;
     font-weight: 600;
     font-size: 1rem;
-    background: linear-gradient(135deg, #ffe066, #ff9f1c); // Turquesa
+    background: linear-gradient(135deg, #ffe066, #ff9f1c); 
     color: white;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 14px rgba(77, 182, 172, 0.4); // Sombra turquesa
+    box-shadow: 0 4px 14px rgba(255, 224, 102, 0.4); 
     white-space: nowrap;
 
     // Desktop: mostrar solo .desktop-login
@@ -237,7 +234,7 @@
 
     &:hover {
       transform: translateY(-3px);
-      box-shadow: 0 6px 20px rgba(77, 182, 172, 0.6); // Sombra turquesa
+      box-shadow: 0 6px 20px rgba(255, 224, 102, 0.6); // Sombra turquesa
       background: linear-gradient(135deg, #ffd60a, #ff9f1c); // Turquesa más claro
     }
 
@@ -267,7 +264,7 @@
     }
 
     &:focus-visible {
-      outline: 2px solid #4DB6AC; // Turquesa
+      outline: 2px solid #ffe066; // Turquesa
       outline-offset: 3px;
     }
 
@@ -348,6 +345,20 @@
       transform: translateY(-50%);
       width: 45px;
       height: 45px;
+      border: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+
+      &.active {
+        background: rgba(15, 23, 42, 0.65); // Fondo activo
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        color: white;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        transition: all 0.3s ease;
+      }
     }
 
     .nav-links {
@@ -372,7 +383,13 @@
       &.active {
         max-height: 500px;
         padding: 25px 0;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        background: rgba(15, 23, 42, 0.65); // Fondo activo
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        transition: all 0.3s ease;
       }
 
       // Mostrar el item del botón móvil
