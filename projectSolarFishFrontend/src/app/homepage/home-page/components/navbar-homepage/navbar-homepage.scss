@@ -183,7 +183,7 @@
           transform: translateX(-50%);
           width: 0;
           height: 2px;
-          background: linear-gradient(90deg, #4DB6AC, #FFD700); // Turquesa a amarillo
+          background: linear-gradient(135deg, #ffd60a, #ff9f1c); // Turquesa a amarillo
           transition: width 0.3s ease;
           border-radius: 2px;
         }
@@ -217,7 +217,7 @@
     border-radius: 40px;
     font-weight: 600;
     font-size: 1rem;
-    background: linear-gradient(135deg, #4DB6AC, #4DB6AC); // Turquesa
+    background: linear-gradient(135deg, #ffe066, #ff9f1c); // Turquesa
     color: white;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -238,7 +238,7 @@
     &:hover {
       transform: translateY(-3px);
       box-shadow: 0 6px 20px rgba(77, 182, 172, 0.6); // Sombra turquesa
-      background: linear-gradient(135deg, #5dc5bb, #4ab5ab); // Turquesa más claro
+      background: linear-gradient(135deg, #ffd60a, #ff9f1c); // Turquesa más claro
     }
 
     &:active {
