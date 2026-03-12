@@ -1,20 +1,24 @@
 @use 'breakpoints' as *;
 
 .navbar {
-  background: linear-gradient(135deg, #1A2338, #003d7a); // Azul marino oscuro
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
   color: white;
   padding: 0;
   position: sticky;
   top: 0;
   z-index: 1000;
   width: 100%;
-  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
   transition: all 0.3s ease;
 
   &.scrolled {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-    background: linear-gradient(135deg, #0f1520, #1A2338); // Azul marino más oscuro
+  background: rgba(10, 15, 30, 0.9);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.35);
   }
 
   .navbar-container {
@@ -31,50 +35,79 @@
   .navbar-logo-wrapper {
     width: 380px;
     height: 100%;
-    background: linear-gradient(135deg, #ffffff, #f8f8ff);
-    clip-path: polygon(0 0, 90% 0, 75% 100%, 0% 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     padding-left: 10px;
     position: relative;
     overflow: hidden;
+    
+    /* 1. Mismo fondo y desenfoque que la navbar */
+    background: rgba(235, 240, 245, 0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    
+    /* 2. Bordes sutiles (Cambiados de 0.9 a 0.08 para que no brillen demasiado) */
+    border-bottom: 1px solid solid rgba(255, 255, 255, 0.2) ;
+    border-right: 1px solid solid rgba(255, 255, 255, 0.2);
+    
+    /* 3. Forma trapezoidal */
+    clip-path: polygon(0 0, 90% 0, 75% 100%, 0% 100%);
+    
+    /* 4. Sombras unificadas (Combinadas en una sola línea) */
+    box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.15), 
+    inset 0 0 15px rgba(255, 255, 255, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    
     transition: all 0.3s ease;
-
+  
+    /* 5. Comportamiento cuando la navbar se scrollea */
+    .navbar.scrolled & {
+      background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(25px);
+    }
+  
+    /* Efecto de brillo al pasar el mouse */
     &::before {
       content: "";
       position: absolute;
       top: 0;
-      left: -100%;
-      width: 100%;
+      left: -120%;
+      width: 120%;
       height: 100%;
       background: linear-gradient(
         90deg,
         transparent,
-        rgba(77, 182, 172, 0.1), // Turquesa
+        rgba(255, 255, 255, 0.1), /* Cambiado a blanco sutil para el brillo */
         transparent
       );
-      transition: left 0.6s ease;
+      transition: left 0.7s ease;
     }
-
+  
     &:hover::before {
-      left: 100%;
+      left: 120%;
     }
-
+  
+    /* Detalle de luz lateral */
     &::after {
       content: "";
       position: absolute;
-      right: -2px;
+      right: 0;
       top: 0;
-      width: 3px;
+      width: 2px;
       height: 100%;
-      background: linear-gradient(180deg, #4DB6AC, transparent); // Turquesa
+      background: linear-gradient(
+        180deg,
+        rgba(77, 182, 172, 0.6),
+        transparent
+      );
       opacity: 0.5;
     }
   }
 
   .logo-img {
-    height: 120px;
+    height: 180px;
     object-fit: contain;
     margin-left: -50px;
     transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
