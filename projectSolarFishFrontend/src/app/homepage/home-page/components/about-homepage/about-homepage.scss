@@ -2,418 +2,208 @@
 
 .about-home {
   position: relative;
-  background: radial-gradient(circle at center, #0F084B, #0D0221);
-  background-attachment: fixed;
-  padding: 80px 30px;
   overflow: hidden;
+  padding: 80px 30px;
   min-height: 600px;
   color: white;
   font-family: "Inter", sans-serif;
-  margin: 0;
 
-  /* Fondo animado: patrón sutil para oscuro (sin cubos blancos) */
-  .animated-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background:
-      repeating-linear-gradient(
-        90deg,
-        transparent 0,
-        transparent 48px,
-        rgba(255, 255, 255, 0.02) 49px,
-        transparent 50px
-      ),
-      repeating-linear-gradient(
-        0deg,
-        transparent 0,
-        transparent 48px,
-        rgba(255, 255, 255, 0.02) 49px,
-        transparent 50px
-      ),
-      radial-gradient(circle at 25% 30%, rgba(77, 182, 172, 0.12), transparent 55%),
-      radial-gradient(circle at 80% 70%, rgba(0, 74, 143, 0.15), transparent 55%);
-    background-size: 100px 100px, 100px 100px, 100% 100%, 100% 100%;
-    animation: move-bg 35s ease-in-out infinite alternate;
-    z-index: 0;
-    pointer-events: none;
-  }
+  background: radial-gradient(circle at center, #0F084B, #05010f 80%);
 
-  @keyframes move-bg {
-    0% {
-      background-position: 0 0, 0 0, 0 0, 0 0;
-    }
-    100% {
-      background-position: 80px 80px, -60px -60px, 50px 50px, -30px -30px;
-    }
-  }
-
-  /* Partículas flotantes decorativas */
+  /* ⚡ CAPA 1: ENERGÍA EN MOVIMIENTO CONSTANTE */
   &::before {
     content: "";
     position: absolute;
-    top: 15%;
-    right: 8%;
-    width: 350px;
-    height: 350px;
-    background: radial-gradient(circle, rgba(77, 182, 172, 0.08), transparent 65%);
-    border-radius: 50%;
-    animation: float-slow 12s ease-in-out infinite;
+    inset: -50%;
+    background: 
+      radial-gradient(circle at 30% 40%, rgba(0,255,255,0.25), transparent 40%),
+      radial-gradient(circle at 70% 60%, rgba(255,140,0,0.25), transparent 40%);
+    animation: energyMove 6s ease-in-out infinite;
+    filter: blur(80px);
     z-index: 0;
   }
 
-  /* Sin franja diagonal: transición fluida entre secciones */
+  /* ✨ CAPA 2: PARTÍCULAS DINÁMICAS */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: 
+      radial-gradient(3px 3px at 20% 30%, rgba(255,255,255,0.7), transparent),
+      radial-gradient(3px 3px at 80% 60%, rgba(0,255,255,0.8), transparent),
+      radial-gradient(3px 3px at 50% 80%, rgba(255,140,0,0.8), transparent),
+      radial-gradient(3px 3px at 10% 90%, rgba(255,255,255,0.6), transparent);
+    animation: particlesFloat 12s linear infinite;
+    z-index: 0;
+  }
 
-  // ✨ NUEVO: Animación de flotación suave
-  @keyframes float-slow {
-    0%, 100% {
+  /* ⚡ CAPA 3: LÍNEAS EN MOVIMIENTO (PARALLAX) */
+  .energy-lines {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      120deg,
+      transparent,
+      transparent 50px,
+      rgba(0,255,255,0.08) 52px,
+      transparent 54px
+    );
+    animation: linesMoveFast 5s linear infinite;
+    z-index: 0;
+  }
+
+  .energy-lines-slow {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -120deg,
+      transparent,
+      transparent 70px,
+      rgba(255,140,0,0.05) 72px,
+      transparent 74px
+    );
+    animation: linesMoveSlow 12s linear infinite;
+    z-index: 0;
+  }
+
+  /* 🔥 ANIMACIONES FUERTES */
+
+  @keyframes energyMove {
+    0% {
       transform: translate(0, 0) scale(1);
     }
-    33% {
-      transform: translate(-20px, -30px) scale(1.05);
+    25% {
+      transform: translate(40px, -20px) scale(1.2);
     }
-    66% {
-      transform: translate(20px, 30px) scale(0.95);
+    50% {
+      transform: translate(-30px, 30px) scale(1.3);
+    }
+    75% {
+      transform: translate(20px, 40px) scale(1.2);
+    }
+    100% {
+      transform: translate(0, 0) scale(1);
     }
   }
 
+  @keyframes particlesFloat {
+    0% {
+      transform: translateY(0) translateX(0);
+    }
+    50% {
+      transform: translateY(-150px) translateX(40px);
+    }
+    100% {
+      transform: translateY(-300px) translateX(-40px);
+    }
+  }
+
+  @keyframes linesMoveFast {
+    from { transform: translate(0, 0); }
+    to { transform: translate(150px, 150px); }
+  }
+
+  @keyframes linesMoveSlow {
+    from { transform: translate(0, 0); }
+    to { transform: translate(-120px, -120px); }
+  }
+
+  /* 📦 CONTENIDO */
   .container {
-    max-width: 1200px;
-    margin: 0 auto;
     position: relative;
     z-index: 2;
+    max-width: 1200px;
+    margin: auto;
 
     .section-title {
-      font-size: clamp(1.8rem, 4vw, 2.5rem);
-      font-weight: 700;
-      margin-bottom: 50px;
-      color: white;
       text-align: center;
-      position: relative;
-      opacity: 0;
-      transform: translateY(-20px);
-      animation: fadeInDown 0.8s ease forwards;
-
-      &::after {
-        content: "";
-        position: absolute;
-        bottom: -15px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 80px;
-        height: 4px;
-        background: linear-gradient(90deg, #4DB6AC, #004a8f);
-        border-radius: 2px;
-        box-shadow: 0 2px 8px rgba(77, 182, 172, 0.4);
-      }
+      font-size: 2.5rem;
+      margin-bottom: 50px;
+      animation: fadeDown 1s ease forwards;
     }
 
     .content {
       display: flex;
-      flex-wrap: wrap;
-      gap: 50px; // Mejora: más espacio entre columnas
+      gap: 60px;
       align-items: center;
-      opacity: 0;
-      transform: translateY(40px);
-      animation: fadeInUp 1s ease forwards;
-      animation-delay: 0.3s;
+      animation: fadeUp 1s ease forwards;
 
       .text {
-        flex: 1 1 500px;
-        font-size: 1.05rem;
-        color: rgba(255, 255, 255, 0.9);
-        line-height: 1.8;
+        flex: 1;
 
         p {
-          margin-bottom: 24px;
-          position: relative;
-          padding-left: 20px;
-
-          &::before {
-            content: "";
-            position: absolute;
-            left: 0;
-            top: 5px;
-            width: 4px;
-            height: calc(100% - 10px);
-            background: linear-gradient(180deg, #4DB6AC, transparent);
-            border-radius: 2px;
-            opacity: 0.5;
-          }
-
-          &:last-child {
-            margin-bottom: 0;
-          }
-
-          strong {
-            color: #fff;
-            font-weight: 700;
-            position: relative;
-
-            &::after {
-              content: "";
-              position: absolute;
-              bottom: -2px;
-              left: 0;
-              width: 100%;
-              height: 2px;
-              background: linear-gradient(90deg, #4DB6AC, transparent);
-              opacity: 0.5;
-            }
-          }
-        }
-
-        // ✨ NUEVO: Animación escalonada de párrafos
-        p:nth-child(1) {
-          animation: slideInLeft 0.8s ease forwards;
-          animation-delay: 0.5s;
+          margin-bottom: 20px;
           opacity: 0;
-        }
+          transform: translateX(-30px);
+          animation: textIn 0.8s forwards;
 
-        p:nth-child(2) {
-          animation: slideInLeft 0.8s ease forwards;
-          animation-delay: 0.7s;
-          opacity: 0;
-        }
-
-        p:nth-child(3) {
-          animation: slideInLeft 0.8s ease forwards;
-          animation-delay: 0.9s;
-          opacity: 0;
+          &:nth-child(1){ animation-delay: .4s; }
+          &:nth-child(2){ animation-delay: .6s; }
+          &:nth-child(3){ animation-delay: .8s; }
         }
       }
 
       .image {
-        flex: 1 1 400px; // Mejora: ancho base más grande
-        text-align: center;
+        flex: 1;
         position: relative;
+
+        img {
+          width: 100%;
+          border-radius: 20px;
+          animation: zoomIn 1s ease forwards;
+          transition: .4s;
+
+          &:hover {
+            transform: scale(1.08);
+          }
+        }
 
         &::before {
           content: "";
           position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 90%;
-          height: 90%;
-          background: radial-gradient(circle, rgba(0, 74, 143, 0.15), transparent 70%);
-          border-radius: 50%;
+          inset: -20%;
+          background: radial-gradient(circle, rgba(0,255,255,0.3), transparent);
+          filter: blur(100px);
+          animation: pulse 3s infinite;
           z-index: -1;
-          animation: pulse-glow 3s ease-in-out infinite;
-        }
-
-        img {
-          max-width: 100%;
-          border-radius: 20px;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-          transform: scale(0.9);
-          opacity: 0;
-          animation: zoomIn 1s ease forwards;
-          animation-delay: 0.5s;
-          transition: transform 0.4s ease, box-shadow 0.4s ease;
-          object-fit: cover;
-          aspect-ratio: 4/3;
-
-          &:hover {
-            transform: scale(1.05) rotate(1deg);
-            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
-          }
         }
       }
     }
   }
 
-  /* Animaciones */
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(40px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  /* 🎬 UI */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(50px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
-  @keyframes fadeInDown {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   @keyframes zoomIn {
-    from {
-      transform: scale(0.9);
-      opacity: 0;
-    }
-    to {
-      transform: scale(1);
-      opacity: 1;
-    }
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
   }
 
-  @keyframes slideInLeft {
-    from {
-      opacity: 0;
-      transform: translateX(-30px);
-    }
+  @keyframes textIn {
     to {
       opacity: 1;
       transform: translateX(0);
     }
   }
 
-  @keyframes pulse-glow {
-    0%, 100% {
-      transform: translate(-50%, -50%) scale(1);
-      opacity: 0.5;
-    }
-    50% {
-      transform: translate(-50%, -50%) scale(1.1);
-      opacity: 0.3;
-    }
+  @keyframes pulse {
+    0%,100% { transform: scale(1); opacity: .5; }
+    50% { transform: scale(1.4); opacity: .9; }
   }
 
-  /* 🔹 Responsive tablet */
+  /* 📱 RESPONSIVE */
   @include responsive(md) {
-    padding: 60px 30px;
-    min-height: auto; // Permite altura automática
-
-    &::before {
-      width: 250px;
-      height: 250px;
-      right: 5%;
-    }
-
-    .container {
-      .section-title {
-        margin-bottom: 40px;
-      }
-
-      .content {
-        flex-direction: column;
-        gap: 40px;
-        text-align: center;
-
-        .text {
-          p {
-            padding-left: 0; // Remueve padding en centrado
-
-            &::before {
-              display: none; // Oculta barra lateral
-            }
-          }
-        }
-
-        .image {
-          order: -1; // ✨ NUEVO: imagen primero en tablet
-
-          img {
-            max-width: 400px;
-          }
-        }
-      }
-    }
-  }
-
-  /* ✅ Responsive móvil */
-  @include responsive(sm) {
-    padding: 50px 20px;
-
-    &::before {
-      width: 200px;
-      height: 200px;
-      top: 10%;
-      right: -5%;
-    }
-
-    .container {
-      .section-title {
-        font-size: 1.8rem;
-        margin-bottom: 35px;
-
-        &::after {
-          width: 60px;
-          bottom: -12px;
-        }
-      }
-
-      .content {
-        gap: 30px;
-
-        .text {
-          font-size: 0.95rem;
-          line-height: 1.7;
-
-          p {
-            margin-bottom: 18px;
-          }
-        }
-
-        .image {
-          img {
-            max-width: 100%;
-            border-radius: 16px;
-          }
-
-          &::before {
-            display: none; // Oculta círculo decorativo en móvil
-          }
-        }
-      }
-    }
-  }
-}
-
-/* 🔹 Media query para tablets grandes (768px - 1024px) */
-@media (min-width: 768px) and (max-width: 1024px) {
-  .about-home {
-    .container {
-      .content {
-        gap: 45px;
-
-        .text {
-          max-width: 90%;
-          margin: 0 auto;
-        }
-
-        .image img {
-          max-width: 450px;
-        }
-      }
-    }
-  }
-}
-
-/* 🔹 Media query para móviles pequeños (< 400px) */
-@media (max-width: 400px) {
-  .about-home {
-    padding: 40px 15px;
-
-    .container {
-      .section-title {
-        font-size: 1.6rem;
-        margin-bottom: 30px;
-      }
-
-      .content {
-        gap: 25px;
-
-        .text {
-          font-size: 0.9rem;
-
-          p {
-            margin-bottom: 16px;
-          }
-        }
-      }
+    .content {
+      flex-direction: column;
+      text-align: center;
     }
   }
 }
