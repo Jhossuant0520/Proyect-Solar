@@ -10,16 +10,58 @@
   margin: 0;
   font-family: "Inter", sans-serif;
 
-  .footer-overlay {
+  .animated-bg {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at 20% 50%, rgba(77, 182, 172, 0.15), transparent 50%), // Turquesa
-                radial-gradient(circle at 80% 80%, rgba(179, 229, 252, 0.1), transparent 50%); // Azul claro
-    pointer-events: none;
+    background:
+      repeating-linear-gradient(90deg, transparent 0, transparent 48px, rgba(255, 255, 255, 0.02) 49px, transparent 50px),
+      repeating-linear-gradient(0deg, transparent 0, transparent 48px, rgba(255, 255, 255, 0.02) 49px, transparent 50px),
+      radial-gradient(circle at 20% 20%, rgba(77, 182, 172, 0.12), transparent 55%),
+      radial-gradient(circle at 80% 80%, rgba(0, 74, 143, 0.15), transparent 55%);
+    background-size: 100px 100px, 100px 100px, 100% 100%, 100% 100%;
+    animation: move-bg 30s ease-in-out infinite alternate;
     z-index: 0;
+    pointer-events: none;
+  }
+
+  @keyframes move-bg {
+    0% { background-position: 0 0, 0 0, 0 0, 0 0; }
+    100% { background-position: 80px 80px, -60px -60px, 50px 50px, -30px -30px; }
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 10%;
+    left: 5%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(77, 182, 172, 0.08), transparent 70%);
+    border-radius: 50%;
+    animation: float-diagonal 15s ease-in-out infinite;
+    z-index: 0;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 15%;
+    right: 8%;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(0, 74, 143, 0.1), transparent 70%);
+    border-radius: 50%;
+    animation: float-diagonal 18s ease-in-out infinite reverse;
+    z-index: 0;
+  }
+
+  @keyframes float-diagonal {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -40px) scale(1.1); }
+    66% { transform: translate(-30px, 40px) scale(0.9); }
   }
 
   .footer-logo {

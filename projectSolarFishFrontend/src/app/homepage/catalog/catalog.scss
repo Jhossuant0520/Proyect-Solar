@@ -37,7 +37,7 @@
       radial-gradient(circle at 20% 20%, rgba(77, 182, 172, 0.12), transparent 55%),
       radial-gradient(circle at 80% 80%, rgba(0, 74, 143, 0.15), transparent 55%);
     background-size: 100px 100px, 100px 100px, 100% 100%, 100% 100%;
-    animation: move-bg 35s ease-in-out infinite alternate;
+    animation: move-bg 30s ease-in-out infinite alternate;
     z-index: 0;
     pointer-events: none;
   }
