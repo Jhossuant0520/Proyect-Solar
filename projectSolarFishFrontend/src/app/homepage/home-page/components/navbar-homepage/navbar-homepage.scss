@@ -191,7 +191,7 @@
 
           &::after {
             width: 80%;
-            background: linear-gradient(135deg, #ffd60a, #ff9f1c);
+            background: linear-gradient(135deg, #ffe066, #ff9f1c);
           }
         }
 
@@ -236,7 +236,7 @@
     &:hover {
       transform: translateY(-3px);
       box-shadow: 0 6px 20px rgba(255, 224, 102, 0.6); // Sombra turquesa
-      background: linear-gradient(135deg, #ffd60a, #ff9f1c); // Turquesa más claro
+      background: linear-gradient(135deg, #ffe066, #ff9f1c); // Turquesa más claro
     }
 
     &:active {

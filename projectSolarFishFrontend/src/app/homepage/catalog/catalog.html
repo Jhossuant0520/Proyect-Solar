@@ -18,13 +18,13 @@
           <ul class="caracteristicas">
             <li *ngFor="let c of equipo.caracteristicas">{{ c }}</li>
           </ul>
-          <a 
-          [href]="getWhatsAppLink(equipo)" 
+          <a
+          [href]="getWhatsAppLink(equipo)"
           target="_blank"
           rel="noopener noreferrer"
           class="ver-detalle"
         >
-          Ver detalles
+          <span>Ver detalles</span>
         </a>
         </div>
       </div>
