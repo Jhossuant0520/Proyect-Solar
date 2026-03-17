@@ -2,7 +2,7 @@
 
 .about-home { 
   position: relative;
-  background: linear-gradient(135deg, #E0E0E0, #f5f5f5); // Fondo claro con gris
+  background: radial-gradient(circle at center,#0F084B,#0D0221); // Fondo claro con gris
   padding: 80px 30px; // Mejora: más espacio vertical
   overflow: hidden;
   min-height: 600px; // ✨ NUEVO: altura mínima para mejor proporción

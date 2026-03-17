@@ -67,36 +67,122 @@ opacity:.9;
 display:flex;
 gap:20px;
 justify-content:center;
+padding-top:28px;
 }
 
 .btn-main{
-background:linear-gradient(135deg, #ffe066, #ff9f1c);
-border:none;
-padding:14px 30px;
-border-radius:30px;
-font-weight:bold;
-cursor:pointer;
-transition:.3s;
+position: relative;
+overflow: hidden;
+padding: 12px 28px;
+border: none;
+border-radius: 40px;
+font-weight: 600;
+font-size: 1rem;
+background: linear-gradient(135deg, #ffe066, #ff9f1c);
+color: white;
+cursor: pointer;
+transition: all 0.3s ease;
+box-shadow: 0 4px 14px rgba(0, 74, 143, 0.4);
+white-space: nowrap;
 }
 
 .btn-main:hover{
-transform:scale(1.1);
-box-shadow:0 0 20px #3cb1e8;
+transform: translateY(-3px);
+box-shadow: 0 6px 20px rgba(0, 74, 143, 0.6);
+background: linear-gradient(135deg, #ffd60a, #ff9f1c);
+}
+
+.btn-main:active{
+transform: translateY(-1px);
+}
+
+.btn-main::after{
+content: "";
+position: absolute;
+top: 0;
+left: -100%;
+width: 200%;
+height: 100%;
+background: linear-gradient(
+  120deg,
+  rgba(255, 255, 255, 0),
+  rgba(255, 255, 255, 0.3),
+  rgba(255, 255, 255, 0)
+);
+transition: left 0.5s ease;
+z-index: 0;
+}
+
+.btn-main:hover::after{
+left: 100%;
+}
+
+.btn-main:focus-visible{
+outline: 2px solid #004a8f;
+outline-offset: 3px;
+}
+
+.btn-main span{
+position: relative;
+z-index: 1;
 }
 
 .btn-outline{
-background:transparent;
-border:2px solid #3bb9f4;
-color:#ebf3f5;
-padding:14px 30px;
-border-radius:30px;
-cursor:pointer;
-transition:.3s;
+position: relative;
+overflow: hidden;
+padding: 12px 28px;
+border-radius: 40px;
+font-weight: 600;
+font-size: 1rem;
+background: linear-gradient(135deg, #004a8f, #002b5b);
+color: #ebf3f5;
+cursor: pointer;
+transition: all 0.3s ease;
+box-shadow: 0 4px 14px rgba(0, 53, 102, 0.4);
+white-space: nowrap;
 }
 
 .btn-outline:hover{
-background:#2689cc;
-color:black;
+transform: translateY(-3px);
+box-shadow: 0 6px 20px rgba(0, 74, 143, 0.5);
+background: linear-gradient(135deg, #0059a8, #003366);
+color: white;
+border-color: rgba(59, 185, 244, 0.8);
+}
+
+.btn-outline:active{
+transform: translateY(-1px);
+}
+
+.btn-outline::after{
+content: "";
+position: absolute;
+top: 0;
+left: -100%;
+width: 200%;
+height: 100%;
+background: linear-gradient(
+  120deg,
+  rgba(255, 255, 255, 0),
+  rgba(255, 255, 255, 0.2),
+  rgba(255, 255, 255, 0)
+);
+transition: left 0.5s ease;
+z-index: 0;
+}
+
+.btn-outline:hover::after{
+left: 100%;
+}
+
+.btn-outline:focus-visible{
+outline: 2px solid rgba(59, 185, 244, 0.8);
+outline-offset: 3px;
+}
+
+.btn-outline span{
+position: relative;
+z-index: 1;
 }
 
 /* SOL */
