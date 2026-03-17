@@ -2,13 +2,14 @@
 
 .footer-home {
   position: relative;
-  background: linear-gradient(135deg, #1A2338, #003d7a); // Azul marino oscuro
+  background: radial-gradient(circle at center, #0F084B, #0D0221);
+  background-attachment: fixed;
   color: #fff;
   padding: 4rem 2rem 2rem;
   overflow: hidden;
-  margin-top: 5rem;
+  margin: 0;
+  font-family: "Inter", sans-serif;
 
-  // Overlay decorativo
   .footer-overlay {
     position: absolute;
     top: 0;
@@ -19,6 +20,29 @@
                 radial-gradient(circle at 80% 80%, rgba(179, 229, 252, 0.1), transparent 50%); // Azul claro
     pointer-events: none;
     z-index: 0;
+  }
+
+  .footer-logo {
+    max-width: 1200px;
+    margin: 0 auto 2.5rem;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    animation: fadeInUp 0.8s ease forwards;
+
+    img {
+      height: 80px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+      opacity: 0.95;
+      transition: opacity 0.3s ease;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
   }
 
   .footer-container {
@@ -54,7 +78,7 @@
       .footer-description {
         font-size: 0.95rem;
         line-height: 1.6;
-        color: #E0E0E0; // Gris claro
+        color: rgba(255, 255, 255, 0.85);
       }
     }
 
@@ -65,7 +89,7 @@
         font-size: 1.3rem;
         font-weight: 600;
         margin-bottom: 1.2rem;
-        color: #B3E5FC; // Azul claro suave
+        color: #4DB6AC;
       }
 
       ul {
@@ -76,7 +100,7 @@
         li {
           margin-bottom: 0.8rem;
           font-size: 0.95rem;
-          color: #E0E0E0; // Gris claro
+          color: rgba(255, 255, 255, 0.85);
           line-height: 1.5;
 
           strong {
@@ -85,13 +109,13 @@
           }
 
           a {
-            color: #B3E5FC; // Azul claro suave
+            color: rgba(255, 255, 255, 0.9);
             text-decoration: none;
             transition: color 0.3s ease, transform 0.3s ease;
             display: inline-block;
 
             &:hover {
-              color: #fff;
+              color: #4DB6AC;
               transform: translateX(3px);
             }
           }
@@ -106,7 +130,7 @@
         font-size: 1.3rem;
         font-weight: 600;
         margin-bottom: 1.2rem;
-        color: #B3E5FC; // Azul claro suave
+        color: #4DB6AC;
       }
 
       .social-links {
@@ -177,7 +201,7 @@
 
     p {
       font-size: 0.9rem;
-      color: #B3E5FC; // Azul claro suave
+            color: rgba(255, 255, 255, 0.9);
       margin: 0;
     }
   }
@@ -197,7 +221,14 @@
   /* 🔹 Responsive tablet */
   @include responsive(md) {
     padding: 3rem 2rem 1.5rem;
-    margin-top: 3rem;
+
+    .footer-logo img {
+      height: 65px;
+    }
+
+    .footer-logo {
+      margin-bottom: 2rem;
+    }
 
     .footer-container {
       grid-template-columns: 1fr;
@@ -218,7 +249,14 @@
   /* ✅ Responsive móvil */
   @include responsive(sm) {
     padding: 2.5rem 1.5rem 1.5rem;
-    margin-top: 2rem;
+
+    .footer-logo img {
+      height: 55px;
+    }
+
+    .footer-logo {
+      margin-bottom: 1.5rem;
+    }
 
     .footer-container {
       gap: 2rem;
@@ -265,6 +303,10 @@
 @media (max-width: 600px) {
   .footer-home {
     padding: 2rem 1.2rem 1.2rem;
+
+    .footer-logo img {
+      height: 50px;
+    }
 
     .footer-container {
       gap: 1.8rem;
