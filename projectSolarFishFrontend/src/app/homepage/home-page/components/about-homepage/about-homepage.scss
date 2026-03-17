@@ -1,43 +1,56 @@
 @use 'breakpoints' as *;
 
-.about-home { 
+.about-home {
   position: relative;
-  background: radial-gradient(circle at center,#0F084B,#0D0221); // Fondo claro con gris
-  padding: 80px 30px; // Mejora: más espacio vertical
+  background: radial-gradient(circle at center, #0F084B, #0D0221);
+  background-attachment: fixed;
+  padding: 80px 30px;
   overflow: hidden;
-  min-height: 600px; // ✨ NUEVO: altura mínima para mejor proporción
+  min-height: 600px;
+  color: white;
+  font-family: "Inter", sans-serif;
+  margin: 0;
 
-  /* Fondo animado mejorado */
+  /* Fondo animado: patrón sutil para oscuro (sin cubos blancos) */
   .animated-bg {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: 
-      url('https://www.transparenttextures.com/patterns/cubes.png'),
-      radial-gradient(circle at 25% 30%,       rgba(77, 182, 172, 0.15), transparent 60%), // Turquesa suave
-      radial-gradient(circle at 80% 70%, rgba(179, 229, 252, 0.12), transparent 60%); // Azul claro suave
-    opacity: 0.4; // Mejora: menos opacidad para mejor legibilidad
-    animation: move-bg 25s ease-in-out infinite alternate; // Mejora: ease-in-out más suave
+    background:
+      repeating-linear-gradient(
+        90deg,
+        transparent 0,
+        transparent 48px,
+        rgba(255, 255, 255, 0.02) 49px,
+        transparent 50px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        transparent 0,
+        transparent 48px,
+        rgba(255, 255, 255, 0.02) 49px,
+        transparent 50px
+      ),
+      radial-gradient(circle at 25% 30%, rgba(77, 182, 172, 0.12), transparent 55%),
+      radial-gradient(circle at 80% 70%, rgba(0, 74, 143, 0.15), transparent 55%);
+    background-size: 100px 100px, 100px 100px, 100% 100%, 100% 100%;
+    animation: move-bg 35s ease-in-out infinite alternate;
     z-index: 0;
+    pointer-events: none;
   }
 
   @keyframes move-bg {
-    0% { 
-      background-position: 0 0, 0 0, 0 0;
-      opacity: 0.4;
+    0% {
+      background-position: 0 0, 0 0, 0 0, 0 0;
     }
-    50% {
-      opacity: 0.5; // ✨ NUEVO: variación de opacidad
-    }
-    100% { 
-      background-position: 100px 100px, 300px 250px, 400px 400px; // Mejora: más movimiento
-      opacity: 0.4;
+    100% {
+      background-position: 80px 80px, -60px -60px, 50px 50px, -30px -30px;
     }
   }
 
-  /* ✨ NUEVO: Partículas flotantes decorativas */
+  /* Partículas flotantes decorativas */
   &::before {
     content: "";
     position: absolute;
@@ -45,24 +58,13 @@
     right: 8%;
     width: 350px;
     height: 350px;
-    background: radial-gradient(circle, rgba(77, 182, 172, 0.15), transparent 65%); // Turquesa
+    background: radial-gradient(circle, rgba(77, 182, 172, 0.08), transparent 65%);
     border-radius: 50%;
     animation: float-slow 12s ease-in-out infinite;
     z-index: 0;
   }
 
-  /* Franja diagonal mejorada */
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: -50px;
-    left: 0;
-    width: 100%;
-    height: 120px;
-    background: linear-gradient(180deg, transparent, #fafafa); // Mejora: gradiente suave
-    transform: skewY(-2deg); // Mejora: ángulo más sutil
-    z-index: 1;
-  }
+  /* Sin franja diagonal: transición fluida entre secciones */
 
   // ✨ NUEVO: Animación de flotación suave
   @keyframes float-slow {
@@ -84,28 +86,27 @@
     z-index: 2;
 
     .section-title {
-      font-size: clamp(1.8rem, 4vw, 2.5rem); // ✨ NUEVO: responsive fluido
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
       font-weight: 700;
-      margin-bottom: 50px; // Mejora: más espacio
-      color: #1A2338; // Azul marino oscuro
+      margin-bottom: 50px;
+      color: white;
       text-align: center;
       position: relative;
       opacity: 0;
       transform: translateY(-20px);
-      animation: fadeInDown 0.8s ease forwards; // ✨ NUEVO: animación desde arriba
+      animation: fadeInDown 0.8s ease forwards;
 
-      /* Línea decorativa mejorada */
       &::after {
         content: "";
         position: absolute;
-        bottom: -15px; // Mejora: más separación
+        bottom: -15px;
         left: 50%;
         transform: translateX(-50%);
-        width: 80px; // Mejora: más ancha
+        width: 80px;
         height: 4px;
-        background: linear-gradient(90deg, #4DB6AC, #FFD700, #B3E5FC); // Turquesa, Amarillo, Azul claro
+        background: linear-gradient(90deg, #4DB6AC, #004a8f);
         border-radius: 2px;
-        box-shadow: 0 2px 8px rgba(77, 182, 172, 0.3); // Sombra turquesa
+        box-shadow: 0 2px 8px rgba(77, 182, 172, 0.4);
       }
     }
 
@@ -121,16 +122,15 @@
 
       .text {
         flex: 1 1 500px;
-        font-size: 1.05rem; // Mejora: ligeramente más grande
-        color: #4a4a4a; // Mejora: mejor contraste
-        line-height: 1.8; // Mejora: mejor legibilidad
+        font-size: 1.05rem;
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.8;
 
         p {
-          margin-bottom: 24px; // Mejora: más espacio consistente
+          margin-bottom: 24px;
           position: relative;
-          padding-left: 20px; // ✨ NUEVO: espacio para decoración
-          
-          // ✨ NUEVO: Barra lateral decorativa en párrafos
+          padding-left: 20px;
+
           &::before {
             content: "";
             position: absolute;
@@ -138,9 +138,9 @@
             top: 5px;
             width: 4px;
             height: calc(100% - 10px);
-            background: linear-gradient(180deg, #4DB6AC, transparent); // Turquesa
+            background: linear-gradient(180deg, #4DB6AC, transparent);
             border-radius: 2px;
-            opacity: 0.4;
+            opacity: 0.5;
           }
 
           &:last-child {
@@ -148,11 +148,10 @@
           }
 
           strong {
-            color: #1A2338; // Azul marino oscuro
+            color: #fff;
             font-weight: 700;
             position: relative;
-            
-            // ✨ NUEVO: Subrayado decorativo en strong
+
             &::after {
               content: "";
               position: absolute;
@@ -160,8 +159,8 @@
               left: 0;
               width: 100%;
               height: 2px;
-              background: linear-gradient(90deg, #4DB6AC, transparent); // Turquesa
-              opacity: 0.3;
+              background: linear-gradient(90deg, #4DB6AC, transparent);
+              opacity: 0.5;
             }
           }
         }
@@ -191,7 +190,6 @@
         text-align: center;
         position: relative;
 
-        // ✨ NUEVO: Círculo decorativo detrás de la imagen
         &::before {
           content: "";
           position: absolute;
@@ -200,7 +198,7 @@
           transform: translate(-50%, -50%);
           width: 90%;
           height: 90%;
-          background: radial-gradient(circle, rgba(77, 182, 172, 0.1), transparent 70%); // Turquesa
+          background: radial-gradient(circle, rgba(0, 74, 143, 0.15), transparent 70%);
           border-radius: 50%;
           z-index: -1;
           animation: pulse-glow 3s ease-in-out infinite;
@@ -208,19 +206,19 @@
 
         img {
           max-width: 100%;
-          border-radius: 20px; // Mejora: más redondeado
-          box-shadow: 0 8px 30px rgba(77, 182, 172, 0.25); // Sombra turquesa
+          border-radius: 20px;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
           transform: scale(0.9);
           opacity: 0;
           animation: zoomIn 1s ease forwards;
           animation-delay: 0.5s;
           transition: transform 0.4s ease, box-shadow 0.4s ease;
-          object-fit: cover; // ✨ NUEVO: mejor manejo de imágenes
-          aspect-ratio: 4/3; // ✨ NUEVO: mantiene proporción
+          object-fit: cover;
+          aspect-ratio: 4/3;
 
           &:hover {
-            transform: scale(1.05) rotate(1deg); // ✨ NUEVO: rotación sutil
-            box-shadow: 0 12px 40px rgba(77, 182, 172, 0.4); // Sombra turquesa
+            transform: scale(1.05) rotate(1deg);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
           }
         }
       }
@@ -334,11 +332,6 @@
       height: 200px;
       top: 10%;
       right: -5%;
-    }
-
-    &::after {
-      height: 80px;
-      bottom: -30px;
     }
 
     .container {

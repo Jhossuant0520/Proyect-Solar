@@ -1,16 +1,15 @@
-.hero{
-height:100vh;
-display:flex;
-align-items:center;
-justify-content:center;
-flex-direction:column;
-text-align:center;
-position:relative;
-
-font-family: "inter", sans-serif;
-
-background:radial-gradient(circle at center,#0F084B,#0D0221);
-color:white;
+.hero {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  position: relative;
+  font-family: "Inter", sans-serif;
+  background: radial-gradient(circle at center, #0F084B, #0D0221);
+  background-attachment: fixed;
+  color: white;
 }
 
 /* LOGO */

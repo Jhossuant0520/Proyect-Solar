@@ -1,4 +1,16 @@
 :host {
   display: block;
-  background:  #0F084B;
+  background: #0F084B;
+}
+
+/* Unificar secciones sin divisiones visibles */
+section {
+  margin: 0;
+  padding: 0;
+}
+
+app-hero-homepage,
+app-about-homepage,
+app-services-homepage {
+  display: block;
 }
