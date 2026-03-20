@@ -7,7 +7,6 @@ import com.newproject.jhocadi.projectSolarFishBackend.repository.repositoryUsuar
 import com.newproject.jhocadi.projectSolarFishBackend.service.serviceUsuario;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/usuarios")

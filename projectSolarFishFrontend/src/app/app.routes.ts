@@ -1,6 +1,9 @@
 import { Routes } from '@angular/router';
 import { HomePage } from './homepage/home-page/home-page';
 import { LoginComponent } from './features/login/login';
+import { Register } from './features/register/register';
+import { VerificarEmail } from './features/verificar-email/verificar-email';
+import { SolicitarReenvio } from './features/solicitar-reenvio/solicitar-reenvio';
 import { DashboardComponent } from './features/dashboard/dashboard';
 import { authGuard } from './core/guards/auth-guard';
 import { App } from './app';
@@ -16,7 +19,10 @@ export const routes: Routes = [
   { path: '', component: HomePage }, 
   { path: "Catalogo", component: Catalog },
   { path: 'login', component: LoginComponent },
-  
+  { path: 'register', component: Register },
+  { path: 'verificar-email/:token', component: VerificarEmail },
+  { path: 'solicitar-reenvio', component: SolicitarReenvio },
+
   // Rutas protegidas (requieren autenticación)
   {
     path: '', 

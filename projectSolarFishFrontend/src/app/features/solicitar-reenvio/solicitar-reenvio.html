@@ -1,0 +1,31 @@
+<div class="solicitar-container">
+  <div class="solicitar-card">
+    @if (enviado) {
+      <div class="confirmacion">
+        <div class="icono">✉️</div>
+        <h1>Correo enviado</h1>
+        <p>Si el email está registrado, recibirás un nuevo enlace de verificación.</p>
+        <a routerLink="/login" class="btn-primario">Iniciar sesión</a>
+      </div>
+    } @else {
+      <h1>Solicitar nuevo enlace</h1>
+      <p class="subtitulo">Introduce tu email para recibir un nuevo enlace de verificación</p>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        @if (errorMensaje) {
+          <div class="error-mensaje">{{ errorMensaje }}</div>
+        }
+        <div class="campo">
+          <label for="email">Email</label>
+          <input id="email" type="email" formControlName="email" placeholder="tu@correo.com" class="input" />
+          @if (form.get('email')?.invalid && form.get('email')?.touched) {
+            <span class="error-inline">Introduce un email válido</span>
+          }
+        </div>
+        <button type="submit" class="btn-primario" [disabled]="cargando">
+          {{ cargando ? 'Enviando...' : 'Enviar enlace' }}
+        </button>
+      </form>
+      <a routerLink="/login" class="link-secundario">Volver al inicio de sesión</a>
+    }
+  </div>
+</div>

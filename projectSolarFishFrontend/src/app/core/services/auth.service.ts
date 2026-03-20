@@ -32,7 +32,7 @@ export class AuthService {
   estaAutenticado(): boolean {
     const token = this.obtenerToken();
   
-    if (!token) return true; // True para relizar pruebas sin login
+    if (!token) return false; // False para no permitir acceso a rutas protegidas sin login y true para permitir acceso
   
     try {
       const decoded: any = jwtDecode(token);

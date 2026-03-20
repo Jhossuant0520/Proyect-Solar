@@ -23,11 +23,24 @@ public class modelUsuario {
     @Column(name = "password_hash", nullable = false)
     private String passwordUsuario;
 
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
+
     @Column(name = "ultimo_login")
     private LocalDateTime ultimoLogin;
 
     @Column(name = "activo", nullable = false)
     private boolean activo;
+
+    @Column(name = "email_verificado", nullable = false)
+    @Builder.Default
+    private boolean emailVerificado = false;
+
+    @Column(name = "token_verificacion")
+    private String tokenVerificacion;
+
+    @Column(name = "token_verificacion_expiracion")
+    private LocalDateTime tokenVerificacionExpiracion;
 
     @Column(name = "fecha_creacion", updatable = false)
     private LocalDateTime fechaCreacion;

@@ -1,25 +1,29 @@
 package com.newproject.jhocadi.projectSolarFishBackend.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.newproject.jhocadi.projectSolarFishBackend.dtos.RegistroRequestDTO;
 import com.newproject.jhocadi.projectSolarFishBackend.model.modelUsuario;
+import com.newproject.jhocadi.projectSolarFishBackend.model.modelRolUsuario;
 import com.newproject.jhocadi.projectSolarFishBackend.repository.repositoryUsuario;
+import com.newproject.jhocadi.projectSolarFishBackend.repository.repositoryRolUsuario;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class serviceUsuario {
 
     private final repositoryUsuario usuarioRepo;
+    private final repositoryRolUsuario rolRepo;
     private final BCryptPasswordEncoder passwordEncoder;
-
-    @Autowired
-    public serviceUsuario(repositoryUsuario usuarioRepo) {
-        this.usuarioRepo = usuarioRepo;
-        this.passwordEncoder = new BCryptPasswordEncoder(); 
-    }
+    private final EmailService emailService;
 
     public void actualizarUltimoLogin(modelUsuario usuario) {
         usuarioRepo.save(usuario); // ya tiene el nuevo valor en el campo
@@ -46,7 +50,34 @@ public class serviceUsuario {
 
         return Optional.empty(); // credenciales inválidas
     }
-    
-    
-    
+
+    public modelUsuario registrarUsuario(RegistroRequestDTO dto) {
+        if (usuarioRepo.findByNombreUsuario(dto.getNombreUsuario()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El nombre de usuario ya está en uso");
+        }
+        if (usuarioRepo.findByEmail(dto.getEmail()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El email ya está registrado");
+        }
+
+        modelRolUsuario rol = rolRepo.findById(2)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rol de usuario no configurado"));
+
+        String token = UUID.randomUUID().toString();
+
+        modelUsuario usuario = modelUsuario.builder()
+                .nombreUsuario(dto.getNombreUsuario())
+                .email(dto.getEmail())
+                .passwordUsuario(passwordEncoder.encode(dto.getPasswordUsuario()))
+                .activo(true)
+                .emailVerificado(false)
+                .tokenVerificacion(token)
+                .tokenVerificacionExpiracion(LocalDateTime.now().plusHours(24))
+                .rol(rol)
+                .build();
+
+        modelUsuario usuarioGuardado = usuarioRepo.save(usuario);
+        emailService.enviarEmailVerificacion(dto.getEmail(), token);
+
+        return usuarioGuardado;
+    }
 }

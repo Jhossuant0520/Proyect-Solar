@@ -1,0 +1,118 @@
+<div class="register-container">
+  <div class="register-card">
+    @if (registroExitoso) {
+      <div class="confirmacion">
+        <div class="confirmacion-icono">✉️</div>
+        <h1>Revisa tu correo electrónico</h1>
+        <p class="email-enviado">Hemos enviado un enlace de verificación a <strong>{{ emailValue }}</strong></p>
+        <p class="instrucciones">
+          Haz clic en el enlace que recibiste por correo para activar tu cuenta.
+          El enlace expira en 24 horas.
+        </p>
+        <p class="nota">Si no ves el correo, revisa tu carpeta de spam.</p>
+      </div>
+    } @else {
+      <h1>Crear cuenta</h1>
+      <p class="subtitulo">Regístrate para gestionar tu energía solar</p>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="register-form">
+        @if (errorMensaje) {
+          <div class="error-mensaje">{{ errorMensaje }}</div>
+        }
+
+        <div class="campo">
+          <label for="nombreUsuario">Usuario</label>
+          <input
+            id="nombreUsuario"
+            type="text"
+            formControlName="nombreUsuario"
+            placeholder="Mínimo 3 caracteres"
+            class="input"
+          />
+          @if (form.get('nombreUsuario')?.invalid && form.get('nombreUsuario')?.touched) {
+            <span class="error-inline">
+              @if (form.get('nombreUsuario')?.errors?.['required']) {
+                El usuario es obligatorio
+              } @else if (form.get('nombreUsuario')?.errors?.['minlength']) {
+                Mínimo 3 caracteres
+              }
+            </span>
+          }
+        </div>
+
+        <div class="campo">
+          <label for="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="tu@correo.com"
+            class="input"
+          />
+          @if (form.get('email')?.invalid && form.get('email')?.touched) {
+            <span class="error-inline">
+              @if (form.get('email')?.errors?.['required']) {
+                El email es obligatorio
+              } @else if (form.get('email')?.errors?.['email']) {
+                Introduce un email válido
+              }
+            </span>
+          }
+        </div>
+
+        <div class="campo">
+          <label for="passwordUsuario">Contraseña</label>
+          <input
+            id="passwordUsuario"
+            type="password"
+            formControlName="passwordUsuario"
+            placeholder="Mínimo 8 caracteres"
+            class="input"
+          />
+          @if (form.get('passwordUsuario')?.invalid && form.get('passwordUsuario')?.touched) {
+            <span class="error-inline">
+              @if (form.get('passwordUsuario')?.errors?.['required']) {
+                La contraseña es obligatoria
+              } @else if (form.get('passwordUsuario')?.errors?.['minlength']) {
+                Mínimo 8 caracteres
+              }
+            </span>
+          }
+        </div>
+
+        <div class="campo">
+          <label for="confirmarPassword">Confirmar contraseña</label>
+          <input
+            id="confirmarPassword"
+            type="password"
+            formControlName="confirmarPassword"
+            placeholder="Repite tu contraseña"
+            class="input"
+          />
+          @if (form.get('confirmarPassword')?.invalid && form.get('confirmarPassword')?.touched) {
+            <span class="error-inline">
+              @if (form.get('confirmarPassword')?.errors?.['required']) {
+                Confirma tu contraseña
+              }
+            </span>
+          }
+          @if (form.errors?.['passwordsMismatch'] && form.get('confirmarPassword')?.touched) {
+            <span class="error-inline">Las contraseñas no coinciden</span>
+          }
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="cargando">
+          @if (cargando) {
+            Registrando...
+          } @else {
+            Registrarse
+          }
+        </button>
+
+        <div class="link-login">
+          ¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a>
+        </div>
+      </form>
+    }
+  </div>
+</div>

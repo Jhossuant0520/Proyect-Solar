@@ -3,8 +3,6 @@ package com.newproject.jhocadi.projectSolarFishBackend.service;
 import com.newproject.jhocadi.projectSolarFishBackend.model.componenteEnergeticoModel;
 import com.newproject.jhocadi.projectSolarFishBackend.repository.ComponenteEnergeticoRepository;
 
-import jakarta.persistence.EntityNotFoundException;
-
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import java.util.List;

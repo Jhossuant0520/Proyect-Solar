@@ -11,8 +11,10 @@ import java.util.Optional;
 public interface repositoryUsuario extends JpaRepository<modelUsuario, Integer> {
     
     Optional<modelUsuario> findByNombreUsuario(String nombreUsuario);
-    
 
+    Optional<modelUsuario> findByEmail(String email);
+
+    Optional<modelUsuario> findByTokenVerificacion(String tokenVerificacion);
 
     
 }

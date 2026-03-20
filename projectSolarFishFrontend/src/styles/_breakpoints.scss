@@ -16,3 +16,7 @@ $breakpoint-lg: 1280px; // escritorio grande
     @media (max-width: $breakpoint-lg) { @content; }
   }
 }
+
+@mixin mobile {
+  @media (max-width: $breakpoint-sm) { @content; }
+}

@@ -1,7 +1,6 @@
 package com.newproject.jhocadi.projectSolarFishBackend.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity

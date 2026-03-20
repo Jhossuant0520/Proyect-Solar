@@ -1,0 +1,30 @@
+<div class="verificar-container">
+  <div class="verificar-card">
+    @if (estado === 'cargando') {
+      <div class="estado estado-cargando">
+        <div class="spinner"></div>
+        <h1>Verificando tu cuenta...</h1>
+        <p class="subtitulo">Un momento, por favor</p>
+      </div>
+    } @else if (estado === 'exito') {
+      <div class="estado estado-exito">
+        <div class="icono icono-exito">✓</div>
+        <h1>¡Cuenta verificada!</h1>
+        <p class="mensaje">{{ mensaje }}</p>
+        <a routerLink="/login" class="btn-primario">Iniciar sesión</a>
+      </div>
+    } @else {
+      <div class="estado estado-error">
+        <div class="icono icono-error">✕</div>
+        <h1>Error</h1>
+        <p class="mensaje">{{ mensaje }}</p>
+        @if (errorExpirado) {
+          <button type="button" class="btn-primario" (click)="solicitarNuevoEnlace()">
+            Solicitar nuevo enlace
+          </button>
+        }
+        <a routerLink="/login" class="link-secundario">Volver al inicio de sesión</a>
+      </div>
+    }
+  </div>
+</div>
