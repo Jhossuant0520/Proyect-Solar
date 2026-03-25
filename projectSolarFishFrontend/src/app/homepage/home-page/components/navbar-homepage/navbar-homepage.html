@@ -1,6 +1,9 @@
 <nav class="navbar" [class.scrolled]="scrolled">
 
-  <div class="logo">☀ Solvix</div>
+  <div class="logo">
+  <img src="LogoSolvix3.1.png" alt="Logo Solvix" class="logo-img">
+  
+</div>
 
   <ul class="nav-links">
     <li><a href="#inicio" class="nav-item" [class.active]="activeSection==='inicio'">Inicio</a></li>
@@ -11,8 +14,8 @@
   </ul>
 
   <div class="nav-actions">
-    <button class="btn ghost">Iniciar sesión</button>
-    <button class="btn primary">Calcular gratis →</button>
+    <button class="btn ghost" routerLink="/login">Iniciar sesión</button>
+    <button class="btn primary" routerLink="/register">Calcular gratis →</button>
   </div>
 
 </nav>

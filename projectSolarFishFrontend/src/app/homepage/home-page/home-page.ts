@@ -7,10 +7,14 @@ import { NavbarHomepage } from './components/navbar-homepage/navbar-homepage';
 import { ServicesHomepage } from "./components/services-homepage/services-homepage";
 import { Catalog } from "../catalog/catalog";
 import { FooterHomepage } from "./components/footer-homepage/footer-homepage";
+import { StatsHomepage } from "./components/stats-homepage/stats-homepage";
+import { StepsHomepage } from "./components/steps-homepage/steps-homepage";
+import { TestimonialsHomepage } from "./components/testimonials-homepage/testimonials-homepage";
+import { FaqHomepage } from "./components/faq-homepage/faq-homepage";
 
 @Component({
   selector: 'app-home-page',
-  imports: [MatCardModule, HeroHomepage, AboutHomepage, NavbarHomepage, ServicesHomepage, Catalog, FooterHomepage, CommonModule],
+  imports: [MatCardModule, HeroHomepage, AboutHomepage, NavbarHomepage, ServicesHomepage, Catalog, FooterHomepage, CommonModule, StatsHomepage, StepsHomepage, TestimonialsHomepage, FaqHomepage],
   templateUrl: './home-page.html',
   styleUrl: './home-page.scss'
 })

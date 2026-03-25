@@ -1,4 +1,5 @@
-/* NAVBAR */
+
+
 /* NAVBAR */
 .navbar {
   position: fixed;
@@ -8,7 +9,8 @@
 
   width: 90%;
   max-width: 1200px;
-  padding: 12px 30px;
+  height: 80px; /* fija la altura para que no crezca con el logo */
+  padding: 0 30px; /* ajusta el padding horizontal, la altura fija ya controla vertical */
 
   display: flex;
   justify-content: space-between;
@@ -271,6 +273,27 @@
   box-shadow:
     0 15px 40px rgba(0,0,0,0.8),
     0 0 30px rgba(56,189,248,0.4);
+}
+
+/* LOGO IMAGE */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 20px;
+}
+
+.logo-img {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  border-radius: 50%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.logo-img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 14px rgba(56,189,248,0.45);
 }
 
 
