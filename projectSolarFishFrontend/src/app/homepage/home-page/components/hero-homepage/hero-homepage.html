@@ -1,50 +1,100 @@
 <section class="hero">
-  <div class="animated-bg"></div>
 
-  <!-- LOGO -->
-  <div class="logo">
-    <img src="/LogoSolvix1.1.png" alt="Solarfix Logo">
-  </div>
+  <div class="hero-container">
 
-  <!-- TEXTO -->
-  <div class="content">
+    <!-- IZQUIERDA -->
+    <div class="hero-left">
+      <div class="hero-content">
 
-    <h1>Energía Solar Inteligente</h1>
+        <span class="badge">☀ GRATIS PARA HOGARES COLOMBIANOS</span>
 
-    <p>
-      Transformamos la energía del sol en innovación
-      sostenible para el futuro.
-    </p>
+        <h1>
+          Descubre cuánta <br>
+          <span class="highlight">energía solar</span><br>
+          necesita tu hogar
+        </h1>
 
-    <div class="buttons">
-      <button class="btn-main" type="button"><span>Explorar</span></button>
-      <button class="btn-outline" type="button"><span>Tecnología</span></button>
+        <p>
+          Calcula tu sistema solar según tu consumo real en segundos.
+        </p>
+
+        <div class="hero-buttons">
+          <button class="btn primary ripple">Calcular mi sistema →</button>
+          <button class="btn ghost ripple">¿Cómo funciona?</button>
+        </div>
+
+        <div class="social-proof">
+          +1.200 familias ya calcularon su sistema
+        </div>
+
+      </div>
     </div>
 
-  </div>
+    <!-- DERECHA -->
+    <div class="hero-right">
 
-  <!-- SOL ANIMADO -->
-  <div class="solar-system">
+      <div class="calculator-card">
 
-    <div class="sun"></div>
+        <div class="calc-header">
+          ⚡ Calculadora solar inteligente
+          <span class="calc-sub">Simulación en tiempo real</span>
+        </div>
 
-    <div class="ring ring1"></div>
-    <div class="ring ring2"></div>
-    <div class="ring ring3"></div>
+        <div class="calc-section">
 
-    <div class="energy-line line1"></div>
-    <div class="energy-line line2"></div>
-    <div class="energy-line line3"></div>
+          <div class="calc-field">
+            <label>Consumo mensual</label>
+            <div class="input-box">
+              <input type="number" [(ngModel)]="consumo" />
+              <span>kWh/mes</span>
+            </div>
+          </div>
 
-  </div>
+          <div class="calc-field">
+            <label>Ciudad</label>
+            <div class="input-box">
+              <select [(ngModel)]="ciudad">
+                <option value="alta">Alta</option>
+                <option value="media">Media</option>
+                <option value="baja">Baja</option>
+              </select>
+            </div>
+          </div>
 
-  <!-- PARTICULAS -->
-  <div class="particles">
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
+        </div>
+
+        <div class="calc-results">
+
+          <div class="result-card">
+            <span>Paneles</span>
+            <strong>{{ paneles }}</strong>
+          </div>
+
+          <div class="result-card highlight">
+            <span>Ahorro</span>
+            <strong>{{ ahorro | currency:'COP':'symbol':'1.0-0' }}</strong>
+          </div>
+
+          <div class="result-card">
+            <span>Potencia</span>
+            <strong>{{ potencia }} kWp</strong>
+          </div>
+
+          <div class="result-card">
+            <span>ROI</span>
+            <strong>{{ roi }} años</strong>
+          </div>
+
+        </div>
+
+        <button class="calc-btn ripple" (click)="calcular()">
+          Calcular ahora →
+        </button>
+
+      </div>
+
+    </div>
+
   </div>
 
 </section>

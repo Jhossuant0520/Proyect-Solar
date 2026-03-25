@@ -1,109 +1,18 @@
-<nav class="navbar" [class.scrolled]="isScrolled">
-  <div class="navbar-container">
-    <!-- Logo -->
-    <div class="navbar-logo-wrapper">
-      <div class="logo-clip">
-        <img 
-          src="/LogoSolvix2.1.png" 
-          alt="Solarvix Logo" 
-          class="logo-img"
-          (click)="scrollToSection('inicio'); $event.stopPropagation()"
-          style="cursor: pointer;"
-        />
-      </div>
-    </div>
+<nav class="navbar" [class.scrolled]="scrolled">
 
-    <!-- Ícono hamburguesa -->
-    <div 
-      class="menu-toggle" 
-      [class.active]="menuOpen"
-      (click)="toggleMenu(); $event.stopPropagation()"
-      [attr.aria-label]="menuOpen ? 'Cerrar menú' : 'Abrir menú'"
-      [attr.aria-expanded]="menuOpen"
-    >
-      <i class="fa-solid" [ngClass]="menuOpen ? 'fa-xmark' : 'fa-bars'"></i>
-    </div>
+  <div class="logo">☀ Solvix</div>
 
-    <!-- Links de navegación -->
-    <ul class="nav-links" [class.active]="menuOpen">
-      <li>
-        <a 
-          (click)="scrollToSection('inicio'); $event.preventDefault(); $event.stopPropagation()"
-          [class.active]="isActive('inicio')"
-          tabindex="0"
-          role="button"
-        >
-          Inicio
-        </a>
-      </li>
-      <li>
-        <a 
-          (click)="scrollToSection('about'); $event.preventDefault(); $event.stopPropagation()"
-          [class.active]="isActive('about')"
-          tabindex="0"
-          role="button"
-        >
-          Quiénes somos
-        </a>
-      </li>
-      <li>
-        <a 
-          (click)="scrollToSection('services'); $event.preventDefault(); $event.stopPropagation()"
-          [class.active]="isActive('services')"
-          tabindex="0"
-          role="button"
-        >
-          Servicios
-        </a>
-      </li>
-      <li>
-        <a 
-          (click)="scrollToSection('catalog'); $event.preventDefault(); $event.stopPropagation()"
-          [class.active]="isActive('catalog')"
-          tabindex="0"
-          role="button"
-        >
-          Catálogo
-        </a>
-      </li>
-      <li>
-        <a 
-          (click)="scrollToSection('contacto'); $event.preventDefault(); $event.stopPropagation()"
-          [class.active]="isActive('contacto')"
-          tabindex="0"
-          role="button"
-        >
-          Contacto
-        </a>
-      </li>
-      
-      <!-- Botón de login para móvil (dentro del menú) -->
-      <li class="mobile-login-item">
-        <button 
-          class="login-button-animated mobile-login" 
-          routerLink="/login"
-          (click)="closeMenu()"
-          aria-label="Iniciar sesión"
-        >
-          <span>Iniciar sesión</span>
-        </button>
-      </li>
-    </ul>
+  <ul class="nav-links">
+    <li><a href="#inicio" class="nav-item" [class.active]="activeSection==='inicio'">Inicio</a></li>
+    <li><a href="#como" class="nav-item" [class.active]="activeSection==='como'">Cómo funciona</a></li>
+    <li><a href="#servicios" class="nav-item" [class.active]="activeSection==='servicios'">Servicios</a></li>
+    <li><a href="#nosotros" class="nav-item" [class.active]="activeSection==='nosotros'">Nosotros</a></li>
+    <li><a href="#faq" class="nav-item" [class.active]="activeSection==='faq'">FAQ</a></li>
+  </ul>
 
-    <!-- Botón de login (desktop) -->
-    <button 
-      class="login-button-animated desktop-login" 
-      routerLink="/login"
-      aria-label="Iniciar sesión"
-    >
-      <span>Iniciar sesión</span>
-    </button>
+  <div class="nav-actions">
+    <button class="btn ghost">Iniciar sesión</button>
+    <button class="btn primary">Calcular gratis →</button>
   </div>
-</nav>
 
-<!-- Overlay oscuro para móvil -->
-<div 
-  class="menu-overlay" 
-  [class.active]="menuOpen"
-  (click)="closeMenu()"
-></div>
+</nav>
