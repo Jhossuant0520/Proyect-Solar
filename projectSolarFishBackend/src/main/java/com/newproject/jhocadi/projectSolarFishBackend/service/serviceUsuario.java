@@ -6,6 +6,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.newproject.jhocadi.projectSolarFishBackend.dtos.CambiarPasswordDTO;
 import com.newproject.jhocadi.projectSolarFishBackend.dtos.RegistroRequestDTO;
 import com.newproject.jhocadi.projectSolarFishBackend.model.modelUsuario;
 import com.newproject.jhocadi.projectSolarFishBackend.model.modelRolUsuario;
@@ -79,5 +80,26 @@ public class serviceUsuario {
         emailService.enviarEmailVerificacion(dto.getEmail(), token);
 
         return usuarioGuardado;
+    }
+
+    public modelUsuario obtenerPorNombreUsuario(String nombreUsuario) {
+        return usuarioRepo.findByNombreUsuario(nombreUsuario)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+    }
+
+    public void cambiarPassword(String nombreUsuario, CambiarPasswordDTO dto) {
+        modelUsuario usuario = usuarioRepo.findByNombreUsuario(nombreUsuario)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        if (!passwordEncoder.matches(dto.getPasswordActual(), usuario.getPasswordUsuario())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La contraseña actual es incorrecta");
+        }
+
+        if (!dto.getPasswordNueva().equals(dto.getConfirmarPasswordNueva())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Las contraseñas nuevas no coinciden");
+        }
+
+        usuario.setPasswordUsuario(passwordEncoder.encode(dto.getPasswordNueva()));
+        usuarioRepo.save(usuario);
     }
 }
