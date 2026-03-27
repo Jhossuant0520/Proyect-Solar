@@ -7,7 +7,7 @@ import { SolicitarReenvio } from './features/solicitar-reenvio/solicitar-reenvio
 import { DashboardComponent } from './features/dashboard/dashboard';
 import { authGuard } from './core/guards/auth-guard';
 import { App } from './app';
-import { Catalog } from './homepage/catalog/catalog';
+import { Catalog } from './homepage/home-page/components/catalog/catalog';
 import { FincaComponent } from './features/finca/finca';
 import { FincaList } from './features/finca/finca-list/finca-list';
 import { PorComponenteForm } from './features/componenteEnergetico/por-componente/por-componente';
