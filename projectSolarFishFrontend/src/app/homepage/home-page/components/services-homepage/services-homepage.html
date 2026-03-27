@@ -1,53 +1,67 @@
 <section class="service-homepage">
-    <div class="animated-bg"></div> <!-- Fondo animado -->
-  
-    <div class="container">
+
+  <div class="animated-bg"></div>
+  <div class="glow-bg"></div>
+
+  <div class="container">
+
+    <div class="titles">
       <h2 class="section-subtitle">NUESTROS SERVICIOS</h2>
       <h1 class="section-title">Lo que ofrecemos</h1>
-  
-      <div class="services-grid">
-        <div class="service-card">
-          <div class="card-header">
-            <h3>Mantenimiento Preventivo</h3>
-            <p>Cuida tus equipos con revisiones periódicas y limpieza profesional.</p>
-          </div>
-          <ul class="card-features">
-            <li>Revisión completa de hardware</li>
-            <li>Optimización de software</li>
-            <li>Control de temperatura</li>
-            <li>Limpieza interna y externa</li>
-          </ul>
-          <a href="https://wa.me/573172901206" class="card-button"><span>Conoce mas</span></a>
-        </div>
-  
-        <div class="service-card">
-          <div class="card-header">
-            <h3>Soporte Técnico</h3>
-            <p>Asistencia remota y presencial para resolver problemas críticos.</p>
-          </div>
-          <ul class="card-features">
-            <li>Diagnóstico rápido</li>
-            <li>Atención a fallas de hardware</li>
-            <li>Resolución de errores</li>
-            <li>Instalación de software</li>
-          </ul>
-          <a href="https://wa.me/573172901206" class="card-button"><span>Conoce mas</span></a>
-        </div>
-  
-        <div class="service-card">
-          <div class="card-header">
-            <h3>Instalaciones y Configuración</h3>
-            <p>Montaje y configuración profesional de equipos y redes.</p>
-          </div>
-          <ul class="card-features">
-            <li>Instalación de impresoras</li>
-            <li>Configuración de redes</li>
-            <li>Asesoría personalizada</li>
-            <li>Pruebas de rendimiento</li>
-          </ul>
-          <a href="https://wa.me/573172901206" class="card-button"><span>Conoce mas</span></a>
-        </div>
-      </div>
     </div>
-  </section>
-  
+
+    <div class="services-grid">
+
+      <!-- CARD 1 -->
+      <div class="service-card" (mousemove)="onMouseMove($event)">
+        <div class="icon">🛠️</div>
+
+        <h3>Mantenimiento Preventivo</h3>
+        <p>Cuida tus equipos con revisiones periódicas.</p>
+
+        <ul>
+          <li>Revisión completa</li>
+          <li>Optimización</li>
+          <li>Control temperatura</li>
+          <li>Limpieza total</li>
+        </ul>
+
+        <a href="#" class="btn">Conoce más</a>
+      </div>
+
+      <!-- CARD 2 -->
+      <div class="service-card center" (mousemove)="onMouseMove($event)">
+        <div class="icon">💻</div>
+
+        <h3>Soporte Técnico</h3>
+        <p>Asistencia remota y presencial.</p>
+
+        <ul>
+          <li>Diagnóstico rápido</li>
+          <li>Errores</li>
+          <li>Instalación</li>
+        </ul>
+
+        <a href="#" class="btn">Conoce más</a>
+      </div>
+
+      <!-- CARD 3 -->
+      <div class="service-card" (mousemove)="onMouseMove($event)">
+        <div class="icon">📡</div>
+
+        <h3>Instalaciones</h3>
+        <p>Configuración profesional de redes.</p>
+
+        <ul>
+          <li>Redes</li>
+          <li>Impresoras</li>
+          <li>Asesoría</li>
+        </ul>
+
+        <a href="#" class="btn">Conoce más</a>
+      </div>
+
+    </div>
+
+  </div>
+</section>

@@ -1,0 +1,182 @@
+.contact {
+  position: relative;
+  padding: 140px 80px;
+  background: #020617;
+  color: white;
+  overflow: hidden;
+}
+
+/* 🌌 LÍNEAS FUTURISTAS */
+.bg-lines {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(rgba(56,189,248,0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(56,189,248,0.05) 1px, transparent 1px);
+  background-size: 60px 60px;
+  opacity: 0.3;
+}
+
+/* ✨ GLOW DINÁMICO */
+.bg-glow {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  top: -100px;
+  left: -100px;
+
+  background: radial-gradient(circle, #0ea5e9, transparent 70%);
+  filter: blur(120px);
+  opacity: 0.2;
+}
+
+/* CONTENEDOR */
+.wrapper {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 60px;
+}
+
+/* IZQUIERDA */
+.left {
+  max-width: 420px;
+}
+
+.left h2 {
+  font-size: 34px;
+  color: #38bdf8;
+  margin-bottom: 10px;
+}
+
+.left p {
+  color: #94a3b8;
+  margin-bottom: 25px;
+  line-height: 1.6;
+}
+
+/* 🔥 BOTÓN PRO */
+.btn-main {
+  position: relative;
+  padding: 14px 30px;
+  border-radius: 14px;
+  border: none;
+
+  background: #38bdf8;
+  color: #020617;
+  font-weight: bold;
+
+  cursor: pointer;
+  overflow: hidden;
+  transition: 0.3s;
+}
+
+/* EFECTO BRILLO */
+.btn-main span {
+  position: absolute;
+  width: 120%;
+  height: 100%;
+  top: 0;
+  left: -120%;
+
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.6), transparent);
+  transition: 0.5s;
+}
+
+.btn-main:hover span {
+  left: 100%;
+}
+
+/* GLOW */
+.btn-main:hover {
+  box-shadow:
+    0 0 20px #38bdf8,
+    0 0 40px #38bdf8,
+    0 0 80px #38bdf8;
+
+  transform: scale(1.05);
+}
+
+/* 🧊 CARD */
+.card {
+  padding: 35px;
+  border-radius: 22px;
+
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(20px);
+
+  border: 1px solid rgba(255,255,255,0.1);
+
+  min-width: 300px;
+
+  transition: 0.3s;
+}
+
+/* HOVER CARD */
+.card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 0 40px rgba(56,189,248,0.3);
+}
+
+/* ITEMS */
+.item {
+  display: flex;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.item i {
+  color: #38bdf8;
+}
+
+/* REDES */
+.socials {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.icon {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  border: 1px solid #38bdf8;
+
+  color: #38bdf8;
+  transition: 0.3s;
+}
+
+/* 🔥 ICONOS PRO */
+.icon:hover {
+  background: #38bdf8;
+  color: #020617;
+
+  box-shadow:
+    0 0 15px #38bdf8,
+    0 0 30px #38bdf8;
+
+  transform: scale(1.15);
+}
+
+/* FOOTER */
+.footer {
+  margin-top: 80px;
+  text-align: center;
+  color: #64748b;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .wrapper {
+    flex-direction: column;
+    text-align: center;
+  }
+}

@@ -11,12 +11,13 @@ import { StatsHomepage } from "./components/stats-homepage/stats-homepage";
 import { StepsHomepage } from "./components/steps-homepage/steps-homepage";
 import { TestimonialsHomepage } from "./components/testimonials-homepage/testimonials-homepage";
 import { FaqHomepage } from "./components/faq-homepage/faq-homepage";
+import { Contact } from '../contact/contact';
 
 @Component({
   selector: 'app-home-page',
-  imports: [MatCardModule, HeroHomepage, AboutHomepage, NavbarHomepage, ServicesHomepage, Catalog, FooterHomepage, CommonModule, StatsHomepage, StepsHomepage, TestimonialsHomepage, FaqHomepage],
+  imports: [MatCardModule, HeroHomepage, AboutHomepage, NavbarHomepage, ServicesHomepage, Catalog, FooterHomepage,   Contact, CommonModule, StatsHomepage, StepsHomepage, TestimonialsHomepage, FaqHomepage],
   templateUrl: './home-page.html',
-  styleUrl: './home-page.scss'
+  styleUrls: ['./home-page.scss']
 })
 export class HomePage {
 
