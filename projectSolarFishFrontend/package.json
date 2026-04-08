@@ -19,6 +19,7 @@
     "@angular/material": "^20.0.5",
     "@angular/platform-browser": "^20.0.6",
     "@angular/router": "^20.0.6",
+    "@fortawesome/fontawesome-free": "^7.2.0",
     "@rinminase/ng-charts": "^4.3.0",
     "chart.js": "^4.5.1",
     "jwt-decode": "^4.0.0",
