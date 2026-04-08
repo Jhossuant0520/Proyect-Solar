@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PorComponente } from './por-componente';
+import { PorComponenteForm } from './por-componente';
 
-describe('PorComponente', () => {
-  let component: PorComponente;
-  let fixture: ComponentFixture<PorComponente>;
+describe('PorComponenteForm', () => {
+  let component: PorComponenteForm;
+  let fixture: ComponentFixture<PorComponenteForm>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

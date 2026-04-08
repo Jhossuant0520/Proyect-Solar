@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Finca } from './finca';
+import { FincaComponent } from './finca';
 
-describe('Finca', () => {
-  let component: Finca;
-  let fixture: ComponentFixture<Finca>;
+describe('FincaComponent', () => {
+  let component: FincaComponent;
+  let fixture: ComponentFixture<FincaComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

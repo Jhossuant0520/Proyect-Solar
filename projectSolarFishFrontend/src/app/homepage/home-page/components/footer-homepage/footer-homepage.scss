@@ -1,7 +1,13 @@
+<<<<<<< HEAD
 .footer {
   background: #020617;
   color: #e6f7ff;
   padding-top: 70px;
+=======
+@use '../../../styles/breakpoints' as *;
+
+.footer-home {
+>>>>>>> a0abf0f0963dc644d6a99ce7b0e87fe89e312fd7
   position: relative;
   overflow: hidden;
 }
