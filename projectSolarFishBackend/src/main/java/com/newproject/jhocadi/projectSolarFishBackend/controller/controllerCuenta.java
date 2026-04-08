@@ -10,7 +10,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.newproject.jhocadi.projectSolarFishBackend.dtos.CambiarPasswordDTO;
 import com.newproject.jhocadi.projectSolarFishBackend.model.modelUsuario;
-import com.newproject.jhocadi.projectSolarFishBackend.repository.repositoryUsuario;
 import com.newproject.jhocadi.projectSolarFishBackend.security.JwtUtil;
 import com.newproject.jhocadi.projectSolarFishBackend.service.serviceUsuario;
 
@@ -28,7 +27,7 @@ public class controllerCuenta {
 
     private final serviceUsuario usuarioService;
     private final JwtUtil jwtUtil;
-    private final repositoryUsuario usuarioRepo;
+    
 
     private String extraerUsernameDelToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");

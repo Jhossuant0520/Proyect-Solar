@@ -16,6 +16,7 @@ import com.newproject.jhocadi.projectSolarFishBackend.repository.repositoryRolUs
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +28,9 @@ public class serviceUsuario {
     private final EmailService emailService;
 
     public void actualizarUltimoLogin(modelUsuario usuario) {
-        usuarioRepo.save(usuario); // ya tiene el nuevo valor en el campo
+        if (usuario != null) {
+            usuarioRepo.save(usuario); // ya tiene el nuevo valor en el campo
+        }
     }
     
 
@@ -76,7 +79,9 @@ public class serviceUsuario {
                 .rol(rol)
                 .build();
 
-        modelUsuario usuarioGuardado = usuarioRepo.save(usuario);
+        modelUsuario usuarioGuardado = usuarioRepo.save(
+    Objects.requireNonNull(usuario, "Usuario no puede ser null")
+);
         emailService.enviarEmailVerificacion(dto.getEmail(), token);
 
         return usuarioGuardado;

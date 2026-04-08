@@ -8,11 +8,11 @@ describe('PorComponenteForm', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PorComponente]
+      imports: [PorComponenteForm]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(PorComponente);
+    fixture = TestBed.createComponent(PorComponenteForm);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

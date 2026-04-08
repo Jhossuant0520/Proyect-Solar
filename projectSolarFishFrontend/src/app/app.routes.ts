@@ -5,6 +5,7 @@ import { Register } from './features/register/register';
 import { VerificarEmail } from './features/verificar-email/verificar-email';
 import { SolicitarReenvio } from './features/solicitar-reenvio/solicitar-reenvio';
 import { DashboardComponent } from './features/dashboard/dashboard';
+import { MiCuenta } from './features/mi-cuenta/mi-cuenta';
 import { authGuard } from './core/guards/auth-guard';
 import { App } from './app';
 import { Catalog } from './homepage/home-page/components/catalog/catalog';
@@ -30,6 +31,7 @@ export const routes: Routes = [
     canActivate: [authGuard], 
     children: [
       { path: 'dashboard', component: DashboardComponent },
+      { path: 'mi-cuenta', component: MiCuenta },
       { path: 'finca', component: FincaComponent },
       { path: 'listafinca', component: FincaList },
       { path: 'editar-finca/:id', component: FincaComponent },

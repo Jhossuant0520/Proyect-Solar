@@ -1,1 +1,84 @@
-<p>mi-cuenta works!</p>
+<div class="mi-cuenta-page">
+  <div class="page-shell">
+    <h1>Mi cuenta</h1>
+
+    <section class="card">
+      <div class="card-header">
+        <h2>Mis datos</h2>
+      </div>
+
+      <div *ngIf="errorGeneral" class="error-message">{{ errorGeneral }}</div>
+
+      <div *ngIf="cargandoDatos && !errorGeneral" class="loader-grid">
+        <div class="skeleton skeleton-title"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+      </div>
+
+      <div *ngIf="!cargandoDatos && misDatos" class="data-grid">
+        <div class="data-row">
+          <span class="label">Nombre de usuario</span>
+          <span>{{ misDatos.nombreUsuario }}</span>
+        </div>
+        <div class="data-row">
+          <span class="label">Email</span>
+          <span>{{ misDatos.email }}</span>
+        </div>
+        <div class="data-row">
+          <span class="label">Miembro desde</span>
+          <span>{{ misDatos.fechaCreacion }}</span>
+        </div>
+        <div class="data-row">
+          <span class="label">Último acceso</span>
+          <span>{{ misDatos.ultimoLogin }}</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <h2>Cambiar contraseña</h2>
+      </div>
+
+      <div *ngIf="errorPassword" class="error-message">{{ errorPassword }}</div>
+      <div *ngIf="exitoPassword" class="success-message">Contraseña actualizada correctamente.</div>
+
+      <form [formGroup]="form" (ngSubmit)="cambiarPassword()" novalidate>
+        <div class="form-row">
+          <label for="passwordActual">Contraseña actual</label>
+          <input id="passwordActual" type="password" formControlName="passwordActual" [class.invalid]="passwordActualControl?.invalid && passwordActualControl?.touched" />
+          <div class="field-error" *ngIf="passwordActualControl?.hasError('required') && passwordActualControl?.touched">
+            Ingresa tu contraseña actual.
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label for="passwordNueva">Contraseña nueva</label>
+          <input id="passwordNueva" type="password" formControlName="passwordNueva" [class.invalid]="passwordNuevaControl?.invalid && passwordNuevaControl?.touched" />
+          <div class="field-error" *ngIf="passwordNuevaControl?.hasError('required') && passwordNuevaControl?.touched">
+            Ingresa la nueva contraseña.
+          </div>
+          <div class="field-error" *ngIf="passwordNuevaControl?.hasError('minlength') && passwordNuevaControl?.touched">
+            La contraseña debe tener al menos 8 caracteres.
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label for="confirmarPasswordNueva">Confirmar contraseña</label>
+          <input id="confirmarPasswordNueva" type="password" formControlName="confirmarPasswordNueva" [class.invalid]="confirmarPasswordNuevaControl?.invalid && confirmarPasswordNuevaControl?.touched" />
+          <div class="field-error" *ngIf="confirmarPasswordNuevaControl?.hasError('required') && confirmarPasswordNuevaControl?.touched">
+            Confirma la contraseña nueva.
+          </div>
+        </div>
+
+        <div class="field-error" *ngIf="mismatch">Las contraseñas no coinciden.</div>
+
+        <button type="submit" class="primary-button" [disabled]="guardando">
+          <span *ngIf="guardando" class="spinner"></span>
+          {{ guardando ? 'Guardando...' : 'Guardar contraseña' }}
+        </button>
+      </form>
+    </section>
+  </div>
+</div>
