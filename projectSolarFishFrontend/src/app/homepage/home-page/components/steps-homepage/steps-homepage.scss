@@ -1,0 +1,176 @@
+.steps-homepage {
+  position: relative;
+  padding: 120px 40px;
+  background: linear-gradient(180deg, #020617, #03122c);
+  color: white;
+  overflow: hidden;
+  text-align: center;
+}
+
+/* 🌌 FONDO */
+.bg-dots {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px);
+
+  background-size: 60px 60px;
+  animation: moveDots 25s linear infinite;
+  opacity: 0.25;
+}
+
+.bg-glow {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  top: -200px;
+  left: -200px;
+
+  background: radial-gradient(circle, #00e5ff, transparent 70%);
+  filter: blur(150px);
+  opacity: 0.2;
+}
+
+/* CONTENIDO */
+.container {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: auto;
+}
+
+/* TITULOS */
+.titles h2 {
+  font-size: 42px;
+  margin-bottom: 10px;
+}
+
+.titles p {
+  color: #94a3b8;
+  margin-bottom: 80px;
+}
+
+/* PASOS */
+.steps {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  flex-wrap: wrap;
+}
+
+/* ⚡ LINEA CONECTORA */
+.line {
+  position: absolute;
+  top: 30px;
+  width: 80%;
+  height: 2px;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #00e5ff,
+    #4DB6AC,
+    #004a8f,
+    transparent
+  );
+
+  opacity: 0.6;
+}
+
+/* 💎 CARD */
+.step {
+  width: 240px;
+  padding: 30px;
+  border-radius: 25px;
+
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(20px);
+
+  border: 1px solid rgba(255,255,255,0.1);
+
+  transition: 0.4s;
+  position: relative;
+}
+
+/* ✨ HOVER PRO */
+.step:hover {
+  transform: translateY(-12px) scale(1.05);
+
+  box-shadow:
+    0 0 25px #00e5ff,
+    0 0 50px rgba(0,74,143,0.5);
+}
+
+/* 🔥 EFECTO LUZ INTERNA */
+.step::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background: radial-gradient(
+    circle at var(--x,50%) var(--y,50%),
+    rgba(0,229,255,0.2),
+    transparent 60%
+  );
+
+  opacity: 0;
+  transition: 0.3s;
+}
+
+.step:hover::before {
+  opacity: 1;
+}
+
+/* 🔵 CIRCULO */
+.circle {
+  width: 65px;
+  height: 65px;
+  margin: auto;
+  margin-bottom: 20px;
+
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00e5ff, #004a8f);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: bold;
+  font-size: 22px;
+
+  box-shadow:
+    0 0 20px #00e5ff,
+    0 0 40px rgba(0,74,143,0.5);
+}
+
+/* TEXTO */
+.step h3 {
+  margin-bottom: 10px;
+}
+
+.step p {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+/* ANIMACIONES */
+@keyframes moveDots {
+  from { transform: translateY(0); }
+  to { transform: translateY(-120px); }
+}
+
+/* 📱 RESPONSIVE */
+@media (max-width: 768px) {
+
+  .line {
+    display: none;
+  }
+
+  .steps {
+    flex-direction: column;
+    align-items: center;
+  }
+}

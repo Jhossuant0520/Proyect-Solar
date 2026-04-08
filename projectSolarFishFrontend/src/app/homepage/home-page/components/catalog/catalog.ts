@@ -11,12 +11,15 @@ import { MatButtonModule } from '@angular/material/button';
   styleUrl: './catalog.scss'
 })
 export class Catalog {
+
+  categoriaSeleccionada = 'TODOS';
+
   equipos = [
     {
       nombre: 'Computador All-in-One HP 24”',
       precio: 1299,
+      categoria: 'COMPUTO',
       imagen: 'https://www.pcware.com.co/wp-content/uploads/2019/09/HP-20-C408LA_2.jpg',
-      destacado: true,
       caracteristicas: [
         'Intel Core i5 12th Gen',
         '8 GB RAM DDR4',
@@ -27,6 +30,7 @@ export class Catalog {
     {
       nombre: 'Laptop Lenovo ThinkPad E14',
       precio: 999,
+      categoria: 'COMPUTO',
       imagen: 'https://i.ibb.co/KX3W8v7/canon-g3110.png',
       caracteristicas: [
         'AMD Ryzen 5 7530U',
@@ -36,45 +40,56 @@ export class Catalog {
       ]
     },
     {
-      nombre: 'Impresora Multifuncional Canon G3110',
+      nombre: 'Impresora Canon G3110',
       precio: 320,
+      categoria: 'IMPRESION',
       imagen: 'https://i.ibb.co/KX3W8v7/canon-g3110.png',
       caracteristicas: [
         'Impresión a color',
-        'Escáner y copiado',
-        'Conectividad WiFi',
-        'Sistema de tinta continua'
+        'WiFi',
+        'Sistema continuo'
       ]
     },
     {
-      nombre: 'Impresora Multifuncional Canon G3110',
-      precio: 320,
-      imagen: 'https://i.ibb.co/KX3W8v7/canon-g3110.png',
+      nombre: 'Kit Panel Solar Portátil 200W',
+      precio: 450,
+      categoria: 'SOLAR',
+      imagen: 'https://i.ibb.co/3N9sZqG/panel.png',
       caracteristicas: [
-        'Impresión a color',
-        'Escáner y copiado',
-        'Conectividad WiFi',
-        'Sistema de tinta continua'
+        'Portátil',
+        'Alta eficiencia',
+        'Uso exterior'
       ]
     },
     {
-      nombre: 'Impresora Multifuncional Canon G3110',
-      precio: 320,
-      imagen: 'https://i.ibb.co/KX3W8v7/canon-g3110.png',
+      nombre: 'Inversor Solar Inteligente 3KW',
+      precio: 780,
+      categoria: 'SOLAR',
+      imagen: 'https://i.ibb.co/3N9sZqG/panel.png',
       caracteristicas: [
-        'Impresión a color',
-        'Escáner y copiado',
-        'Conectividad WiFi',
-        'Sistema de tinta continua'
+        'Monitoreo inteligente',
+        'Alta eficiencia',
+        'Instalación fácil'
       ]
     }
   ];
 
+  /* FILTRO */
+  get equiposFiltrados() {
+    if (this.categoriaSeleccionada === 'TODOS') {
+      return this.equipos;
+    }
+    return this.equipos.filter(e => e.categoria === this.categoriaSeleccionada);
+  }
+
+  seleccionarCategoria(cat: string) {
+    this.categoriaSeleccionada = cat;
+  }
+
+  /* WHATSAPP */
   getWhatsAppLink(equipo: any): string {
-    const numero = '573172901206'; // Tu número de WhatsApp
+    const numero = '573172901206';
     const mensaje = `Hola! Estoy interesado en: *${equipo.nombre}* - Precio: $${equipo.precio}`;
-    const mensajeCodificado = encodeURIComponent(mensaje);
-    
-    return `https://wa.me/${numero}?text=${mensajeCodificado}`;
+    return `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
   }
 }

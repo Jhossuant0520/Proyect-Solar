@@ -1,1 +1,41 @@
-<p>faq-homepage works!</p>
+<section class="faq">
+
+  <!-- HEADER -->
+  <div class="faq-header">
+    <span class="tag">FAQ</span>
+    <h1>Preguntas frecuentes</h1>
+  </div>
+
+  <!-- LÍNEA CENTRAL (decorativa) -->
+  <div class="faq-line"></div>
+
+  <!-- LISTA -->
+  <div class="faq-container">
+
+    <div class="faq-item"
+         *ngFor="let item of faq; let i = index"
+         (click)="toggle(i)"
+         [class.active]="activeIndex === i">
+
+      <!-- PUNTO CONECTOR -->
+      <div class="faq-dot"></div>
+
+      <!-- TARJETA -->
+      <div class="faq-card">
+
+        <div class="faq-question">
+          {{ item.q }}
+          <span class="arrow"></span>
+        </div>
+
+        <div class="faq-answer">
+          {{ item.a }}
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>

@@ -1,34 +1,53 @@
+<section class="catalog">
 
-<section class="catalog-section">
-  <div class="animated-bg"></div>
-
-  <div class="container">
-    <h2 class="section-subtitle">Catálogo</h2>
-    <h1 class="section-title">Equipos de Energía Solar en Venta</h1>
-
-    <div class="catalog-grid">
-      <div class="catalog-card" [class.featured]="equipo.destacado"
-      *ngFor="let equipo of equipos">
-        <div class="card-image">
-          <img [src]="equipo.imagen" [alt]="equipo.nombre" />
-        </div>
-        <div class="card-content">
-          <h3>{{ equipo.nombre }}</h3>
-          <p class="precio">{{ equipo.precio | currency:'USD' }}</p>
-          <ul class="caracteristicas">
-            <li *ngFor="let c of equipo.caracteristicas">{{ c }}</li>
-          </ul>
-          <a
-          [href]="getWhatsAppLink(equipo)"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="ver-detalle"
-        >
-          <span>Ver detalles</span>
-        </a>
-        </div>
-      </div>
-    </div>
+  <!-- HEADER -->
+  <div class="catalog-header">
+    <h2>Equipos de Energía Solar</h2>
+    <p>Optimiza tu consumo con tecnología eficiente</p>
   </div>
-</section>
 
+  <!-- FILTROS -->
+  <div class="filters">
+    <button [class.active]="categoriaSeleccionada==='TODOS'" (click)="seleccionarCategoria('TODOS')">TODOS</button>
+    <button [class.active]="categoriaSeleccionada==='COMPUTO'" (click)="seleccionarCategoria('COMPUTO')">COMPUTO</button>
+    <button [class.active]="categoriaSeleccionada==='IMPRESION'" (click)="seleccionarCategoria('IMPRESION')">IMPRESIÓN</button>
+    <button [class.active]="categoriaSeleccionada==='SOLAR'" (click)="seleccionarCategoria('SOLAR')">SOLAR</button>
+  </div>
+
+  <!-- GRID -->
+  <div class="catalog-grid">
+
+    <div class="card" *ngFor="let equipo of equiposFiltrados">
+
+      <!-- IMAGEN -->
+      <div class="image-box">
+        <img [src]="equipo.imagen" alt="">
+        <div class="glow"></div>
+      </div>
+
+      <!-- INFO -->
+      <div class="info">
+
+        <h3>{{ equipo.nombre }}</h3>
+
+        <ul>
+          <li *ngFor="let c of equipo.caracteristicas">
+            ✔ {{ c }}
+          </li>
+        </ul>
+
+        <div class="bottom">
+          <span class="price">${{ equipo.precio }}</span>
+
+          <a [href]="getWhatsAppLink(equipo)" target="_blank">
+            <button>Ver detalles</button>
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>

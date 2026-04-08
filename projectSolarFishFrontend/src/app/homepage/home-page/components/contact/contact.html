@@ -1,59 +1,101 @@
-<footer class="contact">
+<section class="contact">
 
-  <!-- FONDO -->
-  <div class="bg-lines"></div>
-  <div class="bg-glow"></div>
+  <div class="contact-box">
 
-  <div class="wrapper">
-
-    <!-- TEXTO -->
+    <!-- IZQUIERDA -->
     <div class="left">
-      <h2>⚡ Solvix Energy</h2>
+      <h2>SolarFish</h2>
+
       <p>
-        Controla tu energía con tecnología solar inteligente.
-        Ahorra, monitorea y optimiza tu consumo.
+        Plataforma especializada en energía solar, optimización energética
+        y análisis inteligente para hogares y empresas.
       </p>
 
-      <!-- BOTÓN PRINCIPAL -->
-      <button class="btn-main">
-        Contáctanos
-        <span></span>
-      </button>
+      <div class="features">
+        <div class="feature">⚡ Energía eficiente</div>
+        <div class="feature">🌱 Energía limpia</div>
+        <div class="feature">📊 Datos en tiempo real</div>
+      </div>
     </div>
 
-    <!-- CARD PRO -->
-    <div class="card">
+    <!-- CENTRO -->
+    <div class="center">
+      <div class="energy-core"></div>
+    </div>
 
-      <h3>Información</h3>
+    <!-- DERECHA -->
+    <div class="right">
 
-      <div class="item">
-        <i class="fa-solid fa-phone"></i>
-        <span>+57 301 5316116</span>
+      <!-- CONTACTO -->
+      <div class="card">
+        <h3>Contáctanos</h3>
+        <p>📞 +57 301 5316116</p>
+        <p>💬 WhatsApp: +57 317 2901206</p>
+        <p>⏰ Lun - Vie 7:15 AM - 6:00 PM</p>
+        <p>📍 Colombia</p>
       </div>
 
-      <div class="item">
-        <i class="fa-brands fa-whatsapp"></i>
-        <span>+57 317 2901206</span>
+      <!-- SIGUENOS -->
+      <div class="card">
+        <h3>Síguenos</h3>
+
+        <div class="social-list">
+
+          <div class="social-item">
+            <div class="icon">📘</div>
+            <div class="info">
+              <span>Facebook</span>
+              <small>&#64;SolarFish</small>
+            </div>
+            <button>Ver</button>
+          </div>
+
+          <div class="social-item">
+            <div class="icon">📸</div>
+            <div class="info">
+              <span>Instagram</span>
+              <small>&#64;SolarFish.energy</small>
+            </div>
+            <button>Ver</button>
+          </div>
+
+          <div class="social-item">
+            <div class="icon">💼</div>
+            <div class="info">
+              <span>LinkedIn</span>
+              <small>SolarFish Tech</small>
+            </div>
+            <button>Ver</button>
+          </div>
+
+        </div>
       </div>
 
-      <div class="item">
-        <i class="fa-solid fa-location-dot"></i>
-        <span>Colombia</span>
-      </div>
+      <!-- FORMULARIO -->
+      <div class="card form-card">
+        <h3>Envíanos un mensaje</h3>
 
-      <!-- REDES -->
-      <div class="socials">
-        <div class="icon"><i class="fa-brands fa-facebook-f"></i></div>
-        <div class="icon"><i class="fa-brands fa-instagram"></i></div>
-        <div class="icon"><i class="fa-brands fa-x-twitter"></i></div>
+        <form class="contact-form" (ngSubmit)="onSubmit()">
+
+          <div class="input-group">
+            <input type="text" placeholder="Tu nombre" required>
+          </div>
+
+          <div class="input-group">
+            <input type="email" placeholder="Correo electrónico" required>
+          </div>
+
+          <div class="input-group">
+            <textarea rows="4" placeholder="Escribe tu mensaje..." required></textarea>
+          </div>
+
+          <button type="submit">Enviar mensaje</button>
+
+        </form>
       </div>
 
     </div>
 
   </div>
 
-  <div class="footer">
-    © 2026 Solvix — Energía inteligente
-  </div>
-
-</footer>
+</section>

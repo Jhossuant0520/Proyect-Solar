@@ -339,3 +339,40 @@
     0 10px 30px rgba(0,0,0,0.8),
     0 0 30px rgba(56,189,248,0.3);
 }
+
+
+
+
+
+
+@media (max-width: 768px) {
+
+  .nav-links {
+    position: fixed; /* 🔥 IMPORTANTE */
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100vh; /* 🔥 ESTO EVITA QUE SE CORTE */
+
+    overflow-y: auto; /* 🔥 por si hay muchos links */
+
+    background: #020617; /* usa tu mismo color */
+
+    z-index: 9999; /* 🔥 para que esté encima de todo */
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+
+    transform: translateX(-100%);
+    transition: 0.3s;
+  }
+
+  .nav-links.active {
+    transform: translateX(0);
+  }
+
+}
