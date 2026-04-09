@@ -7,27 +7,19 @@
 
   <div class="services-grid">
 
-    @for (s of servicios; track s) {
-    <div class="card">
+    <div class="card" *ngFor="let s of servicios">
 
       <div class="icon">
         {{ s.icono }}
       </div>
 
-<<<<<<< HEAD
       <h3>{{ s.titulo }}</h3>
-=======
-      <!-- CARD 2.1 -->
-      <div class="service-card center" (mousemove)="onMouseMove($event)">
-        <div class="icon">💻</div>
->>>>>>> 2ac53d826feb4f163f6c3a5222ae34fd9b8f0623
 
       <p>{{ s.descripcion }}</p>
 
       <div class="glow"></div>
 
     </div>
-    }
 
   </div>
 
