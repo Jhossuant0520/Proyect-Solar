@@ -7,7 +7,9 @@
 
   <div class="services-grid">
 
-    <div class="card" *ngFor="let s of servicios">
+    @for (s of servicios; track s) {
+
+    <div class="card">
 
       <div class="icon">
         {{ s.icono }}
@@ -20,6 +22,8 @@
       <div class="glow"></div>
 
     </div>
+
+    }
 
   </div>
 
