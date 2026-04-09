@@ -1,67 +1,28 @@
-<section class="service-homepage">
+<section class="services">
 
-  <div class="animated-bg"></div>
-  <div class="glow-bg"></div>
+  <div class="header">
+    <h2>¿Por qué elegirnos?</h2>
+    <p>Soluciones inteligentes para energía solar</p>
+  </div>
 
-  <div class="container">
+  <div class="services-grid">
 
-    <div class="titles">
-      <h2 class="section-subtitle">NUESTROS SERVICIOS</h2>
-      <h1 class="section-title">Lo que ofrecemos</h1>
-    </div>
+    @for (s of servicios; track s) {
+    <div class="card">
 
-    <div class="services-grid">
-
-      <!-- CARD 1 -->
-      <div class="service-card" (mousemove)="onMouseMove($event)">
-        <div class="icon">🛠️</div>
-
-        <h3>Mantenimiento Preventivo</h3>
-        <p>Cuida tus equipos con revisiones periódicas.</p>
-
-        <ul>
-          <li>Revisión completa</li>
-          <li>Optimización</li>
-          <li>Control temperatura</li>
-          <li>Limpieza total</li>
-        </ul>
-
-        <a href="#" class="btn">Conoce más</a>
+      <div class="icon">
+        {{ s.icono }}
       </div>
 
-      <!-- CARD 2 -->
-      <div class="service-card center" (mousemove)="onMouseMove($event)">
-        <div class="icon">💻</div>
+      <h3>{{ s.titulo }}</h3>
 
-        <h3>Soporte Técnico</h3>
-        <p>Asistencia remota y presencial.</p>
+      <p>{{ s.descripcion }}</p>
 
-        <ul>
-          <li>Diagnóstico rápido</li>
-          <li>Errores</li>
-          <li>Instalación</li>
-        </ul>
-
-        <a href="#" class="btn">Conoce más</a>
-      </div>
-
-      <!-- CARD 3 -->
-      <div class="service-card" (mousemove)="onMouseMove($event)">
-        <div class="icon">📡</div>
-
-        <h3>Instalaciones</h3>
-        <p>Configuración profesional de redes.</p>
-
-        <ul>
-          <li>Redes</li>
-          <li>Impresoras</li>
-          <li>Asesoría</li>
-        </ul>
-
-        <a href="#" class="btn">Conoce más</a>
-      </div>
+      <div class="glow"></div>
 
     </div>
+    }
 
   </div>
+
 </section>

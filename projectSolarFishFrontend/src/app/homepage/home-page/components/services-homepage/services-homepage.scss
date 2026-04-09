@@ -1,284 +1,94 @@
-@use '../../../styles/breakpoints' as *;
-
-html {
-  scroll-behavior: smooth;
+.services {
+  padding: 100px 20px;
+  background: #020617;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
 }
 
-.service-homepage {
+/* HEADER */
+.header h2 {
+  color: #4fd1ff;
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.header p {
+  color: #9fdfff;
+  margin-bottom: 50px;
+}
+
+/* GRID */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 30px;
+}
+
+/* CARD */
+.card {
   position: relative;
-  padding: 120px 40px;
-  background: radial-gradient(circle at 50% 20%, #0f1c3f, #020617 70%);
+  padding: 30px;
+  border-radius: 20px;
+
+  background: rgba(0, 200, 255, 0.05);
+  border: 1px solid rgba(0,200,255,0.2);
+
+  backdrop-filter: blur(10px);
+
+  transition: 0.4s;
+  overflow: hidden;
+}
+
+/* HOVER */
+.card:hover {
+  transform: translateY(-10px) scale(1.03);
+
+  box-shadow:
+    0 0 25px rgba(0,200,255,0.5),
+    0 0 50px rgba(0,200,255,0.2);
+}
+
+/* ICONO */
+.icon {
+  font-size: 40px;
+  margin-bottom: 15px;
+}
+
+/* TITULO */
+.card h3 {
   color: white;
-  overflow: hidden;
-  font-family: "Inter", sans-serif;
-
-  /* 🌌 GRID TECNOLÓGICO */
-  .animated-bg {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-
-    background:
-      linear-gradient(rgba(0, 255, 255, 0.06) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 255, 255, 0.06) 1px, transparent 1px);
-
-    background-size: 80px 80px;
-    opacity: 0.4;
-
-    animation: moveGrid 20s linear infinite;
-    z-index: 0;
-  }
-
-  @keyframes moveGrid {
-    from { transform: translate(0, 0); }
-    to { transform: translate(80px, 80px); }
-  }
-
-  /* ⚡ LÍNEA DE ENERGÍA */
-  &::before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 10%;
-    width: 80%;
-    height: 2px;
-
-    background: linear-gradient(
-      90deg,
-      transparent,
-      #4DB6AC,
-      #00e5ff,
-      #004a8f,
-      transparent
-    );
-
-    opacity: 0.6;
-    filter: blur(2px);
-    z-index: 0;
-  }
-
-  /* ✨ GLOW GRANDE */
-  &::after {
-    content: "";
-    position: absolute;
-    width: 600px;
-    height: 600px;
-    top: -200px;
-    left: -200px;
-
-    background: radial-gradient(circle, #00e5ff, transparent 70%);
-    filter: blur(150px);
-    opacity: 0.15;
-    z-index: 0;
-  }
-
-  .container {
-    position: relative;
-    z-index: 2;
-    max-width: 1200px;
-    margin: auto;
-  }
-
-  /* 🎯 TITULOS */
-  .titles {
-    text-align: center;
-    margin-bottom: 60px;
-  }
-
-  .section-subtitle {
-    color: #4DB6AC;
-    letter-spacing: 2px;
-    font-size: 14px;
-  }
-
-  .section-title {
-    font-size: 40px;
-    margin-top: 10px;
-  }
-
-  /* GRID */
-  .services-grid {
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-    flex-wrap: wrap;
-  }
-
-  /* 💎 CARDS */
-  .service-card {
-    width: 300px;
-    padding: 30px;
-    border-radius: 25px;
-
-    background:
-      radial-gradient(
-        circle at var(--x,50%) var(--y,50%),
-        rgba(77,182,172,0.2),
-        transparent 40%
-      ),
-      rgba(255,255,255,0.05);
-
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.1);
-
-    text-align: center;
-    transition: 0.4s;
-  }
-
-  /* CARD CENTRAL */
-  .center {
-    transform: scale(1.1);
-  }
-
-  /* HOVER */
-  .service-card:hover {
-    transform: translateY(-12px) scale(1.05);
-
-    box-shadow:
-      0 0 30px #4DB6AC,
-      0 0 60px rgba(0,74,143,0.5);
-  }
-
-  /* ICONO */
-  .icon {
-    font-size: 40px;
-    margin-bottom: 15px;
-  }
-
-  /* TEXTO */
-  .service-card p {
-    color: #94a3b8;
-    font-size: 14px;
-  }
-
-  /* LISTA */
-  .service-card ul {
-    text-align: left;
-    margin: 20px 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .service-card li {
-    margin: 8px 0;
-    padding-left: 20px;
-    position: relative;
-  }
-
-  .service-card li::before {
-    content: "✔";
-    position: absolute;
-    left: 0;
-    color: #4DB6AC;
-  }
-
-  /* 🔥 BOTÓN */
-  .btn {
-    padding: 10px 20px;
-    border-radius: 30px;
-    background: linear-gradient(135deg, #4DB6AC, #004a8f);
-    color: white;
-    text-decoration: none;
-    transition: 0.3s;
-  }
-
-  .btn:hover {
-    box-shadow:
-      0 0 20px #4DB6AC,
-      0 0 40px #004a8f;
-  }
-
-  /* 📱 RESPONSIVE */
-  @include responsive(md) {
-    padding: 80px 30px;
-  }
-
-  @include responsive(sm) {
-    padding: 60px 20px;
-
-    .services-grid {
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .center {
-      transform: scale(1);
-    }
-  }
+  margin-bottom: 10px;
 }
 
-
-/* ===== FORZAR FONDO NUEVO ===== */
-
-.service-homepage {
-  background: #020617 !important;
-  position: relative;
-  overflow: hidden;
+/* TEXTO */
+.card p {
+  color: #cfe9ff;
+  font-size: 14px;
 }
 
-/* 💧 PARTÍCULAS (PUNTOS) */
-.service-homepage::before {
-  content: "";
+/* GLOW */
+.glow {
   position: absolute;
-  inset: 0;
+  width: 120px;
+  height: 120px;
 
-  background-image:
-    radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px),
-    radial-gradient(circle, rgba(0,229,255,0.2) 2px, transparent 2px);
+  background: radial-gradient(circle, rgba(0,200,255,0.4), transparent);
+  filter: blur(30px);
 
-  background-size: 50px 50px, 120px 120px;
-  animation: moverPuntos 15s linear infinite;
-
-  z-index: 0;
+  top: -20px;
+  right: -20px;
+  opacity: 0;
+  transition: 0.4s;
 }
 
-/* 🌊 GOTA GRANDE */
-.service-homepage::after {
-  content: "";
-  position: absolute;
-  width: 500px;
-  height: 500px;
-  top: -100px;
-  left: -100px;
-
-  background: radial-gradient(circle, rgba(0,229,255,0.2), transparent 70%);
-  filter: blur(100px);
-
-  animation: moverBlob 18s ease-in-out infinite alternate;
-
-  z-index: 0;
+.card:hover .glow {
+  opacity: 1;
 }
 
-/* ✨ SEGUNDA GOTA */
-.service-homepage .glow-bg {
-  position: absolute;
-  width: 400px;
-  height: 400px;
-  bottom: -100px;
-  right: -100px;
-
-  background: radial-gradient(circle, rgba(77,182,172,0.2), transparent 70%);
-  filter: blur(120px);
-
-  animation: moverBlob 20s ease-in-out infinite alternate-reverse;
-
-  z-index: 0;
-}
-
-/* ANIMACIONES */
-@keyframes moverPuntos {
-  from { transform: translateY(0); }
-  to { transform: translateY(-80px); }
-}
-
-@keyframes moverBlob {
-  0% { transform: translate(0,0); }
-  50% { transform: translate(50px,-30px); }
-  100% { transform: translate(-30px,50px); }
-}
-
-/* 🔥 ASEGURAR CONTENIDO ENCIMA */
-.service-homepage .container {
-  position: relative;
-  z-index: 2;
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .header h2 {
+    font-size: 24px;
+  }
 }
