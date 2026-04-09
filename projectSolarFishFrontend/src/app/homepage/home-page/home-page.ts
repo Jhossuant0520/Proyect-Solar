@@ -11,17 +11,23 @@ import { StatsHomepage } from "./components/stats-homepage/stats-homepage";
 import { StepsHomepage } from "./components/steps-homepage/steps-homepage";
 import { TestimonialsHomepage } from "./components/testimonials-homepage/testimonials-homepage";
 import { FaqHomepage } from "./components/faq-homepage/faq-homepage";
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> 2ac53d826feb4f163f6c3a5222ae34fd9b8f0623
 import { CtaHomepage } from "./components/cta-homepage/cta-homepage";
 import { Contact } from './components/contact/contact';
 
 @Component({
   selector: 'app-home-page',
   imports: [MatCardModule, HeroHomepage, AboutHomepage, NavbarHomepage, ServicesHomepage, Catalog, FooterHomepage, CommonModule, StatsHomepage, StepsHomepage, TestimonialsHomepage, FaqHomepage, CtaHomepage, Contact],
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 2ac53d826feb4f163f6c3a5222ae34fd9b8f0623
   templateUrl: './home-page.html',
   styleUrls: ['./home-page.scss']
 })
