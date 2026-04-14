@@ -1,6 +1,6 @@
 :host {
   display: block;
-  background: #0F084B;
+  background: var(--app-bg-color);
 }
 
 /* Unificar secciones sin divisiones visibles */
@@ -9,10 +9,30 @@ section {
   padding: 0;
 }
 
+app-home-page,
+app-navbar-homepage,
 app-hero-homepage,
 app-about-homepage,
 app-services-homepage,
 app-catalog,
-app-footer-homepage {
+app-footer-homepage,
+app-testimonials-homepage,
+app-steps-homepage,
+app-faq-homepage,
+app-contact,
+app-stats-homepage,
+section#inicio,
+section#stats,
+section#steps,
+section#services,
+section#about,
+section#testimonials,
+section#faq,
+section#catalog,
+section#cta,
+section#contact,
+section#footer {
   display: block;
+  background: var(--app-bg-color) !important;
+  background-color: var(--app-bg-color) !important;
 }

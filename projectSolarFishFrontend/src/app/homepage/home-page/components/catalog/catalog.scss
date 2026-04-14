@@ -2,7 +2,7 @@
 
 .catalog {
   padding: 100px 20px;
-  background: #020617;
+  background: var(--app-bg-color);
 }
 
 /* HEADER */
@@ -58,7 +58,7 @@
 
 /* CARD */
 .card {
-  background: #061427;
+  background: var(--app-bg-color);
   border-radius: 20px;
   overflow: hidden;
   border: 1px solid rgba(0,200,255,0.2);

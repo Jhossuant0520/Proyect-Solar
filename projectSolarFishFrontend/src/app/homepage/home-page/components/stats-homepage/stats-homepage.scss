@@ -1,6 +1,6 @@
 .stats {
   padding: 120px 20px;
-  background: radial-gradient(circle at center, #071a2d, #020617);
+  background: var(--app-bg-color);
   position: relative;
   overflow: hidden;
   text-align: center;
@@ -69,7 +69,7 @@
   padding: 35px 20px;
   border-radius: 20px;
 
-  background: rgba(10, 25, 45, 0.7);
+  background: var(--app-bg-color);
   backdrop-filter: blur(14px);
 
   border: 1px solid rgba(0,200,255,0.3);

@@ -1,7 +1,7 @@
 @use '../../../../../styles/breakpoints' as *;
 
 .footer {
-  background: #020617;
+  background: var(--app-bg-color);
   color: #e6f7ff;
   padding-top: 70px;
   position: relative;

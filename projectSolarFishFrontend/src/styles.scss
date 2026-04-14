@@ -2,8 +2,13 @@
 
 
 
+:root {
+  --app-bg-color: #020617;
+}
+
 html, body {
-  background: #020617;
+  background: var(--app-bg-color);
+  background-color: var(--app-bg-color);
   height: 100%;
   margin: 0;
   padding: 0;
@@ -12,8 +17,6 @@ html, body {
   max-width: 100%;
   overflow-x: hidden;
   overflow-y: auto; // Vertical permitido
-
-  
 }
 
 html {

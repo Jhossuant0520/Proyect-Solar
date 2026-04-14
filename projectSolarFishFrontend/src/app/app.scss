@@ -5,6 +5,7 @@
   width: 100%;
   font-family: 'Inter', sans-serif;
   overflow-x: hidden;  /* ya lo tienes, mantenlo */
+  background-color: var(--app-bg-color);
 }
 html, body {
   margin: 0;
@@ -12,6 +13,12 @@ html, body {
   height: 100%;
   width: 100%;
   overflow-x: hidden;  /* fuerza ocultar scroll horizontal */
+}
+
+app-root,
+.app-sidenav-container,
+.app-sidenav-content {
+  background-color: var(--app-bg-color);
 }
 
 

@@ -18,7 +18,7 @@
 
   border-radius: 50px;
 
-  background: rgba(2,6,23,0.7);
+  background: var(--app-bg-color);
   backdrop-filter: blur(20px);
 
   overflow: hidden; 
@@ -29,7 +29,7 @@
   top: 10px;
   transform: translateX(-50%) scale(0.98);
 
-  background: rgba(2,6,23,0.9);
+  background: var(--app-bg-color);
 
   box-shadow:
     0 15px 40px rgba(0,0,0,0.8),
@@ -134,7 +134,7 @@
 
   border-radius: 50px; /* 🔥 FORMA DIFERENTE */
 
-  background: rgba(2,6,23,0.6);
+  background: var(--app-bg-color);
   backdrop-filter: blur(15px);
 
   border: 1px solid rgba(56,189,248,0.2);
@@ -152,7 +152,7 @@
   top: 10px;
   transform: translateX(-50%) scale(0.98);
 
-  background: rgba(2,6,23,0.9);
+  background: var(--app-bg-color);
 
   box-shadow:
     0 15px 40px rgba(0,0,0,0.8),
@@ -357,7 +357,7 @@
 
     overflow-y: auto; /* 🔥 por si hay muchos links */
 
-    background: #020617; /* usa tu mismo color */
+    background: var(--app-bg-color); /* usa tu mismo color */
 
     z-index: 9999; /* 🔥 para que esté encima de todo */
 

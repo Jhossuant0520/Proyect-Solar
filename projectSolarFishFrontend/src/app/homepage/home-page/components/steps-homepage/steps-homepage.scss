@@ -1,7 +1,7 @@
 .steps-homepage {
   position: relative;
   padding: 120px 40px;
-  background: linear-gradient(180deg, #020617, #03122c);
+  background: var(--app-bg-color);
   color: white;
   overflow: hidden;
   text-align: center;
@@ -86,7 +86,7 @@
   padding: 30px;
   border-radius: 25px;
 
-  background: rgba(255,255,255,0.05);
+  background: var(--app-bg-color);
   backdrop-filter: blur(20px);
 
   border: 1px solid rgba(255,255,255,0.1);

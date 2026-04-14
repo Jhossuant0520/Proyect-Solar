@@ -1,7 +1,7 @@
 .cta {
   position: relative;
   padding: 160px 20px;
-  background: #020617;
+  background: var(--app-bg-color);
   overflow: hidden;
 }
 
@@ -11,10 +11,10 @@
   inset: 0;
 
   background-image:
-    radial-gradient(2px 2px at 20% 30%, #4fd1ff, transparent),
-    radial-gradient(2px 2px at 70% 60%, #4fd1ff, transparent),
-    radial-gradient(2px 2px at 40% 80%, #4fd1ff, transparent),
-    radial-gradient(2px 2px at 90% 20%, #4fd1ff, transparent);
+    radial-gradient(2px 2px at 20% 30%, #081028, transparent),
+    radial-gradient(2px 2px at 70% 60%, #081028, transparent),
+    radial-gradient(2px 2px at 40% 80%, #081028, transparent),
+    radial-gradient(2px 2px at 90% 20%, #18083c, transparent);
 
   animation: moveParticles 10s linear infinite;
   opacity: 0.4;
@@ -38,7 +38,7 @@
   padding: 60px 40px;
   border-radius: 20px;
 
-  background: rgba(0, 30, 60, 0.15);
+  background: var(--app-bg-color);
   backdrop-filter: blur(15px);
 
   border: 1px solid rgba(0,200,255,0.3);
