@@ -93,6 +93,7 @@
 		</dependency>
 	</dependencies>
 
+		   <!-- Las dependencias de validación ya están incluidas con spring-boot-starter-validation -->
 	<build>
 		<plugins>
 			<plugin>
