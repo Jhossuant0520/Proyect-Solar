@@ -10,8 +10,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, ActivatedRoute } from '@angular/router';
 
-import { FincaService } from '../../../core/services/finca.service';
-import { ComponenteEnergeticoService } from '../../../core/services/componente-energeticoby.service';
+import { FincaService } from '../../../../core/services/finca.service';
+import { ComponenteEnergeticoService } from '../../../../core/services/componente-energeticoby.service';
 import { fincaModel } from '../../finca/fincaClase';
 import { ComponenteEnergeticoByClase } from './componenteEnergeticobyClase';
 

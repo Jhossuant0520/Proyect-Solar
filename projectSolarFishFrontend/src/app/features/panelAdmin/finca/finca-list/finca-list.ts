@@ -9,8 +9,8 @@ import { MatCardModule } from '@angular/material/card';
 import { Router } from '@angular/router';
 
 import { fincaModel } from '../fincaClase';
-import { FincaService } from '../../../core/services/finca.service';
-import { DialogoConfirmacionDelete } from '../../../shared/components/dialogo-confirmacion-delete/dialogo-confirmacion-delete';
+import { FincaService } from '../../../../core/services/finca.service';
+import { DialogoConfirmacionDelete } from '../../../../shared/components/dialogo-confirmacion-delete/dialogo-confirmacion-delete';
 
 @Component({
   selector: 'app-finca-list',

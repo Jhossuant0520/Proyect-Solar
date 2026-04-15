@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { fincaModel } from './fincaClase';
-import { FincaService } from '../../core/services/finca.service';
+import { FincaService } from '../../../core/services/finca.service';
 
 @Component({
   selector: 'app-finca',

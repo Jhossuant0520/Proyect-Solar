@@ -1,0 +1,325 @@
+<div class="demanda-wrapper">
+
+  <!-- Encabezado -->
+  <div class="demanda-header">
+    <h1>Demanda Energética <span>SolarFish</span></h1>
+    <p>Calcula y registra tu demanda a partir de tus recibos o promedio mensual.</p>
+    <p class="usuario-badge" *ngIf="usuarioActual">
+      <mat-icon>person</mat-icon> {{ usuarioActual }}
+    </p>
+  </div>
+
+  <!-- Stepper principal -->
+  <mat-stepper linear #stepper orientation="horizontal">
+
+    <!-- ══════════════════════════════════════
+         PASO 1 — Ingreso de datos
+    ══════════════════════════════════════ -->
+    <mat-step label="Ingreso de datos" [stepControl]="form">
+      <form [formGroup]="form">
+
+        <!-- Selector de modo -->
+        <mat-card class="sf-card">
+          <mat-card-header>
+            <mat-card-title>Método de cálculo</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>¿Cómo deseas ingresar tu consumo?</mat-label>
+              <mat-select formControlName="modoCalculoConsumoBase">
+                <mat-option value="RECIBOS">Opción A — Ingresar recibos (6 a 12 meses)</mat-option>
+                <mat-option value="PROMEDIO_DIRECTO">Opción B — Promedio directo del recibo</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- ── OPCIÓN A: Recibos ── -->
+        <ng-container *ngIf="modo === 'RECIBOS'">
+          <mat-card class="sf-card">
+            <mat-card-header>
+              <mat-card-title>Recibos energéticos</mat-card-title>
+              <mat-card-subtitle>Ingresa entre 6 y 12 recibos en cualquier orden</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+
+              <div class="recibos-grid">
+                <div *ngFor="let recibo of recibos.controls; let i = index"
+                     [formGroup]="asFormGroup(recibo)"
+                     class="recibo-item">
+
+                  <span class="recibo-label">Recibo {{ i + 1 }}</span>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Mes</mat-label>
+                    <input matInput type="number" formControlName="mes"
+                           placeholder="1-12" min="1" max="12">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Año</mat-label>
+                    <input matInput type="number" formControlName="anio"
+                           placeholder="2024" min="2000">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>kWh</mat-label>
+                    <input matInput type="number" formControlName="kwh"
+                           placeholder="150" min="1">
+                  </mat-form-field>
+
+                  <button mat-icon-button color="warn"
+                          type="button"
+                          [disabled]="recibos.length <= 6"
+                          (click)="eliminarRecibo(i)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <button mat-stroked-button type="button"
+                      [disabled]="recibos.length >= 12"
+                      (click)="agregarRecibo()">
+                <mat-icon>add</mat-icon> Agregar recibo ({{ recibos.length }}/12)
+              </button>
+
+            </mat-card-content>
+          </mat-card>
+        </ng-container>
+
+        <!-- ── OPCIÓN B: Promedio directo ── -->
+        <ng-container *ngIf="modo === 'PROMEDIO_DIRECTO'">
+          <mat-card class="sf-card">
+            <mat-card-header>
+              <mat-card-title>Promedio directo</mat-card-title>
+              <mat-card-subtitle>
+                Ingresa el promedio mensual que aparece en tu recibo y el periodo que cubre
+              </mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Consumo promedio mensual (kWh)</mat-label>
+                <input matInput type="number" formControlName="consumoPromedioDirectoKwh"
+                       placeholder="180" min="1">
+              </mat-form-field>
+
+              <div class="fecha-grid">
+                <mat-form-field appearance="outline">
+                  <mat-label>Mes inicio</mat-label>
+                  <input matInput type="number" formControlName="mesInicio"
+                         placeholder="1" min="1" max="12">
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Año inicio</mat-label>
+                  <input matInput type="number" formControlName="anioInicio"
+                         placeholder="2025" min="2000">
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Mes fin</mat-label>
+                  <input matInput type="number" formControlName="mesFin"
+                         placeholder="6" min="1" max="12">
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Año fin</mat-label>
+                  <input matInput type="number" formControlName="anioFin"
+                         placeholder="2025" min="2000">
+                </mat-form-field>
+              </div>
+
+            </mat-card-content>
+          </mat-card>
+        </ng-container>
+
+        <!-- Parámetros comunes -->
+        <mat-card class="sf-card">
+          <mat-card-header>
+            <mat-card-title>Parámetros del sistema</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="fecha-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Precio kWh (COP)</mat-label>
+                <input matInput type="number" formControlName="precioKwhCop"
+                       placeholder="600" min="1">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Cobertura solar (%)</mat-label>
+                <input matInput type="number" formControlName="porcentajeCobertura"
+                       placeholder="80" min="1" max="100">
+              </mat-form-field>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <div class="step-actions">
+          <button mat-flat-button color="primary"
+                  type="button" matStepperNext
+                  [disabled]="form.invalid">
+            Siguiente <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </div>
+
+      </form>
+    </mat-step>
+
+    <!-- ══════════════════════════════════════
+         PASO 2 — Previsualización y confirmación
+    ══════════════════════════════════════ -->
+    <mat-step label="Confirmar y calcular">
+
+      <!-- Estado: previsualización (antes de confirmar) -->
+      <ng-container *ngIf="!resultado && !loading">
+
+        <mat-card class="sf-card preview-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>preview</mat-icon>
+            <mat-card-title>Previsualización de datos</mat-card-title>
+            <mat-card-subtitle>
+              Verifica que los datos sean correctos antes de continuar.
+              Un error aquí afectará todo el dimensionamiento.
+            </mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+
+            <p><strong>Modo de cálculo:</strong>
+              {{ modo === 'RECIBOS' ? 'Recibos (Opción A)' : 'Promedio directo (Opción B)' }}
+            </p>
+            <p><strong>Precio kWh:</strong> ${{ form.value.precioKwhCop | number:'1.0-0' }} COP</p>
+            <p><strong>Cobertura solar:</strong> {{ form.value.porcentajeCobertura }}%</p>
+
+            <mat-divider></mat-divider>
+
+            <!-- Preview recibos -->
+            <ng-container *ngIf="modo === 'RECIBOS'">
+              <h4>Recibos ingresados ({{ recibos.length }})</h4>
+              <div class="preview-recibos">
+                <div *ngFor="let r of recibos.controls; let i = index"
+                     class="preview-recibo-item">
+                  <mat-icon>receipt</mat-icon>
+                  <span>{{ nombreMes(r.value.mes) }} {{ r.value.anio }}</span>
+                  <strong>{{ r.value.kwh }} kWh</strong>
+                </div>
+              </div>
+            </ng-container>
+
+            <!-- Preview promedio directo -->
+            <ng-container *ngIf="modo === 'PROMEDIO_DIRECTO'">
+              <h4>Promedio mensual</h4>
+              <p>
+                <strong>{{ form.value.consumoPromedioDirectoKwh }} kWh/mes</strong>
+                — Periodo: {{ nombreMes(form.value.mesInicio) }} {{ form.value.anioInicio }}
+                al {{ nombreMes(form.value.mesFin) }} {{ form.value.anioFin }}
+              </p>
+            </ng-container>
+
+            <mat-divider></mat-divider>
+
+            <!-- Aviso -->
+            <div class="aviso-warning">
+              <mat-icon color="warn">warning</mat-icon>
+              <span>Si los datos son incorrectos, el dimensionamiento fotovoltaico no será preciso.</span>
+            </div>
+
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button mat-stroked-button type="button" matStepperPrevious>
+              <mat-icon>arrow_back</mat-icon> Corregir datos
+            </button>
+            <button mat-flat-button color="primary"
+                    type="button" (click)="onConfirmar()">
+              Confirmar y calcular <mat-icon>bolt</mat-icon>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+
+      </ng-container>
+
+      <!-- Estado: cargando -->
+      <div *ngIf="loading" class="loading-center">
+        <mat-spinner diameter="48"></mat-spinner>
+        <p>Calculando y guardando...</p>
+      </div>
+
+      <!-- Estado: error -->
+      <mat-card *ngIf="errorMsg && !loading" class="sf-card error-card">
+        <mat-card-content>
+          <mat-icon color="warn">error</mat-icon>
+          <span>{{ errorMsg }}</span>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-stroked-button type="button" matStepperPrevious>
+            <mat-icon>arrow_back</mat-icon> Volver al formulario
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <!-- Estado: resultados -->
+      <ng-container *ngIf="resultado && !loading">
+
+        <div class="resultado-header">
+          <mat-icon color="primary">check_circle</mat-icon>
+          <h3>Cálculo guardado correctamente</h3>
+        </div>
+
+        <div class="resultados-grid">
+
+          <mat-card class="sf-card resultado-item">
+            <mat-card-header>
+              <mat-card-title>Energía diaria</mat-card-title>
+              <mat-card-subtitle>Base / Final</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="valor-base">{{ resultado.energiaDiariaWhBase | number:'1.0-2' }} Wh</p>
+              <p class="valor-final">{{ resultado.energiaDiariaWhFinal | number:'1.0-2' }} Wh</p>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="sf-card resultado-item">
+            <mat-card-header>
+              <mat-card-title>Energía mensual</mat-card-title>
+              <mat-card-subtitle>Base / Final</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="valor-base">{{ resultado.energiaMensualWhBase | number:'1.0-2' }} Wh</p>
+              <p class="valor-final">{{ resultado.energiaMensualWhFinal | number:'1.0-2' }} Wh</p>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="sf-card resultado-item">
+            <mat-card-header>
+              <mat-card-title>Energía anual</mat-card-title>
+              <mat-card-subtitle>Base / Final</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="valor-base">{{ resultado.energiaAnualWhBase | number:'1.0-2' }} Wh</p>
+              <p class="valor-final">{{ resultado.energiaAnualWhFinal | number:'1.0-2' }} Wh</p>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="sf-card resultado-item">
+            <mat-card-header>
+              <mat-card-title>Cobertura aplicada</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="valor-final">{{ resultado.porcentajeCoberturaAplicado }}%</p>
+              <p class="valor-base">Factor seguridad: +25%</p>
+            </mat-card-content>
+          </mat-card>
+
+        </div>
+
+        <div class="step-actions">
+          <button mat-flat-button color="accent" type="button" (click)="reiniciar()">
+            <mat-icon>refresh</mat-icon> Nuevo cálculo
+          </button>
+        </div>
+
+      </ng-container>
+
+    </mat-step>
+
+  </mat-stepper>
+</div>

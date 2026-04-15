@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 // import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 // import { BienvenidaDialogComponent } from '../../shared/components/bienvenida-dialog/bienvenida-dialog';
 
-import { AuthService } from '../../core/services/auth.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { jwtDecode } from 'jwt-decode';
 
 @Component({

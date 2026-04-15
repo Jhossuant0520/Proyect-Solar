@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
-import { CuentaService, MisDatos, CambiarPassword } from '../../core/services/cuenta.service';
+import { CuentaService, MisDatos, CambiarPassword } from '../../../core/services/cuenta.service';
 
 @Component({
   selector: 'app-mi-cuenta',

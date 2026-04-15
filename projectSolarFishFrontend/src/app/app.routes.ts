@@ -1,19 +1,20 @@
 import { Routes } from '@angular/router';
 import { HomePage } from './homepage/home-page/home-page';
-import { LoginComponent } from './features/login/login';
-import { Register } from './features/register/register';
-import { VerificarEmail } from './features/verificar-email/verificar-email';
-import { SolicitarReenvio } from './features/solicitar-reenvio/solicitar-reenvio';
-import { DashboardComponent } from './features/dashboard/dashboard';
-import { MiCuenta } from './features/mi-cuenta/mi-cuenta';
+import { LoginComponent } from './features/access/login/login';
+import { Register } from './features/access/register/register';
+import { VerificarEmail } from './features/access/verificar-email/verificar-email';
+import { SolicitarReenvio } from './features/access/solicitar-reenvio/solicitar-reenvio';
+import { DashboardComponent } from './features/panelAdmin/dashboard/dashboard';
+import { MiCuenta } from './features/access/mi-cuenta/mi-cuenta';
 import { authGuard } from './core/guards/auth-guard';
 import { App } from './app';
 import { Catalog } from './homepage/home-page/components/catalog/catalog';
-import { FincaComponent } from './features/finca/finca';
-import { FincaList } from './features/finca/finca-list/finca-list';
-import { PorComponenteForm } from './features/componenteEnergetico/por-componente/por-componente';
-import { PorComponenteList } from './features/componenteEnergetico/por-componente-list/por-componente-list';
-import { DemandaEnergetica } from './features/demanda-energetica/demanda-energetica';
+import { FincaComponent } from './features/panelAdmin/finca/finca';
+import { FincaList } from './features/panelAdmin/finca/finca-list/finca-list';
+import { PorComponenteForm } from './features/panelAdmin/componenteEnergetico/por-componente/por-componente';
+import { PorComponenteList } from './features/panelAdmin/componenteEnergetico/por-componente-list/por-componente-list';
+import { DemandaEnergetica } from './features/panelAdmin/demanda-energetica/demanda-energetica';
+import { ModulDemandaRecibo } from './features/business/modul-demanda-recibo/modul-demanda-recibo';
 
 export const routes: Routes = [
   // Rutas públicas (sin autenticación)
@@ -23,6 +24,7 @@ export const routes: Routes = [
   { path: 'register', component: Register },
   { path: 'verificar-email/:token', component: VerificarEmail },
   { path: 'solicitar-reenvio', component: SolicitarReenvio },
+  { path: 'demanda-recibo', component: ModulDemandaRecibo },
 
   // Rutas protegidas (requieren autenticación)
   {

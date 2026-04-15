@@ -2,66 +2,117 @@ package com.newproject.jhocadi.projectSolarFishBackend.service;
 
 import com.newproject.jhocadi.projectSolarFishBackend.dtos.RequestDemandaRecibo;
 import com.newproject.jhocadi.projectSolarFishBackend.dtos.ResponseDemandaRecibo;
+import com.newproject.jhocadi.projectSolarFishBackend.model.modelDemandaRecibo;
+import com.newproject.jhocadi.projectSolarFishBackend.model.modelUsuario;
+import com.newproject.jhocadi.projectSolarFishBackend.repository.RepositoryDemandaRecibo;
+import com.newproject.jhocadi.projectSolarFishBackend.repository.repositoryUsuario;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+@Service
+@RequiredArgsConstructor
 public class ServiceImpDemandaRecibo implements ServiceDemandaRecibo {
+
+    private final RepositoryDemandaRecibo demandaRepo;
+    private final repositoryUsuario usuarioRepo;
 
     @Override
     public ResponseDemandaRecibo calcularDemandaEnergetica(RequestDemandaRecibo request) {
+        return calcular(request);
+    }
+
+    @Override
+    public ResponseDemandaRecibo calcularYGuardar(RequestDemandaRecibo request, String nombreUsuario) {
+        ResponseDemandaRecibo response = calcular(request);
+
+        modelUsuario usuario = usuarioRepo.findByNombreUsuario(nombreUsuario)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        modelDemandaRecibo entidad = modelDemandaRecibo.builder()
+                .usuario(usuario)
+                .modoCalculoConsumoBase(response.getModoCalculoConsumoBase())
+                .consumoBaseMensualKwh(response.getConsumoBaseMensualKwhUsuario())
+                .cantidadRecibosUsados(response.getCantidadRecibosUsados())
+                .diasPeriodoCalculados(response.getDiasPeriodoCalculados())
+                .energiaDiariaWhBase(response.getEnergiaDiariaWhBase())
+                .energiaMensualWhBase(response.getEnergiaMensualWhBase())
+                .energiaAnualWhBase(response.getEnergiaAnualWhBase())
+                .porcentajeCobertura(response.getPorcentajeCoberturaAplicado())
+                .energiaDiariaWhCubierta(response.getEnergiaDiariaWhCubierta())
+                .energiaDiariaWhFinal(response.getEnergiaDiariaWhFinal())
+                .energiaMensualWhFinal(response.getEnergiaMensualWhFinal())
+                .energiaAnualWhFinal(response.getEnergiaAnualWhFinal())
+                .build();
+
+        demandaRepo.save(entidad);
+        return response;
+    }
+
+    // ── lógica de cálculo (sin cambios respecto a lo que ya tenías) ──────────
+    private ResponseDemandaRecibo calcular(RequestDemandaRecibo request) {
         ResponseDemandaRecibo response = new ResponseDemandaRecibo();
 
-        // 1. Obtener fechas exactas
-        LocalDate inicio = request.getFechaInicioPeriodo();
-        LocalDate fin = request.getFechaFinPeriodo();
+        LocalDate fechaInicio = LocalDate.of(request.getAnioInicio(), request.getMesInicio(), 1);
+        LocalDate fechaFin    = YearMonth.of(request.getAnioFin(), request.getMesFin()).atEndOfMonth();
 
-        if (inicio == null || fin == null || fin.isBefore(inicio)) {
-            throw new IllegalArgumentException("El periodo de fechas es inválido");
-        }
+        if (fechaFin.isBefore(fechaInicio))
+            throw new IllegalArgumentException("El periodo de fechas es inválido.");
 
-        // 2. Cálculo exacto de días (La base de toda la lógica)
-        // Usamos ChronoUnit para obtener la diferencia real en días calendario
-        int diasPeriodo = (int) ChronoUnit.DAYS.between(inicio, fin) + 1;
+        int diasPeriodo = (int) ChronoUnit.DAYS.between(fechaInicio, fechaFin) + 1;
 
-        // 3. Obtener el Consumo Total en kWh
-        double consumoTotalKwh = 0.0;
-        double consumoBaseMensual = 0.0;
+        double consumoBaseKwh;
 
         if ("RECIBOS".equalsIgnoreCase(request.getModoCalculoConsumoBase())) {
             List<Double> recibos = request.getRecibosKwh();
-            if (recibos == null || recibos.isEmpty()) throw new IllegalArgumentException("Lista de recibos vacía");
+            if (recibos == null || recibos.isEmpty())
+                throw new IllegalArgumentException("Debe ingresar los valores de los recibos.");
+            if (recibos.size() < 6 || recibos.size() > 12)
+                throw new IllegalArgumentException("La cantidad de recibos debe ser mínimo 6 y máximo 12.");
+            consumoBaseKwh = recibos.stream().mapToDouble(Double::doubleValue).sum() / recibos.size();
+            response.setCantidadRecibosUsados(recibos.size());
 
-            // SUMATORIA PURA: 315 + 111 + 128 = 554
-            consumoTotalKwh = recibos.stream().mapToDouble(Double::doubleValue).sum();
-            
-            // El promedio mensual es informativo (Total / (Días / 30.41))
-            consumoBaseMensual = consumoTotalKwh / (diasPeriodo / 30.4167); 
+        } else if ("PROMEDIO_DIRECTO".equalsIgnoreCase(request.getModoCalculoConsumoBase())) {
+            if (request.getConsumoPromedioDirectoKwh() == null || request.getConsumoPromedioDirectoKwh() <= 0)
+                throw new IllegalArgumentException("El consumo promedio directo debe ser mayor a 0.");
+            consumoBaseKwh = request.getConsumoPromedioDirectoKwh();
+            long mesesPeriodo = ChronoUnit.MONTHS.between(fechaInicio, fechaFin.plusDays(1));
+            response.setCantidadRecibosUsados((int) mesesPeriodo);
+
         } else {
-            // Si es promedio directo, calculamos el total proyectado según los días del periodo
-            consumoBaseMensual = request.getConsumoPromedioDirectoKwh();
-            consumoTotalKwh = (consumoBaseMensual / 30.4167) * diasPeriodo;
+            throw new IllegalArgumentException("Modo de cálculo no soportado.");
         }
 
-        // 4. CÁLCULO MAESTRO: Wh/día
-        // (Total kWh * 1000) / Días Reales
-        // Ejemplo: (554 * 1000) / 182 = 3,043.95 Wh/día
-        double energiaDiariaWhBase = (consumoTotalKwh * 1000) / diasPeriodo;
+        double energiaDiariaWhBase   = (consumoBaseKwh * 1000.0) / diasPeriodo;
+        double energiaMensualWhBase  = energiaDiariaWhBase * 30;
+        double energiaAnualWhBase    = energiaDiariaWhBase * 365;
 
-        // 5. Aplicar Cobertura y Pérdidas (Lógica de Ingeniería)
-        double factorCobertura = request.getPorcentajeCobertura() / 100.0;
-        double factorPerdidas = 1.25; // 25% de pérdidas según tu código
+        double factorCobertura        = request.getPorcentajeCobertura() / 100.0;
+        double energiaDiariaWhCubierta = energiaDiariaWhBase * factorCobertura;
 
-        double energiaDiariaWhFinal = energiaDiariaWhBase * factorCobertura * factorPerdidas;
+        double energiaDiariaWhFinal  = energiaDiariaWhCubierta * 1.25;
+        double energiaMensualWhFinal = energiaDiariaWhFinal * 30;
+        double energiaAnualWhFinal   = energiaDiariaWhFinal * 365;
 
-        // 6. Mapear al Response
+        response.setModoCalculoConsumoBase(request.getModoCalculoConsumoBase());
+        response.setConsumoBaseMensualKwhUsuario(consumoBaseKwh);
         response.setDiasPeriodoCalculados(diasPeriodo);
-        response.setConsumoPeriodoKwhTotalUsuario(consumoTotalKwh);
         response.setEnergiaDiariaWhBase(energiaDiariaWhBase);
+        response.setEnergiaMensualWhBase(energiaMensualWhBase);
+        response.setEnergiaAnualWhBase(energiaAnualWhBase);
+        response.setPorcentajeCoberturaAplicado(request.getPorcentajeCobertura());
+        response.setFactorCoberturaDecimal(factorCobertura);
+        response.setEnergiaDiariaWhCubierta(energiaDiariaWhCubierta);
+        response.setFactorSeguridad(0.25);
         response.setEnergiaDiariaWhFinal(energiaDiariaWhFinal);
-        
-        // Proyecciones (Opcionales, usando promedio técnico de 30.41 días por mes)
-        response.setEnergiaMensualWhFinal(energiaDiariaWhFinal * 30.4167); 
+        response.setEnergiaMensualWhFinal(energiaMensualWhFinal);
+        response.setEnergiaAnualWhFinal(energiaAnualWhFinal);
 
         return response;
     }

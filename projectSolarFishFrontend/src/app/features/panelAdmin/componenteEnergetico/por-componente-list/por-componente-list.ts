@@ -11,11 +11,11 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 
-import { ComponenteEnergeticoService } from '../../../core/services/componente-energeticoby.service';
+import { ComponenteEnergeticoService } from '../../../../core/services/componente-energeticoby.service';
 import { ComponenteEnergeticoByClase } from '../por-componente/componenteEnergeticobyClase'; 
-import { FincaService } from '../../../core/services/finca.service';
+import { FincaService } from '../../../../core/services/finca.service';
 import { fincaModel } from '../../finca/fincaClase';
-import { DialogoConfirmacionDelete } from '../../../shared/components/dialogo-confirmacion-delete/dialogo-confirmacion-delete';
+import { DialogoConfirmacionDelete } from '../../../../shared/components/dialogo-confirmacion-delete/dialogo-confirmacion-delete';
 
 @Component({
   selector: 'app-por-componente-list',

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { DemandaEnergeticaClase } from '../../features/demanda-energetica/demandaEnergeticaClase';
+import { DemandaEnergeticaClase } from '../../features/panelAdmin/demanda-energetica/demandaEnergeticaClase';
 
 @Injectable({
   providedIn: 'root'

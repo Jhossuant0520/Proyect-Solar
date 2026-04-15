@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ComponenteEnergeticoByClase } from '../../features/componenteEnergetico/por-componente/componenteEnergeticobyClase';
+import { ComponenteEnergeticoByClase } from '../../features/panelAdmin/componenteEnergetico/por-componente/componenteEnergeticobyClase';
 
 @Injectable({
   providedIn: 'root'

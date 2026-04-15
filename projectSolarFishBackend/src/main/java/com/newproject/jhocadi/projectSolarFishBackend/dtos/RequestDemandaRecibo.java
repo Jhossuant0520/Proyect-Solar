@@ -2,50 +2,40 @@ package com.newproject.jhocadi.projectSolarFishBackend.dtos;
 
 import lombok.Data;
 import jakarta.validation.constraints.*;
-import java.time.LocalDate;
 import java.util.List;
 
 
 @Data
 public class RequestDemandaRecibo {
 
-	/**
-	 * Modo de cálculo del consumo base.
-	 * Valores posibles: "RECIBOS", "PROMEDIO_DIRECTO"
-	 */
-	@NotNull(message = "El modo de cálculo es obligatorio.")
-	private String modoCalculoConsumoBase;
+    @NotNull(message = "El modo de cálculo es obligatorio.")
+    private String modoCalculoConsumoBase; // "RECIBOS" o "PROMEDIO_DIRECTO"
 
-	
-	private List<@NotNull Double> recibosKwh;
+    private List<@NotNull Double> recibosKwh;
 
-	
-	private Double consumoPromedioDirectoKwh;
+    private Double consumoPromedioDirectoKwh;
 
-	/**
-	 * Precio del kWh en COP.
-	 */
-	@NotNull(message = "El precio del kWh es obligatorio.")
-	@Positive(message = "El precio del kWh debe ser positivo.")
-	private Double precioKwhCop;
+    @NotNull(message = "El precio del kWh es obligatorio.")
+    @Positive(message = "El precio del kWh debe ser positivo.")
+    private Double precioKwhCop;
 
-	/**
-	 * Porcentaje de cobertura deseado (0-100).
-	 */
-	@NotNull(message = "El porcentaje de cobertura es obligatorio.")
-	@DecimalMin(value = "0.0", inclusive = true, message = "El porcentaje de cobertura no puede ser menor que 0.")
-	@DecimalMax(value = "100.0", inclusive = true, message = "El porcentaje de cobertura no puede ser mayor que 100.")
-	private Double porcentajeCobertura;
+    @NotNull(message = "El porcentaje de cobertura es obligatorio.")
+    @DecimalMin(value = "0.0")
+    @DecimalMax(value = "100.0")
+    private Double porcentajeCobertura;
 
-	/**
-	 * Fecha de inicio del periodo de cálculo.
-	 */
-	@NotNull(message = "La fecha de inicio del periodo es obligatoria.")
-	private LocalDate fechaInicioPeriodo;
+    // --- CAMBIO CLAVE AQUÍ ---
+    @NotNull(message = "El año de inicio es obligatorio.")
+    private Integer anioInicio;
 
-	
-	@NotNull(message = "La fecha de fin del periodo es obligatoria.")
-	private LocalDate fechaFinPeriodo;
+    @NotNull(message = "El mes de inicio es obligatorio.")
+    @Min(1) @Max(12)
+    private Integer mesInicio;
 
-	// Validaciones condicionales pueden implementarse con un validador personalizado
+    @NotNull(message = "El año de fin es obligatorio.")
+    private Integer anioFin;
+
+    @NotNull(message = "El mes de fin es obligatorio.")
+    @Min(1) @Max(12)
+    private Integer mesFin;
 }

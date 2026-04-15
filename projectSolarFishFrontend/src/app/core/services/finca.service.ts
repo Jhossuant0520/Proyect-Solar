@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { fincaModel } from '../../features/finca/fincaClase';
+import { fincaModel } from '../../features/panelAdmin/finca/fincaClase';
 
 @Injectable({
   providedIn: 'root'
