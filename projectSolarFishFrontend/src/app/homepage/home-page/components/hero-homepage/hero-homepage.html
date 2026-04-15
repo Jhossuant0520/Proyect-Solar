@@ -1,100 +1,63 @@
-<section class="hero">
+<section class="solar-scan-container">
+  
+  <div class="info-panel">
+    <div class="brand-badge">SOLARFISH AI • Diagnóstico Activo</div>
+    <h1>Desbloquea el <span class="power-text">Poder Solar</span> de tu Hogar</h1>
+    <p>Nuestra IA escanea tu ADN energético y proyecta tu independencia en segundos. Sintoniza tu consumo a la derecha.</p>
+    
+    <div class="trusted-counter">
+      <i class="icon-star">★</i>
+      <span>Analizando la red de +1,200 familias colombianas.</span>
+    </div>
+  </div>
 
-  <div class="hero-container">
+  <div class="scan-visual-panel">
+    
+    <div class="hologram-stage">
+      <div class="house-mesh">
+        <img src="https://cdn-icons-png.flaticon.com/512/616/616490.png" alt="Malla de Casa 3D" class="mesh-img">
+        <div class="energy-shield"></div>
+      </div>
 
-    <!-- IZQUIERDA -->
-    <div class="hero-left">
-      <div class="hero-content">
+      <div class="hologram-data h-ahorro">
+        <span class="label">AHORRO PROYECTADO</span>
+        <h3 class="value">{{ proyeccionAhorro | currency:'COP':'symbol-narrow':'1.0-0' }}<small>/mes</small></h3>
+      </div>
 
-        <span class="badge">☀ GRATIS PARA HOGARES COLOMBIANOS</span>
+      <div class="hologram-data h-paneles">
+        <span class="label">PANELES NECESARIOS</span>
+        <h3 class="value">{{ proyeccionPaneles }}</h3>
+      </div>
 
-        <h1>
-          Descubre cuánta <br>
-          <span class="highlight">energía solar</span><br>
-          necesita tu hogar
-        </h1>
-
-        <p>
-          Calcula tu sistema solar según tu consumo real en segundos.
-        </p>
-
-        <div class="hero-buttons">
-          <button class="btn primary ripple">Calcular mi sistema →</button>
-          <button class="btn ghost ripple">¿Cómo funciona?</button>
-        </div>
-
-        <div class="social-proof">
-          +1.200 familias ya calcularon su sistema
-        </div>
-
+      <div class="hologram-data h-roi">
+        <span class="label">ROI ESTIMADO</span>
+        <h3 class="value">{{ proyeccionRoi }} <small>años</small></h3>
       </div>
     </div>
 
-    <!-- DERECHA -->
-    <div class="hero-right">
-
-      <div class="calculator-card">
-
-        <div class="calc-header">
-          ⚡ Calculadora solar inteligente
-          <span class="calc-sub">Simulación en tiempo real</span>
+    <div class="tune-controls glass-panel">
+      
+      <div class="control-group">
+        <label>Sintonía de Consumo: <b>{{ consumoSintonizado }} kWh</b></label>
+        <div class="dial-container">
+          <input type="range" min="50" max="1500" step="10" 
+                 [(ngModel)]="consumoSintonizado" (input)="sintonizarPoder()" 
+                 class="dial-slider">
         </div>
+      </div>
 
-        <div class="calc-section">
-
-          <div class="calc-field">
-            <label>Consumo mensual</label>
-            <div class="input-box">
-              <input type="number" [(ngModel)]="consumo" />
-              <span>kWh/mes</span>
-            </div>
-          </div>
-
-          <div class="calc-field">
-            <label>Ciudad</label>
-            <div class="input-box">
-              <select [(ngModel)]="ciudad">
-                <option value="alta">Alta</option>
-                <option value="media">Media</option>
-                <option value="baja">Baja</option>
-              </select>
-            </div>
-          </div>
-
+      <div class="control-group regions">
+        <label>Región de Sintonía</label>
+        <div class="region-buttons">
+          <button *ngFor="let region of regiones; let i = index" 
+                  (click)="setRegion(i)" 
+                  [ngClass]="{'active': i === regionIdx}">
+            {{ region.name.split(' ')[0] }}
+          </button>
         </div>
-
-        <div class="calc-results">
-
-          <div class="result-card">
-            <span>Paneles</span>
-            <strong>{{ paneles }}</strong>
-          </div>
-
-          <div class="result-card highlight">
-            <span>Ahorro</span>
-            <strong>{{ ahorro | currency:'COP':'symbol':'1.0-0' }}</strong>
-          </div>
-
-          <div class="result-card">
-            <span>Potencia</span>
-            <strong>{{ potencia }} kWp</strong>
-          </div>
-
-          <div class="result-card">
-            <span>ROI</span>
-            <strong>{{ roi }} años</strong>
-          </div>
-
-        </div>
-
-        <button class="calc-btn ripple" (click)="calcular()">
-          Calcular ahora →
-        </button>
-
       </div>
 
     </div>
 
   </div>
-
 </section>
