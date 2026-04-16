@@ -42,6 +42,9 @@ public class modelDemandaRecibo {
     private Double energiaMensualWhFinal;
     private Double energiaAnualWhFinal;
 
+    @Column(name = "consumo_total_periodo_kwh")
+    private Double consumoTotalPeriodoKwh;
+
     @Column(name = "fecha_registro", updatable = false)
     private LocalDateTime fechaRegistro;
 

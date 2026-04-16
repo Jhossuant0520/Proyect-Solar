@@ -38,5 +38,35 @@ html {
   overflow: hidden !important;
 }
 
+/* ==========================================================================
+   ESTILOS GLOBALES PARA EL MENÚ DESPLEGABLE (SolarFish Glassmorphism)
+   ========================================================================== */
+.sf-select-panel {
+  background: rgba(10, 20, 35, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 200, 255, 0.3) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0, 200, 255, 0.1) !important;
 
+  /* Color de las opciones no seleccionadas */
+  .mat-mdc-option {
+    color: #cfe9ff !important;
+    
+    &:hover {
+      background: rgba(0, 200, 255, 0.1) !important;
+    }
+  }
+
+  /* Color de la opción activa/seleccionada */
+  .mat-mdc-option.mdc-list-item--selected {
+    background: rgba(0, 200, 255, 0.15) !important;
+    
+    .mdc-list-item__primary-text {
+      color: #4fd1ff !important;
+      font-weight: 600;
+      text-shadow: 0 0 8px rgba(0, 200, 255, 0.4);
+    }
+  }
+}
 
