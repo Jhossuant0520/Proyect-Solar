@@ -33,23 +33,32 @@ public class ServiceImpDemandaRecibo implements ServiceDemandaRecibo {
         ResponseDemandaRecibo response = calcular(request);
 
         modelUsuario usuario = usuarioRepo.findByNombreUsuario(nombreUsuario)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        // Calcular consumo total del periodo
+        double consumoTotal = 0.0;
+        if ("RECIBOS".equalsIgnoreCase(response.getModoCalculoConsumoBase())) {
+            consumoTotal = response.getConsumoBaseMensualKwhUsuario() * response.getCantidadRecibosUsados();
+        } else if ("PROMEDIO_DIRECTO".equalsIgnoreCase(response.getModoCalculoConsumoBase())) {
+            consumoTotal = response.getConsumoBaseMensualKwhUsuario() * response.getCantidadRecibosUsados();
+        }
 
         modelDemandaRecibo entidad = modelDemandaRecibo.builder()
-                .usuario(usuario)
-                .modoCalculoConsumoBase(response.getModoCalculoConsumoBase())
-                .consumoBaseMensualKwh(response.getConsumoBaseMensualKwhUsuario())
-                .cantidadRecibosUsados(response.getCantidadRecibosUsados())
-                .diasPeriodoCalculados(response.getDiasPeriodoCalculados())
-                .energiaDiariaWhBase(response.getEnergiaDiariaWhBase())
-                .energiaMensualWhBase(response.getEnergiaMensualWhBase())
-                .energiaAnualWhBase(response.getEnergiaAnualWhBase())
-                .porcentajeCobertura(response.getPorcentajeCoberturaAplicado())
-                .energiaDiariaWhCubierta(response.getEnergiaDiariaWhCubierta())
-                .energiaDiariaWhFinal(response.getEnergiaDiariaWhFinal())
-                .energiaMensualWhFinal(response.getEnergiaMensualWhFinal())
-                .energiaAnualWhFinal(response.getEnergiaAnualWhFinal())
-                .build();
+            .usuario(usuario)
+            .modoCalculoConsumoBase(response.getModoCalculoConsumoBase())
+            .consumoBaseMensualKwh(response.getConsumoBaseMensualKwhUsuario())
+            .cantidadRecibosUsados(response.getCantidadRecibosUsados())
+            .diasPeriodoCalculados(response.getDiasPeriodoCalculados())
+            .energiaDiariaWhBase(response.getEnergiaDiariaWhBase())
+            .energiaMensualWhBase(response.getEnergiaMensualWhBase())
+            .energiaAnualWhBase(response.getEnergiaAnualWhBase())
+            .porcentajeCobertura(response.getPorcentajeCoberturaAplicado())
+            .energiaDiariaWhCubierta(response.getEnergiaDiariaWhCubierta())
+            .energiaDiariaWhFinal(response.getEnergiaDiariaWhFinal())
+            .energiaMensualWhFinal(response.getEnergiaMensualWhFinal())
+            .energiaAnualWhFinal(response.getEnergiaAnualWhFinal())
+            .consumoTotalPeriodoKwh(consumoTotal)
+            .build();
 
         demandaRepo.save(entidad);
         return response;

@@ -386,3 +386,73 @@ $glass-border: rgba(0, 200, 255, 0.3);
     padding: 10px; /* Reducir padding en móviles */
   }
 }
+
+/* ==========================================================================
+   CORRECCIÓN DE MATERIAL INPUTS (Texto, Bordes y Hover)
+   ========================================================================== */
+::ng-deep {
+  /* 1. Color del texto que digita el usuario y texto del select */
+  .mat-mdc-input-element,
+  .mat-mdc-select-value-text {
+    color: #ffffff !important;
+    font-weight: 500;
+  }
+
+  /* 2. Color de las etiquetas (Labels) y placeholders */
+  .mdc-floating-label,
+  .mat-mdc-select-placeholder {
+    color: #cfe9ff !important;
+  }
+
+  /* 3. Color de la flechita del selector */
+  .mat-mdc-select-arrow svg {
+    fill: #4fd1ff !important;
+  }
+
+  /* 4. Color del borde del input en estado normal */
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: rgba(0, 200, 255, 0.3) !important;
+    transition: border-color 0.3s ease;
+  }
+
+  /* 5. Efecto al hacer HOVER o CLICK (Focus) en los inputs */
+  .mdc-text-field--focused .mdc-notched-outline__leading,
+  .mdc-text-field--focused .mdc-notched-outline__notch,
+  .mdc-text-field--focused .mdc-notched-outline__trailing,
+  .mat-mdc-form-field:hover .mdc-notched-outline__leading,
+  .mat-mdc-form-field:hover .mdc-notched-outline__notch,
+  .mat-mdc-form-field:hover .mdc-notched-outline__trailing {
+    border-color: #4fd1ff !important;
+  }
+
+  /* Color del label cuando está enfocado */
+  .mdc-text-field--focused .mdc-floating-label {
+    color: #4fd1ff !important;
+  }
+
+  /* 6. Eliminar el fondo oscuro/gris que pone Material al hacer hover */
+  .mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-text-field__input {
+    caret-color: #4fd1ff; /* Color del cursor parpadeante */
+  }
+}
+
+/* ==========================================================================
+   OCULTAR FLECHAS GENÉRICAS DE LOS INPUTS NUMBER (Estilo Limpio)
+   ========================================================================== */
+::ng-deep {
+  /* Ocultar en Chrome, Safari, Edge, Opera */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none !important;
+    appearance: none !important; /* <-- Esta es la línea que pide tu editor */
+    margin: 0 !important;
+  }
+  
+  /* Ocultar en Firefox */
+  input[type="number"] {
+    -moz-appearance: textfield !important; 
+    appearance: textfield !important; /* <-- Y esta también */
+  }
+}

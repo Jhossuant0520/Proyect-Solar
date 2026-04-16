@@ -2,7 +2,7 @@
 
   <!-- Encabezado -->
   <div class="demanda-header">
-    <h1>Demanda Energética <span>SolarFish</span></h1>
+    <h1>Demanda Energética <span>SolarFix</span></h1>
     <p>Calcula y registra tu demanda a partir de tus recibos o promedio mensual.</p>
     <p class="usuario-badge" *ngIf="usuarioActual">
       <mat-icon>person</mat-icon> {{ usuarioActual }}
@@ -26,7 +26,7 @@
           <mat-card-content>
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>¿Cómo deseas ingresar tu consumo?</mat-label>
-              <mat-select formControlName="modoCalculoConsumoBase">
+              <mat-select formControlName="modoCalculoConsumoBase" panelClass="sf-select-panel">
                 <mat-option value="RECIBOS">Opción A — Ingresar recibos (6 a 12 meses)</mat-option>
                 <mat-option value="PROMEDIO_DIRECTO">Opción B — Promedio directo del recibo</mat-option>
               </mat-select>
