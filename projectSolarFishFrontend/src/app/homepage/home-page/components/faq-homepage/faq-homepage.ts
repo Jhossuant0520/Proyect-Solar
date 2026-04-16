@@ -20,22 +20,22 @@ export class FaqHomepage {
   faq = [
     {
       q: '¿Por qué necesitan mi ubicación?',
-      a: 'Para darte el pronóstico más preciso y el cálculo de ahorro para tu hogar exacto. No compartimos tu ubicación con terceros.',
+      a: 'Para conocer las horas sol pico exactas de tu región. Sin este dato, el cálculo sería genérico y poco confiable. Tu ubicación solo se usa para el cálculo y nunca se comparte con terceros.',
       icon: 'assets/icons/map.png'
     },
     {
       q: '¿Es realmente gratis?',
-      a: 'Sí, completamente gratis para hogares colombianos. No hay costos ocultos ni suscripciones.',
+      a: 'Sí, completamente. Solvix es una herramienta gratuita para hogares colombianos. No hay costos ocultos ni suscripciones.',
       icon: 'assets/icons/money.png'
     },
     {
       q: '¿Qué tan preciso es el cálculo?',
-      a: 'Utilizamos datos reales de irradiación solar y consumo energético para ofrecer resultados confiables y cercanos a la realidad.',
+      a: 'El algoritmo utiliza tu consumo real en kWh, las horas sol pico de tu municipio (datos de PVGIS/NASA), la eficiencia del panel seleccionado y los factores de pérdida del sistema. Los resultados son una estimación técnicamente sólida, equivalente a la que haría un profesional del sector.',
       icon: 'assets/icons/chart.png'
     },
     {
       q: '¿Mis datos están seguros?',
-      a: 'Sí. Usamos autenticación segura, cifrado y tu información nunca se comparte.',
+      a: 'Sí. Usamos autenticación con verificación por correo y JWT para proteger tu sesión. Tu información de consumo y ubicación no se comparte con nadie y es solo tuya.',
       icon: 'assets/icons/security.png'
     }
   ];
