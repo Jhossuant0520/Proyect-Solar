@@ -1,8 +1,9 @@
-package com.newproject.jhocadi.projectSolarFishBackend.repository;
+package com.newproject.jhocadi.projectSolarFishBackend.repository.BusinessRepo.ModulDemandaReciboRepo;
 
-import com.newproject.jhocadi.projectSolarFishBackend.model.modelDemandaRecibo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import com.newproject.jhocadi.projectSolarFishBackend.model.BusinessModel.ModulDemandaReciboModel.modelDemandaRecibo;
 
 @Repository
 public interface RepositoryDemandaRecibo extends JpaRepository<modelDemandaRecibo, Long> {

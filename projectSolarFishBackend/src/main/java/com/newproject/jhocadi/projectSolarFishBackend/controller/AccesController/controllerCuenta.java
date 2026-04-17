@@ -1,4 +1,4 @@
-package com.newproject.jhocadi.projectSolarFishBackend.controller;
+package com.newproject.jhocadi.projectSolarFishBackend.controller.AccesController;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -8,10 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.newproject.jhocadi.projectSolarFishBackend.dtos.CambiarPasswordDTO;
-import com.newproject.jhocadi.projectSolarFishBackend.model.modelUsuario;
+import com.newproject.jhocadi.projectSolarFishBackend.dtos.AccesDtos.CambiarPasswordDTO;
+import com.newproject.jhocadi.projectSolarFishBackend.model.AccesModel.modelUsuario;
 import com.newproject.jhocadi.projectSolarFishBackend.security.JwtUtil;
-import com.newproject.jhocadi.projectSolarFishBackend.service.serviceUsuario;
+import com.newproject.jhocadi.projectSolarFishBackend.service.AcessService.serviceUsuario;
 
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;

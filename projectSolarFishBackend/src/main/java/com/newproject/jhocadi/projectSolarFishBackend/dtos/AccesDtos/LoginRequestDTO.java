@@ -1,4 +1,4 @@
-package com.newproject.jhocadi.projectSolarFishBackend.dtos;
+package com.newproject.jhocadi.projectSolarFishBackend.dtos.AccesDtos;
 
 import lombok.Data;
 

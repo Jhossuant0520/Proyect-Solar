@@ -1,8 +1,9 @@
-package com.newproject.jhocadi.projectSolarFishBackend.controller;
+package com.newproject.jhocadi.projectSolarFishBackend.controller.BusinessController.ModulDemandaReciboCon;
 
-import com.newproject.jhocadi.projectSolarFishBackend.dtos.RequestDemandaRecibo;
-import com.newproject.jhocadi.projectSolarFishBackend.dtos.ResponseDemandaRecibo;
-import com.newproject.jhocadi.projectSolarFishBackend.service.ServiceDemandaRecibo;
+import com.newproject.jhocadi.projectSolarFishBackend.dtos.BusinessDtos.ModulDemandaReciboDtos.RequestDemandaRecibo;
+import com.newproject.jhocadi.projectSolarFishBackend.dtos.BusinessDtos.ModulDemandaReciboDtos.ResponseDemandaRecibo;
+import com.newproject.jhocadi.projectSolarFishBackend.service.BusinessService.ModulDemandaReciboService.ServiceDemandaRecibo;
+
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

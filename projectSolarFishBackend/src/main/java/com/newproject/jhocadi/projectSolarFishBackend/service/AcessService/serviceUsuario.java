@@ -1,4 +1,4 @@
-package com.newproject.jhocadi.projectSolarFishBackend.service;
+package com.newproject.jhocadi.projectSolarFishBackend.service.AcessService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -6,12 +6,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.newproject.jhocadi.projectSolarFishBackend.dtos.CambiarPasswordDTO;
-import com.newproject.jhocadi.projectSolarFishBackend.dtos.RegistroRequestDTO;
-import com.newproject.jhocadi.projectSolarFishBackend.model.modelUsuario;
-import com.newproject.jhocadi.projectSolarFishBackend.model.modelRolUsuario;
-import com.newproject.jhocadi.projectSolarFishBackend.repository.repositoryUsuario;
-import com.newproject.jhocadi.projectSolarFishBackend.repository.repositoryRolUsuario;
+import com.newproject.jhocadi.projectSolarFishBackend.dtos.AccesDtos.CambiarPasswordDTO;
+import com.newproject.jhocadi.projectSolarFishBackend.dtos.AccesDtos.RegistroRequestDTO;
+import com.newproject.jhocadi.projectSolarFishBackend.model.AccesModel.modelRolUsuario;
+import com.newproject.jhocadi.projectSolarFishBackend.model.AccesModel.modelUsuario;
+import com.newproject.jhocadi.projectSolarFishBackend.repository.AccesRepo.repositoryRolUsuario;
+import com.newproject.jhocadi.projectSolarFishBackend.repository.AccesRepo.repositoryUsuario;
 
 import java.time.LocalDateTime;
 import java.util.Optional;

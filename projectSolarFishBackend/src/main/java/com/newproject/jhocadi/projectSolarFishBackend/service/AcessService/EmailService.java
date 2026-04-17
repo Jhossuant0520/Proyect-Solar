@@ -1,4 +1,4 @@
-package com.newproject.jhocadi.projectSolarFishBackend.service;
+package com.newproject.jhocadi.projectSolarFishBackend.service.AcessService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

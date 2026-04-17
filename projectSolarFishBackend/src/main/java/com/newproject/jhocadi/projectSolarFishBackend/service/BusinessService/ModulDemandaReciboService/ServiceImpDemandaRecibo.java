@@ -1,11 +1,12 @@
-package com.newproject.jhocadi.projectSolarFishBackend.service;
+package com.newproject.jhocadi.projectSolarFishBackend.service.BusinessService.ModulDemandaReciboService;
 
-import com.newproject.jhocadi.projectSolarFishBackend.dtos.RequestDemandaRecibo;
-import com.newproject.jhocadi.projectSolarFishBackend.dtos.ResponseDemandaRecibo;
-import com.newproject.jhocadi.projectSolarFishBackend.model.modelDemandaRecibo;
-import com.newproject.jhocadi.projectSolarFishBackend.model.modelUsuario;
-import com.newproject.jhocadi.projectSolarFishBackend.repository.RepositoryDemandaRecibo;
-import com.newproject.jhocadi.projectSolarFishBackend.repository.repositoryUsuario;
+import com.newproject.jhocadi.projectSolarFishBackend.dtos.BusinessDtos.ModulDemandaReciboDtos.RequestDemandaRecibo;
+import com.newproject.jhocadi.projectSolarFishBackend.dtos.BusinessDtos.ModulDemandaReciboDtos.ResponseDemandaRecibo;
+import com.newproject.jhocadi.projectSolarFishBackend.model.AccesModel.modelUsuario;
+import com.newproject.jhocadi.projectSolarFishBackend.model.BusinessModel.ModulDemandaReciboModel.modelDemandaRecibo;
+import com.newproject.jhocadi.projectSolarFishBackend.repository.AccesRepo.repositoryUsuario;
+import com.newproject.jhocadi.projectSolarFishBackend.repository.BusinessRepo.ModulDemandaReciboRepo.RepositoryDemandaRecibo;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

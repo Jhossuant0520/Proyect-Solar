@@ -1,4 +1,4 @@
-package com.newproject.jhocadi.projectSolarFishBackend.model;
+package com.newproject.jhocadi.projectSolarFishBackend.model.AccesModel;
 
 import jakarta.persistence.*;
 import lombok.*;

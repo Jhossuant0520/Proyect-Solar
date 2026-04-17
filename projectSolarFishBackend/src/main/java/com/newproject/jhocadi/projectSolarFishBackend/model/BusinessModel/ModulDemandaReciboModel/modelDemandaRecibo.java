@@ -1,8 +1,10 @@
-package com.newproject.jhocadi.projectSolarFishBackend.model;
+package com.newproject.jhocadi.projectSolarFishBackend.model.BusinessModel.ModulDemandaReciboModel;
 
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+
+import com.newproject.jhocadi.projectSolarFishBackend.model.AccesModel.modelUsuario;
 
 @Entity
 @Table(name = "demandas_recibos")

@@ -1,9 +1,9 @@
-package com.newproject.jhocadi.projectSolarFishBackend.controller;
+package com.newproject.jhocadi.projectSolarFishBackend.controller.AccesController;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.newproject.jhocadi.projectSolarFishBackend.model.modelRolUsuario;
-import com.newproject.jhocadi.projectSolarFishBackend.repository.repositoryRolUsuario;
+import com.newproject.jhocadi.projectSolarFishBackend.model.AccesModel.modelRolUsuario;
+import com.newproject.jhocadi.projectSolarFishBackend.repository.AccesRepo.repositoryRolUsuario;
 
 import java.util.List;
 import org.springframework.http.HttpStatus;

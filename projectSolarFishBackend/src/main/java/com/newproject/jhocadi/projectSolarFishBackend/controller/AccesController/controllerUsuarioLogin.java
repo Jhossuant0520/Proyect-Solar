@@ -1,17 +1,17 @@
-package com.newproject.jhocadi.projectSolarFishBackend.controller;
+package com.newproject.jhocadi.projectSolarFishBackend.controller.AccesController;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
-import com.newproject.jhocadi.projectSolarFishBackend.dtos.LoginRequestDTO;
-import com.newproject.jhocadi.projectSolarFishBackend.dtos.RegistroRequestDTO;
-import com.newproject.jhocadi.projectSolarFishBackend.model.modelUsuario;
-import com.newproject.jhocadi.projectSolarFishBackend.repository.repositoryUsuario;
+import com.newproject.jhocadi.projectSolarFishBackend.dtos.AccesDtos.LoginRequestDTO;
+import com.newproject.jhocadi.projectSolarFishBackend.dtos.AccesDtos.RegistroRequestDTO;
+import com.newproject.jhocadi.projectSolarFishBackend.model.AccesModel.modelUsuario;
+import com.newproject.jhocadi.projectSolarFishBackend.repository.AccesRepo.repositoryUsuario;
 import com.newproject.jhocadi.projectSolarFishBackend.security.JwtUtil;
-import com.newproject.jhocadi.projectSolarFishBackend.service.EmailService;
-import com.newproject.jhocadi.projectSolarFishBackend.service.serviceUsuario;
+import com.newproject.jhocadi.projectSolarFishBackend.service.AcessService.EmailService;
+import com.newproject.jhocadi.projectSolarFishBackend.service.AcessService.serviceUsuario;
 
 import java.time.LocalDateTime;
 import java.util.Map;
