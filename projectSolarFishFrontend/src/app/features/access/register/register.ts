@@ -15,9 +15,14 @@ import { UserService } from '../../../core/services/user.service';
 export class Register {
 
   form: FormGroup;
+
   cargando = false;
   errorMensaje = '';
   registroExitoso = false;
+
+  // 👁️ CONTROL DEL OJO
+  showPassword = false;
+  showConfirm = false;
 
   constructor(
     private fb: FormBuilder,
@@ -32,13 +37,31 @@ export class Register {
     }, { validators: this.passwordMatchValidator });
   }
 
+  // 👇 acceso fácil a controles
+  get f() {
+    return this.form.controls;
+  }
+
+  // 🔐 validar contraseñas
   private passwordMatchValidator(g: AbstractControl): ValidationErrors | null {
     const pass = g.get('passwordUsuario')?.value;
     const confirm = g.get('confirmarPassword')?.value;
+
     return pass === confirm ? null : { passwordsMismatch: true };
   }
 
+  // 👁️ mostrar/ocultar
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirm(): void {
+    this.showConfirm = !this.showConfirm;
+  }
+
+  // 🚀 submit
   onSubmit(): void {
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -53,30 +76,19 @@ export class Register {
       passwordUsuario: this.form.get('passwordUsuario')?.value
     };
 
-    this.userService.registrar(datos).pipe(
-      finalize(() => { this.cargando = false; })
-    ).subscribe({
-      next: () => {
-        this.registroExitoso = true;
-      },
-      error: (err) => {
-        const body = err?.error;
-        if (typeof body === 'string') {
-          this.errorMensaje = body;
-        } else if (body?.message) {
-          this.errorMensaje = body.message;
-        } else if (body?.error) {
-          this.errorMensaje = body.error;
-        } else if (body?.mensaje) {
-          this.errorMensaje = body.mensaje;
-        } else {
-          this.errorMensaje = 'Error al registrar. Intenta nuevamente.';
-        }
-      }
-    });
-  }
+    this.userService.registrar(datos)
+      .pipe(finalize(() => this.cargando = false))
+      .subscribe({
+        next: () => {
+          this.registroExitoso = true;
 
-  get emailValue(): string {
-    return this.form.get('email')?.value || '';
+          setTimeout(() => {
+            this.router.navigate(['/login']);
+          }, 2000);
+        },
+        error: (err) => {
+          this.errorMensaje = 'Error al registrar';
+        }
+      });
   }
 }

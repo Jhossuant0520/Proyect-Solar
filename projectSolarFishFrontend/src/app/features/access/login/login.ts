@@ -17,24 +17,19 @@ import { MatButtonModule } from '@angular/material/button';
   styleUrls: ['./login.scss']
 })
 export class LoginComponent {
-  usuarioLogin = '';
-  passwordLogin = '';
-  error = '';
+  user = {
+    email: '',
+    password: ''
+  };
 
-  constructor(private authService: AuthService, private router: Router) {}
+  loading: boolean = false;
 
-  login() {
-    this.authService.login(this.usuarioLogin, this.passwordLogin).subscribe({
-      next: (response) => {
-        console.log('Respuesta del backend:', response); // 👈 revisa aquí en consola
-        this.authService.guardarToken(response.token);
-        this.router.navigate(['/dashboard']); // Redirige al dashboard después del login exitoso
-      },
-      error: (err) => {
-        console.error('Error del backend:', err); // 👈 importante revisar esto también
-        this.error = 'Credenciales inválidas';
-      }
-    });
+  iniciarSesion() {
+    this.loading = true;
+    // Simulación de validación de identidad
+    setTimeout(() => {
+      console.log('Sincronizando con la red...', this.user);
+      this.loading = false;
+    }, 2000);
   }
-  
 }
