@@ -19,7 +19,7 @@ export class Catalog {
       nombre: 'Computador All-in-One HP 24”',
       precio: 1299,
       categoria: 'COMPUTO',
-      imagen: 'https://www.pcware.com.co/wp-content/uploads/2019/09/HP-20-C408LA_2.jpg',
+      imagen: 'https://##',
       caracteristicas: [
         'Intel Core i5 12th Gen',
         '8 GB RAM DDR4',

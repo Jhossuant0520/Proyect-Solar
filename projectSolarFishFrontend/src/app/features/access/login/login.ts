@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import {MatCardModule} from '@angular/material/card';
-import {MatFormFieldModule} from '@angular/material/form-field';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 
@@ -17,19 +17,28 @@ import { MatButtonModule } from '@angular/material/button';
   styleUrls: ['./login.scss']
 })
 export class LoginComponent {
-  user = {
-    email: '',
-    password: ''
-  };
-
+  usuarioLogin = '';
+  passwordLogin = '';
+  error = '';
   loading: boolean = false;
 
-  iniciarSesion() {
+  constructor(private authService: AuthService, private router: Router) {}
+
+  login() {
     this.loading = true;
-    // Simulación de validación de identidad
-    setTimeout(() => {
-      console.log('Sincronizando con la red...', this.user);
-      this.loading = false;
-    }, 2000);
+    this.error = '';
+    this.authService.login(this.usuarioLogin, this.passwordLogin).subscribe({
+      next: (response) => {
+        console.log('Respuesta del backend:', response); // 👈 revisa aquí en consola
+        this.authService.guardarToken(response.token);
+        this.router.navigate(['/dashboard']); // Redirige al dashboard después del login exitoso
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error del backend:', err); // 👈 importante revisar esto también
+        this.error = 'Credenciales inválidas';
+        this.loading = false;
+      }
+    });
   }
 }

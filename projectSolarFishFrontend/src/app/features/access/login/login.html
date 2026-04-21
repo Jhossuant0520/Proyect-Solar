@@ -3,7 +3,6 @@
 
   <div class="creative-card">
     <div class="side-accent"></div>
-    
     <div class="content-wrapper">
       <header>
         <div class="hex-brand"></div>
@@ -11,22 +10,33 @@
         <p class="subtitle">ACCESO AL SISTEMA DE CONTROL</p>
       </header>
 
-      <form>
-        <div class="input-box">
-          <label>Usuario</label>
-          <input type="text" placeholder="nombre@dominio.com">
-        </div>
+      <form (ngSubmit)="login()" #loginForm="ngForm" autocomplete="off" class="login-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Usuario</mat-label>
+          <input matInput [(ngModel)]="usuarioLogin" name="username" required [disabled]="loading" />
+        </mat-form-field>
 
-        <div class="input-box">
-          <label>Contraseña</label>
-          <input type="password" placeholder="••••••••">
-        </div>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Contraseña</mat-label>
+          <input matInput [(ngModel)]="passwordLogin" name="password" type="password" required [disabled]="loading" />
+        </mat-form-field>
 
-        <div class="form-footer">
-          <a href="#" class="link-alt">RECUPERAR CLAVE</a>
-          <button type="submit" class="btn-ultra">ENTRAR</button>
-        </div>
+        <button mat-raised-button color="primary" class="btn-ultra login-btn" type="submit" [disabled]="loading || !loginForm.form.valid">
+          <span *ngIf="!loading">Ingresar</span>
+          <span *ngIf="loading">Cargando...</span>
+        </button>
+
+        <p class="error" *ngIf="error">{{ error }}</p>
       </form>
+
+      <div class="bottom-links">
+        <a href="#" class="link-alt">¿Olvidaste tu contraseña?</a>
+      </div>
     </div>
   </div>
 </div>
+
+<footer class="login-footer">
+  © 2025 Computer & Electronic — Todos los derechos reservados<br />
+  <span class="footer-contact">SoporteComputer</span>
+</footer>

@@ -14,6 +14,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.client.RestTemplate;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
 @EnableMethodSecurity
@@ -38,6 +40,16 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
 }
+        @Bean
+        public RestTemplate restTemplate() {
+            return new RestTemplate();
+        }
+
+        @Bean
+        public ObjectMapper objectMapper() {
+            return new ObjectMapper();
+        }
+
 
 
     
@@ -63,7 +75,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
-
+    
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

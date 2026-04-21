@@ -15,6 +15,7 @@ import { PorComponenteForm } from './features/panelAdmin/componenteEnergetico/po
 import { PorComponenteList } from './features/panelAdmin/componenteEnergetico/por-componente-list/por-componente-list';
 import { DemandaEnergetica } from './features/panelAdmin/demanda-energetica/demanda-energetica';
 import { ModulDemandaRecibo } from './features/business/modul-demanda-recibo/modul-demanda-recibo';
+import { ModulHsp } from './features/business/modul-hsp/modul-hsp';
 
 export const routes: Routes = [
   // Rutas públicas (sin autenticación)
@@ -25,6 +26,7 @@ export const routes: Routes = [
   { path: 'verificar-email/:token', component: VerificarEmail },
   { path: 'solicitar-reenvio', component: SolicitarReenvio },
   { path: 'demanda-recibo', component: ModulDemandaRecibo },
+  { path: 'hsp', component: ModulHsp },
 
   // Rutas protegidas (requieren autenticación)
   {

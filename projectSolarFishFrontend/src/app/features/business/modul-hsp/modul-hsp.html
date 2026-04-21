@@ -1,0 +1,254 @@
+<div class="hsp-wrapper">
+
+  <div class="hsp-header">
+    <h1>Horas Sol Pico <span>SolarFix</span></h1>
+    <p>Consulta automática a PVGIS con tus coordenadas para obtener la irradiación real de tu ubicación.</p>
+  </div>
+
+  <mat-stepper linear #stepper orientation="horizontal">
+
+    <!-- ══════════════════════════════════════
+         PASO 1 — Ubicación
+    ══════════════════════════════════════ -->
+    <mat-step label="Ubicación" [stepControl]="form">
+      <form [formGroup]="form">
+
+        <mat-card class="sf-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>location_on</mat-icon>
+            <mat-card-title>Ubicación del sistema fotovoltaico</mat-card-title>
+            <mat-card-subtitle>
+              Indica la ubicación exacta donde se instalará el sistema solar.
+            </mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+
+            <!-- Botón geolocalización -->
+            <div class="geo-row">
+              <button mat-flat-button color="accent" type="button"
+                      [disabled]="!geoDisponible || loadingUbicacion"
+                      (click)="usarUbicacionActual()">
+                <mat-icon>my_location</mat-icon>
+                {{ loadingUbicacion ? 'Obteniendo ubicación...' : 'Usar mi ubicación actual' }}
+              </button>
+              <span class="o-divider">— o ingresa manualmente —</span>
+            </div>
+
+            <div *ngIf="errorUbicacion" class="aviso-warning">
+              <mat-icon color="warn">warning</mat-icon>
+              <span>{{ errorUbicacion }}</span>
+            </div>
+
+            <!-- Inputs manuales -->
+            <div class="coords-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Latitud (DD)</mat-label>
+                <input matInput type="number" formControlName="latitud"
+                       step="0.0000001" placeholder="7.007528"
+                       (change)="onCoordsChange()">
+                <mat-hint>Ejemplo: 7.007528</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Longitud (DD)</mat-label>
+                <input matInput type="number" formControlName="longitud"
+                       step="0.0000001" placeholder="-73.9110583"
+                       (change)="onCoordsChange()">
+                <mat-hint>Ejemplo: -73.9110583</mat-hint>
+              </mat-form-field>
+            </div>
+
+            <!-- Link verificación Google Maps -->
+            <div *ngIf="mapaUrl" class="mapa-link">
+              <mat-icon>map</mat-icon>
+              <a [href]="mapaUrl" target="_blank" rel="noopener">
+                Verificar ubicación en Google Maps
+              </a>
+            </div>
+
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button mat-flat-button color="primary" type="button"
+                    matStepperNext
+                    [disabled]="form.invalid || loadingCalculo"
+                    (click)="onCalcular()">
+              Consultar PVGIS <mat-icon>bolt</mat-icon>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+
+      </form>
+    </mat-step>
+
+    <!-- ══════════════════════════════════════
+         PASO 2 — Previsualización y confirmación
+    ══════════════════════════════════════ -->
+    <mat-step label="Resultados HSP">
+
+      <!-- Cargando cálculo -->
+      <div *ngIf="loadingCalculo || loadingGuardar" class="loading-center">
+        <mat-spinner diameter="48"></mat-spinner>
+        <p>{{ loadingCalculo ? 'Consultando PVGIS...' : 'Guardando resultados...' }}</p>
+      </div>
+
+      <!-- Error cálculo -->
+      <mat-card *ngIf="errorCalculo && !loadingCalculo" class="sf-card error-card">
+        <mat-card-content>
+          <mat-icon color="warn">error</mat-icon> {{ errorCalculo }}
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-stroked-button matStepperPrevious type="button">
+            <mat-icon>arrow_back</mat-icon> Corregir coordenadas
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <!-- Previsualización (antes de confirmar) -->
+      <ng-container *ngIf="preview && !resultado && !loadingCalculo && !loadingGuardar">
+
+        <!-- Info técnica PVGIS -->
+        <mat-card class="sf-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>satellite_alt</mat-icon>
+            <mat-card-title>Datos PVGIS — Año {{ preview.anioConsultado }}</mat-card-title>
+            <mat-card-subtitle>
+              Lat {{ preview.latitud | number:'1.4-7' }} /
+              Lon {{ preview.longitud | number:'1.4-7' }}
+            </mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="info-chips">
+              <mat-chip>Inclinación óptima: {{ preview.slopeAngle }}°</mat-chip>
+              <mat-chip>Azimuth óptimo: {{ preview.azimuthAngle }}°</mat-chip>
+              <mat-chip>Montaje sobre tejado</mat-chip>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Tabla mensual -->
+        <mat-card class="sf-card">
+          <mat-card-header>
+            <mat-card-title>Irradiación mensual</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <table mat-table [dataSource]="preview.meses" class="hsp-table">
+
+              <ng-container matColumnDef="mes">
+                <th mat-header-cell *matHeaderCellDef>Mes</th>
+                <td mat-cell *matCellDef="let m">{{ m.nombreMes }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="diasMes">
+                <th mat-header-cell *matHeaderCellDef>Días</th>
+                <td mat-cell *matCellDef="let m">{{ m.diasMes }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="hOptM">
+                <th mat-header-cell *matHeaderCellDef>H(i_opt)_m (kWh/m²)</th>
+                <td mat-cell *matCellDef="let m">{{ m.hOptM | number:'1.2-2' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="hspDiaria">
+                <th mat-header-cell *matHeaderCellDef>HSP diaria (h/día)</th>
+                <td mat-cell *matCellDef="let m"
+                    [class.celda-critica]="m.mes === preview!.mesCritico"
+                    [class.celda-favorable]="m.mes === preview!.mesFavorable">
+                  {{ m.hspDiaria | number:'1.4-4' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="tipo">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let m">
+                  <mat-chip *ngIf="m.mes === preview!.mesCritico" color="warn">Crítico</mat-chip>
+                  <mat-chip *ngIf="m.mes === preview!.mesFavorable" color="primary">Favorable</mat-chip>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="columnasMeses"></tr>
+              <tr mat-row *matRowDef="let row; columns: columnasMeses;"></tr>
+            </table>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Resumen HSP -->
+        <mat-card class="sf-card">
+          <mat-card-header>
+            <mat-card-title>Resumen HSP de diseño</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="resumen-grid">
+              <div class="resumen-item critico">
+                <span class="resumen-label">HSP Crítica</span>
+                <span class="resumen-valor">{{ preview.hspCritica | number:'1.4-4' }} h/día</span>
+                <span class="resumen-sub">{{ preview.nombreMesCritico }}</span>
+              </div>
+              <div class="resumen-item favorable">
+                <span class="resumen-label">HSP Favorable</span>
+                <span class="resumen-valor">{{ preview.hspFavorable | number:'1.4-4' }} h/día</span>
+                <span class="resumen-sub">{{ preview.nombreMesFavorable }}</span>
+              </div>
+              <div class="resumen-item promedio">
+                <span class="resumen-label">HSP Promedio anual</span>
+                <span class="resumen-valor">{{ preview.hspPromedio | number:'1.4-4' }} h/día</span>
+                <span class="resumen-sub">Σ H(i_opt) / 365</span>
+              </div>
+              <div class="resumen-item diseno">
+                <span class="resumen-label">HSP Diseño</span>
+                <span class="resumen-valor">{{ preview.hspDiseno | number:'1.4-4' }} h/día</span>
+                <span class="resumen-sub">HSP crítica × 0.85</span>
+              </div>
+            </div>
+
+            <div class="aviso-warning" style="margin-top:16px;">
+              <mat-icon color="warn">warning</mat-icon>
+              <span>Verifica que las coordenadas corresponden al lugar de instalación.
+                    Un error afectará todos los módulos siguientes.</span>
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button mat-stroked-button type="button" matStepperPrevious>
+              <mat-icon>arrow_back</mat-icon> Corregir coordenadas
+            </button>
+            <button mat-flat-button color="primary" type="button"
+                    (click)="onConfirmar()">
+              Confirmar y guardar <mat-icon>save</mat-icon>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+
+      </ng-container>
+
+      <!-- Resultado guardado -->
+      <ng-container *ngIf="resultado && !loadingGuardar">
+        <div class="resultado-header">
+          <mat-icon color="primary">check_circle</mat-icon>
+          <h3>HSP guardado correctamente — Año {{ resultado.anioConsultado }}</h3>
+        </div>
+
+        <div class="resumen-grid">
+          <div class="resumen-item critico">
+            <span class="resumen-label">HSP Crítica</span>
+            <span class="resumen-valor">{{ resultado.hspCritica | number:'1.4-4' }} h/día</span>
+            <span class="resumen-sub">{{ resultado.nombreMesCritico }}</span>
+          </div>
+          <div class="resumen-item diseno">
+            <span class="resumen-label">HSP Diseño</span>
+            <span class="resumen-valor">{{ resultado.hspDiseno | number:'1.4-4' }} h/día</span>
+            <span class="resumen-sub">Usado en el dimensionamiento</span>
+          </div>
+        </div>
+
+        <div class="step-actions" style="margin-top:24px;">
+          <button mat-flat-button color="accent" type="button" (click)="reiniciar()">
+            <mat-icon>refresh</mat-icon> Nueva consulta
+          </button>
+        </div>
+      </ng-container>
+
+    </mat-step>
+  </mat-stepper>
+</div>
