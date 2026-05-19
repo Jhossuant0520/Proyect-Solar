@@ -10,6 +10,7 @@ import com.newproject.jhocadi.projectSolarFishBackend.model.AccesModel.modelUsua
 import com.newproject.jhocadi.projectSolarFishBackend.repository.BusinessRepo.ModulHspRepo.RepositoryHSP;
 import com.newproject.jhocadi.projectSolarFishBackend.repository.AccesRepo.repositoryUsuario;
 import lombok.RequiredArgsConstructor;
+import java.util.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -50,7 +51,11 @@ public class ServiceImpHSP implements ServiceHSP {
 
     @Override
     public ResponseHSP calcularYGuardar(RequestHSP request, String nombreUsuario) {
+        Objects.requireNonNull(request, "Request no puede ser null");
+        Objects.requireNonNull(nombreUsuario, "Nombre de usuario no puede ser null");
+
         ResponseHSP response = calcularInterno(request);
+        Objects.requireNonNull(response, "Response no puede ser null");
 
         modelUsuario usuario = usuarioRepo.findByNombreUsuario(nombreUsuario)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -74,6 +79,7 @@ public class ServiceImpHSP implements ServiceHSP {
                     .hspDiseno(response.getHspDiseno())
                     .mesesJson(mesesJson)
                     .build();
+            Objects.requireNonNull(entidad, "Entidad HSP no puede ser null");
 
             hspRepo.save(entidad);
         } catch (Exception e) {
@@ -160,8 +166,11 @@ public class ServiceImpHSP implements ServiceHSP {
                         .replace("{lat}",  String.valueOf(lat))
                         .replace("{lon}",  String.valueOf(lon))
                         .replace("{year}", String.valueOf(anio));
+                Objects.requireNonNull(url, "URL de PVGIS no puede ser null");
 
-                String raw = restTemplate.getForObject(url, String.class);
+                String raw = Objects.requireNonNull(
+                        restTemplate.getForObject(url, String.class),
+                        "Respuesta de PVGIS no puede ser null");
                 System.out.println("=== RAW PVGIS ===\n" + raw + "\n=================");
                 return objectMapper.readTree(raw);
             } catch (Exception e) {

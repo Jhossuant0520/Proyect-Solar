@@ -7,6 +7,7 @@
 section {
   margin: 0;
   padding: 0;
+  scroll-margin-top: 120px; /* Evita que el navbar fijo tape el inicio de la sección */
 }
 
 app-home-page,

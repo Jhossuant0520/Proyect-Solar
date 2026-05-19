@@ -19,38 +19,61 @@ export class NavbarHomepage {
 
   menu = [
     { id: 'inicio', label: 'Inicio' },
-    { id: 'como', label: 'Cómo funciona' },
-    { id: 'servicios', label: 'Servicios' },
-    { id: 'nosotros', label: 'Nosotros' },
-    { id: 'faq', label: 'FAQ' }
+    { id: 'steps', label: 'Cómo funciona' },
+    { id: 'services', label: 'Servicios' },
+    { id: 'about', label: 'Nosotros' },
+    { id: 'faq', label: 'FAQ' },
+    { id: 'contact', label: 'Contacto' }
   ];
-
   toggleMenu() {
     this.menuOpen = !this.menuOpen;
-  }
-
-  setActive(id: string) {
-    this.activeSection = id;
   }
 
   moveIndicator(event: any) {
     this.indicatorLeft = event.target.offsetLeft;
   }
 
-  /* SCROLL SPY + SUAVE */
+  /* 🔥 SCROLL SUAVE CORREGIDO */
+  scrollToSection(event: Event, id: string) {
+  event.preventDefault();
+
+  this.activeSection = id;
+  this.menuOpen = false;
+
+  setTimeout(() => {
+    const el = document.getElementById(id);
+    if (!el) {
+      console.warn(`No se encontró #${id}`);
+      return;
+    }
+
+    const offset = 100; // altura del navbar
+
+    // ✅ Intenta primero con el scrolling nativo del elemento
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // ✅ Ajuste del offset del navbar (scrollIntoView no soporta offset directo)
+    setTimeout(() => {
+      window.scrollBy({ top: -offset, behavior: 'smooth' });
+    }, 50);
+
+  }, 50);
+}
+
+  /* 🔥 SCROLL SPY CORREGIDO */
   @HostListener('window:scroll', [])
   onScroll() {
-    this.scrolled = window.scrollY > 60;
+    const currentScroll = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    this.scrolled = currentScroll > 60;
 
     const sections = this.menu.map(m => m.id);
 
     sections.forEach(sec => {
       const el = document.getElementById(sec);
       if (el) {
-        const top = el.offsetTop - 100;
-        const height = el.offsetHeight;
-
-        if (window.scrollY >= top && window.scrollY < top + height) {
+        const rect = el.getBoundingClientRect();
+        const spyOffset = 120;
+        if (rect.top <= spyOffset && rect.bottom > spyOffset) {
           this.activeSection = sec;
         }
       }

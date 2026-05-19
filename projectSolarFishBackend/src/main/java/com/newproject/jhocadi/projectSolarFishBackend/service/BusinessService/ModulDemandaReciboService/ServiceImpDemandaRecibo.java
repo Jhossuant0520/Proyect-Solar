@@ -6,6 +6,7 @@ import com.newproject.jhocadi.projectSolarFishBackend.model.AccesModel.modelUsua
 import com.newproject.jhocadi.projectSolarFishBackend.model.BusinessModel.ModulDemandaReciboModel.modelDemandaRecibo;
 import com.newproject.jhocadi.projectSolarFishBackend.repository.AccesRepo.repositoryUsuario;
 import com.newproject.jhocadi.projectSolarFishBackend.repository.BusinessRepo.ModulDemandaReciboRepo.RepositoryDemandaRecibo;
+import java.util.Objects;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,10 +32,15 @@ public class ServiceImpDemandaRecibo implements ServiceDemandaRecibo {
 
     @Override
     public ResponseDemandaRecibo calcularYGuardar(RequestDemandaRecibo request, String nombreUsuario) {
+        Objects.requireNonNull(request, "Request no puede ser null");
+        Objects.requireNonNull(nombreUsuario, "Nombre de usuario no puede ser null");
+
         ResponseDemandaRecibo response = calcular(request);
+        Objects.requireNonNull(response, "Response no puede ser null");
 
         modelUsuario usuario = usuarioRepo.findByNombreUsuario(nombreUsuario)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        Objects.requireNonNull(usuario, "Usuario no puede ser null");
 
         // Calcular consumo total del periodo
         double consumoTotal = 0.0;
@@ -60,6 +66,7 @@ public class ServiceImpDemandaRecibo implements ServiceDemandaRecibo {
             .energiaAnualWhFinal(response.getEnergiaAnualWhFinal())
             .consumoTotalPeriodoKwh(consumoTotal)
             .build();
+        Objects.requireNonNull(entidad, "Entidad demanda no puede ser null");
 
         demandaRepo.save(entidad);
         return response;

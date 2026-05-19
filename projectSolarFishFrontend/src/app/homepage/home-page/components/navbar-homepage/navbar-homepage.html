@@ -1,22 +1,47 @@
-<nav class="navbar" [class.scrolled]="scrolled">
+<!-- navbar-homepage.html -->
+<div class="navbar-wrapper">
 
-  <div class="logo">
-  <img src="LogoSolvix3.1.png" alt="Logo Solvix" class="logo-img">
-  
-</div>
+  <nav class="navbar" [class.scrolled]="scrolled">
+    <div class="logo">
+      <img src="LogoSolvix3.1.png" alt="Logo Solvix" class="logo-img">
+    </div>
 
-  <ul class="nav-links">
-    <li><a href="#inicio" class="nav-item" [class.active]="activeSection==='inicio'">Inicio</a></li>
-    <li><a href="#como" class="nav-item" [class.active]="activeSection==='como'">Cómo funciona</a></li>
-    <li><a href="#servicios" class="nav-item" [class.active]="activeSection==='servicios'">Servicios</a></li>
-    <li><a href="#nosotros" class="nav-item" [class.active]="activeSection==='nosotros'">Nosotros</a></li>
-    <li><a href="#faq" class="nav-item" [class.active]="activeSection==='faq'">FAQ</a></li>
-    <li><a href="#contac" class="nav-item" [class.active]="activeSection==='contact'">Contact</a></li>
-  </ul>
+    <div class="hamburger" (click)="toggleMenu()" [class.active]="menuOpen">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </div>
 
-  <div class="nav-actions">
-    <button class="btn ghost" routerLink="/login">Iniciar sesión</button>
-    <button class="btn primary" routerLink="/register">Calcular gratis →</button>
+    <!-- Solo links de escritorio dentro del navbar -->
+    <ul class="nav-links desktop-nav">
+      <li><a class="nav-item" [class.active]="activeSection==='inicio'" (click)="scrollToSection($event, 'inicio')">Inicio</a></li>
+      <li><a class="nav-item" [class.active]="activeSection==='steps'" (click)="scrollToSection($event, 'steps')">Cómo funciona</a></li>
+      <li><a class="nav-item" [class.active]="activeSection==='services'" (click)="scrollToSection($event, 'services')">Servicios</a></li>
+      <li><a class="nav-item" [class.active]="activeSection==='about'" (click)="scrollToSection($event, 'about')">Nosotros</a></li>
+      <li><a class="nav-item" [class.active]="activeSection==='faq'" (click)="scrollToSection($event, 'faq')">FAQ</a></li>
+      <li><a class="nav-item" [class.active]="activeSection==='contact'" (click)="scrollToSection($event, 'contact')">Contacto</a></li>
+    </ul>
+
+    <div class="nav-actions desktop-actions">
+      <button class="btn ghost" routerLink="/login">Iniciar sesión</button>
+      <button class="btn primary" routerLink="/register">Calcular gratis →</button>
+    </div>
+  </nav>
+
+  <!--  Menú móvil FUERA del navbar (mismo nivel) -->
+  <div class="mobile-menu" [class.active]="menuOpen">
+    <ul>
+      <li><a class="nav-item" (click)="scrollToSection($event, 'inicio')">Inicio</a></li>
+      <li><a class="nav-item" (click)="scrollToSection($event, 'steps')">Cómo funciona</a></li>
+      <li><a class="nav-item" (click)="scrollToSection($event, 'services')">Servicios</a></li>
+      <li><a class="nav-item" (click)="scrollToSection($event, 'about')">Nosotros</a></li>
+      <li><a class="nav-item" (click)="scrollToSection($event, 'faq')">FAQ</a></li>
+      <li><a class="nav-item" (click)="scrollToSection($event, 'contact')">Contacto</a></li>
+    </ul>
+    <div class="mobile-actions">
+      <button class="btn ghost" routerLink="/login" (click)="toggleMenu()">Iniciar sesión</button>
+      <button class="btn primary" routerLink="/register" (click)="toggleMenu()">Calcular gratis →</button>
+    </div>
   </div>
 
-</nav>
+</div>
