@@ -1,113 +1,273 @@
-$bg1: #020617;
-$bg2: #041e2b;
-$neon: #00f5ff;
-$text: #e5e7eb;
+// ==========================================
+// CONFIGURACIÓN Y VARIABLES
+// ==========================================
+$bg-color: #030408;
+$text-main: #ffffff;
+$text-muted: #8b9bb4;
+$neon-cyan: #00f2ff;
+$neon-purple: #7000ff;
+$error-red: #ff4a4a;
+$success-green: #00ff88;
 
-.page {
-  height: 100vh;
+$font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+// ==========================================
+// ESTILOS DEL HOST (Control de fondo de pantalla)
+// ==========================================
+:host {
   display: flex;
   justify-content: center;
   align-items: center;
-
-  background: linear-gradient(90deg, #020617, #041e2b);
+  min-height: 100vh;
+  width: 100vw;
+  background-color: $bg-color;
+  font-family: $font-family;
+  overflow: hidden;
+  position: relative;
 }
 
-/* 💎 CARD */
-.card {
-  width: 380px;
+// --- FONDO DE ONDAS (FUT-3) ---
+.wave-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 1;
+  background: 
+    radial-gradient(circle at 10% 20%, rgba($neon-cyan, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba($neon-purple, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(147, 51, 234, 0.08) 0%, transparent 60%);
+  filter: blur(60px);
+  opacity: 0.8;
+}
+
+.grid-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 2;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse at center, black, transparent 80%);
+}
+
+// ==========================================
+// CONTENEDOR DE LA TARJETA (Organizado)
+// ==========================================
+.app-register-host {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 400px;
   padding: 40px;
-  border-radius: 20px;
-  background: rgba(10, 20, 30, 0.9);
-  position: relative;
-
-  /* línea neon lateral */
-  border-left: 3px solid $neon;
-
-  box-shadow: 0 0 40px rgba(0, 245, 255, 0.1);
+  background: rgba(6, 11, 25, 0.5);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba($neon-cyan, 0.2);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
 }
 
-/* icono */
-.icon {
-  width: 25px;
-  height: 25px;
-  background: $neon;
-  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-  margin-bottom: 15px;
+// --- ENCABEZADO ---
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 40px;
+
+  .logo-container {
+    width: 50px; height: 50px;
+    filter: drop-shadow(0 0 10px rgba($neon-cyan, 0.3));
+    
+    .quantum-logo { width: 100%; height: 100%; }
+  }
+
+  .brand-text {
+    text-align: right;
+    h2 { color: $neon-cyan; font-size: 10px; font-weight: 700; letter-spacing: 2px; margin: 0; }
+    p { color: $text-muted; font-size: 8px; letter-spacing: 1px; margin-top: 2px; }
+  }
 }
 
-/* títulos */
-h1 {
-  color: $text;
-  font-size: 28px;
-  letter-spacing: 2px;
+// --- TÍTULOS ---
+.title-block {
+  margin-bottom: 35px;
+  
+  .main-title {
+    color: $text-main;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin: 0;
+  }
+  .subtitle {
+    color: $text-muted;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-top: 4px;
+    margin-bottom: 0;
+  }
 }
 
-.subtitle {
-  color: $neon;
-  font-size: 11px;
-  margin-bottom: 25px;
+// --- FORMULARIO Y CAMPOS (Mejorado) ---
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px; // Espaciado simétrico entre campos
 }
 
-/* labels */
-label {
-  font-size: 12px;
-  color: #9ca3af;
-  display: block;
-  margin-bottom: 5px;
-}
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 
-/* inputs */
-.input {
-  margin-bottom: 18px;
-  position: relative;
+  label {
+    color: $text-muted;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
 
-  input {
+  .input-wrapper {
+    position: relative;
     width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #1f2937;
-    background: transparent;
-    color: white;
-    outline: none;
 
-    &:focus {
-      border-color: $neon;
-      box-shadow: 0 0 8px $neon;
+    input {
+      width: 100%;
+      background: rgba(2, 6, 23, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 12px 14px;
+      color: $text-main;
+      font-size: 13px;
+      outline: none;
+      transition: all 0.3s ease;
+
+      &::placeholder { color: rgba(255, 255, 255, 0.2); }
+
+      &:focus {
+        border-color: rgba($neon-cyan, 0.5);
+        background: rgba(2, 6, 23, 0.6);
+        box-shadow: 0 0 10px rgba($neon-cyan, 0.1);
+      }
+
+      &.input-error {
+        border-color: rgba($error-red, 0.6);
+        box-shadow: 0 0 10px rgba($error-red, 0.1);
+      }
+    }
+  }
+
+  // Estilos específicos para el wrapper con ojo
+  .password-wrapper {
+    display: flex;
+    align-items: center;
+
+    input {
+      padding-right: 40px; // Espacio para el ojo
+    }
+
+    .eye-toggle {
+      position: absolute;
+      right: 0;
+      top: 0;
+      height: 100%;
+      width: 40px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0.5;
+      transition: opacity 0.3s ease;
+      outline: none;
+
+      &:hover { opacity: 1; }
+
+      .eye-icon { font-size: 16px; }
     }
   }
 }
 
-/* password */
-.password span {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  cursor: pointer;
+// --- NOTIFICACIONES (Errores y Éxito) ---
+.notification-area {
+  min-height: 18px; // Reserva espacio simétrico
+  margin-top: -10px; // Ajuste fino
+  margin-bottom: 5px;
+
+  .error-text {
+    color: $error-red;
+    font-size: 10px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .success-text {
+    color: $success-green;
+    font-size: 11px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .server-error { margin-top: 5px; }
 }
 
-/* botón */
-button {
-  width: 100%;
-  padding: 12px;
+// --- BOTÓN DE ACCIÓN ---
+.action-block {
   margin-top: 10px;
-  border-radius: 10px;
-  background: transparent;
-  border: 2px solid $neon;
-  color: $neon;
-  letter-spacing: 2px;
-  cursor: pointer;
-  transition: 0.3s;
 
-  &:hover {
-    background: $neon;
-    color: black;
-    box-shadow: 0 0 20px $neon;
+  .btn-primary {
+    width: 100%;
+    background: transparent;
+    border: 1px solid $neon-cyan;
+    border-radius: 6px;
+    padding: 14px;
+    color: $text-main;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba($neon-cyan, 0.15), 
+                inset 0 0 10px rgba($neon-cyan, 0.1);
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:hover:not(:disabled) {
+      background: rgba($neon-cyan, 0.05);
+      box-shadow: 0 0 25px rgba($neon-cyan, 0.3), 
+                  inset 0 0 12px rgba($neon-cyan, 0.15);
+      transform: translateY(-1px);
+    }
+
+    &:active:not(:disabled) { transform: translateY(1px); }
+
+    &:disabled {
+      border-color: $text-muted;
+      color: $text-muted;
+      cursor: not-allowed;
+      opacity: 0.6;
+      box-shadow: none;
+    }
   }
 }
 
-/* error */
-.error {
-  color: #ef4444;
-  font-size: 12px;
-  margin-bottom: 10px;
+// --- SPINNER INLINE (Para estado de carga) ---
+.spinner-inline {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: $text-main;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
+
+@keyframes spin { to { transform: rotate(360deg); } }

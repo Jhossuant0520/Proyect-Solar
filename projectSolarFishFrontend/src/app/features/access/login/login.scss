@@ -1,149 +1,314 @@
-// Paleta de alta fidelidad
-$deep-void: #020408;
-$neon-cyan: #00f2ff;
-$neon-purple: #9d00ff;
-$text-bright: #ffffff;
+// --- Variables ---
+$bg-main: #05050a;
+$card-bg: rgba(10, 12, 22, 0.7);
+$neon-cyan: #00f2fe;
+$neon-purple: #9b51e0;
+$text-light: #ffffff;
+$text-muted: #62697a;
+$font-family: 'Segoe UI', Roboto, sans-serif;
 
-.viewport-wrapper {
-  display: flex;
-  align-items: center;      // Centrado Vertical
-  justify-content: center;   // Centrado Horizontal
-  min-height: 100vh;
+// --- Reset e Inicialización ---
+html, body {
+  margin: 0;
+  padding: 0;
   width: 100%;
-  background: $deep-void;
-  position: relative;
-  overflow: hidden;
-  font-family: 'Orbitron', sans-serif; // Sugerencia: Fuente futurista
+  height: 100%;
+  background-color: $bg-main;
+  font-family: $font-family;
+  overflow: hidden; 
 }
 
-.background-mesh {
+// --- Contenedor Maestro (Centrado Absoluto y Atmósfera) ---
+.login-page-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center; // Centrado horizontal
+  align-items: center;     // Centrado vertical
+  background: radial-gradient(circle at center, #0f1126 0%, $bg-main 100%);
+  perspective: 1000px;     // Preparado por si deseas efectos 3D interactivos posteriores
+}
+
+// --- Rejilla Tecnológica de Fondo ---
+.bg-grid {
   position: absolute;
-  width: 100%; height: 100%;
-  background: 
-    radial-gradient(circle at 20% 30%, rgba($neon-purple, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 80% 70%, rgba($neon-cyan, 0.15) 0%, transparent 40%);
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: center;
+  mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+  -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+  pointer-events: none;
   z-index: 1;
 }
 
-.creative-card {
-  position: relative;
-  z-index: 10;
-  width: 450px;
-  background: rgba(15, 18, 25, 0.85);
-  backdrop-filter: blur(25px);
-  border-radius: 30px;
-  border-left: 5px solid $neon-cyan; // Acento lateral
-  padding: 50px;
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
-  overflow: hidden;
+// --- Orbes de Luz de Neón de Fondo ---
+.ambient-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(140px);
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: 2;
 
-  // Efecto de luz interna
-  &::after {
+  &.glow-cyan {
+    width: 400px;
+    height: 400px;
+    background: $neon-cyan;
+    top: 15%;
+    left: 20%;
+  }
+
+  &.glow-purple {
+    width: 500px;
+    height: 500px;
+    background: $neon-purple;
+    bottom: 10%;
+    right: 15%;
+  }
+}
+
+// --- Tarjeta Login Principal ---
+.login-card {
+  position: relative;
+  width: 90%;
+  max-width: 560px;
+  background: $card-bg;
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border-radius: 24px;
+  padding: 50px 40px;
+  box-shadow: 
+    0 30px 60px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0px rgba(255, 255, 255, 0.1);
+  z-index: 10; // Por encima del fondo y los glows
+
+  // Borde exterior estilizado
+  &::before {
     content: '';
     position: absolute;
-    top: -50%; left: -50%;
-    width: 200%; height: 200%;
-    background: radial-gradient(circle, rgba($neon-cyan, 0.03) 0%, transparent 70%);
+    inset: 0;
+    border-radius: 24px;
+    padding: 1.5px; 
+    background: linear-gradient(135deg, rgba($neon-cyan, 0.8), rgba($neon-purple, 0.3) 40%, rgba($neon-purple, 0.8));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
     pointer-events: none;
   }
 }
 
-header {
-  text-align: left; // Asimetría creativa
+// --- Encabezado ---
+.login-header {
+  text-align: center;
   margin-bottom: 40px;
 
-  .hex-brand {
-    width: 50px; height: 50px;
-    background: $neon-cyan;
-    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-    margin-bottom: 20px;
-    filter: drop-shadow(0 0 15px $neon-cyan);
+  .brand-logo {
+    width: 65px;
+    height: 65px;
+    margin: 0 auto 24px;
+    
+    .logo-svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 8px rgba($neon-cyan, 0.5));
+      
+      .outer-hex { fill: none; stroke: $neon-cyan; stroke-width: 3; }
+      .inner-hex { fill: none; stroke: $neon-purple; stroke-width: 2; opacity: 0.9; }
+      .logo-line { stroke: rgba($neon-cyan, 0.25); stroke-width: 1; }
+    }
   }
 
-  h1 {
-    font-size: 2.5rem;
-    font-weight: 900;
-    letter-spacing: 4px;
-    color: $text-bright;
+  .brand-title {
+    color: $text-light;
+    font-size: 2.3rem;
+    font-weight: 800;
+    letter-spacing: 5px;
     margin: 0;
-    text-shadow: 0 0 20px rgba($text-bright, 0.3);
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
   }
 
-  .subtitle {
-    font-size: 0.8rem;
+  .brand-subtitle {
     color: $neon-cyan;
-    letter-spacing: 2px;
-    font-weight: 600;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    margin: 10px 0 0 0;
+    text-shadow: 0 0 10px rgba($neon-cyan, 0.3);
   }
 }
 
-.input-box {
-  margin-bottom: 25px;
+// --- Formulario e Inputs ---
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
 
-  label {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 800;
-    color: rgba($text-bright, 0.6);
-    margin-bottom: 10px;
-    letter-spacing: 1.5px;
+  .input-group-row {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+
+    @media (max-width: 520px) {
+      flex-direction: column;
+    }
   }
 
-  input {
-    width: 100%;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 15px;
-    border-radius: 12px;
-    color: $text-bright;
-    font-size: 1rem;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  .input-wrapper {
+    position: relative;
+    flex: 1;
 
-    &:focus {
+    input {
+      width: 100%;
+      padding: 16px 22px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px 4px 16px 4px;
+      color: $text-light;
+      font-size: 0.95rem;
       outline: none;
-      border-color: $neon-cyan;
-      background: rgba($neon-cyan, 0.05);
-      transform: translateX(5px); // Pequeño movimiento creativo al enfocar
-      box-shadow: -5px 0 15px rgba($neon-cyan, 0.2);
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      box-sizing: border-box;
+
+      &:focus {
+        border-color: rgba($neon-cyan, 0.8);
+        background: rgba(255, 255, 255, 0.05);
+        box-shadow: inset 0 0 10px rgba($neon-cyan, 0.1);
+        
+        ~ .input-glow { opacity: 1; }
+        ~ label, &:not(:placeholder-shown) ~ label {
+          top: -10px;
+          left: 14px;
+          font-size: 0.75rem;
+          color: $neon-cyan;
+          background: #0a0c16;
+          padding: 0 6px;
+        }
+      }
+    }
+
+    label {
+      position: absolute;
+      left: 22px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: $text-muted;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+
+    input:not(:placeholder-shown) ~ label {
+      top: -10px;
+      left: 14px;
+      font-size: 0.75rem;
+      color: $text-muted;
+      background: #0a0c16;
+      padding: 0 6px;
+    }
+
+    .input-glow {
+      position: absolute;
+      inset: -1px;
+      border-radius: 16px 4px 16px 4px;
+      box-shadow: 0 0 15px rgba($neon-cyan, 0.3);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+
+      .eye-icon {
+        width: 18px;
+        height: 18px;
+        fill: $text-muted;
+        transition: fill 0.3s ease;
+        &:hover { fill: $neon-cyan; }
+      }
     }
   }
 }
 
-.btn-ultra {
-  width: 100%;
-  padding: 18px;
-  margin-top: 10px;
-  background: transparent;
-  border: 2px solid $neon-cyan;
-  color: $neon-cyan;
-  font-weight: 900;
-  font-size: 1.1rem;
-  letter-spacing: 3px;
-  border-radius: 15px;
-  cursor: pointer;
-  transition: all 0.4s;
+// --- Botón Ingresar ---
+.btn-submit {
   position: relative;
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(90deg, rgba($neon-cyan, 0.15), rgba($neon-purple, 0.15));
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
   overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  margin-top: 12px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    padding: 1.5px;
+    background: linear-gradient(90deg, $neon-cyan, $neon-purple);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+  }
+
+  .btn-text {
+    color: $text-light;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    position: relative;
+    z-index: 2;
+    text-shadow: 0 0 10px rgba($neon-cyan, 0.5);
+  }
+
+  .wave-overlay {
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%2300f2fe' fill-opacity='0.1' d='M0,160L120,144C240,128,480,96,720,112C960,128,1200,192,1320,224L1440,256L1440,320L1320,320C1200,320,960,320,720,320C480,320,240,320,120,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") no-repeat center;
+    background-size: cover;
+    opacity: 0.4;
+    z-index: 1;
+  }
 
   &:hover {
-    background: $neon-cyan;
-    color: $deep-void;
-    box-shadow: 0 0 30px rgba($neon-cyan, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 
+      0 0 30px rgba($neon-cyan, 0.35),
+      0 0 30px rgba($neon-purple, 0.35);
+    background: linear-gradient(90deg, rgba($neon-cyan, 0.25), rgba($neon-purple, 0.25));
   }
+
+  &:active { transform: translateY(1px); }
 }
 
-.link-alt {
-  display: block;
+// --- Footer ---
+.form-footer {
   text-align: right;
-  font-size: 0.7rem;
-  color: $neon-purple;
-  text-decoration: none;
-  font-weight: 800;
-  margin-bottom: 15px;
-  transition: 0.3s;
 
-  &:hover {
-    color: $text-bright;
-    text-shadow: 0 0 10px $neon-purple;
+  .forgot-password {
+    color: rgba($neon-purple, 0.8);
+    font-size: 0.78rem;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+
+    &:hover {
+      color: lighten($neon-purple, 15%);
+      text-shadow: 0 0 10px rgba($neon-purple, 0.6);
+    }
   }
 }

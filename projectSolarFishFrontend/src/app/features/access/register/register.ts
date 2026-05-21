@@ -10,7 +10,7 @@ import { UserService } from '../../../core/services/user.service';
   standalone: true,
   imports: [ReactiveFormsModule, RouterLink, CommonModule],
   templateUrl: './register.html',
-  styleUrl: './register.scss'
+  styleUrls: ['./register.scss']
 })
 export class Register {
 
@@ -20,7 +20,7 @@ export class Register {
   errorMensaje = '';
   registroExitoso = false;
 
-  // 👁️ CONTROL DEL OJO
+  // 👁️ CONTROL DEL OJO (Mantenidos exactamente igual)
   showPassword = false;
   showConfirm = false;
 

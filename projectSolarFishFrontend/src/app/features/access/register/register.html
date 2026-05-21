@@ -1,64 +1,112 @@
-<div class="page">
+<div class="wave-overlay"></div>
+<div class="grid-overlay"></div>
 
-  <div class="card">
+<div class="app-register-host">
+  <div class="register-card">
+    
+    <header class="card-header">
+      <div class="logo-container">
+        <svg viewBox="0 0 100 100" class="quantum-logo">
+          <defs>
+            <radialGradient id="grad1" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#00f2ff" stop-opacity="1" />
+              <stop offset="100%" stop-color="#7000ff" stop-opacity="0" />
+            </radialGradient>
+          </defs>
+          <path d="M50 15L80 32.5V67.5L50 85L20 67.5V32.5L50 15Z" stroke="#00f2ff" stroke-width="2" fill="url(#grad1)"/>
+        </svg>
+      </div>
+      
+      <div class="brand-text">
+        <h2>QUANTUM COMPUTING</h2>
+        <p>HIGH RESOLUTION SOLUTIONS</p>
+      </div>
+    </header>
 
-    <!-- ICONO -->
-    <div class="icon"></div>
+    <div class="title-block">
+      <h1 class="main-title">CREAR CUENTA</h1>
+      <p class="subtitle">ACCESO AL SISTEMA DE CONTROL</p>
+    </div>
 
-    <!-- TITULO -->
-    <h1>CREAR CUENTA</h1>
-    <p class="subtitle">ACCESO AL SISTEMA DE CONTROL</p>
-
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-
-      <!-- USUARIO -->
-      <label>Usuario</label>
-      <div class="input">
-        <input type="text" formControlName="nombreUsuario" placeholder="usuario">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off" class="register-form">
+      
+      <div class="form-field">
+        <label for="nombreUsuario">USUARIO</label>
+        <div class="input-wrapper">
+          <input 
+            type="text" 
+            id="nombreUsuario" 
+            formControlName="nombreUsuario" 
+            placeholder="Introduce tu usuario"
+            [ngClass]="{'input-error': f['nombreUsuario'].touched && f['nombreUsuario'].errors}">
+        </div>
       </div>
 
-      <!-- EMAIL -->
-      <label>Email</label>
-      <div class="input">
-        <input type="email" formControlName="email" placeholder="correo@dominio.com">
+      <div class="form-field">
+        <label for="email">EMAIL</label>
+        <div class="input-wrapper">
+          <input 
+            type="email" 
+            id="email" 
+            formControlName="email" 
+            placeholder="correo@dominio.com"
+            [ngClass]="{'input-error': f['email'].touched && f['email'].errors}">
+        </div>
       </div>
 
-      <!-- PASSWORD -->
-      <label>Contraseña</label>
-      <div class="input password">
-        <input 
-          [type]="showPassword ? 'text' : 'password'"
-          formControlName="passwordUsuario"
-          placeholder="••••••••"
-        >
-        <span (click)="togglePassword()">
-          {{ showPassword ? '🙈' : '👁️' }}
-        </span>
+      <div class="form-field">
+        <label for="passwordUsuario">CONTRASEÑA</label>
+        <div class="input-wrapper password-wrapper">
+          <input 
+            [type]="showPassword ? 'text' : 'password'" 
+            id="passwordUsuario" 
+            formControlName="passwordUsuario" 
+            placeholder="••••••••"
+            [ngClass]="{'input-error': f['passwordUsuario'].touched && f['passwordUsuario'].errors}">
+          
+          <button type="button" class="eye-toggle" (click)="togglePassword()" aria-label="Toggle password visibility">
+            <span class="eye-icon">{{ showPassword ? '👁️' : '🙈' }}</span>
+          </button>
+        </div>
       </div>
 
-      <!-- CONFIRMAR -->
-      <label>Confirmar contraseña</label>
-      <div class="input password">
-        <input 
-          [type]="showConfirm ? 'text' : 'password'"
-          formControlName="confirmarPassword"
-          placeholder="••••••••"
-        >
-        <span (click)="toggleConfirm()">
-          {{ showConfirm ? '🙈' : '👁️' }}
-        </span>
+      <div class="form-field">
+        <label for="confirmarPassword">CONFIRMAR CONTRASEÑA</label>
+        <div class="input-wrapper password-wrapper">
+          <input 
+            [type]="showConfirm ? 'text' : 'password'" 
+            id="confirmarPassword" 
+            formControlName="confirmarPassword" 
+            placeholder="••••••••"
+            [ngClass]="{'input-error': (form.errors?.['passwordsMismatch'] || f['confirmarPassword'].errors) && form.touched}">
+          
+          <button type="button" class="eye-toggle" (click)="toggleConfirm()" aria-label="Toggle password visibility">
+            <span class="eye-icon">{{ showConfirm ? '👁️' : '🙈' }}</span>
+          </button>
+        </div>
       </div>
 
-      <!-- ERROR -->
-      <div class="error" *ngIf="errorMensaje">
-        {{ errorMensaje }}
+      <div class="notification-area">
+        <p *ngIf="form.touched && form.errors?.['passwordsMismatch']" class="error-text">
+          Las contraseñas no coinciden.
+        </p>
+        
+        <p *ngIf="errorMensaje" class="error-text server-error">
+          {{ errorMensaje }}
+        </p>
+
+        <p *ngIf="registroExitoso" class="success-text">
+          ¡Registro exitoso! Redireccionando...
+        </p>
       </div>
 
-      <!-- BOTON -->
-      <button type="submit">REGISTRARSE</button>
+      <div class="action-block">
+        <button type="submit" class="btn-primary" [disabled]="cargando">
+          <span *ngIf="!cargando">REGISTRARSE</span>
+          <span *ngIf="cargando" class="spinner-inline"></span>
+        </button>
+      </div>
 
     </form>
-
   </div>
-
 </div>

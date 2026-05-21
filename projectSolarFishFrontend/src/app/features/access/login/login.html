@@ -1,42 +1,52 @@
-﻿<div class="viewport-wrapper">
-  <div class="background-mesh"></div>
+﻿<div class="login-page-wrapper">
+  <div class="ambient-glow glow-cyan"></div>
+  <div class="ambient-glow glow-purple"></div>
+  
+  <div class="bg-grid"></div>
 
-  <div class="creative-card">
-    <div class="side-accent"></div>
-    <div class="content-wrapper">
-      <header>
-        <div class="hex-brand"></div>
-        <h1>BIENVENIDO</h1>
-        <p class="subtitle">ACCESO AL SISTEMA DE CONTROL</p>
-      </header>
-
-      <form (ngSubmit)="login()" #loginForm="ngForm" autocomplete="off" class="login-form">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Usuario</mat-label>
-          <input matInput [(ngModel)]="usuarioLogin" name="username" required [disabled]="loading" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Contraseña</mat-label>
-          <input matInput [(ngModel)]="passwordLogin" name="password" type="password" required [disabled]="loading" />
-        </mat-form-field>
-
-        <button mat-raised-button color="primary" class="btn-ultra login-btn" type="submit" [disabled]="loading || !loginForm.form.valid">
-          <span *ngIf="!loading">Ingresar</span>
-          <span *ngIf="loading">Cargando...</span>
-        </button>
-
-        <p class="error" *ngIf="error">{{ error }}</p>
-      </form>
-
-      <div class="bottom-links">
-        <a href="#" class="link-alt">¿Olvidaste tu contraseña?</a>
+  <div class="login-card">
+    <div class="login-header">
+      <div class="brand-logo">
+        <svg viewBox="0 0 100 100" class="logo-svg">
+          <polygon points="50,5 95,25 95,75 50,95 5,75 5,25" class="outer-hex" />
+          <polygon points="50,20 80,35 80,65 50,80 20,65 20,35" class="inner-hex" />
+          <line x1="50" y1="5" x2="50" y2="95" class="logo-line" />
+          <line x1="5" y1="25" x2="95" y2="75" class="logo-line" />
+          <line x1="5" y1="75" x2="95" y2="25" class="logo-line" />
+        </svg>
       </div>
+      <h1 class="brand-title">BIENVENIDO</h1>
+      <p class="brand-subtitle">ACCESO AL SISTEMA DE CONTROL</p>
     </div>
+
+    <form class="login-form">
+      <div class="input-group-row">
+        <div class="input-wrapper">
+          <input type="text" id="username" placeholder=" " required />
+          <label for="username">Usuario*</label>
+          <div class="input-glow"></div>
+        </div>
+
+        <div class="input-wrapper">
+          <input type="password" id="password" placeholder=" " required />
+          <label for="password">Contraseña*</label>
+          <button type="button" class="toggle-password" aria-label="Mostrar contraseña">
+            <svg viewBox="0 0 24 24" class="eye-icon">
+              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+            </svg>
+          </button>
+          <div class="input-glow"></div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit">
+        <span class="btn-text">Ingresar</span>
+        <div class="wave-overlay"></div>
+      </button>
+
+      <div class="form-footer">
+        <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+      </div>
+    </form>
   </div>
 </div>
-
-<footer class="login-footer">
-  © 2025 Computer & Electronic — Todos los derechos reservados<br />
-  <span class="footer-contact">SoporteComputer</span>
-</footer>
