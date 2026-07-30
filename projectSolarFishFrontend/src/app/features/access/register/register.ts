@@ -59,6 +59,11 @@ export class Register {
     this.showConfirm = !this.showConfirm;
   }
 
+  // 🔗 Navegación a recuperar contraseña
+  goToForgotPassword(): void {
+    this.router.navigate(['/forgot-password']); // O la ruta exacta que uses
+  }
+
   // 🚀 submit
   onSubmit(): void {
 

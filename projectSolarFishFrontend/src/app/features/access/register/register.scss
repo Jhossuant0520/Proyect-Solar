@@ -1,273 +1,374 @@
-// ==========================================
-// CONFIGURACIÓN Y VARIABLES
-// ==========================================
-$bg-color: #030408;
+// Paleta Holográfica Avanzada
+$dark-void: #03050d;
+$cyber-blue: #00f3ff;
+$cyber-neon-blue: #0066ff;
+$cyber-coral: #ff2a5f;
+$neon-green: #39ff14;
+$glass-tint: rgba(6, 10, 26, 0.75);
 $text-main: #ffffff;
-$text-muted: #8b9bb4;
-$neon-cyan: #00f2ff;
-$neon-purple: #7000ff;
-$error-red: #ff4a4a;
-$success-green: #00ff88;
+$text-dark-muted: #4e5b73;
 
-$font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-
-// ==========================================
-// ESTILOS DEL HOST (Control de fondo de pantalla)
-// ==========================================
-:host {
+.register-container {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  width: 100vw;
-  background-color: $bg-color;
-  font-family: $font-family;
+  background-color: $dark-void;
   overflow: hidden;
-  position: relative;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 24px;
 }
 
-// --- FONDO DE ONDAS (FUT-3) ---
-.wave-overlay {
+// Rejilla geométrica de fondo militar/tecnológico
+.cyber-grid {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
-  z-index: 1;
-  background: 
-    radial-gradient(circle at 10% 20%, rgba($neon-cyan, 0.1) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba($neon-purple, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(147, 51, 234, 0.08) 0%, transparent 60%);
-  filter: blur(60px);
-  opacity: 0.8;
-}
-
-.grid-overlay {
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  z-index: 2;
   background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-  background-size: 40px 40px;
-  mask-image: radial-gradient(ellipse at center, black, transparent 80%);
-}
+    linear-gradient(rgba($cyber-blue, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba($cyber-blue, 0.03) 1px, transparent 1px);
+  background-size: 30px 30px;
+  pointer-events: none;
+  z-index: 1;
 
-// ==========================================
-// CONTENEDOR DE LA TARJETA (Organizado)
-// ==========================================
-.app-register-host {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  padding: 20px;
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at 50% 50%, transparent 20%, $dark-void 80%);
+  }
 }
 
 .register-card {
+  position: relative;
+  z-index: 2;
   width: 100%;
-  max-width: 400px;
-  padding: 40px;
-  background: rgba(6, 11, 25, 0.5);
-  backdrop-filter: blur(10px);
+  max-width: 450px;
+  background: $glass-tint;
+  border: 1px solid rgba($cyber-blue, 0.2);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-top: 1px solid rgba($neon-cyan, 0.2);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  padding: 45px 35px;
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.6),
+    inset 0 0 20px rgba($cyber-blue, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  // Remates estéticos industriales en las esquinas
+  .corner-spec {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-color: rgba($cyber-blue, 0.6);
+    border-style: solid;
+    pointer-events: none;
+    
+    &.top-left { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+    &.top-right { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
+  }
 }
 
-// --- ENCABEZADO ---
+// Encabezado
 .card-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 15px;
   margin-bottom: 40px;
+  border-bottom: 1px solid rgba($text-dark-muted, 0.2);
+  padding-bottom: 15px;
 
-  .logo-container {
-    width: 50px; height: 50px;
-    filter: drop-shadow(0 0 10px rgba($neon-cyan, 0.3));
+  .quantum-core {
+    width: 28px;
+    height: 28px;
+    border: 2px solid $cyber-blue;
+    transform: rotate(45deg);
+    position: relative;
+    box-shadow: 0 0 10px rgba($cyber-blue, 0.4);
+    background: radial-gradient(circle, $cyber-blue 20%, transparent 60%);
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px; right: 3px; bottom: 3px;
+      border: 1px solid $cyber-coral;
+    }
+  }
+
+  .brand-info {
+    display: flex;
+    flex-direction: column;
     
-    .quantum-logo { width: 100%; height: 100%; }
-  }
-
-  .brand-text {
-    text-align: right;
-    h2 { color: $neon-cyan; font-size: 10px; font-weight: 700; letter-spacing: 2px; margin: 0; }
-    p { color: $text-muted; font-size: 8px; letter-spacing: 1px; margin-top: 2px; }
+    .main-brand {
+      color: $cyber-blue;
+      font-size: 0.8rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+    }
+    .sub-brand {
+      color: $text-dark-muted;
+      font-size: 0.6rem;
+      letter-spacing: 0.5px;
+    }
   }
 }
 
-// --- TÍTULOS ---
-.title-block {
-  margin-bottom: 35px;
-  
-  .main-title {
+// Bloque de Título
+.action-header {
+  margin-bottom: 30px;
+
+  h1 {
     color: $text-main;
-    font-size: 26px;
+    font-size: 1.75rem;
     font-weight: 800;
-    letter-spacing: 1px;
+    letter-spacing: 3px;
     margin: 0;
+    text-shadow: 0 0 15px rgba($text-main, 0.1);
   }
-  .subtitle {
-    color: $text-muted;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    margin-top: 4px;
-    margin-bottom: 0;
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+
+    .status-indicator {
+      width: 6px;
+      height: 6px;
+      background-color: $cyber-coral;
+      border-radius: 50%;
+      box-shadow: 0 0 6px $cyber-coral;
+      
+      &.alert-pulse {
+        animation: pulseStatus 1.5s infinite ease-in-out;
+      }
+    }
+
+    .status-text {
+      color: $text-dark-muted;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin: 0;
+    }
   }
 }
 
-// --- FORMULARIO Y CAMPOS (Mejorado) ---
-.register-form {
-  display: flex;
-  flex-direction: column;
-  gap: 22px; // Espaciado simétrico entre campos
-}
-
+// Inputs Estilo Clean Cyber
 .form-field {
+  margin-bottom: 22px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
 
   label {
-    color: $text-muted;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+    color: rgba($text-main, 0.7);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+
+    .label-tag {
+      color: $cyber-coral;
+      margin-right: 4px;
+    }
   }
 
-  .input-wrapper {
+  .input-container {
     position: relative;
     width: 100%;
 
     input {
       width: 100%;
-      background: rgba(2, 6, 23, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 6px;
-      padding: 12px 14px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba($text-dark-muted, 0.4);
+      border-radius: 4px;
+      padding: 13px 16px;
       color: $text-main;
-      font-size: 13px;
+      font-size: 0.9rem;
       outline: none;
-      transition: all 0.3s ease;
+      box-sizing: border-box;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
-      &::placeholder { color: rgba(255, 255, 255, 0.2); }
+      &::placeholder {
+        color: rgba($text-dark-muted, 0.6);
+      }
 
       &:focus {
-        border-color: rgba($neon-cyan, 0.5);
-        background: rgba(2, 6, 23, 0.6);
-        box-shadow: 0 0 10px rgba($neon-cyan, 0.1);
+        border-color: $cyber-blue;
+        background: rgba($cyber-blue, 0.02);
+        box-shadow: 
+          0 0 12px rgba($cyber-blue, 0.15),
+          inset 0 0 6px rgba($cyber-blue, 0.05);
       }
 
-      &.input-error {
-        border-color: rgba($error-red, 0.6);
-        box-shadow: 0 0 10px rgba($error-red, 0.1);
+      &.field-invalid {
+        border-color: rgba($cyber-coral, 0.7);
+        background: rgba($cyber-coral, 0.02);
+        box-shadow: 0 0 10px rgba($cyber-coral, 0.1);
       }
-    }
-  }
-
-  // Estilos específicos para el wrapper con ojo
-  .password-wrapper {
-    display: flex;
-    align-items: center;
-
-    input {
-      padding-right: 40px; // Espacio para el ojo
-    }
-
-    .eye-toggle {
-      position: absolute;
-      right: 0;
-      top: 0;
-      height: 100%;
-      width: 40px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      opacity: 0.5;
-      transition: opacity 0.3s ease;
-      outline: none;
-
-      &:hover { opacity: 1; }
-
-      .eye-icon { font-size: 16px; }
     }
   }
 }
 
-// --- NOTIFICACIONES (Errores y Éxito) ---
-.notification-area {
-  min-height: 18px; // Reserva espacio simétrico
-  margin-top: -10px; // Ajuste fino
-  margin-bottom: 5px;
+// Wrapper especial de visibilidad de contraseñas
+.password-group {
+  input {
+    padding-right: 45px !important;
+  }
 
-  .error-text {
-    color: $error-red;
-    font-size: 10px;
-    font-weight: 600;
-    margin: 0;
+  .view-toggle {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba($cyber-blue, 0.5);
+    cursor: pointer;
+    font-size: 0.95rem;
+    padding: 0;
+    transition: color 0.2s ease, text-shadow 0.2s;
+
+    &:hover {
+      color: $cyber-blue;
+      text-shadow: 0 0 5px $cyber-blue;
+    }
   }
-  .success-text {
-    color: $success-green;
-    font-size: 11px;
-    font-weight: 600;
-    margin: 0;
-  }
-  .server-error { margin-top: 5px; }
 }
 
-// --- BOTÓN DE ACCIÓN ---
-.action-block {
-  margin-top: 10px;
+// Manejo de errores debajo del input
+.error-wrapper {
+  margin-top: 5px;
+  min-height: 14px;
 
-  .btn-primary {
+  .error-msg {
+    color: $cyber-coral;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    display: block;
+  }
+}
+
+// Acciones Extras (Olvidaste tu contraseña)
+.helper-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 28px;
+
+  .forgot-link {
+    color: $text-dark-muted;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    .tech-bracket {
+      color: transparent;
+      transition: color 0.2s ease;
+    }
+
+    &:hover {
+      color: $cyber-blue;
+      text-shadow: 0 0 8px rgba($cyber-blue, 0.4);
+
+      .tech-bracket {
+        color: $cyber-coral;
+      }
+    }
+  }
+}
+
+// Botón Táctico de Envío
+.submit-wrapper {
+  .cyber-btn {
+    position: relative;
     width: 100%;
     background: transparent;
-    border: 1px solid $neon-cyan;
-    border-radius: 6px;
-    padding: 14px;
-    color: $text-main;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
+    border: 1px solid $cyber-blue;
+    border-radius: 4px;
+    padding: 15px;
     cursor: pointer;
-    box-shadow: 0 0 15px rgba($neon-cyan, 0.15), 
-                inset 0 0 10px rgba($neon-cyan, 0.1);
+    overflow: hidden;
     transition: all 0.3s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    box-shadow: 0 4px 15px rgba($cyber-blue, 0.1);
 
-    &:hover:not(:disabled) {
-      background: rgba($neon-cyan, 0.05);
-      box-shadow: 0 0 25px rgba($neon-cyan, 0.3), 
-                  inset 0 0 12px rgba($neon-cyan, 0.15);
-      transform: translateY(-1px);
+    .btn-content {
+      position: relative;
+      z-index: 2;
+      color: $text-main;
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: 2.5px;
+      transition: color 0.3s;
     }
 
-    &:active:not(:disabled) { transform: translateY(1px); }
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba($cyber-blue, 0.2), transparent);
+      transition: all 0.6s ease;
+    }
+
+    &:hover:not([disabled]) {
+      background: rgba($cyber-blue, 0.08);
+      border-color: $cyber-blue;
+      box-shadow: 0 0 20px rgba($cyber-blue, 0.35);
+      transform: translateY(-1px);
+
+      &::before { left: 100%; }
+      .btn-content { color: $cyber-blue; }
+    }
+
+    &:active:not([disabled]) {
+      transform: translateY(1px);
+    }
 
     &:disabled {
-      border-color: $text-muted;
-      color: $text-muted;
+      border-color: rgba($text-dark-muted, 0.3);
+      background: rgba(0, 0, 0, 0.2);
       cursor: not-allowed;
-      opacity: 0.6;
       box-shadow: none;
+      
+      .btn-content {
+        color: rgba($text-dark-muted, 0.6);
+      }
     }
   }
 }
 
-// --- SPINNER INLINE (Para estado de carga) ---
-.spinner-inline {
-  width: 16px; height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-top-color: $text-main;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+// Alertas de Consola de Sistema
+.system-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 25px;
+  letter-spacing: 0.5px;
+
+  .alert-icon { font-size: 0.9rem; }
+
+  &.alert-error {
+    background: rgba($cyber-coral, 0.08);
+    border: 1px solid rgba($cyber-coral, 0.4);
+    color: #ff6b8b;
+    box-shadow: 0 0 10px rgba($cyber-coral, 0.05);
+  }
+
+  &.alert-success {
+    background: rgba($neon-green, 0.08);
+    border: 1px solid rgba($neon-green, 0.4);
+    color: #7cff6b;
+    box-shadow: 0 0 10px rgba($neon-green, 0.05);
+  }
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+// Animación de estado
+@keyframes pulseStatus {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
