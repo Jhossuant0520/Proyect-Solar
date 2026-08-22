@@ -1,41 +1,26 @@
 <section class="faq">
+  <div class="faq-glow" aria-hidden="true"></div>
 
-  <!-- HEADER -->
-  <div class="faq-header">
-    <span class="tag">FAQ</span>
-    <h1>Preguntas frecuentes</h1>
-  </div>
+  <div class="faq-inner">
+    <h2>Preguntas frecuentes</h2>
 
-  <!-- LÍNEA CENTRAL (decorativa) -->
-  <div class="faq-line"></div>
-
-  <!-- LISTA -->
-  <div class="faq-container">
-
-    <div class="faq-item"
-         *ngFor="let item of faq; let i = index"
-         (click)="toggle(i)"
-         [class.active]="activeIndex === i">
-
-      <!-- PUNTO CONECTOR -->
-      <div class="faq-dot"></div>
-
-      <!-- TARJETA -->
-      <div class="faq-card">
-
-        <div class="faq-question">
-          {{ item.q }}
-          <span class="arrow"></span>
-        </div>
-
-        <div class="faq-answer">
-          {{ item.a }}
-        </div>
-
-      </div>
-
+    <div class="faq-list">
+      @for (item of faq; track item.q; let i = $index) {
+        <article
+          class="faq-item"
+          [class.active]="isActive(i)"
+          [style.animation-delay]="(i * 0.1) + 's'"
+          (click)="toggle(i)"
+        >
+          <div class="faq-question">
+            <span>{{ item.q }}</span>
+            <span class="chevron" aria-hidden="true"></span>
+          </div>
+          <div class="faq-answer">
+            <p>{{ item.a }}</p>
+          </div>
+        </article>
+      }
     </div>
-
   </div>
-
 </section>

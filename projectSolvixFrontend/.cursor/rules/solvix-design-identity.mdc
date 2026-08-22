@@ -1,0 +1,38 @@
+---
+description: Identidad visual y paleta oficial SOLVIX (solar / cyber-minimalista)
+alwaysApply: true
+---
+
+# SOLVIX — Identidad y paleta
+
+Principio rector: **SOLVIX no simplifica la ingeniería. SOLVIX simplifica la forma de entenderla.**
+
+Estética: **solar / cyber-minimalista**. Transmitir precisión, tecnología, energía solar, confianza y simplicidad. No convertir la interfaz en un dashboard SaaS genérico.
+
+## Tokens oficiales
+
+Reutilizar estos tokens. No introducir hex nuevos sin razón funcional. No repetir hex en componentes; centralizar progresivamente.
+
+```scss
+--solvix-bg: #020617;
+--solvix-surface: #0f172a;
+--solvix-primary: #4fd1ff;
+--solvix-secondary: #38bdf8;
+--solvix-neon: #00e5ff;
+--solvix-deep: #003366;
+--solvix-text: #ffffff;
+--solvix-text-secondary: #cfe9ff;
+--solvix-text-muted: #94a3b8;
+```
+
+Antes de crear un color: 1) buscar token equivalente, 2) reutilizarlo, 3) si no existe, evaluar si debe ser token.
+
+## Uso de colores
+
+- `#4fd1ff` (primary): acciones principales, títulos destacados, iconos, bordes importantes, marca
+- `#38bdf8` (secondary): navegación, interacción secundaria, elementos activos, hover
+- `#00e5ff` (neon): highlights, indicadores importantes, elementos especiales
+- `#003366` (deep): profundidad, gradientes, superficies secundarias
+- Verde: éxito, cálculo válido, sistema compatible
+- Ámbar: advertencias
+- Rojo: errores

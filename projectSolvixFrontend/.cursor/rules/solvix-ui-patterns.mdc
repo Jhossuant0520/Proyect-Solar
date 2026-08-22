@@ -1,0 +1,41 @@
+---
+description: Capas de resultado, botones, progressive disclosure y componentes reutilizables SOLVIX
+alwaysApply: true
+---
+
+# SOLVIX — Patrones de interfaz
+
+Principio rector: **SOLVIX no simplifica la ingeniería. SOLVIX simplifica la forma de entenderla.**
+
+## Inteligencia de interfaz
+
+Los resultados de ingeniería se presentan en capas:
+
+1. **Capa 1** — Resultado fácil de entender
+2. **Capa 2** — Resumen de cálculo
+3. **Capa 3** — Detalles técnicos
+
+Nunca obligar al usuario común a leer fórmulas para entender el resultado.
+Nunca eliminar las fórmulas o información técnica existente.
+
+## Progressive disclosure
+
+Usar "Ver detalles técnicos" para mostrar: fórmulas, voltajes, corrientes, factores, verificaciones, configuración de strings, MPPT.
+
+## Botones — jerarquía
+
+- **PRIMARY** → acción principal
+- **SECONDARY** → acción complementaria
+- **TERTIARY** → acción secundaria
+- **DANGER** → acción destructiva
+
+No usar múltiples botones primarios compitiendo entre sí.
+
+Familias oficiales (una por pantalla): **Cyber-Glow**, **Glass-Precision**, **Tech-Minimal**.
+Skill: `.cursor/skills/solvix-buttons/SKILL.md`
+
+## Componentes reutilizables
+
+Si un patrón aparece en más de una pantalla, extraer componente. Ejemplos:
+
+`solvix-metric-card`, `solvix-result-card`, `solvix-status`, `solvix-section-header`, `solvix-loading`, `solvix-error`, `solvix-empty-state`, `solvix-technical-details`, `solvix-wizard`, `solvix-chart`

@@ -1,58 +1,29 @@
 <section class="testimonials">
-
-  <h2 class="subtitle">TESTIMONIOS</h2>
-  <h1 class="title">Lo que dicen nuestros usuarios</h1>
-
-  <!-- 🌐 RED TECNOLÓGICA -->
-  <div class="network-bg"></div>
-
-  <!-- 🔗 LÍNEAS SVG -->
-  <svg class="connections" viewBox="0 0 1200 400">
+  <div class="network-bg" aria-hidden="true"></div>
+  <svg class="connections" viewBox="0 0 1200 400" aria-hidden="true">
     <path d="M200 200 C 350 50, 550 50, 700 200" />
     <path d="M500 200 C 650 350, 850 350, 1000 200" />
   </svg>
 
+  <h2>Una forma más clara de entender tu energía.</h2>
+
   <div class="cards">
-
-    <div class="card">
-      <div class="avatar">
-        <img src="https://randomuser.me/api/portraits/men/32.jpg">
-      </div>
-
-      <div class="content">
-        <div class="stars">★★★★★</div>
-        <p>"No entendía nada de paneles solares. Solvix me dio el número exacto de paneles que necesito y cuánto voy a ahorrar al año. Ahora tengo todo listo para hablar con el instalador."</p>
-        <h4>Carlos M.</h4>
-        <span>Bucaramanga</span>
-      </div>
-    </div>
-
-    <div class="card highlight">
-      <div class="avatar">
-        <img src="https://randomuser.me/api/portraits/women/44.jpg">
-      </div>
-
-      <div class="content">
-        <div class="stars">★★★★★</div>
-        <p>"Me sorprendió que fuera gratis. En 5 minutos tuve un reporte completo con el ROI y los componentes. Lo compartí con mi esposo y quedamos convencidos de instalar."</p>
-        <h4>Laura R.</h4>
-        <span>Medellín</span>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="avatar">
-        <img src="https://randomuser.me/api/portraits/men/65.jpg">
-      </div>
-
-      <div class="content">
-        <div class="stars">★★★★★</div>
-        <p>"El PDF fue clave para cotizar. Todo claro y profesional."</p>
-        <h4>Jorge P.</h4>
-        <span>Cali</span>
-      </div>
-    </div>
-
+    @for (item of testimonials; track item.name; let i = $index) {
+      <article
+        class="card"
+        [ngClass]="[item.variant === 'primary' ? 'is-primary' : item.variant === 'neon' ? 'is-neon' : 'is-secondary', item.highlight ? 'highlight' : '']"
+        [style.animation-delay]="(i * 0.15) + 's'"
+      >
+        <span class="quote-mark" aria-hidden="true">”</span>
+        <p>{{ item.quote }}</p>
+        <div class="card-footer">
+          <img [src]="item.photo" [alt]="item.name" />
+          <div>
+            <h4>{{ item.name }}</h4>
+            <span>{{ item.role }}</span>
+          </div>
+        </div>
+      </article>
+    }
   </div>
-
 </section>

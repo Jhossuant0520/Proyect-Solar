@@ -1,30 +1,34 @@
 <section class="services">
+  <div class="services-glow" aria-hidden="true"></div>
 
-  <div class="header">
-    <h2>¿Por qué elegirnos?</h2>
-    <p>Soluciones inteligentes para energía solar</p>
-  </div>
+  <div class="services-inner">
+    <h2>Todo el análisis que necesitas</h2>
 
-  <div class="services-grid">
+    <div class="services-grid">
+      @for (s of servicios; track s.title; let i = $index) {
+        <article class="stat-card" [class]="'is-' + s.variant" [style.animation-delay]="(i * 0.12) + 's'">
+          <div class="service-icon" aria-hidden="true">
+            @switch (s.icon) {
+              @case ('bolt') {
+                <svg viewBox="0 0 24 24"><path d="M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66L11 3h1l-1 7h3.5c.49 0 .56.33.47.59L11 21z" fill="currentColor"/></svg>
+              }
+              @case ('sun') {
+                <svg viewBox="0 0 24 24"><path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.8 1.42-1.42zM4 10.5H1v2h3v-2zm9-9.95h-2V3.5h2V.55zm7.45 3.91l-1.41-1.41-1.79 1.79 1.41 1.41 1.79-1.79zm-3.21 13.7l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 10.5v2h3v-2h-3zm-8-5a4.5 4.5 0 100 9 4.5 4.5 0 000-9zm-1 15.95h2V19.5h-2v2.45zm-7.45-3.91l1.41 1.41 1.79-1.8-1.41-1.41-1.79 1.8z" fill="currentColor"/></svg>
+              }
+              @case ('grid') {
+                <svg viewBox="0 0 24 24"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z" fill="currentColor"/></svg>
+              }
+              @case ('power') {
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" fill="currentColor"/></svg>
+              }
+            }
+          </div>
 
-    @for (s of servicios; track s) {
-
-    <div class="card">
-
-      <div class="icon">
-        {{ s.icono }}
-      </div>
-
-      <h3>{{ s.titulo }}</h3>
-
-      <p>{{ s.descripcion }}</p>
-
-      <div class="glow"></div>
-
+          <h3>{{ s.title }}</h3>
+          <p>{{ s.description }}</p>
+          <span class="service-footer">{{ s.footer }}</span>
+        </article>
+      }
     </div>
-
-    }
-
   </div>
-
 </section>

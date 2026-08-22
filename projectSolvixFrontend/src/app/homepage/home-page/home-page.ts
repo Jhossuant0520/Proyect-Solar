@@ -5,7 +5,6 @@ import { AboutHomepage } from './components/about-homepage/about-homepage';
 import { CommonModule } from '@angular/common';
 import { NavbarHomepage } from './components/navbar-homepage/navbar-homepage';
 import { ServicesHomepage } from "./components/services-homepage/services-homepage";
-import { Catalog } from "./components/catalog/catalog";
 import { FooterHomepage } from "./components/footer-homepage/footer-homepage";
 import { StatsHomepage } from "./components/stats-homepage/stats-homepage";
 import { StepsHomepage } from "./components/steps-homepage/steps-homepage";
@@ -14,12 +13,13 @@ import { FaqHomepage } from "./components/faq-homepage/faq-homepage";
 
 
 
+import { CatalogPreview } from "./components/catalog-preview/catalog-preview";
 import { CtaHomepage } from "./components/cta-homepage/cta-homepage";
 import { Contact } from './components/contact/contact';
 
 @Component({
   selector: 'app-home-page',
-  imports: [MatCardModule, HeroHomepage, AboutHomepage, NavbarHomepage, ServicesHomepage, Catalog, FooterHomepage, CommonModule, StatsHomepage, StepsHomepage, TestimonialsHomepage, FaqHomepage, CtaHomepage, Contact],
+  imports: [MatCardModule, HeroHomepage, AboutHomepage, NavbarHomepage, ServicesHomepage, CatalogPreview, FooterHomepage, CommonModule, StatsHomepage, StepsHomepage, TestimonialsHomepage, FaqHomepage, CtaHomepage, Contact],
   templateUrl: './home-page.html',
   styleUrls: ['./home-page.scss']
 })

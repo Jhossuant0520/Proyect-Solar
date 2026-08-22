@@ -2,10 +2,10 @@ import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 @Component({
-  selector: 'app-hero-homepage',
+  selector: 'app-catalog-preview',
   standalone: true,
   imports: [RouterModule],
-  templateUrl: './hero-homepage.html',
-  styleUrls: ['./hero-homepage.scss']
+  templateUrl: './catalog-preview.html',
+  styleUrl: './catalog-preview.scss'
 })
-export class HeroHomepage {}
+export class CatalogPreview {}

@@ -1,63 +1,67 @@
-<section class="solar-scan-container">
-  
-  <div class="info-panel">
-    <div class="brand-badge">SOLVIX • Diagnóstico Activo</div>
-    <h1>Desbloquea el <span class="power-text">Poder Solar</span> de tu Hogar</h1>
-    <p>Nuestra IA escanea tu ADN energético y proyecta tu independencia en segundos. Sintoniza tu consumo a la derecha.</p>
-    
-    <div class="trusted-counter">
-      <i class="icon-star">★</i>
-      <span>Analizando la red de +1,200 familias colombianas.</span>
-    </div>
-  </div>
+<section class="hero">
+  <div class="hero-glow" aria-hidden="true"></div>
 
-  <div class="scan-visual-panel">
-    
-    <div class="hologram-stage">
-      <div class="house-mesh">
-        <img src="https://cdn-icons-png.flaticon.com/512/616/616490.png" alt="Malla de Casa 3D" class="mesh-img">
-        <div class="energy-shield"></div>
-      </div>
-
-      <div class="hologram-data h-ahorro">
-        <span class="label">AHORRO PROYECTADO</span>
-        <h3 class="value">{{ proyeccionAhorro | currency:'COP':'symbol-narrow':'1.0-0' }}<small>/mes</small></h3>
-      </div>
-
-      <div class="hologram-data h-paneles">
-        <span class="label">PANELES NECESARIOS</span>
-        <h3 class="value">{{ proyeccionPaneles }}</h3>
-      </div>
-
-      <div class="hologram-data h-roi">
-        <span class="label">ROI ESTIMADO</span>
-        <h3 class="value">{{ proyeccionRoi }} <small>años</small></h3>
-      </div>
-    </div>
-
-    <div class="tune-controls glass-panel">
-      
-      <div class="control-group">
-        <label>Sintonía de Consumo: <b>{{ consumoSintonizado }} kWh</b></label>
-        <div class="dial-container">
-          <input type="range" min="50" max="1500" step="10" 
-                 [(ngModel)]="consumoSintonizado" (input)="sintonizarPoder()" 
-                 class="dial-slider">
+  <div class="hero-grid">
+    <aside class="hero-side">
+      <article class="holo-card">
+        <span class="holo-label">Radiación solar</span>
+        <strong class="holo-value">942 W/m²</strong>
+        <div class="holo-bar" aria-hidden="true">
+          <span class="holo-bar-fill"></span>
         </div>
-      </div>
+      </article>
 
-      <div class="control-group regions">
-        <label>Región de Sintonía</label>
-        <div class="region-buttons">
-          <button *ngFor="let region of regiones; let i = index" 
-                  (click)="setRegion(i)" 
-                  [ngClass]="{'active': i === regionIdx}">
-            {{ region.name.split(' ')[0] }}
-          </button>
+      <article class="holo-card">
+        <span class="holo-label holo-label-neon">Demanda energética</span>
+        <strong class="holo-value">4,2 kW</strong>
+        <div class="holo-ticks" aria-hidden="true">
+          <span></span><span></span><span class="is-on"></span><span></span>
         </div>
-      </div>
+      </article>
+    </aside>
 
+    <div class="hero-center">
+      <span class="hero-badge">
+        <span class="hero-badge-dot" aria-hidden="true"></span>
+        Simulador inteligente
+      </span>
+
+      <h1>Descubre cuántos paneles solares necesita tu hogar</h1>
+
+      <p>
+        Calcula tu sistema a partir de tu consumo energético real.
+        Precisión para tu independencia energética.
+      </p>
+
+      <a class="btn-cyber-primary" routerLink="/register">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 19V5h2v14H4zm4-8h3v8H8v-8zm5-4h3v12h-3V7zm5-3h3v15h-3V4z" fill="currentColor"/>
+        </svg>
+        Calcular mi sistema
+      </a>
+
+      <svg class="hero-wave" viewBox="0 0 400 100" aria-hidden="true">
+        <path d="M0 50 Q 50 10, 100 50 T 200 50 T 300 50 T 400 50" fill="none" stroke="#4fd1ff" stroke-width="1"/>
+        <circle cx="200" cy="50" r="3" fill="#4fd1ff"/>
+      </svg>
     </div>
 
+    <aside class="hero-side">
+      <article class="holo-card">
+        <span class="holo-label holo-label-secondary">Eficiencia del sistema</span>
+        <strong class="holo-value">98,4%</strong>
+        <div class="holo-bars" aria-hidden="true">
+          <span></span><span></span><span class="is-on"></span><span></span>
+        </div>
+      </article>
+
+      <article class="holo-card holo-card-accent">
+        <span class="holo-label">Estado del análisis</span>
+        <div class="holo-status">
+          <span class="holo-status-icon" aria-hidden="true"></span>
+          Calculando
+        </div>
+      </article>
+    </aside>
   </div>
 </section>

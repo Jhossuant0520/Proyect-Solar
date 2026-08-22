@@ -1,0 +1,113 @@
+:host {
+  --solvix-bg: #020617;
+  --solvix-surface: #151b2d;
+  --solvix-primary: #4fd1ff;
+  --solvix-neon: #00e5ff;
+  --solvix-text: #ffffff;
+  --solvix-text-muted: #94a3b8;
+  display: block;
+}
+
+.catalog-preview {
+  padding: 96px 64px;
+  background: var(--solvix-surface);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.catalog-preview h2 {
+  margin: 0 0 64px;
+  text-align: center;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 600;
+  color: var(--solvix-text);
+}
+
+.preview-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 32px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.preview-card {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  width: min(100%, 520px);
+  height: 256px;
+  padding: 32px;
+  border-radius: 16px;
+  overflow: hidden;
+  text-decoration: none;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(79, 209, 255, 0.2);
+  backdrop-filter: blur(16px);
+  transition: border-color 0.3s ease, transform 0.3s ease;
+}
+
+.preview-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(2, 6, 23, 0.9), transparent);
+}
+
+.preview-card.is-biz {
+  border-color: rgba(0, 229, 255, 0.2);
+}
+
+.preview-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(79, 209, 255, 0.5);
+}
+
+.preview-card.is-biz:hover {
+  border-color: rgba(0, 229, 255, 0.5);
+}
+
+.preview-icon {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  font-size: 2rem;
+  color: var(--solvix-primary);
+}
+
+.preview-card.is-biz .preview-icon {
+  color: var(--solvix-neon);
+}
+
+.preview-card div {
+  position: relative;
+  z-index: 2;
+}
+
+.preview-card h3 {
+  margin: 0 0 8px;
+  font-size: 1.5rem;
+  color: var(--solvix-text);
+  transition: color 0.3s ease;
+}
+
+.preview-card:hover h3 {
+  color: var(--solvix-primary);
+}
+
+.preview-card.is-biz:hover h3 {
+  color: var(--solvix-neon);
+}
+
+.preview-card p {
+  margin: 0;
+  color: var(--solvix-text-muted);
+}
+
+@media (max-width: 768px) {
+  .catalog-preview {
+    padding: 64px 20px;
+  }
+}

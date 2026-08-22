@@ -82,7 +82,14 @@ public class serviceUsuario {
         modelUsuario usuarioGuardado = usuarioRepo.save(
     Objects.requireNonNull(usuario, "Usuario no puede ser null")
 );
-        emailService.enviarEmailVerificacion(dto.getEmail(), token);
+        boolean correoEnviado = emailService.enviarEmailVerificacion(dto.getEmail(), token);
+
+        if (!correoEnviado) {
+            usuarioGuardado.setEmailVerificado(true);
+            usuarioGuardado.setTokenVerificacion(null);
+            usuarioGuardado.setTokenVerificacionExpiracion(null);
+            usuarioGuardado = usuarioRepo.save(usuarioGuardado);
+        }
 
         return usuarioGuardado;
     }

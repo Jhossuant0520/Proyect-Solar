@@ -131,40 +131,23 @@ html {
   box-shadow: 0 0 15px rgba(56,189,248,0.6);
 }
 
-/* BOTONES */
-.nav-actions {
+/* BOTONES — Cyber-Glow (global en styles.scss) */
+.nav-actions,
+.mobile-actions {
   display: flex;
   gap: 10px;
 }
 
 .mobile-actions {
-  display: none; /* Oculto en escritorio */
+  display: none;
+  flex-direction: column;
+  width: 80%;
 }
 
-.btn {
-  padding: 8px 16px;
-  border-radius: 20px;
-  cursor: pointer;
-  border: none;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.btn.primary {
-  background: linear-gradient(135deg, #0ea5e9, #38bdf8);
-  color: #020617;
-  font-weight: bold;
-  box-shadow: 0 0 15px rgba(56,189,248,0.5);
-}
-
-.btn.ghost {
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.2);
-  color: white;
-}
-
-.btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 20px rgba(56,189,248,0.7);
+.mobile-actions .btn-cyber-primary,
+.mobile-actions .btn-cyber-secondary {
+  width: 100%;
+  justify-content: center;
 }
 
 /* 🔥 HAMBURGUESA */

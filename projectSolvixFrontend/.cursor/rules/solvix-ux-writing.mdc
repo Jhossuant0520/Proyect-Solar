@@ -1,0 +1,34 @@
+---
+description: UX writing, números y presentación de resultados en SOLVIX
+alwaysApply: true
+---
+
+# SOLVIX — UX writing y resultados
+
+Principio rector: **SOLVIX no simplifica la ingeniería. SOLVIX simplifica la forma de entenderla.**
+
+El usuario común debe entender SOLVIX sin conocimientos de ingeniería. Un usuario técnico debe poder acceder a toda la información de ingeniería.
+
+## UX writing
+
+1. Palabras simples.
+2. Tiempo presente.
+3. Simplificar valores numéricos en la capa visible.
+4. Ser consciente del lenguaje técnico. Traducir cuando haga falta.
+   - `HSP_diseño` → "Horas solares de diseño"
+5. Jerarquía visual en botones.
+6. Botones y labels en una sola línea siempre que sea posible.
+7. Consistencia de estilos y colores.
+
+## Números
+
+Simplificar visualmente. Mantener precisión completa en detalles técnicos.
+
+- Visible: `3763.754873 Wh/día` → `3,76 kWh/día`
+- Detalle técnico: valor completo
+
+## Resultados importantes
+
+Usar: número grande + unidad clara + descripción corta + estado visual.
+
+Ejemplo: `6` / Paneles necesarios

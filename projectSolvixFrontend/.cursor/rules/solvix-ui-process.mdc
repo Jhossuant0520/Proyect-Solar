@@ -1,0 +1,31 @@
+---
+description: Proceso de UI y regla crítica de no tocar lógica de negocio al mejorar presentación
+alwaysApply: true
+---
+
+# SOLVIX — Proceso de UI
+
+Principio rector: **SOLVIX no simplifica la ingeniería. SOLVIX simplifica la forma de entenderla.**
+
+## Regla crítica
+
+Durante mejoras de UI **NO modificar** salvo que la tarea lo pida explícitamente:
+
+fórmulas, servicios, endpoints, modelos, autenticación, guards, interceptors, contratos API.
+
+Primero preservar funcionalidad. Después mejorar presentación.
+
+## Antes de modificar una pantalla
+
+1. Leer HTML
+2. Leer TypeScript
+3. Leer SCSS
+4. Identificar servicios
+5. Identificar modelos
+6. Identificar estados
+7. Identificar datos reales
+8. Implementar UI
+9. Verificar funcionalidad
+10. Verificar responsive
+11. Verificar UX writing
+12. Verificar coherencia de colores

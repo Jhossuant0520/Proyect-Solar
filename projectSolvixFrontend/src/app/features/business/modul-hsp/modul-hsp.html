@@ -2,10 +2,13 @@
 
   <div class="hsp-header">
     <h1>Horas Sol Pico <span>SolarFix</span></h1>
-    <p>Consulta automática a PVGIS con tus coordenadas para obtener la irradiación real de tu ubicación.</p>
+    <p>Consulta PVGIS automaticamente con tus coordenadas para obtener la irradiación real de tu ubicación.</p>
+    <p class="usuario-badge" *ngIf="auth?.obtenerNombreUsuario">
+      <mat-icon>person</mat-icon> {{ auth.obtenerNombreUsuario() }}
+    </p>
   </div>
 
-  <mat-stepper linear #stepper orientation="horizontal">
+  <mat-stepper linear #stepper orientation="horizontal" class="hsp-stepper">
 
     <!-- ══════════════════════════════════════
          PASO 1 — Ubicación
@@ -14,66 +17,60 @@
       <form [formGroup]="form">
 
         <mat-card class="sf-card">
-          <mat-card-header>
+          <mat-card-header class="card-header-compact">
             <mat-icon mat-card-avatar>location_on</mat-icon>
-            <mat-card-title>Ubicación del sistema fotovoltaico</mat-card-title>
-            <mat-card-subtitle>
-              Indica la ubicación exacta donde se instalará el sistema solar.
-            </mat-card-subtitle>
+            <div>
+              <mat-card-title>Ubicación del sistema fotovoltaico</mat-card-title>
+              <mat-card-subtitle>Indica la ubicación exacta donde se instalará el sistema solar.</mat-card-subtitle>
+            </div>
           </mat-card-header>
 
           <mat-card-content>
+            <div class="geo-row compact">
+              <div class="left">
+                <button mat-flat-button color="accent" type="button"
+                        [disabled]="!geoDisponible || loadingUbicacion"
+                        (click)="usarUbicacionActual()">
+                  <mat-icon>my_location</mat-icon>
+                  {{ loadingUbicacion ? 'Obteniendo ubicación...' : 'Usar mi ubicación' }}
+                </button>
+                <span class="o-divider">— o ingresa manualmente —</span>
+              </div>
 
-            <!-- Botón geolocalización -->
-            <div class="geo-row">
-              <button mat-flat-button color="accent" type="button"
-                      [disabled]="!geoDisponible || loadingUbicacion"
-                      (click)="usarUbicacionActual()">
-                <mat-icon>my_location</mat-icon>
-                {{ loadingUbicacion ? 'Obteniendo ubicación...' : 'Usar mi ubicación actual' }}
-              </button>
-              <span class="o-divider">— o ingresa manualmente —</span>
+              <div class="coords-grid compact">
+                <mat-form-field appearance="outline">
+                  <mat-label>Latitud (DD)</mat-label>
+                  <input matInput type="number" formControlName="latitud"
+                         step="0.0000001" placeholder="7.007528"
+                         (change)="onCoordsChange()">
+                  <mat-hint>Ejemplo: 7.007528</mat-hint>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Longitud (DD)</mat-label>
+                  <input matInput type="number" formControlName="longitud"
+                         step="0.0000001" placeholder="-73.9110583"
+                         (change)="onCoordsChange()">
+                  <mat-hint>Ejemplo: -73.9110583</mat-hint>
+                </mat-form-field>
+              </div>
             </div>
 
-            <div *ngIf="errorUbicacion" class="aviso-warning">
+            <div *ngIf="errorUbicacion" class="aviso-warning compact">
               <mat-icon color="warn">warning</mat-icon>
               <span>{{ errorUbicacion }}</span>
             </div>
 
-            <!-- Inputs manuales -->
-            <div class="coords-grid">
-              <mat-form-field appearance="outline">
-                <mat-label>Latitud (DD)</mat-label>
-                <input matInput type="number" formControlName="latitud"
-                       step="0.0000001" placeholder="7.007528"
-                       (change)="onCoordsChange()">
-                <mat-hint>Ejemplo: 7.007528</mat-hint>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline">
-                <mat-label>Longitud (DD)</mat-label>
-                <input matInput type="number" formControlName="longitud"
-                       step="0.0000001" placeholder="-73.9110583"
-                       (change)="onCoordsChange()">
-                <mat-hint>Ejemplo: -73.9110583</mat-hint>
-              </mat-form-field>
-            </div>
-
-            <!-- Link verificación Google Maps -->
-            <div *ngIf="mapaUrl" class="mapa-link">
+            <div *ngIf="mapaUrl" class="mapa-link compact">
               <mat-icon>map</mat-icon>
-              <a [href]="mapaUrl" target="_blank" rel="noopener">
-                Verificar ubicación en Google Maps
-              </a>
+              <a [href]="mapaUrl" target="_blank" rel="noopener">Verificar ubicación en Google Maps</a>
             </div>
 
           </mat-card-content>
 
-          <mat-card-actions>
-            <button mat-flat-button color="primary" type="button"
-                    matStepperNext
-                    [disabled]="form.invalid || loadingCalculo"
-                    (click)="onCalcular()">
+          <mat-card-actions class="actions-right">
+            <button mat-flat-button color="primary" type="button" matStepperNext
+                    [disabled]="form.invalid || loadingCalculo" (click)="onCalcular()">
               Consultar PVGIS <mat-icon>bolt</mat-icon>
             </button>
           </mat-card-actions>
@@ -109,7 +106,7 @@
       <ng-container *ngIf="preview && !resultado && !loadingCalculo && !loadingGuardar">
 
         <!-- Info técnica PVGIS -->
-        <mat-card class="sf-card">
+        <mat-card class="sf-card preview-card">
           <mat-card-header>
             <mat-icon mat-card-avatar>satellite_alt</mat-icon>
             <mat-card-title>Datos PVGIS — Año {{ preview.anioConsultado }}</mat-card-title>
@@ -128,7 +125,7 @@
         </mat-card>
 
         <!-- Tabla mensual -->
-        <mat-card class="sf-card">
+        <mat-card class="sf-card table-card">
           <mat-card-header>
             <mat-card-title>Irradiación mensual</mat-card-title>
           </mat-card-header>
@@ -174,7 +171,7 @@
         </mat-card>
 
         <!-- Resumen HSP -->
-        <mat-card class="sf-card">
+        <mat-card class="sf-card summary-card">
           <mat-card-header>
             <mat-card-title>Resumen HSP de diseño</mat-card-title>
           </mat-card-header>
@@ -209,12 +206,11 @@
             </div>
           </mat-card-content>
 
-          <mat-card-actions>
+          <mat-card-actions class="actions-space">
             <button mat-stroked-button type="button" matStepperPrevious>
-              <mat-icon>arrow_back</mat-icon> Corregir coordenadas
+              <mat-icon>arrow_back</mat-icon> Corregir
             </button>
-            <button mat-flat-button color="primary" type="button"
-                    (click)="onConfirmar()">
+            <button mat-flat-button color="primary" type="button" (click)="onConfirmar()">
               Confirmar y guardar <mat-icon>save</mat-icon>
             </button>
           </mat-card-actions>

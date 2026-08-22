@@ -28,6 +28,7 @@
   margin-bottom: 60px;
   position: relative;
   z-index: 2;
+  animation: fadeInUp 0.7s ease both;
 }
 
 .stats-header span {
@@ -140,6 +141,24 @@
   }
   100% {
     transform: translateY(-20px);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stats::before,
+  .stats-header {
+    animation: none;
   }
 }
 

@@ -53,7 +53,7 @@ export class ModulHsp implements OnInit {
   constructor(
     private fb: FormBuilder,
     private service: HspService,
-    private auth: AuthService,
+    public auth: AuthService,
     private router: Router
   ) {}
 
