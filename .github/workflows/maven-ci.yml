@@ -1,0 +1,35 @@
+name: Maven CI (Solvix Backend)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "projectSolvixBackend/**"
+      - ".github/workflows/maven-ci.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "projectSolvixBackend/**"
+      - ".github/workflows/maven-ci.yml"
+
+jobs:
+  test:
+    name: mvn clean test (JDK 21)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: projectSolvixBackend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Run unit and smoke tests
+        run: mvn -B clean test
