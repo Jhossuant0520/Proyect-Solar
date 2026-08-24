@@ -1,90 +1,70 @@
-<div class="solicitar-page">
-  <div class="solicitar-card">
+<div class="access-page">
+  <div class="access-glow access-glow--a" aria-hidden="true"></div>
+  <div class="access-glow access-glow--b" aria-hidden="true"></div>
+  <div class="access-grid" aria-hidden="true"></div>
 
+  <a class="access-home" routerLink="/" aria-label="Ir al inicio">
+    <img src="LogoSolvix3.1.png" alt="SOLVIX" class="access-logo">
+  </a>
+
+  <div class="access-card fade-up">
     @if (enviado) {
-
-      <div class="confirmacion fade-in">
-        <div class="icono-success">
-          ✓
+      <div class="estado fade-in">
+        <div class="icono icono-success" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
         </div>
-
         <h1>Correo enviado</h1>
-
-        <p>
-          Si el email está registrado, recibirás un nuevo enlace de verificación.
+        <p class="mensaje">
+          Si el correo está registrado, recibirás un nuevo enlace de verificación.
         </p>
-
-        <a routerLink="/login" class="btn-primary">
-          Iniciar sesión
-        </a>
+        <a routerLink="/login" class="btn-cyber-primary access-submit">Iniciar sesión</a>
       </div>
-
     } @else {
+      <header class="access-header">
+        <span class="access-badge">
+          <span class="access-badge-dot" aria-hidden="true"></span>
+          Verificación
+        </span>
+        <h1>Nuevo enlace</h1>
+        <p>Escribe tu correo y te enviamos un enlace para activar tu cuenta.</p>
+      </header>
 
-      <div class="header">
-        <h1>Nuevo enlace de verificación</h1>
-
-        <p>
-          Introduce tu correo electrónico y te enviaremos un nuevo enlace.
-        </p>
-      </div>
-
-      <form
-        [formGroup]="form"
-        (ngSubmit)="onSubmit()"
-        class="formulario"
-      >
-
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="access-form">
         @if (errorMensaje) {
-          <div class="alert-error">
-            {{ errorMensaje }}
-          </div>
+          <div class="alert alert-error" role="alert">{{ errorMensaje }}</div>
         }
 
-        <div class="campo">
-
-          <label for="email">
-            Correo electrónico
-          </label>
-
-          <div class="input-wrapper">
-            <input
-              id="email"
-              type="email"
-              formControlName="email"
-              placeholder="tu@correo.com"
-              autocomplete="email"
-            />
-          </div>
-
+        <label class="field">
+          <span>Correo electrónico</span>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="tu&#64;correo.com"
+            autocomplete="email"
+          />
           @if (form.get('email')?.invalid && form.get('email')?.touched) {
-            <small class="error-inline">
-              Introduce un email válido
-            </small>
+            <small class="field-error">Introduce un correo válido</small>
           }
-
-        </div>
+        </label>
 
         <button
           type="submit"
-          class="btn-primary"
+          class="btn-cyber-primary access-submit"
           [disabled]="form.invalid || cargando"
         >
           @if (cargando) {
-            <span class="spinner"></span>
+            <span class="btn-spinner" aria-hidden="true"></span>
             Enviando...
           } @else {
             Enviar enlace
           }
         </button>
-
       </form>
 
-      <a routerLink="/login" class="link-secondary">
-        ← Volver al inicio de sesión
-      </a>
-
+      <footer class="access-footer">
+        <a routerLink="/login" class="access-back">Volver al inicio de sesión</a>
+      </footer>
     }
-
   </div>
 </div>

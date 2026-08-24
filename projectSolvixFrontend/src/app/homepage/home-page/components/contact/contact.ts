@@ -16,7 +16,7 @@ export class Contact {
   form = {
     name: '',
     email: '',
-    subject: 'support',
+    subject: 'calculation',
     message: '',
     privacy: false
   };

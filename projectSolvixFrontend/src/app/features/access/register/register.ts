@@ -20,7 +20,6 @@ export class Register {
   errorMensaje = '';
   registroExitoso = false;
 
-  // 👁️ CONTROL DEL OJO (Mantenidos exactamente igual)
   showPassword = false;
   showConfirm = false;
 
@@ -37,12 +36,10 @@ export class Register {
     }, { validators: this.passwordMatchValidator });
   }
 
-  // 👇 acceso fácil a controles
   get f() {
     return this.form.controls;
   }
 
-  // 🔐 validar contraseñas
   private passwordMatchValidator(g: AbstractControl): ValidationErrors | null {
     const pass = g.get('passwordUsuario')?.value;
     const confirm = g.get('confirmarPassword')?.value;
@@ -50,7 +47,6 @@ export class Register {
     return pass === confirm ? null : { passwordsMismatch: true };
   }
 
-  // 👁️ mostrar/ocultar
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
@@ -59,14 +55,7 @@ export class Register {
     this.showConfirm = !this.showConfirm;
   }
 
-  // 🔗 Navegación a recuperar contraseña
-  goToForgotPassword(): void {
-    this.router.navigate(['/forgot-password']); // O la ruta exacta que uses
-  }
-
-  // 🚀 submit
   onSubmit(): void {
-
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -91,7 +80,7 @@ export class Register {
             this.router.navigate(['/login']);
           }, 2000);
         },
-        error: (err) => {
+        error: () => {
           this.errorMensaje = 'Error al registrar';
         }
       });
