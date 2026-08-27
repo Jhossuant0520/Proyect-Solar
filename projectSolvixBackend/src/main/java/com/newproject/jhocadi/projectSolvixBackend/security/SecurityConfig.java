@@ -40,13 +40,15 @@ public class SecurityConfig {
                 // Públicos: autenticación y preflight CORS
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // Catálogo de productos (lectura pública)
+                .requestMatchers(HttpMethod.GET, "/api/v1/productos", "/api/v1/productos/**").permitAll()
                 // Documentación OpenAPI / Swagger (si se habilita a futuro)
                 .requestMatchers(
                     "/v3/api-docs/**",
                     "/swagger-ui/**",
                     "/swagger-ui.html"
                 ).permitAll()
-                // Todo lo demás requiere JWT (fincas, componentes, paneles, cálculos, etc.)
+                // Todo lo demás requiere JWT
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

@@ -1,6 +1,6 @@
 @use 'sass:color';
 
-.finca-form-wrapper {
+.producto-form-wrapper {
   position: relative;
   min-height: calc(100vh - 64px);
   display: flex;
@@ -12,7 +12,7 @@
 }
 
 @media (max-height: 700px) {
-  .finca-form-wrapper {
+  .producto-form-wrapper {
     align-items: flex-start;
     padding-top: 2rem;
   }
@@ -44,7 +44,7 @@
   }
 }
 
-.finca-form-content {
+.producto-form-content {
   position: relative;
   z-index: 1;
   width: 100%;
@@ -52,7 +52,7 @@
   justify-content: center;
 }
 
-.finca-form-card {
+.producto-form-card {
   max-width: 900px;
   width: 100%;
   background: linear-gradient(135deg, #FFFFFF, #f8f9fa);
@@ -120,7 +120,7 @@
       opacity: 0.95;
       font-weight: 400;
     }
-    .finca-id {
+    .producto-id {
       display: block;
       margin-top: 0.5rem;
       font-size: 0.9rem;
@@ -244,3 +244,7 @@ mat-form-field {
     }
   }
 }
+
+.full-width { grid-column: 1 / -1; }
+.toggle-activo { display: flex; align-items: center; padding: 0.5rem 0; }
+

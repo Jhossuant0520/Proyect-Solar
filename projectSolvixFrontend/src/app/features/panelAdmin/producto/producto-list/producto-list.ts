@@ -6,87 +6,91 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatCardModule } from '@angular/material/card';
-import { Router } from '@angular/router';
+import { MatChipsModule } from '@angular/material/chips';
+import { CommonModule } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
 
-import { fincaModel } from '../fincaClase';
-import { FincaService } from '../../../../core/services/finca.service';
+import { ProductoModel } from '../productoClase';
+import { ProductoService } from '../../../../core/services/producto.service';
 import { DialogoConfirmacionDelete } from '../../../../shared/components/dialogo-confirmacion-delete/dialogo-confirmacion-delete';
 
 @Component({
-  selector: 'app-finca-list',
+  selector: 'app-producto-list',
   standalone: true,
-  templateUrl: './finca-list.html',
-  styleUrls: ['./finca-list.scss'],
+  templateUrl: './producto-list.html',
+  styleUrls: ['./producto-list.scss'],
   imports: [
+    CommonModule,
+    RouterLink,
     MatFormFieldModule,
     MatInputModule,
     MatTableModule,
     MatIconModule,
     MatButtonModule,
     MatDialogModule,
-    MatCardModule
+    MatCardModule,
+    MatChipsModule
   ]
 })
-export class FincaList implements OnInit {
+export class ProductoList implements OnInit {
 
   displayedColumns: string[] = [
-    'nombreFinca',
-    'ubicacionFinca',
-    'propietarioFinca',
-    'superficieFinca',
-    'actividadPrincipal',
+    'nombre',
+    'marca',
+    'categoria',
+    'precio',
+    'cantidadStock',
+    'activo',
     'acciones'
   ];
 
-  dataSource = new MatTableDataSource<fincaModel>([]);
+  dataSource = new MatTableDataSource<ProductoModel>([]);
 
   constructor(
-    private fincaService: FincaService,
+    private productoService: ProductoService,
     private dialog: MatDialog,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.cargarFincas();
-
-    // Permitir filtro global sobre todos los campos
+    this.cargarProductos();
     this.dataSource.filterPredicate = (data, filter) =>
       Object.values(data).some(value =>
         value?.toString().toLowerCase().includes(filter)
       );
   }
 
-  cargarFincas() {
-    this.fincaService.listarFincas().subscribe({
-      next: (fincas) => this.dataSource.data = fincas,
-      error: (err) => console.error('Error al cargar fincas:', err)
+  cargarProductos(): void {
+    this.productoService.listar().subscribe({
+      next: (productos) => this.dataSource.data = productos,
+      error: () => { /* snackbar opcional */ }
     });
   }
 
-  applyFilter(event: Event) {
+  applyFilter(event: Event): void {
     const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
     this.dataSource.filter = filterValue;
   }
 
-  editarFinca(finca: fincaModel) {
-    this.router.navigate(['/editar-finca', finca.id]);
+  editarProducto(producto: ProductoModel): void {
+    this.router.navigate(['/editar-producto', producto.id]);
   }
 
-  eliminarFinca(id: number) {
+  desactivarProducto(id: number): void {
     const dialogRef = this.dialog.open(DialogoConfirmacionDelete, {
       data: {
-        mensaje: '¿Estás seguro de que deseas eliminar esta finca?'
+        mensaje: '¿Desactivar este producto del catálogo?'
       }
     });
 
     dialogRef.afterClosed().subscribe(resultado => {
       if (resultado === true) {
-        this.fincaService.eliminarFinca(id).subscribe({
-          next: () => {
-            this.dataSource.data = this.dataSource.data.filter(f => f.id !== id);
-            console.log('Finca eliminada');
-          },
-          error: (err) => console.error('Error al eliminar finca:', err)
+        this.productoService.desactivar(id).subscribe({
+          next: (actualizado) => {
+            this.dataSource.data = this.dataSource.data.map(p =>
+              p.id === id ? actualizado : p
+            );
+          }
         });
       }
     });

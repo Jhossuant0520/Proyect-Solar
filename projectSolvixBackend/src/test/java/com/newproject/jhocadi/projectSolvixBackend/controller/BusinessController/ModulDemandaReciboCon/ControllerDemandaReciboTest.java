@@ -11,9 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulDemandaReciboDtos.ResponseDemandaRecibo;
@@ -27,16 +26,18 @@ import com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.Modul
 @AutoConfigureMockMvc(addFilters = false)
 class ControllerDemandaReciboTest {
 
+    private static final String JSON = "application/json";
+
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private ServiceDemandaRecibo serviceDemandaRecibo;
 
-    @MockBean
+    @MockitoBean
     private JwtAuthFilter jwtAuthFilter;
 
-    @MockBean
+    @MockitoBean
     private JwtUtil jwtUtil;
 
     @Test
@@ -62,7 +63,7 @@ class ControllerDemandaReciboTest {
             """;
 
         mockMvc.perform(post("/api/v1/demanda-recibo/calcular")
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(JSON)
                 .content(body))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.modoCalculoConsumoBase").value("PROMEDIO_DIRECTO"))
@@ -89,7 +90,7 @@ class ControllerDemandaReciboTest {
             """;
 
         mockMvc.perform(post("/api/v1/demanda-recibo/calcular")
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(JSON)
                 .content(body))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.status").value(400))
@@ -106,7 +107,7 @@ class ControllerDemandaReciboTest {
             """;
 
         mockMvc.perform(post("/api/v1/demanda-recibo/calcular")
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(JSON)
                 .content(body))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.status").value(400));

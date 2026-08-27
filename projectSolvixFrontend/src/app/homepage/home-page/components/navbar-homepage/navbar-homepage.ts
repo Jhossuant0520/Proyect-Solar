@@ -43,16 +43,13 @@ export class NavbarHomepage {
   setTimeout(() => {
     const el = document.getElementById(id);
     if (!el) {
-      console.warn(`No se encontró #${id}`);
       return;
     }
 
     const offset = 100; // altura del navbar
 
-    // ✅ Intenta primero con el scrolling nativo del elemento
     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    // ✅ Ajuste del offset del navbar (scrollIntoView no soporta offset directo)
     setTimeout(() => {
       window.scrollBy({ top: -offset, behavior: 'smooth' });
     }, 50);

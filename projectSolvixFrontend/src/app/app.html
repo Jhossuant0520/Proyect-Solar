@@ -13,58 +13,31 @@
 
       <!-- Menú de navegación -->
       <mat-nav-list class="sidebar-menu">
-        <a mat-list-item routerLink="/dashboard" routerLinkActive="active-link" >
+        <a mat-list-item routerLink="/dashboard" routerLinkActive="active-link">
           <span class="menu-item">
             <mat-icon>home</mat-icon>
             <span class="menu-text">Inicio</span>
           </span>
         </a>
-      
-        <a mat-list-item routerLink="/finca" routerLinkActive="active-link">
+
+        <a mat-list-item routerLink="/producto" routerLinkActive="active-link">
           <span class="menu-item">
-            <mat-icon>add_home_work</mat-icon>
-            <span class="menu-text">Registrar Finca</span>
-          </span>
-        </a>
-      
-        <a mat-list-item routerLink="/listafinca" routerLinkActive="active-link" >
-          <span class="menu-item">
-            <mat-icon>list_alt</mat-icon>
-            <span class="menu-text">Listado de Fincas</span>
-          </span>
-        </a>
-      
-        <a mat-list-item routerLink="/componentesenergeticos" routerLinkActive="active-link" >
-          <span class="menu-item">
-            <mat-icon><span class="material-symbols-outlined">
-              electric_bolt
-              </span></mat-icon>
-            <span class="menu-text">Registro de Componentes </span>
+            <mat-icon>add_box</mat-icon>
+            <span class="menu-text">Registrar producto</span>
           </span>
         </a>
 
-        <a mat-list-item routerLink="/listcomponet" routerLinkActive="active-link" >
+        <a mat-list-item routerLink="/listaproductos" routerLinkActive="active-link">
           <span class="menu-item">
-            <mat-icon><span class="material-symbols-outlined">
-              view_list
-              </span></mat-icon>
-            <span class="menu-text">Listado de Componentes </span>
+            <mat-icon>inventory_2</mat-icon>
+            <span class="menu-text">Gestión de productos</span>
           </span>
         </a>
 
-        <a mat-list-item routerLink="/demanda" routerLinkActive="active-link" >
-          <span class="menu-item">
-            <mat-icon><span class="material-symbols-outlined">
-              assessment
-              </span></mat-icon>
-            <span class="menu-text">Demanda Energetica </span>
-          </span>
-        </a>
-      
         <a mat-list-item (click)="logout()">
           <span class="menu-item">
             <mat-icon>logout</mat-icon>
-            <span class="menu-text">Cerrar Sesión</span>
+            <span class="menu-text">Cerrar sesión</span>
           </span>
         </a>
       </mat-nav-list>

@@ -17,28 +17,34 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("IllegalArgumentException → 400 Bad Request JSON")
     void illegalArgument_retorna400() {
-        ServletWebRequest request = new ServletWebRequest(new MockHttpServletRequest("POST", "/api/v1/demanda-recibo/calcular"));
+        ServletWebRequest request = new ServletWebRequest(
+            new MockHttpServletRequest("POST", "/api/v1/demanda-recibo/calcular"));
 
         ResponseEntity<ApiErrorResponse> response =
             handler.handleIllegalArgument(new IllegalArgumentException("Periodo inválido"), request);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(400, response.getBody().status());
-        assertEquals("Periodo inválido", response.getBody().message());
-        assertEquals("/api/v1/demanda-recibo/calcular", response.getBody().path());
+
+        ApiErrorResponse body = response.getBody();
+        assertNotNull(body);
+        assertEquals(400, body.status());
+        assertEquals("Periodo inválido", body.message());
+        assertEquals("/api/v1/demanda-recibo/calcular", body.path());
     }
 
     @Test
     @DisplayName("BusinessException → 400 Bad Request JSON")
     void businessException_retorna400() {
-        ServletWebRequest request = new ServletWebRequest(new MockHttpServletRequest("POST", "/api/v1/hsp/calcular"));
+        ServletWebRequest request = new ServletWebRequest(
+            new MockHttpServletRequest("POST", "/api/v1/hsp/calcular"));
 
         ResponseEntity<ApiErrorResponse> response =
             handler.handleBusiness(new BusinessException("Regla de negocio incumplida"), request);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("Regla de negocio incumplida", response.getBody().message());
+
+        ApiErrorResponse body = response.getBody();
+        assertNotNull(body);
+        assertEquals("Regla de negocio incumplida", body.message());
     }
 }

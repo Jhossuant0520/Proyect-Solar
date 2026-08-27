@@ -140,12 +140,20 @@
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.card-footer img {
+.card-footer .avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  object-fit: cover;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+  border: 1px solid rgba(79, 209, 255, 0.35);
+  background: rgba(79, 209, 255, 0.12);
+  color: var(--solvix-primary);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 .card-footer h4 {
@@ -155,7 +163,7 @@
   color: var(--solvix-text);
 }
 
-.card-footer span {
+.card-footer .role {
   display: block;
   margin-top: 2px;
   font-size: 12px;
@@ -163,9 +171,26 @@
   letter-spacing: 0.04em;
 }
 
-.card.is-primary .card-footer span { color: var(--solvix-primary); }
-.card.is-neon .card-footer span { color: var(--solvix-neon); }
-.card.is-secondary .card-footer span { color: var(--solvix-secondary); }
+.card.is-primary .avatar {
+  border-color: rgba(79, 209, 255, 0.45);
+  background: rgba(79, 209, 255, 0.14);
+  color: var(--solvix-primary);
+}
+.card.is-primary .role { color: var(--solvix-primary); }
+
+.card.is-neon .avatar {
+  border-color: rgba(0, 229, 255, 0.45);
+  background: rgba(0, 229, 255, 0.14);
+  color: var(--solvix-neon);
+}
+.card.is-neon .role { color: var(--solvix-neon); }
+
+.card.is-secondary .avatar {
+  border-color: rgba(56, 189, 248, 0.45);
+  background: rgba(56, 189, 248, 0.14);
+  color: var(--solvix-secondary);
+}
+.card.is-secondary .role { color: var(--solvix-secondary); }
 
 @keyframes moveBg {
   from { transform: translate(0, 0); }

@@ -17,10 +17,10 @@
         <span class="quote-mark" aria-hidden="true">”</span>
         <p>{{ item.quote }}</p>
         <div class="card-footer">
-          <img [src]="item.photo" [alt]="item.name" />
+          <span class="avatar" aria-hidden="true">{{ item.initials }}</span>
           <div>
             <h4>{{ item.name }}</h4>
-            <span>{{ item.role }}</span>
+            <span class="role">{{ item.role }}</span>
           </div>
         </div>
       </article>
