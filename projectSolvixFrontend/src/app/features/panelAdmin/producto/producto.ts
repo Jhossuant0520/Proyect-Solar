@@ -1,18 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatIconModule } from '@angular/material/icon';
-import { MatSelectModule } from '@angular/material/select';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
 import { CATEGORIAS_PRODUCTO, ProductoModel } from './productoClase';
 import { ProductoService } from '../../../core/services/producto.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-producto',
@@ -22,13 +16,7 @@ import { ProductoService } from '../../../core/services/producto.service';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatCardModule,
-    MatIconModule,
-    MatSelectModule,
-    MatSlideToggleModule
+    RouterModule
   ]
 })
 export class ProductoComponent implements OnInit {
@@ -42,7 +30,8 @@ export class ProductoComponent implements OnInit {
     private productoService: ProductoService,
     private snackBar: MatSnackBar,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {
     this.productoForm = this.fb.group({
       nombre: ['', Validators.required],
@@ -79,6 +68,7 @@ export class ProductoComponent implements OnInit {
 
   onSubmit(): void {
     if (this.productoForm.invalid) {
+      this.productoForm.markAllAsTouched();
       this.snackBar.open('Completa los campos obligatorios', 'Cerrar', {
         duration: 2500,
         panelClass: ['snackbar-warning']
@@ -125,5 +115,10 @@ export class ProductoComponent implements OnInit {
 
   onCancel(): void {
     this.router.navigate(['/listaproductos']);
+  }
+
+  logout(): void {
+    this.authService.cerrarSesion();
+    this.router.navigate(['/login']);
   }
 }

@@ -34,6 +34,27 @@ html {
   scroll-behavior: smooth;
 }
 
+/* El dashboard trae su propio sidebar; se oculta el shell para no duplicarlo. */
+.app-sidenav-container:has(app-dashboard) {
+  .app-sidenav {
+    display: none !important;
+  }
+
+  .app-toolbar {
+    display: none !important;
+  }
+
+  .app-sidenav-content,
+  .mat-drawer-content {
+    margin-left: 0 !important;
+  }
+
+  .main-content-area {
+    padding: 0;
+    height: 100%;
+  }
+}
+
 /* Compatibilidad con Angular Material dialogs */
 .mat-mdc-dialog-container,
 .mat-dialog-container {

@@ -1,11 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, RouterModule, RouterOutlet } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-// Eliminamos estas importaciones relacionadas con MatDialog y el componente de diálogo
-// import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-// import { BienvenidaDialogComponent } from '../../shared/components/bienvenida-dialog/bienvenida-dialog';
 
 import { AuthService } from '../../../core/services/auth.service';
 import { jwtDecode } from 'jwt-decode';
@@ -15,28 +10,27 @@ import { jwtDecode } from 'jwt-decode';
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule,
-    MatCardModule,
-    MatIconModule
-    // Eliminamos MatDialogModule
-    // MatDialogModule
+    RouterModule
   ],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.scss']
 })
 export class DashboardComponent implements OnInit {
 
-  nombreUsuario: string = 'Usuario'; // Propiedad para el nombre del usuario
+  userName: string = 'Usuario';
+  kpis = {
+    objetivos: 33,
+    tasaVot: 58,
+    tiempoOperacion: 20
+  };
 
   constructor(
     private authService: AuthService,
-    private router: Router,
-    // Eliminamos la inyección de MatDialog
-    // private dialog: MatDialog
+    private router: Router
   ) { }
 
   ngOnInit(): void {
-    this.obtenerNombreUsuarioParaBienvenida(); // Llamamos al nuevo método aquí
+    this.obtenerNombreUsuarioParaBienvenida();
   }
 
   obtenerNombreUsuarioParaBienvenida() {
@@ -44,17 +38,15 @@ export class DashboardComponent implements OnInit {
     if (token) {
       try {
         const decoded: any = jwtDecode(token);
-        this.nombreUsuario = decoded.nombreUsuario || decoded.sub || 'Usuario';
+        this.userName = decoded.nombreUsuario || decoded.sub || 'Usuario';
       } catch (e) {
         console.error('Error al decodificar el token:', e);
-        this.nombreUsuario = 'Usuario';
+        this.userName = 'Usuario';
       }
     } else {
-      this.nombreUsuario = 'Usuario';
+      this.userName = 'Usuario';
     }
   }
-
-  // Se elimina el método abrirDialogoBienvenida() si existía
 
   logout() {
     this.authService.cerrarSesion();

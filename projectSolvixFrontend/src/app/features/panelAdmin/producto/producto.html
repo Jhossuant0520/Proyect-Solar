@@ -1,79 +1,121 @@
-<div class="producto-form-wrapper">
-  <div class="animated-bg"></div>
+<div class="producto-page">
+  <aside class="sidebar">
+    <div>
+      <div class="brand">
+        <div class="brand-mark">SX</div>
+        <span class="brand-name">SOLVIX</span>
+      </div>
+      <nav class="nav-menu">
+        <a routerLink="/dashboard" class="nav-item">Inicio</a>
+        <a routerLink="/producto" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">Registrar producto</a>
+        <a routerLink="/listaproductos" class="nav-item">Gestión de productos</a>
+      </nav>
+    </div>
+    <div class="sidebar-footer">
+      <a class="nav-item logout" (click)="logout()">Cerrar sesión</a>
+    </div>
+  </aside>
 
-  <div class="producto-form-content">
-    <mat-card class="producto-form-card">
-      <header class="form-header">
-        <div class="header-left">
-          <mat-icon>inventory_2</mat-icon>
-          <div class="header-text">
-            <h2>{{ modoEdicion ? 'Editar producto' : 'Registrar producto' }}</h2>
-            <p *ngIf="!modoEdicion">Agrega un producto al catálogo</p>
-            <span *ngIf="modoEdicion" class="producto-id">ID: {{ productoId }}</span>
-          </div>
+  <main class="main-content">
+    <div class="registration-wrapper">
+
+      <!-- Indicador de Pasos (Stepper) -->
+      <div class="stepper">
+        <div class="step active">
+          <span class="step-num">1</span>
+          <span class="step-label">Información</span>
         </div>
-      </header>
+        <div class="step-line"></div>
+        <div class="step active">
+          <span class="step-num">2</span>
+          <span class="step-label">Detalles</span>
+        </div>
+      </div>
 
-      <form [formGroup]="productoForm" (ngSubmit)="onSubmit()">
-        <div class="form-grid">
-          <mat-form-field appearance="outline">
-            <mat-label>Nombre</mat-label>
-            <input matInput formControlName="nombre" placeholder="Ej: Nombre del producto" />
-            <mat-error *ngIf="productoForm.get('nombre')?.hasError('required')">Obligatorio</mat-error>
-          </mat-form-field>
+      <!-- Formulario Principal -->
+      <form class="form-grid" [formGroup]="productoForm" (ngSubmit)="onSubmit()">
 
-          <mat-form-field appearance="outline">
-            <mat-label>Marca</mat-label>
-            <input matInput formControlName="marca" placeholder="Ej: Marca" />
-            <mat-error *ngIf="productoForm.get('marca')?.hasError('required')">Obligatorio</mat-error>
-          </mat-form-field>
+        <!-- PASO 1: INFORMACIÓN BÁSICA -->
+        <div class="card-step">
+          <div class="card-header">
+            <h2>{{ modoEdicion ? 'Editar: Información' : 'Paso 1: Información' }}</h2>
+            <p *ngIf="!modoEdicion">Datos principales del elemento</p>
+            <p *ngIf="modoEdicion">ID: {{ productoId }}</p>
+          </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Categoría</mat-label>
-            <mat-select formControlName="categoria">
+          <div class="form-group">
+            <label for="nombre">Nombre *</label>
+            <input id="nombre" type="text" formControlName="nombre" placeholder="Escribe el nombre del producto" />
+            <small *ngIf="productoForm.get('nombre')?.touched && productoForm.get('nombre')?.hasError('required')">Obligatorio</small>
+          </div>
+
+          <div class="form-group">
+            <label for="marca">Marca *</label>
+            <input id="marca" type="text" formControlName="marca" placeholder="Seleccionar marca..." />
+            <small *ngIf="productoForm.get('marca')?.touched && productoForm.get('marca')?.hasError('required')">Obligatorio</small>
+          </div>
+
+          <div class="form-group">
+            <label for="categoria">Categoría *</label>
+            <select id="categoria" formControlName="categoria">
               @for (c of categorias; track c.value) {
-                <mat-option [value]="c.value">{{ c.label }}</mat-option>
+                <option [value]="c.value">{{ c.label }}</option>
               }
-            </mat-select>
-          </mat-form-field>
+            </select>
+          </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Precio (COP)</mat-label>
-            <input matInput type="number" formControlName="precio" placeholder="Ej: 850000" />
-            <mat-error *ngIf="productoForm.get('precio')?.hasError('required')">Obligatorio</mat-error>
-            <mat-error *ngIf="productoForm.get('precio')?.hasError('min')">No puede ser negativo</mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Stock</mat-label>
-            <input matInput type="number" formControlName="cantidadStock" />
-            <mat-error *ngIf="productoForm.get('cantidadStock')?.hasError('min')">No puede ser negativo</mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>URL de imagen</mat-label>
-            <input matInput formControlName="imagenUrl" placeholder="https://..." />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Descripción</mat-label>
-            <textarea matInput rows="3" formControlName="descripcion"></textarea>
-          </mat-form-field>
-
-          <div class="toggle-activo">
-            <mat-slide-toggle formControlName="activo" color="primary">
-              Visible en catálogo
-            </mat-slide-toggle>
+          <div class="form-group">
+            <label for="stock">Stock *</label>
+            <input id="stock" type="number" formControlName="cantidadStock" placeholder="0" />
+            <small *ngIf="productoForm.get('cantidadStock')?.hasError('min')">No puede ser negativo</small>
           </div>
         </div>
 
-        <div class="botones">
-          <button mat-raised-button color="primary" type="submit" [disabled]="productoForm.invalid">
-            {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
-          </button>
-          <button mat-stroked-button color="warn" type="button" (click)="onCancel()">Cancelar</button>
+        <!-- PASO 2: DETALLES Y ACCIONES -->
+        <div class="card-step flex-between">
+          <div class="step-content">
+            <div class="card-header">
+              <h2>Paso 2: Detalles</h2>
+              <p>Multimedia y especificaciones</p>
+            </div>
+
+            <div class="form-group">
+              <label for="precio">Precio (COP) *</label>
+              <div class="input-suffix">
+                <input id="precio" type="number" formControlName="precio" placeholder="0" />
+                <span class="suffix">COP</span>
+              </div>
+              <small *ngIf="productoForm.get('precio')?.touched && productoForm.get('precio')?.hasError('required')">Obligatorio</small>
+              <small *ngIf="productoForm.get('precio')?.hasError('min')">No puede ser negativo</small>
+            </div>
+
+            <div class="form-group">
+              <label for="imagen">Imagen</label>
+              <div class="dropzone">
+                <input id="imagen" type="text" formControlName="imagenUrl" placeholder="Añade URL de la imagen..." />
+                <span class="dropzone-hint">O arrastra una imagen aquí (máx. 10MB)</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="descripcion">Descripción</label>
+              <textarea id="descripcion" rows="3" formControlName="descripcion" placeholder="Detalla el producto aquí..."></textarea>
+            </div>
+
+            <div class="checkbox-group">
+              <input type="checkbox" id="visible" formControlName="activo" />
+              <label for="visible">Visible en catálogo</label>
+            </div>
+          </div>
+
+          <!-- Botones de Acción -->
+          <div class="card-actions">
+            <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">{{ modoEdicion ? 'Actualizar' : 'Guardar' }}</button>
+          </div>
         </div>
+
       </form>
-    </mat-card>
-  </div>
+    </div>
+  </main>
 </div>

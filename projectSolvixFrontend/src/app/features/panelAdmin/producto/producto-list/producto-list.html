@@ -1,92 +1,205 @@
-<div class="producto-list-container">
-  <div class="animated-bg"></div>
+<div class="app-container">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-box">SX</div>
+      <span>Bienvenido {{ userName }}</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a routerLink="/dashboard" class="nav-item">
+        <i class="fa-solid fa-house"></i> Inicio
+      </a>
+      <a routerLink="/producto" class="nav-item">
+        <i class="fa-solid fa-plus-square"></i> Registrar producto
+      </a>
+      <a routerLink="/listaproductos" class="nav-item active">
+        <i class="fa-solid fa-boxes-stacked"></i> Gestión de productos
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a class="nav-item" (click)="logout()">
+        <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+      </a>
+    </div>
+  </aside>
 
-  <mat-card class="producto-card">
-    <header class="form-header">
-      <div class="header-left">
-        <mat-icon class="iconoList">inventory_2</mat-icon>
-        <div class="header-text">
-          <h2>Gestión de productos</h2>
-          <p>Busca, edita o desactiva productos del catálogo</p>
-        </div>
-      </div>
-
-      <div class="header-right">
-        <button mat-stroked-button color="primary" routerLink="/producto" class="btn-nuevo">
-          <mat-icon>add</mat-icon>
-          Nuevo
-        </button>
-        <mat-form-field appearance="outline" class="filtro-form-field">
-          <mat-label>Filtrar</mat-label>
-          <input matInput (keyup)="applyFilter($event)" placeholder="Marca, nombre..." #input />
-          <button mat-icon-button matSuffix type="button">
-            <mat-icon>search</mat-icon>
-          </button>
-        </mat-form-field>
+  <main class="main-content">
+    <header class="topbar">
+      <h1 class="brand">SOLVIX</h1>
+      <div class="user-profile">
+        <i class="fa-regular fa-bell notification-icon"></i>
+        <div class="avatar">{{ userInitial }}</div>
+        <span>Hola, {{ userName }}</span>
+        <i class="fa-solid fa-chevron-down"></i>
       </div>
     </header>
 
-    <div class="producto-table-wrapper">
-      <table mat-table [dataSource]="dataSource" class="producto-table">
-        <ng-container matColumnDef="nombre">
-          <th mat-header-cell *matHeaderCellDef>Nombre</th>
-          <td mat-cell *matCellDef="let element">{{ element.nombre }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="marca">
-          <th mat-header-cell *matHeaderCellDef>Marca</th>
-          <td mat-cell *matCellDef="let element">{{ element.marca }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="categoria">
-          <th mat-header-cell *matHeaderCellDef>Categoría</th>
-          <td mat-cell *matCellDef="let element">{{ element.categoria }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="precio">
-          <th mat-header-cell *matHeaderCellDef>Precio</th>
-          <td mat-cell *matCellDef="let element">{{ element.precio | number:'1.0-0' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="cantidadStock">
-          <th mat-header-cell *matHeaderCellDef>Stock</th>
-          <td mat-cell *matCellDef="let element">{{ element.cantidadStock }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="activo">
-          <th mat-header-cell *matHeaderCellDef>Estado</th>
-          <td mat-cell *matCellDef="let element">
-            <span [class.activo]="element.activo" [class.inactivo]="!element.activo">
-              {{ element.activo ? 'Activo' : 'Inactivo' }}
-            </span>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="acciones">
-          <th mat-header-cell *matHeaderCellDef>Acciones</th>
-          <td mat-cell *matCellDef="let element" class="acciones-cell">
-            <button mat-icon-button color="primary" (click)="editarProducto(element)" type="button">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button
-              mat-icon-button
-              color="warn"
-              (click)="desactivarProducto(element.id)"
-              type="button"
-              [disabled]="!element.activo"
-            >
-              <mat-icon>visibility_off</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
-        <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell" colspan="7">No hay coincidencias para "{{ input.value }}"</td>
-        </tr>
-      </table>
+    <div class="page-header">
+      <div>
+        <h2>Gestión de productos</h2>
+        <p>Administra, busca y controla todos los productos del catálogo.</p>
+      </div>
+      <div class="header-actions">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" placeholder="Buscar productos..." [value]="filtro" (keyup)="applyFilter($event)" />
+        </div>
+        <button type="button" class="btn btn-primary" routerLink="/producto">
+          <i class="fa-solid fa-plus"></i> Nuevo producto
+        </button>
+      </div>
     </div>
-  </mat-card>
+
+    <div class="kpi-grid">
+      <div class="kpi-card" (click)="setVista('all')">
+        <div class="kpi-icon blue"><i class="fa-solid fa-database"></i></div>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ totalProductos }}</span>
+          <span class="kpi-label">Productos Totales</span>
+        </div>
+      </div>
+      <div class="kpi-card" (click)="setVista('stock')">
+        <div class="kpi-icon green"><i class="fa-solid fa-check"></i></div>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ enStock }}</span>
+          <span class="kpi-label">En stock</span>
+        </div>
+      </div>
+      <div class="kpi-card" (click)="setVista('low')">
+        <div class="kpi-icon warning"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ bajoStock }}</span>
+          <span class="kpi-label">Acciones de Bajo Stock</span>
+        </div>
+      </div>
+      <div class="kpi-card" (click)="setVista('out')">
+        <div class="kpi-icon danger"><i class="fa-solid fa-xmark"></i></div>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ agotados }}</span>
+          <span class="kpi-label">Agotados</span>
+          <small class="text-danger">No hay advertencias del producto.</small>
+        </div>
+      </div>
+    </div>
+
+    <section class="table-container">
+      <div class="table-header">
+        <div>
+          <h3>Catálogo de productos</h3>
+          <p>Consulta y administra los productos registrados.</p>
+        </div>
+        <div class="filter-group">
+          <select class="filter-select" [value]="categoriaFiltro" (change)="cambiarCategoria($event)">
+            <option value="">Todas las Categorías</option>
+            @for (cat of categorias; track cat.value) {
+              <option [value]="cat.value">{{ cat.label }}</option>
+            }
+          </select>
+          <select class="filter-select" [value]="vista" (change)="cambiarEstado($event)">
+            <option value="all">Todos los Estados</option>
+            <option value="stock">En Stock</option>
+            <option value="low">Bajo Stock</option>
+            <option value="out">Agotado</option>
+          </select>
+          <button type="button" class="btn btn-secondary" (click)="exportar()">
+            <i class="fa-solid fa-file-export"></i> Exportar
+          </button>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>NOMBRE</th>
+              <th>MARCA</th>
+              <th>CATEGORÍA</th>
+              <th>PRECIO</th>
+              <th>EXISTENCIAS</th>
+              <th>ESTADO</th>
+              <th class="text-right">ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (productosVisibles.length === 0) {
+              <tr>
+                <td colspan="7">
+                  <div class="empty-state">
+                    <div class="empty-icon"><i class="fa-solid fa-box-open"></i></div>
+                    <h4>No se encontraron productos coincidentes</h4>
+                    <p>Intenta ajustar la búsqueda o añade un nuevo producto al catálogo.</p>
+                    <div class="empty-actions">
+                      <button type="button" class="btn btn-secondary" (click)="borrarBusqueda()">Borrar búsqueda</button>
+                      <button type="button" class="btn btn-primary" routerLink="/producto">Añadir primer producto</button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            } @else {
+              @for (element of productosPaginados; track element.id) {
+                <tr>
+                  <td class="font-medium">{{ element.nombre }}</td>
+                  <td>{{ element.marca }}</td>
+                  <td>{{ element.categoria }}</td>
+                  <td>${{ element.precio | number:'1.2-2' }}</td>
+                  <td>{{ element.cantidadStock }}</td>
+                  <td>
+                    <span
+                      class="badge-status"
+                      [class.in-stock]="estadoStock(element) === 'available'"
+                      [class.low-stock]="estadoStock(element) === 'low'"
+                      [class.out-of-stock]="estadoStock(element) === 'out'"
+                    >
+                      {{ etiquetaStock(element) }}
+                    </span>
+                  </td>
+                  <td class="text-right">
+                    <div class="action-buttons">
+                      <button type="button" class="action-btn" title="Editar" (click)="editarProducto(element)">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="action-btn delete"
+                        title="Desactivar"
+                        (click)="desactivarProducto(element.id!)"
+                        [disabled]="!element.activo"
+                      >
+                        <i class="fa-solid fa-trash-can"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <span class="pagination-info">Mostrando {{ rangoInicio }}-{{ rangoFin }} de {{ productosVisibles.length }} registros</span>
+        <div class="pagination-controls">
+          <button type="button" class="btn-page" (click)="irPagina(paginaActual - 1)" [disabled]="paginaActual === 1">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          @for (pagina of paginas; track $index) {
+            @if (pagina === '...') {
+              <span class="page-ellipsis">...</span>
+            } @else {
+              <button
+                type="button"
+                class="btn-page"
+                [class.active]="pagina === paginaActual"
+                (click)="irPagina(pagina)"
+              >
+                {{ pagina }}
+              </button>
+            }
+          }
+          <button type="button" class="btn-page" (click)="irPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
 </div>

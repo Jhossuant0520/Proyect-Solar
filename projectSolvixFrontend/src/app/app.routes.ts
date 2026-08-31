@@ -23,17 +23,17 @@ export const routes: Routes = [
   { path: 'solicitar-reenvio', component: SolicitarReenvio },
   { path: 'demanda-recibo', component: ModulDemandaRecibo },
   { path: 'hsp', component: ModulHsp },
+  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
+  { path: 'producto', component: ProductoComponent, canActivate: [authGuard] },
+  { path: 'editar-producto/:id', component: ProductoComponent, canActivate: [authGuard] },
+  { path: 'listaproductos', component: ProductoList, canActivate: [authGuard] },
 
   {
     path: '',
     component: App,
     canActivate: [authGuard],
     children: [
-      { path: 'dashboard', component: DashboardComponent },
       { path: 'mi-cuenta', component: MiCuenta },
-      { path: 'producto', component: ProductoComponent },
-      { path: 'listaproductos', component: ProductoList },
-      { path: 'editar-producto/:id', component: ProductoComponent },
     ]
   },
 
