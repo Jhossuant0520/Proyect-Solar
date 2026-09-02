@@ -40,8 +40,10 @@ public class SecurityConfig {
                 // Públicos: autenticación y preflight CORS
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                // Catálogo de productos (lectura pública)
+                // Catálogo de productos y categorías (lectura pública)
                 .requestMatchers(HttpMethod.GET, "/api/v1/productos", "/api/v1/productos/**").permitAll()
+                .requestMatchers(HttpMethod.GET,
+                    "/api/v1/categorias-producto", "/api/v1/categorias-producto/**").permitAll()
                 // Documentación OpenAPI / Swagger (si se habilita a futuro)
                 .requestMatchers(
                     "/v3/api-docs/**",

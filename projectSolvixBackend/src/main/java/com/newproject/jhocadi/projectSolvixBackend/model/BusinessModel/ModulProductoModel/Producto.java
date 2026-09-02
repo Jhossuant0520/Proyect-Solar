@@ -5,11 +5,12 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -18,6 +19,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Producto del catálogo. Los valores económicos aquí son SIEMPRE los vigentes;
+ * el historial económico vive congelado en DetalleVenta / DetalleCompra.
+ */
 @Entity
 @Table(name = "productos")
 @Data
@@ -36,15 +41,25 @@ public class Producto {
     @Column(nullable = false, length = 100)
     private String marca;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 40)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "categoria_id", nullable = false)
     private CategoriaProducto categoria;
 
-    @Column(nullable = false, precision = 14, scale = 2)
-    private BigDecimal precio;
+    /** Precio de venta vigente. No se usa para reconstruir ventas pasadas. */
+    @Column(name = "precio_venta_actual", nullable = false, precision = 14, scale = 2)
+    private BigDecimal precioVentaActual;
 
-    @Column(name = "cantidad_stock", nullable = false)
-    private Integer cantidadStock;
+    /**
+     * Costo unitario vigente segun la politica de costeo configurada.
+     * {@code null} significa COSTO DESCONOCIDO (no equivale a costo cero).
+     */
+    @Column(name = "costo_actual", precision = 14, scale = 2)
+    private BigDecimal costoActual;
+
+    /** Stock vigente. Solo InventarioService puede modificarlo. */
+    @Column(name = "stock_actual", nullable = false)
+    @Builder.Default
+    private Integer stockActual = 0;
 
     @Column(length = 2000)
     private String descripcion;
@@ -62,13 +77,18 @@ public class Producto {
     @Column(name = "fecha_actualizacion")
     private LocalDateTime fechaActualizacion;
 
+    /** Distingue costo conocido de costo desconocido para analytics. */
+    public boolean tieneCostoConocido() {
+        return this.costoActual != null;
+    }
+
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
         this.fechaCreacion = now;
         this.fechaActualizacion = now;
-        if (this.cantidadStock == null) {
-            this.cantidadStock = 0;
+        if (this.stockActual == null) {
+            this.stockActual = 0;
         }
     }
 

@@ -37,9 +37,10 @@ export class ProductoList implements OnInit {
   displayedColumns: string[] = [
     'nombre',
     'marca',
-    'categoria',
-    'precio',
-    'cantidadStock',
+    'categoriaNombre',
+    'precioVentaActual',
+    'costoActual',
+    'stockActual',
     'activo',
     'acciones'
   ];

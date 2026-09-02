@@ -248,3 +248,9 @@ mat-form-field {
 .full-width { grid-column: 1 / -1; }
 .toggle-activo { display: flex; align-items: center; padding: 0.5rem 0; }
 
+
+.stock-actual { display: flex; flex-direction: column; justify-content: center; gap: 0.15rem; padding: 0.5rem 0.75rem; border: 1px solid rgba(79, 209, 255, 0.25); border-radius: 8px; }
+.stock-actual .stock-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.75; }
+.stock-actual .stock-valor { font-size: 1.5rem; font-weight: 700; }
+.stock-actual .stock-nota { font-size: 0.72rem; opacity: 0.7; }
+

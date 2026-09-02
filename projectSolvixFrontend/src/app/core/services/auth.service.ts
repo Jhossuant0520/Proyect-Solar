@@ -63,6 +63,22 @@ export class AuthService {
       return null;
     }
   }
+
+  obtenerRol(): string | null {
+    const token = this.obtenerToken();
+    if (!token) return null;
+
+    try {
+      const decoded: any = jwtDecode(token);
+      return decoded.rol ?? null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  esAdmin(): boolean {
+    return this.obtenerRol() === 'ADMIN';
+  }
   
 
   

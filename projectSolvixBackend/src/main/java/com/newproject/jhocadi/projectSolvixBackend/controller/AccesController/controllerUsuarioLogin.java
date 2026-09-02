@@ -51,7 +51,8 @@ public class controllerUsuarioLogin {
                     "Debes verificar tu email antes de iniciar sesión."
             );
         }
-        String token = jwtUtil.generateToken(usuario.getNombreUsuario());
+        String rol = usuario.getRol() != null ? usuario.getRol().getNombreRol() : "USUARIO";
+        String token = jwtUtil.generateToken(usuario.getNombreUsuario(), rol);
 
        
        usuario.setUltimoLogin(LocalDateTime.now());

@@ -1,6 +1,7 @@
 package com.newproject.jhocadi.projectSolvixBackend.security;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
@@ -18,12 +19,24 @@ public class JwtUtil {
     }
 
     public String generateToken(String username) {
-        return Jwts.builder()
+        return generateToken(username, null);
+    }
+
+    /**
+     * Incluye el rol como claim para que el cliente pueda adaptar la interfaz.
+     * La autoridad real sigue validándose en el backend contra la base de datos.
+     */
+    public String generateToken(String username, String rol) {
+        JwtBuilder builder = Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(getKey(), SignatureAlgorithm.HS256)
-                .compact();
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME));
+
+        if (rol != null) {
+            builder.claim("rol", rol);
+        }
+
+        return builder.signWith(getKey(), SignatureAlgorithm.HS256).compact();
     }
 
     public boolean validateToken(String token) {

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ProductoModel } from '../../features/panelAdmin/producto/productoClase';
+import { ProductoFiltros, ProductoModel } from '../../features/panelAdmin/producto/productoClase';
 
 @Injectable({
   providedIn: 'root'
@@ -12,17 +12,10 @@ export class ProductoService {
 
   constructor(private http: HttpClient) {}
 
-  listar(filtros?: {
-    marca?: string;
-    categoria?: string;
-    precioMin?: number;
-    precioMax?: number;
-    stockMin?: number;
-    activo?: boolean;
-  }): Observable<ProductoModel[]> {
+  listar(filtros?: ProductoFiltros): Observable<ProductoModel[]> {
     let params = new HttpParams();
     if (filtros?.marca) params = params.set('marca', filtros.marca);
-    if (filtros?.categoria) params = params.set('categoria', filtros.categoria);
+    if (filtros?.categoriaId != null) params = params.set('categoriaId', String(filtros.categoriaId));
     if (filtros?.precioMin != null) params = params.set('precioMin', String(filtros.precioMin));
     if (filtros?.precioMax != null) params = params.set('precioMax', String(filtros.precioMax));
     if (filtros?.stockMin != null) params = params.set('stockMin', String(filtros.stockMin));

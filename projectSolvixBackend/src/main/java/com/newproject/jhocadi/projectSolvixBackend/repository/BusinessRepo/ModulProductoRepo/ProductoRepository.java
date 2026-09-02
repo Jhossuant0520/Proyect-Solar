@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
-import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulProductoModel.CategoriaProducto;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulProductoModel.Producto;
 
 @Repository
@@ -15,11 +14,16 @@ public interface ProductoRepository extends JpaRepository<Producto, Long>, JpaSp
 
     List<Producto> findByMarcaContainingIgnoreCase(String marca);
 
-    List<Producto> findByCategoria(CategoriaProducto categoria);
+    List<Producto> findByCategoriaId(Long categoriaId);
 
-    List<Producto> findByPrecioBetween(BigDecimal precioMin, BigDecimal precioMax);
+    List<Producto> findByPrecioVentaActualBetween(BigDecimal precioMin, BigDecimal precioMax);
 
-    List<Producto> findByCantidadStockGreaterThan(Integer stock);
+    List<Producto> findByStockActualGreaterThan(Integer stock);
 
     List<Producto> findByActivoTrue();
+
+    /** Productos migrados o nunca comprados: costo desconocido, no costo cero. */
+    List<Producto> findByCostoActualIsNull();
+
+    boolean existsByCategoriaId(Long categoriaId);
 }

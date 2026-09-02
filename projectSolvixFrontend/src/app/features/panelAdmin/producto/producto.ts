@@ -11,8 +11,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { CATEGORIAS_PRODUCTO, ProductoModel } from './productoClase';
+import { CategoriaProductoModel, ProductoModel } from './productoClase';
 import { ProductoService } from '../../../core/services/producto.service';
+import { CategoriaProductoService } from '../../../core/services/categoria-producto.service';
 
 @Component({
   selector: 'app-producto',
@@ -35,11 +36,13 @@ export class ProductoComponent implements OnInit {
   productoForm: FormGroup;
   productoId?: number;
   modoEdicion = false;
-  categorias = CATEGORIAS_PRODUCTO;
+  categorias: CategoriaProductoModel[] = [];
+  stockActual = 0;
 
   constructor(
     private fb: FormBuilder,
     private productoService: ProductoService,
+    private categoriaService: CategoriaProductoService,
     private snackBar: MatSnackBar,
     private route: ActivatedRoute,
     private router: Router
@@ -47,9 +50,10 @@ export class ProductoComponent implements OnInit {
     this.productoForm = this.fb.group({
       nombre: ['', Validators.required],
       marca: ['', Validators.required],
-      categoria: ['GENERAL', Validators.required],
-      precio: [null, [Validators.required, Validators.min(0)]],
-      cantidadStock: [0, [Validators.required, Validators.min(0)]],
+      categoriaId: [null, Validators.required],
+      precioVentaActual: [null, [Validators.required, Validators.min(0)]],
+      costoActual: [null, [Validators.min(0)]],
+      stockInicial: [0, [Validators.min(0)]],
       descripcion: [''],
       imagenUrl: [''],
       activo: [true]
@@ -57,6 +61,8 @@ export class ProductoComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.cargarCategorias();
+
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
       this.modoEdicion = true;
@@ -65,9 +71,34 @@ export class ProductoComponent implements OnInit {
     }
   }
 
+  cargarCategorias(): void {
+    this.categoriaService.listar(true).subscribe({
+      next: (categorias) => this.categorias = categorias,
+      error: () => {
+        this.snackBar.open('No se pudieron cargar las categorías', 'Cerrar', {
+          duration: 3000,
+          panelClass: ['snackbar-error']
+        });
+      }
+    });
+  }
+
   cargarProducto(id: number): void {
     this.productoService.obtenerPorId(id).subscribe({
-      next: (producto) => this.productoForm.patchValue(producto),
+      next: (producto) => {
+        this.stockActual = producto.stockActual ?? 0;
+        this.productoForm.patchValue({
+          nombre: producto.nombre,
+          marca: producto.marca,
+          categoriaId: producto.categoriaId,
+          precioVentaActual: producto.precioVentaActual,
+          costoActual: producto.costoActual ?? null,
+          descripcion: producto.descripcion ?? '',
+          imagenUrl: producto.imagenUrl ?? '',
+          activo: producto.activo
+        });
+        this.productoForm.get('stockInicial')?.disable();
+      },
       error: () => {
         this.snackBar.open('Error al cargar el producto', 'Cerrar', {
           duration: 3000,
@@ -86,7 +117,17 @@ export class ProductoComponent implements OnInit {
       return;
     }
 
-    const datos: ProductoModel = this.productoForm.value;
+    const valores = this.productoForm.getRawValue();
+    const datos: ProductoModel = {
+      nombre: valores.nombre,
+      marca: valores.marca,
+      categoriaId: valores.categoriaId,
+      precioVentaActual: valores.precioVentaActual,
+      costoActual: valores.costoActual === '' || valores.costoActual == null ? null : valores.costoActual,
+      descripcion: valores.descripcion,
+      imagenUrl: valores.imagenUrl,
+      activo: valores.activo
+    };
 
     if (this.modoEdicion && this.productoId !== undefined) {
       this.productoService.actualizar(this.productoId, datos).subscribe({
@@ -97,25 +138,25 @@ export class ProductoComponent implements OnInit {
           });
           this.router.navigate(['/listaproductos']);
         },
-        error: () => {
-          this.snackBar.open('Error al actualizar producto', 'Cerrar', {
-            duration: 3000,
+        error: (err) => {
+          this.snackBar.open(err?.error?.message ?? 'Error al actualizar producto', 'Cerrar', {
+            duration: 4000,
             panelClass: ['snackbar-error']
           });
         }
       });
     } else {
-      this.productoService.crear(datos).subscribe({
+      this.productoService.crear({ ...datos, stockInicial: valores.stockInicial ?? 0 }).subscribe({
         next: () => {
           this.snackBar.open('Producto registrado', 'Cerrar', {
             duration: 3000,
             panelClass: ['snackbar-success']
           });
-          this.productoForm.reset({ categoria: 'GENERAL', cantidadStock: 0, activo: true });
+          this.productoForm.reset({ stockInicial: 0, activo: true });
         },
-        error: () => {
-          this.snackBar.open('Error al registrar producto', 'Cerrar', {
-            duration: 3000,
+        error: (err) => {
+          this.snackBar.open(err?.error?.message ?? 'Error al registrar producto', 'Cerrar', {
+            duration: 4000,
             panelClass: ['snackbar-error']
           });
         }

@@ -7,6 +7,7 @@ import { SolicitarReenvio } from './features/access/solicitar-reenvio/solicitar-
 import { DashboardComponent } from './features/panelAdmin/dashboard/dashboard';
 import { MiCuenta } from './features/access/mi-cuenta/mi-cuenta';
 import { authGuard } from './core/guards/auth-guard';
+import { adminGuard } from './core/guards/admin-guard';
 import { App } from './app';
 import { Catalog } from './homepage/home-page/components/catalog/catalog';
 import { ProductoComponent } from './features/panelAdmin/producto/producto';
@@ -31,9 +32,9 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'mi-cuenta', component: MiCuenta },
-      { path: 'producto', component: ProductoComponent },
-      { path: 'listaproductos', component: ProductoList },
-      { path: 'editar-producto/:id', component: ProductoComponent },
+      { path: 'producto', component: ProductoComponent, canActivate: [adminGuard] },
+      { path: 'listaproductos', component: ProductoList, canActivate: [adminGuard] },
+      { path: 'editar-producto/:id', component: ProductoComponent, canActivate: [adminGuard] },
     ]
   },
 

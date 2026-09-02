@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 
 import org.springframework.data.jpa.domain.Specification;
 
-import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulProductoModel.CategoriaProducto;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulProductoModel.Producto;
 
 public final class ProductoSpecifications {
@@ -14,7 +13,7 @@ public final class ProductoSpecifications {
 
     public static Specification<Producto> conFiltros(
             String marca,
-            CategoriaProducto categoria,
+            Long categoriaId,
             BigDecimal precioMin,
             BigDecimal precioMax,
             Integer stockMin,
@@ -22,7 +21,7 @@ public final class ProductoSpecifications {
 
         return Specification
             .where(marcaContiene(marca))
-            .and(categoriaEs(categoria))
+            .and(categoriaEs(categoriaId))
             .and(precioDesde(precioMin))
             .and(precioHasta(precioMax))
             .and(stockMayorQue(stockMin))
@@ -38,12 +37,12 @@ public final class ProductoSpecifications {
         };
     }
 
-    private static Specification<Producto> categoriaEs(CategoriaProducto categoria) {
+    private static Specification<Producto> categoriaEs(Long categoriaId) {
         return (root, query, cb) -> {
-            if (categoria == null) {
+            if (categoriaId == null) {
                 return cb.conjunction();
             }
-            return cb.equal(root.get("categoria"), categoria);
+            return cb.equal(root.get("categoria").get("id"), categoriaId);
         };
     }
 
@@ -52,7 +51,7 @@ public final class ProductoSpecifications {
             if (precioMin == null) {
                 return cb.conjunction();
             }
-            return cb.greaterThanOrEqualTo(root.get("precio"), precioMin);
+            return cb.greaterThanOrEqualTo(root.get("precioVentaActual"), precioMin);
         };
     }
 
@@ -61,7 +60,7 @@ public final class ProductoSpecifications {
             if (precioMax == null) {
                 return cb.conjunction();
             }
-            return cb.lessThanOrEqualTo(root.get("precio"), precioMax);
+            return cb.lessThanOrEqualTo(root.get("precioVentaActual"), precioMax);
         };
     }
 
@@ -70,7 +69,7 @@ public final class ProductoSpecifications {
             if (stockMin == null) {
                 return cb.conjunction();
             }
-            return cb.greaterThan(root.get("cantidadStock"), stockMin);
+            return cb.greaterThan(root.get("stockActual"), stockMin);
         };
     }
 

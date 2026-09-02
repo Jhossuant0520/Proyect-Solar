@@ -1,19 +1,24 @@
-export type CategoriaProducto =
-  | 'GENERAL'
-  | 'ELECTRONICA'
-  | 'HERRAMIENTA'
-  | 'SOFTWARE'
-  | 'SERVICIO'
-  | 'ACCESORIO'
-  | 'OTRO';
+export interface CategoriaProductoModel {
+  id: number;
+  codigo: string;
+  nombre: string;
+  activo?: boolean;
+}
 
 export interface ProductoModel {
   id?: number;
   nombre: string;
   marca: string;
-  categoria: CategoriaProducto;
-  precio: number;
-  cantidadStock: number;
+  categoriaId: number;
+  categoriaCodigo?: string;
+  categoriaNombre?: string;
+  precioVentaActual: number;
+  /** null significa costo desconocido, no costo cero. */
+  costoActual?: number | null;
+  costoConocido?: boolean;
+  stockActual?: number;
+  /** Solo se envía al crear: genera un movimiento de carga inicial. */
+  stockInicial?: number | null;
   descripcion?: string;
   imagenUrl?: string;
   activo?: boolean;
@@ -21,12 +26,11 @@ export interface ProductoModel {
   fechaActualizacion?: string;
 }
 
-export const CATEGORIAS_PRODUCTO: { value: CategoriaProducto; label: string }[] = [
-  { value: 'GENERAL', label: 'General' },
-  { value: 'ELECTRONICA', label: 'Electrónica' },
-  { value: 'HERRAMIENTA', label: 'Herramienta' },
-  { value: 'SOFTWARE', label: 'Software' },
-  { value: 'SERVICIO', label: 'Servicio' },
-  { value: 'ACCESORIO', label: 'Accesorio' },
-  { value: 'OTRO', label: 'Otro' }
-];
+export interface ProductoFiltros {
+  marca?: string;
+  categoriaId?: number;
+  precioMin?: number;
+  precioMax?: number;
+  stockMin?: number;
+  activo?: boolean;
+}

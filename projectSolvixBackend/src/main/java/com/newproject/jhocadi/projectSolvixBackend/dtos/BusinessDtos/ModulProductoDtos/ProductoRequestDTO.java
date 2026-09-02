@@ -2,8 +2,6 @@ package com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulProdu
 
 import java.math.BigDecimal;
 
-import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulProductoModel.CategoriaProducto;
-
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -23,15 +21,27 @@ public class ProductoRequestDTO {
     private String marca;
 
     @NotNull(message = "La categoría es obligatoria.")
-    private CategoriaProducto categoria;
+    private Long categoriaId;
 
-    @NotNull(message = "El precio es obligatorio.")
-    @DecimalMin(value = "0.0", inclusive = true, message = "El precio no puede ser negativo.")
-    private BigDecimal precio;
+    @NotNull(message = "El precio de venta es obligatorio.")
+    @DecimalMin(value = "0.0", inclusive = true, message = "El precio de venta no puede ser negativo.")
+    private BigDecimal precioVentaActual;
 
-    @NotNull(message = "La cantidad en stock es obligatoria.")
-    @Min(value = 0, message = "El stock no puede ser negativo.")
-    private Integer cantidadStock;
+    /**
+     * Costo unitario vigente. Solo se aplica al crear el producto: es el punto de partida.
+     * En la actualización no puede modificarse desde este DTO; usar
+     * {@code POST /api/v1/inventario/ajustes/costo}. Enviar {@code null} al crear significa
+     * COSTO DESCONOCIDO, no costo cero.
+     */
+    @DecimalMin(value = "0.0", inclusive = true, message = "El costo no puede ser negativo.")
+    private BigDecimal costoActual;
+
+    /**
+     * Solo se aplica al crear el producto y genera un movimiento CARGA_INICIAL.
+     * En la actualización el stock no puede modificarse desde este DTO.
+     */
+    @Min(value = 0, message = "El stock inicial no puede ser negativo.")
+    private Integer stockInicial;
 
     @Size(max = 2000)
     private String descripcion;

@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulProductoDtos.ProductoRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulProductoDtos.ProductoResponseDTO;
-import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulProductoModel.CategoriaProducto;
 import com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.ModulProductoService.ProductoService;
 
 import jakarta.validation.Valid;
@@ -41,7 +40,8 @@ public class ProductoController {
     public ResponseEntity<ProductoResponseDTO> crear(
             @Valid @RequestBody ProductoRequestDTO request,
             Principal principal) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(productoService.crear(request));
+        String usuario = principal != null ? principal.getName() : null;
+        return ResponseEntity.status(HttpStatus.CREATED).body(productoService.crear(request, usuario));
     }
 
     /**
@@ -51,7 +51,7 @@ public class ProductoController {
     @GetMapping
     public ResponseEntity<List<ProductoResponseDTO>> listar(
             @RequestParam(required = false) String marca,
-            @RequestParam(required = false) CategoriaProducto categoria,
+            @RequestParam(required = false) Long categoriaId,
             @RequestParam(required = false) BigDecimal precioMin,
             @RequestParam(required = false) BigDecimal precioMax,
             @RequestParam(required = false) Integer stockMin,
@@ -61,7 +61,7 @@ public class ProductoController {
         Boolean filtroActivo = resolverFiltroActivo(activo, authentication);
 
         return ResponseEntity.ok(
-            productoService.listar(marca, categoria, precioMin, precioMax, stockMin, filtroActivo)
+            productoService.listar(marca, categoriaId, precioMin, precioMax, stockMin, filtroActivo)
         );
     }
 
