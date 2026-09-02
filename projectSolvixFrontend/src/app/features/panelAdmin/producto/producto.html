@@ -45,12 +45,18 @@
             <mat-error *ngIf="productoForm.get('precioVentaActual')?.hasError('min')">No puede ser negativo</mat-error>
           </mat-form-field>
 
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" *ngIf="!modoEdicion">
             <mat-label>Costo unitario (COP)</mat-label>
             <input matInput type="number" formControlName="costoActual" placeholder="Déjalo vacío si no lo sabes" />
             <mat-hint>Si lo dejas vacío queda como costo desconocido</mat-hint>
             <mat-error *ngIf="productoForm.get('costoActual')?.hasError('min')">No puede ser negativo</mat-error>
           </mat-form-field>
+
+          <div class="stock-actual" *ngIf="modoEdicion">
+            <span class="stock-label">Costo vigente</span>
+            <span class="stock-valor">{{ costoConocido ? (costoVigente | number:'1.0-0') : 'Sin costo' }}</span>
+            <span class="stock-nota">Se modifica con compras o un ajuste de costo</span>
+          </div>
 
           <mat-form-field appearance="outline" *ngIf="!modoEdicion">
             <mat-label>Stock inicial</mat-label>

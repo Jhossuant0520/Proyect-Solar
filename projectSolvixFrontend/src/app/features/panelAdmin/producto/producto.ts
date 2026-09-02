@@ -38,6 +38,8 @@ export class ProductoComponent implements OnInit {
   modoEdicion = false;
   categorias: CategoriaProductoModel[] = [];
   stockActual = 0;
+  costoVigente: number | null = null;
+  costoConocido = false;
 
   constructor(
     private fb: FormBuilder,
@@ -87,6 +89,8 @@ export class ProductoComponent implements OnInit {
     this.productoService.obtenerPorId(id).subscribe({
       next: (producto) => {
         this.stockActual = producto.stockActual ?? 0;
+        this.costoVigente = producto.costoActual ?? null;
+        this.costoConocido = producto.costoConocido === true;
         this.productoForm.patchValue({
           nombre: producto.nombre,
           marca: producto.marca,
@@ -98,6 +102,7 @@ export class ProductoComponent implements OnInit {
           activo: producto.activo
         });
         this.productoForm.get('stockInicial')?.disable();
+        this.productoForm.get('costoActual')?.disable();
       },
       error: () => {
         this.snackBar.open('Error al cargar el producto', 'Cerrar', {

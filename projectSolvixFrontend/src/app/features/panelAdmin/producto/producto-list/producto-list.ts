@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -6,9 +8,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
-import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
 
 import { ProductoModel } from '../productoClase';
 import { ProductoService } from '../../../../core/services/producto.service';
@@ -18,18 +17,17 @@ import { DialogoConfirmacionDelete } from '../../../../shared/components/dialogo
   selector: 'app-producto-list',
   standalone: true,
   templateUrl: './producto-list.html',
-  styleUrls: ['./producto-list.scss'],
+  styleUrl: './producto-list.scss',
   imports: [
     CommonModule,
     RouterLink,
+    MatCardModule,
+    MatIconModule,
+    MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
     MatTableModule,
-    MatIconModule,
-    MatButtonModule,
-    MatDialogModule,
-    MatCardModule,
-    MatChipsModule
+    MatDialogModule
   ]
 })
 export class ProductoList implements OnInit {
@@ -57,14 +55,15 @@ export class ProductoList implements OnInit {
     this.cargarProductos();
     this.dataSource.filterPredicate = (data, filter) =>
       Object.values(data).some(value =>
-        value?.toString().toLowerCase().includes(filter)
+        String(value ?? '').toLowerCase().includes(filter)
       );
   }
 
   cargarProductos(): void {
     this.productoService.listar().subscribe({
-      next: (productos) => this.dataSource.data = productos,
-      error: () => { /* snackbar opcional */ }
+      next: (productos) => {
+        this.dataSource.data = productos;
+      }
     });
   }
 
@@ -77,7 +76,11 @@ export class ProductoList implements OnInit {
     this.router.navigate(['/editar-producto', producto.id]);
   }
 
-  desactivarProducto(id: number): void {
+  desactivarProducto(id: number | undefined): void {
+    if (id == null) {
+      return;
+    }
+
     const dialogRef = this.dialog.open(DialogoConfirmacionDelete, {
       data: {
         mensaje: '¿Desactivar este producto del catálogo?'
