@@ -1,27 +1,64 @@
-<div class="dashboard-container">
-  <div class="animated-bg"></div>
+<section class="dashboard-page">
+  <solvix-dashboard-header
+    [periodo]="periodo()"
+    [refreshing]="refreshing()"
+    (periodoChange)="onPeriodo($event)"
+    (refresh)="onRefresh()"
+  />
 
-  <div class="dashboard-content">
-    <div class="welcome-section">
-      <h2>¡Bienvenido, {{ nombreUsuario }}!</h2>
-      <p>Administra el catálogo de productos desde aquí.</p>
-    </div>
+  <solvix-dashboard-kpis
+    [metrics]="kpis()"
+    [state]="kpiState()"
+    (retry)="loadResumen()"
+  />
 
-    <div class="dashboard-wrapper">
-      <mat-card class="dashboard-card" routerLink="/producto">
-        <mat-icon>add_box</mat-icon>
-        <p>Registrar producto</p>
-      </mat-card>
+  <solvix-sales-evolution
+    [points]="serie()"
+    [metrica]="metrica()"
+    [agrupacion]="agrupacion()"
+    [state]="serieState()"
+    (metricaChange)="metrica.set($event)"
+    (agrupacionChange)="onAgrupacion($event)"
+    (retry)="loadVentas()"
+  />
 
-      <mat-card class="dashboard-card" routerLink="/listaproductos">
-        <mat-icon>inventory_2</mat-icon>
-        <p>Gestión de productos</p>
-      </mat-card>
-
-      <mat-card class="dashboard-card logout-card" (click)="logout()">
-        <mat-icon>logout</mat-icon>
-        <p>Cerrar sesión</p>
-      </mat-card>
-    </div>
+  <div class="dashboard-split">
+    <solvix-top-products
+      [products]="ranking()"
+      [criterio]="criterio()"
+      [state]="rankingState()"
+      (criterioChange)="onCriterio($event)"
+      (retry)="loadTop()"
+    />
+    <solvix-low-performance-products
+      [products]="revision()"
+      [state]="revisionState()"
+      (retry)="loadRevision()"
+    />
   </div>
-</div>
+
+  <div class="dashboard-split">
+    <solvix-category-performance
+      [categories]="categorias()"
+      [state]="categoriaState()"
+      (retry)="loadCategorias()"
+    />
+    <solvix-abc-analysis
+      [classes]="abc()"
+      [state]="abcState()"
+      (retry)="loadAbc()"
+    />
+  </div>
+
+  <solvix-inventory-health
+    [data]="inventario()"
+    [state]="inventarioState()"
+    (retry)="loadInventario()"
+  />
+
+  <solvix-business-insights
+    [insights]="insights()"
+    [state]="insightsState()"
+    (retry)="loadAll()"
+  />
+</section>

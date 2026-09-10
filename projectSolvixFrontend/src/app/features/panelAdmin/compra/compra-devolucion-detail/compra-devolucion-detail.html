@@ -1,0 +1,169 @@
+<section class="detalle-page">
+  @if (loadState === 'loading') {
+    <solvix-loading-state label="Cargando devolución." />
+  } @else if (loadState === 'error' || !devolucion) {
+    <solvix-error-state
+      [title]="errorTitle"
+      [message]="errorMessage"
+      (retry)="cargar()"
+    />
+  } @else {
+    <solvix-page-header
+      kicker="Devolución a proveedor"
+      [title]="devolucion.numero"
+      subtitle="Documento independiente. El total histórico de la compra no cambia."
+    >
+      <solvix-button family="tech" rank="tertiary" icon="arrow_back" (click)="volver()">
+        Volver a la compra
+      </solvix-button>
+      <solvix-button family="tech" rank="secondary" (click)="irALista()">
+        Ir a compras
+      </solvix-button>
+    </solvix-page-header>
+
+    <div class="head-meta">
+      <solvix-badge [tone]="estadoTone(devolucion.estado)">
+        {{ estadoLabel(devolucion.estado) }}
+      </solvix-badge>
+      <span>{{ fecha(devolucion.fecha) }}</span>
+    </div>
+
+    <div class="detalle-grid">
+      <div class="col">
+        <section class="panel">
+          <solvix-section-header kicker="Productos" title="Líneas devueltas" />
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th class="is-num">Cantidad</th>
+                  <th class="is-num">Monto</th>
+                  <th class="is-num">Costo histórico</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (linea of devolucion.detalles; track linea.id) {
+                  <tr>
+                    <td>
+                      <strong>{{ linea.productoNombre }}</strong>
+                      @if (linea.categoriaCodigo) {
+                        <span class="sub">{{ linea.categoriaCodigo }}</span>
+                      }
+                    </td>
+                    <td class="is-num">{{ linea.cantidad }}</td>
+                    <td class="is-num">{{ money(linea.montoDevuelto) }}</td>
+                    <td class="is-num">
+                      @if (linea.costoConocido) {
+                        {{ money(linea.costoUnitario) }}
+                      } @else {
+                        <span class="warn">Costo incompleto</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <aside class="col">
+        <section class="panel">
+          <solvix-section-header kicker="Totales" title="Resultado" />
+          <dl class="facts">
+            <div>
+              <dt>Monto devuelto</dt>
+              <dd class="total">{{ money(devolucion.montoTotalDevuelto) }}</dd>
+            </div>
+            <div>
+              <dt>Costo histórico devuelto</dt>
+              <dd>
+                @if (devolucion.costoCompletoConocido) {
+                  {{ money(devolucion.costoTotalDevuelto) }}
+                } @else {
+                  Costo incompleto
+                }
+              </dd>
+            </div>
+            <div>
+              <dt>Motivo</dt>
+              <dd>{{ motivo(devolucion.motivo) }}</dd>
+            </div>
+            <div>
+              <dt>Reembolso</dt>
+              <dd>{{ metodo(devolucion.metodoReembolso) }}</dd>
+            </div>
+            @if (devolucion.fechaReembolso) {
+              <div>
+                <dt>Fecha de reembolso</dt>
+                <dd>{{ fecha(devolucion.fechaReembolso) }}</dd>
+              </div>
+            }
+          </dl>
+        </section>
+
+        <section class="panel">
+          <solvix-section-header kicker="Origen" title="Compra original" />
+          <dl class="facts">
+            <div>
+              <dt>Número</dt>
+              <dd>{{ devolucion.compraNumero || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Total histórico</dt>
+              <dd>{{ money(devolucion.compraTotalOriginal) }}</dd>
+            </div>
+            <div>
+              <dt>Estado de la compra</dt>
+              <dd>{{ devolucion.compraEstado ? compraEstado(devolucion.compraEstado) : '—' }}</dd>
+            </div>
+            <div>
+              <dt>Proveedor</dt>
+              <dd>{{ devolucion.proveedorNombre || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Registrada por</dt>
+              <dd>{{ devolucion.createdBy || '—' }}</dd>
+            </div>
+          </dl>
+          @if (devolucion.observaciones) {
+            <p class="obs">{{ devolucion.observaciones }}</p>
+          }
+        </section>
+
+        @if (devolucion.estado === 'REGISTRADA') {
+          <section class="panel" [formGroup]="form">
+            <solvix-section-header
+              kicker="Reembolso"
+              title="Registrar reembolso"
+              subtitle="La devolución ya afectó el inventario. Aquí solo se registra el dinero."
+            />
+            <label>
+              Método de reembolso
+              <select formControlName="metodoReembolso">
+                <option [ngValue]="null" disabled>Selecciona un método</option>
+                @for (item of metodos; track item.id) {
+                  <option [ngValue]="item.id">{{ item.label }}</option>
+                }
+              </select>
+            </label>
+            @if (accionState === 'error' && accionError) {
+              <p class="form-error" role="alert">{{ accionError }}</p>
+            }
+            <div class="form-actions">
+              <solvix-button
+                family="tech"
+                rank="primary"
+                [disabled]="accionState === 'processing'"
+                (click)="reembolsar()"
+              >
+                {{ accionState === 'processing' ? 'Registrando…' : 'Registrar reembolso' }}
+              </solvix-button>
+            </div>
+          </section>
+        }
+      </aside>
+    </div>
+  }
+</section>

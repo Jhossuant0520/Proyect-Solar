@@ -1,100 +1,148 @@
-<div class="producto-form-wrapper">
-  <div class="animated-bg"></div>
+<section class="producto-form-page">
+  <solvix-page-header
+    kicker="Catálogo"
+    [title]="modoEdicion ? 'Editar producto' : 'Nuevo producto'"
+    [subtitle]="modoEdicion ? 'El costo vigente se corrige con un ajuste, no desde este formulario.' : 'El costo inicial queda registrado al crear el producto.'"
+  >
+    @if (modoEdicion) {
+      <solvix-button family="tech" rank="secondary" icon="sync" type="button" (click)="ajustarCosto()">
+        Ajustar costo
+      </solvix-button>
+    }
+  </solvix-page-header>
 
-  <div class="producto-form-content">
-    <mat-card class="producto-form-card">
-      <header class="form-header">
-        <div class="header-left">
-          <mat-icon>inventory_2</mat-icon>
-          <div class="header-text">
-            <h2>{{ modoEdicion ? 'Editar producto' : 'Registrar producto' }}</h2>
-            <p *ngIf="!modoEdicion">Agrega un producto al catálogo</p>
-            <span *ngIf="modoEdicion" class="producto-id">ID: {{ productoId }}</span>
+  @if (modoEdicion && loadState === 'loading') {
+    <solvix-loading-state label="Cargando producto." />
+  } @else if (modoEdicion && loadState === 'error') {
+    <solvix-error-state
+      title="No pudimos cargar este producto."
+      message="Puede que no exista o que no tengas permiso."
+      (retry)="reintentarCarga()"
+    />
+  } @else {
+    <form class="form-panel" [formGroup]="productoForm" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+        <label>
+          <span class="label-row">
+            Nombre
+            <span class="req">Obligatorio</span>
+          </span>
+          <input type="text" formControlName="nombre" maxlength="150" />
+        </label>
+        <label>
+          <span class="label-row">
+            Marca
+            <span class="req">Obligatorio</span>
+          </span>
+          <input type="text" formControlName="marca" maxlength="100" />
+        </label>
+        <label>
+          <span class="label-row">
+            Categoría
+            <span class="req">Obligatorio</span>
+            <solvix-field-help text="Agrupa el producto. Elige una de las categorías activas del sistema." />
+          </span>
+          <select formControlName="categoriaId">
+            <option [ngValue]="null" disabled>Selecciona una categoría</option>
+            @for (categoria of categorias; track categoria.id) {
+              <option [ngValue]="categoria.id">{{ categoria.nombre }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          <span class="label-row">
+            Precio de venta
+            <span class="req">Obligatorio</span>
+            <solvix-field-help text="Es el precio que se cobra al cliente. Puedes escribir 240000 o 240.000. El sistema guarda el número, no el texto." />
+          </span>
+          <input
+            type="text"
+            inputmode="decimal"
+            [value]="precioTexto"
+            (input)="onMontoInput('precioVentaActual', $event)"
+            (blur)="onMontoBlur('precioVentaActual')"
+            placeholder="240.000"
+          />
+          <span class="hint">Acepta puntos de miles. Ejemplo: 240.000</span>
+        </label>
+
+        @if (!modoEdicion) {
+          <label>
+            <span class="label-row">
+              Costo inicial
+              <span class="opt">Opcional</span>
+              <solvix-field-help text="Lo que te costó el producto al crearlo. Si lo dejas vacío, el costo queda desconocido. También acepta 240.000." />
+            </span>
+            <input
+              type="text"
+              inputmode="decimal"
+              [value]="costoTexto"
+              (input)="onMontoInput('costoActual', $event)"
+              (blur)="onMontoBlur('costoActual')"
+              placeholder="Opcional"
+            />
+            <span class="hint">Vacío = costo desconocido. No es lo mismo que cero.</span>
+          </label>
+          <label>
+            <span class="label-row">
+              Stock inicial
+              <span class="opt">Opcional</span>
+              <solvix-field-help text="Unidades que ya tienes al registrar el producto. El sistema las guarda como un movimiento de inventario. Cero es válido." />
+            </span>
+            <input type="number" formControlName="stockInicial" min="0" step="1" />
+            <span class="hint">Queda registrado como movimiento de inventario.</span>
+          </label>
+        } @else {
+          <div class="readonly">
+            <span class="hint">Costo vigente</span>
+            <strong>{{ costoConocido ? money(costoVigente) : 'Sin costo' }}</strong>
+            <span class="hint">No se edita desde aquí. Usa ajustar costo.</span>
           </div>
-        </div>
-      </header>
-
-      <form [formGroup]="productoForm" (ngSubmit)="onSubmit()">
-        <div class="form-grid">
-          <mat-form-field appearance="outline">
-            <mat-label>Nombre</mat-label>
-            <input matInput formControlName="nombre" placeholder="Ej: Nombre del producto" />
-            <mat-error *ngIf="productoForm.get('nombre')?.hasError('required')">Obligatorio</mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Marca</mat-label>
-            <input matInput formControlName="marca" placeholder="Ej: Marca" />
-            <mat-error *ngIf="productoForm.get('marca')?.hasError('required')">Obligatorio</mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Categoría</mat-label>
-            <mat-select formControlName="categoriaId">
-              @for (c of categorias; track c.id) {
-                <mat-option [value]="c.id">{{ c.nombre }}</mat-option>
-              }
-            </mat-select>
-            <mat-error *ngIf="productoForm.get('categoriaId')?.hasError('required')">Obligatorio</mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Precio de venta (COP)</mat-label>
-            <input matInput type="number" formControlName="precioVentaActual" placeholder="Ej: 850000" />
-            <mat-error *ngIf="productoForm.get('precioVentaActual')?.hasError('required')">Obligatorio</mat-error>
-            <mat-error *ngIf="productoForm.get('precioVentaActual')?.hasError('min')">No puede ser negativo</mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" *ngIf="!modoEdicion">
-            <mat-label>Costo unitario (COP)</mat-label>
-            <input matInput type="number" formControlName="costoActual" placeholder="Déjalo vacío si no lo sabes" />
-            <mat-hint>Si lo dejas vacío queda como costo desconocido</mat-hint>
-            <mat-error *ngIf="productoForm.get('costoActual')?.hasError('min')">No puede ser negativo</mat-error>
-          </mat-form-field>
-
-          <div class="stock-actual" *ngIf="modoEdicion">
-            <span class="stock-label">Costo vigente</span>
-            <span class="stock-valor">{{ costoConocido ? (costoVigente | number:'1.0-0') : 'Sin costo' }}</span>
-            <span class="stock-nota">Se modifica con compras o un ajuste de costo</span>
+          <div class="readonly">
+            <span class="hint">Stock actual</span>
+            <strong>{{ stockActual }}</strong>
+            <span class="hint">Se mueve con compras, ventas o ajustes de inventario.</span>
           </div>
+        }
 
-          <mat-form-field appearance="outline" *ngIf="!modoEdicion">
-            <mat-label>Stock inicial</mat-label>
-            <input matInput type="number" formControlName="stockInicial" />
-            <mat-hint>Queda registrado como movimiento de inventario</mat-hint>
-            <mat-error *ngIf="productoForm.get('stockInicial')?.hasError('min')">No puede ser negativo</mat-error>
-          </mat-form-field>
-
-          <div class="stock-actual" *ngIf="modoEdicion">
-            <span class="stock-label">Stock actual</span>
-            <span class="stock-valor">{{ stockActual }}</span>
-            <span class="stock-nota">Se modifica con compras, ventas o ajustes</span>
-          </div>
-
-          <mat-form-field appearance="outline">
-            <mat-label>URL de imagen</mat-label>
-            <input matInput formControlName="imagenUrl" placeholder="https://..." />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Descripción</mat-label>
-            <textarea matInput rows="3" formControlName="descripcion"></textarea>
-          </mat-form-field>
-
-          <div class="toggle-activo">
-            <mat-slide-toggle formControlName="activo" color="primary">
+        <label class="full">
+          <span class="label-row">
+            URL de imagen
+            <span class="opt">Opcional</span>
+            <solvix-field-help text="Enlace de la foto del producto. Si no tienes uno, déjalo vacío. No sube un archivo desde este formulario." />
+          </span>
+          <input type="text" formControlName="imagenUrl" maxlength="500" placeholder="https://" />
+        </label>
+        <label class="full">
+          <span class="label-row">
+            Descripción
+            <span class="opt">Opcional</span>
+            <solvix-field-help text="Texto libre para el cliente o para tu equipo. No es obligatorio. Si lo dejas vacío, el producto se guarda igual." />
+          </span>
+          <textarea formControlName="descripcion" rows="4" maxlength="2000" placeholder="Opcional. Ejemplo: panel 550 W, 24 V."></textarea>
+        </label>
+        <label class="toggle full">
+          <input type="checkbox" formControlName="activo" />
+          <span>
+            <span class="label-row">
               Visible en catálogo
-            </mat-slide-toggle>
-          </div>
-        </div>
+              <solvix-field-help text="No se guarda en un archivo. Marca el producto como activo en la base de datos. Si está activo, se puede vender y comprar. Si lo desactivas, queda oculto para el público y no aparece al armar una venta o una compra." />
+            </span>
+            <span class="hint">
+              Activo: se puede vender y comprar. Inactivo: queda oculto. El estado se guarda en el producto, no en un archivo.
+            </span>
+          </span>
+        </label>
+      </div>
 
-        <div class="botones">
-          <button mat-raised-button color="primary" type="submit" [disabled]="productoForm.invalid">
-            {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
-          </button>
-          <button mat-stroked-button color="warn" type="button" (click)="onCancel()">Cancelar</button>
-        </div>
-      </form>
-    </mat-card>
-  </div>
-</div>
+      <div class="form-actions">
+        <solvix-button family="tech" rank="tertiary" type="button" (click)="onCancel()">
+          Cancelar
+        </solvix-button>
+        <solvix-button family="tech" rank="primary" type="submit" [disabled]="productoForm.invalid || guardando">
+          {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
+        </solvix-button>
+      </div>
+    </form>
+  }
+</section>

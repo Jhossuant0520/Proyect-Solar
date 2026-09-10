@@ -1,0 +1,62 @@
+.solvix-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 16rem;
+  text-align: center;
+  color: var(--solvix-text-muted);
+  padding: 2rem 1rem;
+}
+
+.solvix-state__icon {
+  font-size: 2rem;
+  color: var(--solvix-primary);
+}
+
+.solvix-state h2 {
+  margin: 0;
+  color: var(--solvix-text);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.solvix-state p {
+  margin: 0;
+  max-width: 28rem;
+}
+
+.solvix-state--error .solvix-state__icon {
+  color: var(--solvix-error);
+}
+
+.solvix-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: min(28rem, 100%);
+}
+
+.solvix-skeleton__bar {
+  display: block;
+  height: 0.75rem;
+  border-radius: 0.25rem;
+  background: linear-gradient(
+    90deg,
+    rgba(79, 209, 255, 0.08),
+    rgba(79, 209, 255, 0.22),
+    rgba(79, 209, 255, 0.08)
+  );
+  background-size: 200% 100%;
+  animation: solvix-shimmer 1.4s ease-in-out infinite;
+}
+
+.solvix-skeleton__bar--short {
+  width: 60%;
+}
+
+@keyframes solvix-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}

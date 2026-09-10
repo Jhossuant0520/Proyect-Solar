@@ -1,0 +1,27 @@
+<section class="dash-panel" aria-labelledby="cat-title">
+  <solvix-section-header
+    kicker="Mix"
+    title="Rendimiento por categoría"
+    subtitle="Ventas, participación y ganancia. El color es el mismo para todas."
+  />
+
+  <solvix-section-state [state]="state" loadingLabel="Cargando categorías." (retry)="retry.emit()">
+    <ul class="cat-list">
+      @for (category of categories; track category.categoriaId) {
+        <li>
+          <div class="cat-row">
+            <span>{{ category.nombre }}</span>
+            <span class="solvix-mono">{{ money(category.ventas, true) }}</span>
+          </div>
+          <div class="cat-bar" role="img" [attr.aria-label]="'Participación ' + percent(category.participacion)">
+            <span [style.width]="barWidth(category.participacion)"></span>
+          </div>
+          <div class="cat-meta solvix-mono">
+            <span>{{ percent(category.participacion) }} de ventas</span>
+            <span>Ganancia {{ moneyEstado(category.ganancia, category.estadoGanancia, true) }}</span>
+          </div>
+        </li>
+      }
+    </ul>
+  </solvix-section-state>
+</section>

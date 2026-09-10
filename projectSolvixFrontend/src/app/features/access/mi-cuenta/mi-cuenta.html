@@ -1,84 +1,167 @@
-<div class="mi-cuenta-page">
-  <div class="page-shell">
-    <h1>Mi cuenta</h1>
+<section class="cuenta-page">
+  <solvix-page-header
+    kicker="Cuenta"
+    title="Mi cuenta"
+    subtitle="Revisa tus datos, cambia tu foto y actualiza tu contraseña."
+  />
 
-    <section class="card">
-      <div class="card-header">
-        <h2>Mis datos</h2>
-      </div>
+  @if (cargandoDatos && !misDatos) {
+    <solvix-loading-state label="Cargando tu cuenta." />
+  } @else if (errorGeneral && !misDatos) {
+    <solvix-error-state
+      title="No pudimos cargar tu cuenta."
+      [message]="errorGeneral"
+      (retry)="cargarMisDatos()"
+    />
+  } @else if (misDatos) {
+    <solvix-card ariaLabel="Perfil">
+      <solvix-section-header
+        kicker="Perfil"
+        title="Tus datos"
+        subtitle="Esta información identifica tu acceso en SOLVIX."
+      />
 
-      <div *ngIf="errorGeneral" class="error-message">{{ errorGeneral }}</div>
-
-      <div *ngIf="cargandoDatos && !errorGeneral" class="loader-grid">
-        <div class="skeleton skeleton-title"></div>
-        <div class="skeleton"></div>
-        <div class="skeleton"></div>
-        <div class="skeleton"></div>
-      </div>
-
-      <div *ngIf="!cargandoDatos && misDatos" class="data-grid">
-        <div class="data-row">
-          <span class="label">Nombre de usuario</span>
-          <span>{{ misDatos.nombreUsuario }}</span>
-        </div>
-        <div class="data-row">
-          <span class="label">Email</span>
-          <span>{{ misDatos.email }}</span>
-        </div>
-        <div class="data-row">
-          <span class="label">Miembro desde</span>
-          <span>{{ misDatos.fechaCreacion }}</span>
-        </div>
-        <div class="data-row">
-          <span class="label">Último acceso</span>
-          <span>{{ misDatos.ultimoLogin }}</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="card-header">
-        <h2>Cambiar contraseña</h2>
-      </div>
-
-      <div *ngIf="errorPassword" class="error-message">{{ errorPassword }}</div>
-      <div *ngIf="exitoPassword" class="success-message">Contraseña actualizada correctamente.</div>
-
-      <form [formGroup]="form" (ngSubmit)="cambiarPassword()" novalidate>
-        <div class="form-row">
-          <label for="passwordActual">Contraseña actual</label>
-          <input id="passwordActual" type="password" formControlName="passwordActual" [class.invalid]="passwordActualControl?.invalid && passwordActualControl?.touched" />
-          <div class="field-error" *ngIf="passwordActualControl?.hasError('required') && passwordActualControl?.touched">
-            Ingresa tu contraseña actual.
+      <div class="perfil">
+        <div class="avatar-block">
+          @if (fotoVisible) {
+            <img class="avatar" [src]="fotoVisible" [alt]="'Foto de ' + misDatos.nombreUsuario" />
+          } @else {
+            <span class="avatar avatar--fallback" aria-hidden="true">{{ iniciales }}</span>
+          }
+          <input
+            #fotoInput
+            class="sr-only"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            (change)="onFotoSeleccionada($event)"
+          />
+          <div class="avatar-actions">
+            <solvix-button
+              family="tech"
+              rank="secondary"
+              icon="photo_camera"
+              [disabled]="subiendoFoto"
+              (click)="elegirFoto()"
+            >
+              {{ subiendoFoto ? 'Guardando...' : 'Cambiar foto' }}
+            </solvix-button>
+            @if (fotoVisible) {
+              <solvix-button
+                family="tech"
+                rank="tertiary"
+                icon="hide_image"
+                [disabled]="subiendoFoto"
+                (click)="quitarFoto()"
+              >
+                Quitar foto
+              </solvix-button>
+            }
           </div>
+          <p class="hint">JPG, PNG o WEBP. Máximo 2 MB.</p>
+          @if (errorFoto) {
+            <p class="field-error" role="alert">{{ errorFoto }}</p>
+          }
         </div>
 
-        <div class="form-row">
-          <label for="passwordNueva">Contraseña nueva</label>
-          <input id="passwordNueva" type="password" formControlName="passwordNueva" [class.invalid]="passwordNuevaControl?.invalid && passwordNuevaControl?.touched" />
-          <div class="field-error" *ngIf="passwordNuevaControl?.hasError('required') && passwordNuevaControl?.touched">
-            Ingresa la nueva contraseña.
+        <dl class="data-grid">
+          <div class="data-row">
+            <dt>Nombre de usuario</dt>
+            <dd>{{ misDatos.nombreUsuario }}</dd>
           </div>
-          <div class="field-error" *ngIf="passwordNuevaControl?.hasError('minlength') && passwordNuevaControl?.touched">
-            La contraseña debe tener al menos 8 caracteres.
+          <div class="data-row">
+            <dt>Email</dt>
+            <dd>{{ misDatos.email }}</dd>
           </div>
+          <div class="data-row">
+            <dt>Rol</dt>
+            <dd>
+              <solvix-badge [tone]="rolVisible === 'Administrador' ? 'success' : 'neutral'">
+                {{ rolVisible }}
+              </solvix-badge>
+            </dd>
+          </div>
+          <div class="data-row">
+            <dt>Miembro desde</dt>
+            <dd>{{ misDatos.fechaCreacion }}</dd>
+          </div>
+          <div class="data-row">
+            <dt>Último acceso</dt>
+            <dd>{{ misDatos.ultimoLogin }}</dd>
+          </div>
+        </dl>
+      </div>
+    </solvix-card>
+
+    <solvix-card ariaLabel="Cambiar contraseña">
+      <solvix-section-header
+        kicker="Seguridad"
+        title="Cambiar contraseña"
+        subtitle="Usa una contraseña de al menos 8 caracteres."
+      />
+
+      @if (errorPassword) {
+        <p class="banner banner--error" role="alert">{{ errorPassword }}</p>
+      }
+      @if (exitoPassword) {
+        <p class="banner banner--success" role="status">Contraseña actualizada.</p>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="cambiarPassword()" novalidate class="password-form">
+        <label>
+          Contraseña actual
+          <input
+            id="passwordActual"
+            type="password"
+            autocomplete="current-password"
+            formControlName="passwordActual"
+            [class.invalid]="passwordActualControl?.invalid && passwordActualControl?.touched"
+          />
+          @if (passwordActualControl?.hasError('required') && passwordActualControl?.touched) {
+            <span class="field-error">Ingresa tu contraseña actual.</span>
+          }
+        </label>
+
+        <label>
+          Contraseña nueva
+          <input
+            id="passwordNueva"
+            type="password"
+            autocomplete="new-password"
+            formControlName="passwordNueva"
+            [class.invalid]="passwordNuevaControl?.invalid && passwordNuevaControl?.touched"
+          />
+          @if (passwordNuevaControl?.hasError('required') && passwordNuevaControl?.touched) {
+            <span class="field-error">Ingresa la nueva contraseña.</span>
+          }
+          @if (passwordNuevaControl?.hasError('minlength') && passwordNuevaControl?.touched) {
+            <span class="field-error">La contraseña debe tener al menos 8 caracteres.</span>
+          }
+        </label>
+
+        <label>
+          Confirmar contraseña
+          <input
+            id="confirmarPasswordNueva"
+            type="password"
+            autocomplete="new-password"
+            formControlName="confirmarPasswordNueva"
+            [class.invalid]="confirmarPasswordNuevaControl?.invalid && confirmarPasswordNuevaControl?.touched"
+          />
+          @if (confirmarPasswordNuevaControl?.hasError('required') && confirmarPasswordNuevaControl?.touched) {
+            <span class="field-error">Confirma la contraseña nueva.</span>
+          }
+        </label>
+
+        @if (mismatch) {
+          <p class="field-error">Las contraseñas no coinciden.</p>
+        }
+
+        <div class="form-actions">
+          <solvix-button family="tech" rank="primary" icon="lock_reset" type="submit" [disabled]="guardando">
+            {{ guardando ? 'Guardando...' : 'Guardar contraseña' }}
+          </solvix-button>
         </div>
-
-        <div class="form-row">
-          <label for="confirmarPasswordNueva">Confirmar contraseña</label>
-          <input id="confirmarPasswordNueva" type="password" formControlName="confirmarPasswordNueva" [class.invalid]="confirmarPasswordNuevaControl?.invalid && confirmarPasswordNuevaControl?.touched" />
-          <div class="field-error" *ngIf="confirmarPasswordNuevaControl?.hasError('required') && confirmarPasswordNuevaControl?.touched">
-            Confirma la contraseña nueva.
-          </div>
-        </div>
-
-        <div class="field-error" *ngIf="mismatch">Las contraseñas no coinciden.</div>
-
-        <button type="submit" class="primary-button" [disabled]="guardando">
-          <span *ngIf="guardando" class="spinner"></span>
-          {{ guardando ? 'Guardando...' : 'Guardar contraseña' }}
-        </button>
       </form>
-    </section>
-  </div>
-</div>
+    </solvix-card>
+  }
+</section>

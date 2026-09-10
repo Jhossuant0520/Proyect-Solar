@@ -1,0 +1,38 @@
+@use '../../dashboard-ui';
+
+.header-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.header-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.header-dates label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  color: var(--solvix-text-muted);
+  font-family: var(--solvix-font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.header-dates input {
+  background: var(--solvix-surface-low);
+  border: 1px solid var(--solvix-border-subtle);
+  color: var(--solvix-text);
+  border-radius: 0.125rem;
+  padding: 0.35rem 0.5rem;
+  font-family: var(--solvix-font-mono);
+}
+
+.header-dates input:focus {
+  outline: 2px solid var(--solvix-secondary);
+}

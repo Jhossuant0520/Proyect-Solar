@@ -8,12 +8,38 @@ import { DashboardComponent } from './features/panelAdmin/dashboard/dashboard';
 import { MiCuenta } from './features/access/mi-cuenta/mi-cuenta';
 import { authGuard } from './core/guards/auth-guard';
 import { adminGuard } from './core/guards/admin-guard';
-import { App } from './app';
 import { Catalog } from './homepage/home-page/components/catalog/catalog';
 import { ProductoComponent } from './features/panelAdmin/producto/producto';
 import { ProductoList } from './features/panelAdmin/producto/producto-list/producto-list';
 import { ModulDemandaRecibo } from './features/business/modul-demanda-recibo/modul-demanda-recibo';
 import { ModulHsp } from './features/business/modul-hsp/modul-hsp';
+import { AdminLayoutComponent } from './layout/admin-layout/admin-layout';
+import { ProductoDetailComponent } from './features/panelAdmin/producto/producto-detail/producto-detail';
+import { VentaListComponent } from './features/panelAdmin/venta/venta-list/venta-list';
+import { VentaFormComponent } from './features/panelAdmin/venta/venta-form/venta-form';
+import { VentaDetailComponent } from './features/panelAdmin/venta/venta-detail/venta-detail';
+import { VentaDevolucionFormComponent } from './features/panelAdmin/venta/venta-devolucion-form/venta-devolucion-form';
+import { VentaDevolucionDetailComponent } from './features/panelAdmin/venta/venta-devolucion-detail/venta-devolucion-detail';
+import { CompraListComponent } from './features/panelAdmin/compra/compra-list/compra-list';
+import { CompraFormComponent } from './features/panelAdmin/compra/compra-form/compra-form';
+import { CompraDetailComponent } from './features/panelAdmin/compra/compra-detail/compra-detail';
+import { CompraDevolucionFormComponent } from './features/panelAdmin/compra/compra-devolucion-form/compra-devolucion-form';
+import { CompraDevolucionDetailComponent } from './features/panelAdmin/compra/compra-devolucion-detail/compra-devolucion-detail';
+
+const comingSoon = (
+  path: string,
+  titulo: string,
+  descripcion: string
+): NonNullable<Routes[number]['children']>[number] => ({
+  path,
+  loadComponent: () =>
+    import('./features/admin/coming-soon/coming-soon').then(m => m.ComingSoonPage),
+  canActivate: [adminGuard],
+  data: { titulo, descripcion }
+});
+
+const moduloPendiente =
+  'Este módulo ya tiene ruta. La pantalla y los datos se conectan más adelante.';
 
 export const routes: Routes = [
   { path: '', component: HomePage },
@@ -27,14 +53,43 @@ export const routes: Routes = [
 
   {
     path: '',
-    component: App,
+    component: AdminLayoutComponent,
     canActivate: [authGuard],
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'mi-cuenta', component: MiCuenta },
-      { path: 'producto', component: ProductoComponent, canActivate: [adminGuard] },
-      { path: 'listaproductos', component: ProductoList, canActivate: [adminGuard] },
-      { path: 'editar-producto/:id', component: ProductoComponent, canActivate: [adminGuard] },
+
+      { path: 'productos', component: ProductoList, canActivate: [adminGuard] },
+      { path: 'productos/nuevo', component: ProductoComponent, canActivate: [adminGuard] },
+      { path: 'productos/:id/editar', component: ProductoComponent, canActivate: [adminGuard] },
+      { path: 'productos/:id', component: ProductoDetailComponent, canActivate: [adminGuard] },
+
+      { path: 'ventas', component: VentaListComponent, canActivate: [adminGuard] },
+      { path: 'ventas/nueva', component: VentaFormComponent, canActivate: [adminGuard] },
+      { path: 'ventas/:id/devolucion', component: VentaDevolucionFormComponent, canActivate: [adminGuard] },
+      { path: 'ventas/:id/devoluciones/:devolucionId', component: VentaDevolucionDetailComponent, canActivate: [adminGuard] },
+      { path: 'ventas/:id', component: VentaDetailComponent, canActivate: [adminGuard] },
+
+      { path: 'compras', component: CompraListComponent, canActivate: [adminGuard] },
+      { path: 'compras/nueva', component: CompraFormComponent, canActivate: [adminGuard] },
+      { path: 'compras/:id/devolucion', component: CompraDevolucionFormComponent, canActivate: [adminGuard] },
+      { path: 'compras/:id/devoluciones/:devolucionId', component: CompraDevolucionDetailComponent, canActivate: [adminGuard] },
+      { path: 'compras/:id', component: CompraDetailComponent, canActivate: [adminGuard] },
+
+      comingSoon('clientes', 'Clientes', moduloPendiente),
+      comingSoon('clientes/nuevo', 'Nuevo cliente', moduloPendiente),
+      comingSoon('clientes/:id', 'Detalle de cliente', moduloPendiente),
+
+      comingSoon('proveedores', 'Proveedores', moduloPendiente),
+      comingSoon('proveedores/nuevo', 'Nuevo proveedor', moduloPendiente),
+      comingSoon('proveedores/:id', 'Detalle de proveedor', moduloPendiente),
+
+      comingSoon('inventario', 'Inventario', moduloPendiente),
+      comingSoon('reportes', 'Reportes', moduloPendiente),
+
+      { path: 'producto', redirectTo: 'productos/nuevo', pathMatch: 'full' },
+      { path: 'listaproductos', redirectTo: 'productos', pathMatch: 'full' },
+      { path: 'editar-producto/:id', redirectTo: 'productos/:id/editar' }
     ]
   },
 

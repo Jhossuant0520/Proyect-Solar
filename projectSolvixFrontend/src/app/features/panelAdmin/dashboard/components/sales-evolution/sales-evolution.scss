@@ -1,0 +1,13 @@
+@use '../../dashboard-ui';
+
+.chart-wrap {
+  position: relative;
+  height: 18rem;
+  width: 100%;
+}
+
+@media (max-width: 767px) {
+  .chart-wrap {
+    height: 14rem;
+  }
+}

@@ -1,15 +1,13 @@
 import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatDialogModule } from '@angular/material/dialog';
-import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { SolvixButtonComponent } from '../solvix-button/solvix-button';
 
 @Component({
   selector: 'app-dialogo-confirmacion-delete',
   standalone: true,
   templateUrl: './dialogo-confirmacion-delete.html',
   styleUrls: ['./dialogo-confirmacion-delete.scss'],
-  imports: [CommonModule, MatDialogModule, MatButtonModule],
+  imports: [MatDialogModule, SolvixButtonComponent]
 })
 export class DialogoConfirmacionDelete {
   constructor(

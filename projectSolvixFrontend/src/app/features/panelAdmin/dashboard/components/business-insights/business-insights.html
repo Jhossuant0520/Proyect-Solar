@@ -1,0 +1,25 @@
+<section class="dash-panel" aria-labelledby="insights-title">
+  <solvix-section-header
+    kicker="Prioridades"
+    title="Lo que debes revisar"
+    subtitle="Lista visual. Estas notas no se generan aquí."
+  />
+
+  <solvix-section-state [state]="state" loadingLabel="Cargando revisiones." (retry)="retry.emit()">
+    <ul class="insight-list">
+      @for (insight of insights; track insight.id) {
+        <li class="insight">
+          <div class="insight__top">
+            <h3>{{ insight.titulo }}</h3>
+            <solvix-badge [tone]="tone(insight.prioridad)">{{ insight.prioridad }}</solvix-badge>
+          </div>
+          <p>{{ insight.explicacion }}</p>
+          <p class="insight__evidence solvix-mono">{{ insight.evidencia }}</p>
+          @if (insight.ruta) {
+            <a [routerLink]="insight.ruta">{{ insight.accion }}</a>
+          }
+        </li>
+      }
+    </ul>
+  </solvix-section-state>
+</section>

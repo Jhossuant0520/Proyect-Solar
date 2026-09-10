@@ -1,0 +1,48 @@
+// SOLVIX design tokens — fuente única de color, tipo y estado.
+// No introducir hex en componentes; usar estas variables.
+
+:root {
+  --solvix-bg: #020617;
+  --solvix-surface: #0f172a;
+  --solvix-surface-low: #151b2d;
+  --solvix-surface-high: #23293c;
+  --solvix-primary: #4fd1ff;
+  --solvix-secondary: #38bdf8;
+  --solvix-neon: #00e5ff;
+  --solvix-deep: #003366;
+  --solvix-text: #ffffff;
+  --solvix-text-secondary: #cfe9ff;
+  --solvix-text-muted: #94a3b8;
+  --solvix-border: rgba(79, 209, 255, 0.2);
+  --solvix-border-subtle: rgba(61, 72, 78, 0.6);
+
+  --solvix-success: #10b981;
+  --solvix-warning: #f59e0b;
+  --solvix-error: #ffb4ab;
+  --solvix-error-bg: #93000a;
+  --solvix-on-primary: #001f29;
+
+  --solvix-font: 'Geist', 'Inter', sans-serif;
+  --solvix-font-mono: 'JetBrains Mono', 'Inconsolata', monospace;
+
+  --solvix-sidebar-width: 16rem;
+  --solvix-topbar-height: 4rem;
+  --solvix-radius: 0.5rem;
+  --solvix-glow: 0 0 12px rgba(79, 209, 255, 0.3);
+
+  --solvix-scrollbar-size: 6px;
+  --solvix-scrollbar-thumb: rgba(148, 163, 184, 0.32);
+  --solvix-scrollbar-thumb-hover: rgba(79, 209, 255, 0.28);
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-size: 1.25rem;
+  line-height: 1;
+  user-select: none;
+}
+
+.solvix-mono {
+  font-family: var(--solvix-font-mono);
+  letter-spacing: 0.05em;
+}

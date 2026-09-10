@@ -1,0 +1,45 @@
+<solvix-page-header
+  kicker="Panel administrativo"
+  title="Resumen del negocio"
+  subtitle="Esto está pasando en tu negocio"
+>
+  <div class="header-controls">
+    <div class="dash-chips" role="group" aria-label="Período">
+      @for (preset of presets; track preset.id) {
+        <button
+          type="button"
+          class="dash-chip"
+          [class.is-active]="periodo.preset === preset.id"
+          [attr.aria-pressed]="periodo.preset === preset.id"
+          (click)="selectPreset(preset.id)"
+        >
+          {{ preset.label }}
+        </button>
+      }
+    </div>
+
+    @if (periodo.preset === 'personalizado') {
+      <div class="header-dates">
+        <label>
+          Desde
+          <input type="date" [value]="periodo.desde" (change)="onCustomDate('desde', $event)" />
+        </label>
+        <label>
+          Hasta
+          <input type="date" [value]="periodo.hasta" (change)="onCustomDate('hasta', $event)" />
+        </label>
+      </div>
+    }
+
+    <solvix-button
+      family="tech"
+      rank="secondary"
+      icon="refresh"
+      [disabled]="refreshing"
+      ariaLabel="Actualizar"
+      (click)="refresh.emit()"
+    >
+      Actualizar
+    </solvix-button>
+  </div>
+</solvix-page-header>

@@ -1,0 +1,19 @@
+<solvix-section-state [state]="state" loadingLabel="Cargando indicadores." (retry)="retry.emit()">
+  <div class="kpi-grid">
+    @for (metric of metrics; track metric.id) {
+      <solvix-metric-card
+        [label]="metric.label"
+        [value]="displayValue(metric)"
+        [hint]="metric.hint"
+        [help]="metric.help ?? ''"
+        [statusNote]="nota(metric)"
+        [icon]="metric.icon"
+        [variation]="metric.variation?.texto ?? ''"
+        [variationLabel]="comparacion(metric)"
+        [variationType]="metric.variation?.tipo ?? 'neutral'"
+        [tone]="tone(metric)"
+        [incomplete]="isIncomplete(metric)"
+      />
+    }
+  </div>
+</solvix-section-state>

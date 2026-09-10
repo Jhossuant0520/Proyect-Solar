@@ -1,0 +1,52 @@
+<section class="dash-panel" aria-labelledby="inv-title">
+  <solvix-section-header
+    kicker="Bodega"
+    title="Salud del inventario"
+    subtitle="El dinero invertido usa el costo de hoy. La rotación usa el costo histórico."
+  />
+
+  <solvix-section-state [state]="state" loadingLabel="Cargando inventario." (retry)="retry.emit()">
+    @if (data) {
+      <div class="inv-grid">
+        <solvix-metric-card
+          label="Dinero invertido en inventario"
+          [value]="display(data.valorInventario, 'money', data.estadoValorInventario, true)"
+          hint="Valor de los productos que tienes en stock según su costo actual."
+          help="Representa cuánto te ha costado el inventario que tienes actualmente. No corresponde al valor total de venta."
+          [statusNote]="nota(data.estadoValorInventario)"
+          icon="account_balance_wallet"
+          [tone]="tone(data.estadoValorInventario)"
+          [incomplete]="incomplete(data.valorInventario, data.estadoValorInventario)"
+        />
+        <solvix-metric-card
+          label="Inventory Turnover"
+          [value]="display(data.inventoryTurnover, 'ratio', data.estadoTurnover)"
+          hint="Cuántas veces se renueva tu inventario en el período."
+          help="Usa el costo histórico de ventas sobre el inventario promedio. No es el dinero invertido hoy."
+          [statusNote]="nota(data.estadoTurnover)"
+          icon="sync"
+          [tone]="tone(data.estadoTurnover)"
+          [incomplete]="incomplete(data.inventoryTurnover, data.estadoTurnover)"
+        />
+        <solvix-metric-card
+          label="Sell-through"
+          [value]="display(data.sellThrough, 'percent', data.estadoSellThrough)"
+          hint="Porcentaje del inventario que lograste vender."
+          help="Compara las unidades vendidas netas con el inventario disponible."
+          [statusNote]="nota(data.estadoSellThrough)"
+          icon="percent"
+          [tone]="tone(data.estadoSellThrough)"
+          [incomplete]="incomplete(data.sellThrough, data.estadoSellThrough)"
+        />
+        <solvix-metric-card
+          label="Stock crítico"
+          [value]="display(data.productosStockCritico, 'quantity', 'OK')"
+          hint="Productos que se están quedando sin existencias."
+          help="Están por debajo del umbral de inventario definido."
+          icon="warning"
+          [tone]="data.productosStockCritico > 0 ? 'error' : 'neutral'"
+        />
+      </div>
+    }
+  </solvix-section-state>
+</section>

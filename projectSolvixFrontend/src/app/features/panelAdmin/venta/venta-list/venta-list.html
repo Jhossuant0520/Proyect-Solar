@@ -1,0 +1,164 @@
+<section class="ventas-page">
+  <solvix-page-header
+    kicker="Comercial"
+    title="Ventas"
+    subtitle="Consulta y controla las ventas de tu negocio."
+  >
+    <solvix-button family="tech" rank="primary" icon="add" (click)="nuevaVenta()">
+      Nueva venta
+    </solvix-button>
+  </solvix-page-header>
+
+  @if (kpiState === 'loading') {
+    <solvix-loading-state label="Cargando resumen." />
+  } @else if (kpiState === 'error') {
+    <solvix-error-state
+      [title]="errorTitle"
+      [message]="errorMessage"
+      (retry)="cargarKpis()"
+    />
+  } @else if (kpiState === 'ready') {
+    <div class="kpi-grid">
+      @for (metric of kpis; track metric.id) {
+        <solvix-metric-card
+          [label]="metric.label"
+          [value]="valorKpi(metric)"
+          [hint]="metric.hint"
+          [help]="metric.help ?? ''"
+          [statusNote]="kpiNota(metric)"
+          [icon]="metric.icon"
+          [variation]="metric.variation?.texto ?? ''"
+          [variationLabel]="kpiComparacion(metric)"
+          [variationType]="metric.variation?.tipo ?? 'neutral'"
+          [tone]="kpiTone(metric)"
+          [incomplete]="kpiIncompleto(metric)"
+        />
+      }
+    </div>
+  }
+
+  <div class="filter-bar">
+    <label class="search">
+      <span class="material-symbols-outlined" aria-hidden="true">search</span>
+      <input
+        type="search"
+        [value]="searchNumero"
+        (input)="onSearch($event)"
+        placeholder="Buscar por número o cliente"
+      />
+    </label>
+    <select [value]="filtroPeriodo" (change)="onPeriodo($event)" aria-label="Período">
+      @for (periodo of periodos; track periodo.id) {
+        <option [value]="periodo.id">{{ periodo.label }}</option>
+      }
+    </select>
+    <select [value]="filtroClienteId ?? ''" (change)="onCliente($event)" aria-label="Cliente">
+      <option value="">Cliente: todos</option>
+      @for (cliente of clientes; track cliente.id) {
+        <option [value]="cliente.id">{{ cliente.nombre }}</option>
+      }
+    </select>
+    <select [value]="filtroEstado" (change)="onEstado($event)" aria-label="Estado">
+      <option value="">Estado: todos</option>
+      @for (estado of estados; track estado.id) {
+        <option [value]="estado.id">{{ estado.label }}</option>
+      }
+    </select>
+    <button type="button" class="clear" (click)="limpiarFiltros()">Limpiar filtros</button>
+  </div>
+
+  @if (state === 'loading') {
+    <solvix-loading-state label="Cargando ventas." />
+  } @else if (state === 'error') {
+    <solvix-error-state
+      [title]="errorTitle"
+      [message]="errorMessage"
+      (retry)="cargar()"
+    />
+  } @else if (state === 'empty') {
+    <solvix-empty-state
+      icon="payments"
+      title="Aún no tienes ventas."
+      message="Registra la primera venta de tu negocio."
+      actionLabel="Nueva venta"
+      actionIcon="add"
+      (action)="nuevaVenta()"
+    />
+  } @else if (visibles.length === 0) {
+    <solvix-empty-state
+      icon="search_off"
+      title="No encontramos ventas con estos filtros."
+      message="Prueba con otro número, cliente, estado o período."
+      actionLabel="Limpiar filtros"
+      (action)="limpiarFiltros()"
+    />
+  } @else {
+    <div class="table-panel">
+      <div class="table-wrap desktop-table">
+        <table class="venta-table">
+          <caption class="sr-only">Lista de ventas</caption>
+          <thead>
+            <tr>
+              <th>Número</th>
+              <th>Fecha</th>
+              <th>Cliente</th>
+              <th>Productos</th>
+              <th class="is-num">Subtotal</th>
+              <th class="is-num">Descuento</th>
+              <th class="is-num">Total</th>
+              <th>Estado</th>
+              <th class="is-num">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (venta of visibles; track venta.id) {
+              <tr [class.is-cancelada]="venta.estado === 'CANCELADA'">
+                <td>
+                  <button type="button" class="name-btn" (click)="verVenta(venta)">
+                    <strong class="solvix-mono">{{ venta.numero }}</strong>
+                  </button>
+                </td>
+                <td>{{ fecha(venta.fecha) }}</td>
+                <td>{{ cliente(venta) }}</td>
+                <td>{{ productos(venta.detalles) }}</td>
+                <td class="is-num">{{ money(venta.subtotal) }}</td>
+                <td class="is-num">{{ money(venta.descuento) }}</td>
+                <td class="is-num total">{{ money(venta.total) }}</td>
+                <td>
+                  <solvix-badge [tone]="estadoTone(venta.estado)">
+                    {{ estadoLabel(venta.estado) }}
+                  </solvix-badge>
+                </td>
+                <td class="is-num actions">
+                  <button type="button" class="icon-btn" (click)="verVenta(venta)" aria-label="Ver venta">
+                    <span class="material-symbols-outlined">visibility</span>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <ul class="mobile-list">
+        @for (venta of visibles; track venta.id) {
+          <li>
+            <button type="button" class="card-main" (click)="verVenta(venta)">
+              <strong class="solvix-mono">{{ venta.numero }}</strong>
+              <span class="sub">{{ cliente(venta) }}</span>
+              <span class="row">
+                <span>{{ fecha(venta.fecha) }}</span>
+                <span>{{ money(venta.total) }}</span>
+              </span>
+            </button>
+            <div class="card-meta">
+              <solvix-badge [tone]="estadoTone(venta.estado)">
+                {{ estadoLabel(venta.estado) }}
+              </solvix-badge>
+            </div>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</section>

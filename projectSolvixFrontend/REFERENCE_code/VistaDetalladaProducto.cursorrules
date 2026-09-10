@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SOLVIX - Product Details</title>
+<!-- Font Setup -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            app: {
+              bg: '#09090b',       // Deepest dark
+              panel: '#121215',    // Slightly lighter dark for panels
+              border: '#27272a',   // Dark border
+              text: {
+                primary: '#f4f4f5',
+                secondary: '#a1a1aa',
+                muted: '#52525b'
+              },
+              accent: {
+                DEFAULT: '#06b6d4', // Cyan technical accent
+                glow: 'rgba(6, 182, 212, 0.2)',
+                hover: '#0891b2'
+              },
+              status: {
+                success: '#10b981',
+                warning: '#f59e0b',
+                danger: '#ef4444'
+              }
+            }
+          },
+          fontFamily: {
+            sans: ['Geist', 'sans-serif'],
+            mono: ['Geist Mono', 'monospace'],
+          },
+          boxShadow: {
+            'glow': '0 0 15px rgba(6, 182, 212, 0.15)',
+            'glow-accent': '0 0 20px rgba(6, 182, 212, 0.4)',
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-styles">
+    body {
+      background-color: theme('colors.app.bg');
+      color: theme('colors.app.text.primary');
+      font-family: 'Geist', sans-serif;
+    }
+    .panel {
+      background-color: theme('colors.app.panel');
+      border: 1px solid theme('colors.app.border');
+      border-radius: 0.5rem;
+    }
+    .technical-border {
+      border: 1px solid theme('colors.app.border');
+      position: relative;
+    }
+    .technical-border::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      width: 4px;
+      height: 4px;
+      background-color: theme('colors.app.accent.DEFAULT');
+    }
+    
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: theme('colors.app.bg');
+    }
+    ::-webkit-scrollbar-thumb {
+      background: theme('colors.app.border');
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: theme('colors.app.text.muted');
+    }
+
+    .stat-value {
+      background: linear-gradient(to right, #fff, #a1a1aa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  </style>
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="flex h-screen overflow-hidden selection:bg-app-accent selection:text-white">
+<!-- BEGIN: Sidebar -->
+<aside class="w-64 border-r border-app-border bg-app-bg flex flex-col hidden md:flex shrink-0">
+<div class="h-16 flex items-center px-6 border-b border-app-border">
+<div class="flex items-center gap-2">
+<i class="w-6 h-6 text-app-accent" data-lucide="cpu"></i>
+<div>
+<h1 class="font-bold text-xl tracking-wider leading-none">SOLVIX</h1>
+<span class="text-[10px] text-app-text-secondary font-mono tracking-widest uppercase">BI Terminal</span>
+</div>
+</div>
+</div>
+<nav class="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-md text-app-text-secondary hover:text-app-text-primary hover:bg-white/5 transition-colors group" href="#">
+<i class="w-5 h-5 group-hover:text-app-accent transition-colors" data-lucide="layout-dashboard"></i>
+<span class="font-medium text-sm">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-md bg-app-accent/10 text-app-accent border-l-2 border-app-accent group relative overflow-hidden" href="#">
+<div class="absolute inset-0 bg-gradient-to-r from-app-accent/20 to-transparent"></div>
+<i class="w-5 h-5 relative z-10" data-lucide="box"></i>
+<span class="font-medium text-sm relative z-10">Products</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-md text-app-text-secondary hover:text-app-text-primary hover:bg-white/5 transition-colors group" href="#">
+<i class="w-5 h-5 group-hover:text-app-accent transition-colors" data-lucide="banknote"></i>
+<span class="font-medium text-sm">Sales</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-md text-app-text-secondary hover:text-app-text-primary hover:bg-white/5 transition-colors group" href="#">
+<i class="w-5 h-5 group-hover:text-app-accent transition-colors" data-lucide="shopping-cart"></i>
+<span class="font-medium text-sm">Purchases</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-md text-app-text-secondary hover:text-app-text-primary hover:bg-white/5 transition-colors group" href="#">
+<i class="w-5 h-5 group-hover:text-app-accent transition-colors" data-lucide="users"></i>
+<span class="font-medium text-sm">Customers</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-md text-app-text-secondary hover:text-app-text-primary hover:bg-white/5 transition-colors group" href="#">
+<i class="w-5 h-5 group-hover:text-app-accent transition-colors" data-lucide="truck"></i>
+<span class="font-medium text-sm">Suppliers</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-md text-app-text-secondary hover:text-app-text-primary hover:bg-white/5 transition-colors group" href="#">
+<i class="w-5 h-5 group-hover:text-app-accent transition-colors" data-lucide="layers"></i>
+<span class="font-medium text-sm">Inventory</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-md text-app-text-secondary hover:text-app-text-primary hover:bg-white/5 transition-colors group" href="#">
+<i class="w-5 h-5 group-hover:text-app-accent transition-colors" data-lucide="bar-chart-2"></i>
+<span class="font-medium text-sm">Reports</span>
+</a>
+</nav>
+</aside>
+<!-- END: Sidebar -->
+<!-- BEGIN: Main Content Area -->
+<main class="flex-1 flex flex-col min-w-0 bg-[#0a0a0c]">
+<!-- BEGIN: Topbar -->
+<header class="h-16 border-b border-app-border flex items-center justify-between px-6 shrink-0 bg-app-bg/80 backdrop-blur-sm sticky top-0 z-20">
+<div class="flex items-center gap-4">
+<!-- Mobile Menu Toggle -->
+<button class="md:hidden text-app-text-secondary hover:text-app-text-primary">
+<i class="w-5 h-5" data-lucide="menu"></i>
+</button>
+<!-- Breadcrumbs -->
+<nav class="flex items-center space-x-2 text-sm font-mono text-app-text-secondary">
+<span class="text-app-text-muted">/</span>
+<a class="hover:text-app-text-primary transition-colors" href="#">Products</a>
+<span class="text-app-text-muted">/</span>
+<span class="text-app-accent">View</span>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-app-text-secondary hover:text-app-accent transition-colors relative">
+<i class="w-5 h-5" data-lucide="calendar"></i>
+</button>
+<button class="text-app-text-secondary hover:text-app-accent transition-colors relative">
+<i class="w-5 h-5" data-lucide="bell"></i>
+<span class="absolute top-0 right-0 w-2 h-2 bg-app-accent rounded-full border border-app-bg"></span>
+</button>
+<button class="text-app-text-secondary hover:text-app-accent transition-colors">
+<i class="w-5 h-5" data-lucide="settings"></i>
+</button>
+<div class="w-px h-6 bg-app-border mx-2"></div>
+<!-- User Profile -->
+<button class="flex items-center gap-2">
+<img alt="Admin" class="w-8 h-8 rounded-full border border-app-border p-0.5 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWOpSs43pQfyLzvhNpIteFYPeLokDwRm-V_JzGwMLI5EmQxbDabbfo--XcZdw0nnXPJGVDGyIdQ_6XcXB29HC1k9j2GAjGaVjUr6yPxeLVWpDLnpgHXYF8Roa6Ehw2Xn7qT5m3GFB1j4NTEb-UENZChK42MbeVzJ2jmY731qS459oaGMoN1ZF4lnkPtOjObud7GLbC_Qm1oPH7G3cYpn6ZwQwvzZx49jQ_QrNsgVelUdxUjqnTfV1R"/>
+</button>
+</div>
+</header>
+<!-- END: Topbar -->
+<!-- BEGIN: Page Content -->
+<div class="flex-1 overflow-y-auto p-6 md:p-8 scroll-smooth">
+<div class="max-w-7xl mx-auto space-y-6">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
+<div>
+<div class="flex items-center gap-3 mb-2">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                ACTIVE
+              </span>
+<span class="text-xs font-mono text-app-text-secondary">ID: PRD-8829-XQ</span>
+</div>
+<h2 class="text-3xl md:text-5xl font-bold text-white tracking-tight leading-tight">
+              Inversor Tri-Fásico 15kW
+            </h2>
+</div>
+<div class="flex items-center gap-3 shrink-0">
+<button class="px-4 py-2 bg-app-panel border border-app-border rounded text-sm font-medium hover:bg-white/5 transition-colors flex items-center gap-2">
+<i class="w-4 h-4" data-lucide="history"></i>
+              Logs
+            </button>
+<button class="px-4 py-2 bg-app-panel border border-app-border rounded text-sm font-medium hover:border-app-accent/50 hover:text-app-accent transition-colors flex items-center gap-2 shadow-glow">
+<i class="w-4 h-4" data-lucide="edit-3"></i>
+              Edit Details
+            </button>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Column 1: Info & Commercial -->
+<div class="lg:col-span-2 space-y-6">
+<!-- General Information Panel -->
+<section class="panel p-6 technical-border">
+<div class="flex items-center gap-2 mb-6 border-b border-app-border pb-4">
+<i class="w-5 h-5 text-app-accent" data-lucide="info"></i>
+<h3 class="text-lg font-semibold text-white">General Information</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+<div>
+<label class="block text-xs font-mono text-app-text-muted mb-1 uppercase tracking-wider">Brand</label>
+<p class="text-app-text-primary font-medium">SolarTech Advanced</p>
+</div>
+<div>
+<label class="block text-xs font-mono text-app-text-muted mb-1 uppercase tracking-wider">Category</label>
+<div class="flex items-center gap-2 text-sm text-app-text-primary">
+<span>Inverters</span>
+<i class="w-3 h-3 text-app-text-muted" data-lucide="chevron-right"></i>
+<span>Three-Phase</span>
+</div>
+</div>
+</div>
+<div>
+<label class="block text-xs font-mono text-app-text-muted mb-2 uppercase tracking-wider">Description</label>
+<p class="text-app-text-secondary leading-relaxed text-sm">
+                  High-efficiency three-phase solar inverter designed for commercial applications. Features advanced grid management functions, dual MPPT inputs, and comprehensive remote monitoring capabilities via RS485 and Wi-Fi modules. IP65 rated for outdoor installation.
+                </p>
+</div>
+</section>
+<!-- Commercial Data Panel -->
+<section class="panel p-6 technical-border">
+<div class="flex justify-between items-start mb-6 border-b border-app-border pb-4">
+<div class="flex items-center gap-2">
+<i class="w-5 h-5 text-app-accent" data-lucide="trending-up"></i>
+<h3 class="text-lg font-semibold text-white">Commercial Data</h3>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Selling Price -->
+<div class="bg-app-bg/50 rounded-lg p-5 border border-app-border relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-app-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<label class="block text-xs font-mono text-app-text-muted mb-1 uppercase tracking-wider">Selling Price</label>
+<div class="flex items-end gap-3 mt-2">
+<span class="text-4xl font-bold stat-value">$ 2,450.00</span>
+</div>
+<div class="mt-4 pt-4 border-t border-app-border/50 flex justify-between items-center">
+<span class="text-xs font-mono text-app-text-muted">CURRENT MARGIN</span>
+<span class="text-sm font-semibold text-emerald-400">32.6%</span>
+</div>
+</div>
+<!-- Current Cost Control -->
+<div class="bg-[#18181b] rounded-lg p-5 border border-app-border relative shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]">
+<div class="flex justify-between items-start mb-2">
+<label class="block text-xs font-mono text-app-text-muted uppercase tracking-wider">Current Cost</label>
+<span class="inline-flex items-center gap-1 text-[10px] font-mono text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+<i class="w-3 h-3" data-lucide="lock"></i> SYSTEM CONTROLLED
+                    </span>
+</div>
+<div class="flex items-center justify-between mt-3">
+<span class="text-2xl font-mono font-medium text-app-text-secondary">$ 1,650.00</span>
+<button class="px-3 py-2 bg-app-accent text-app-bg font-semibold rounded text-sm hover:bg-app-accent-hover transition-colors shadow-glow-accent flex items-center gap-2" onclick="document.getElementById('adjust-cost-modal').classList.remove('hidden')">
+<i class="w-4 h-4" data-lucide="refresh-cw"></i>
+                      Ajustar costo
+                    </button>
+</div>
+<p class="text-[10px] text-app-text-muted mt-4 flex items-center gap-1">
+<i class="w-3 h-3" data-lucide="info"></i> Last updated: Oct 15, 2023 by System
+                  </p>
+</div>
+</div>
+</section>
+<!-- Technical Changes History -->
+<section class="panel p-6">
+<div class="flex items-center gap-2 mb-4 border-b border-app-border pb-4">
+<i class="w-5 h-5 text-app-text-secondary" data-lucide="file-code-2"></i>
+<h3 class="text-sm font-semibold text-app-text-secondary uppercase tracking-wider">Technical History</h3>
+</div>
+<div class="space-y-4">
+<div class="flex gap-4 items-start">
+<div class="mt-1 w-2 h-2 rounded-full bg-app-accent shadow-[0_0_8px_rgba(6,182,212,0.6)]"></div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1">
+<span class="text-sm font-medium text-app-text-primary">Firmware Update v2.4</span>
+<span class="text-xs font-mono text-app-text-muted">Oct 10, 2023</span>
+</div>
+<p class="text-xs text-app-text-secondary">Updated communication protocols for improved RS485 stability.</p>
+</div>
+</div>
+<div class="flex gap-4 items-start">
+<div class="mt-1 w-2 h-2 rounded-full bg-app-border"></div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1">
+<span class="text-sm font-medium text-app-text-secondary">Spec Sheet Revision</span>
+<span class="text-xs font-mono text-app-text-muted">Sep 22, 2023</span>
+</div>
+<p class="text-xs text-app-text-muted">Corrected operating temperature range limits.</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Column 2: Image & Inventory -->
+<div class="space-y-6">
+<!-- Product Image -->
+<section class="panel overflow-hidden relative group h-[250px] flex items-center justify-center bg-black">
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
+<!-- Placeholder for actual product image based on provided screenshot -->
+<img alt="Product Image" class="w-full h-full object-cover opacity-80 mix-blend-luminosity group-hover:mix-blend-normal transition-all duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_kN6UiIyos6gSyIGMphX_lmEYUiQmP32m6QF3riUJUgKjXEQTfwFzAnM_YyTD4t5FNgbtECMgWKlUvgx9RfvUJurdLlP2dz9eN3MTfzoCWYjXyuUJm5_UCwIPwa3ES0a78t6iY9iwMfMIJComRmUz01mktnciHHjZ-mv1iy_ti4d8v2GW5sXMjR0lON-mJrVQHRfilzlei3fh8uPyeEMWJjR0_Xz8SxvQ5-nwU-uMCIUyQ8fM-B-U"/>
+<div class="absolute bottom-4 right-4 z-20">
+<span class="px-2 py-1 bg-black/60 backdrop-blur border border-app-border rounded text-[10px] font-mono text-app-text-secondary">IMG: 01</span>
+</div>
+</section>
+<!-- Inventory Status Panel -->
+<section class="panel p-6 technical-border">
+<div class="flex items-center gap-2 mb-6 border-b border-app-border pb-4">
+<i class="w-5 h-5 text-app-accent" data-lucide="package"></i>
+<h3 class="text-lg font-semibold text-white">Inventory Status</h3>
+</div>
+<div class="mb-8">
+<div class="flex justify-between items-end mb-2">
+<label class="text-xs font-mono text-app-text-muted uppercase tracking-wider">Current Stock</label>
+<span class="text-[10px] font-mono text-app-accent">OPTIMAL</span>
+</div>
+<div class="flex items-baseline gap-2 mb-4">
+<span class="text-5xl font-bold stat-value tracking-tighter">42</span>
+<span class="text-app-text-secondary font-mono text-sm">units</span>
+</div>
+<!-- Stock Bar -->
+<div class="space-y-1">
+<div class="h-2 w-full bg-app-bg rounded-full overflow-hidden flex">
+<div class="h-full bg-app-accent" style="width: 42%;"></div>
+</div>
+<div class="flex justify-between text-[10px] font-mono text-app-text-muted">
+<span>Min: 10</span>
+<span>Max: 100</span>
+</div>
+</div>
+</div>
+<!-- Recent Movements -->
+<div>
+<label class="block text-xs font-mono text-app-text-muted mb-3 uppercase tracking-wider">Recent Movements</label>
+<div class="space-y-2">
+<div class="flex items-center justify-between p-2 rounded bg-app-bg/50 border border-app-border/50 text-sm font-mono">
+<div class="flex items-center gap-3">
+<span class="text-emerald-400 flex items-center gap-1 w-12">
+<i class="w-3 h-3" data-lucide="arrow-down"></i> +15
+                      </span>
+<span class="text-app-text-secondary">PO-2023-081</span>
+</div>
+<span class="text-xs text-app-text-muted">Oct 24, 14:30</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded bg-app-bg/50 border border-app-border/50 text-sm font-mono">
+<div class="flex items-center gap-3">
+<span class="text-rose-400 flex items-center gap-1 w-12">
+<i class="w-3 h-3" data-lucide="arrow-up"></i> -2
+                      </span>
+<span class="text-app-text-secondary">SO-2023-992</span>
+</div>
+<span class="text-xs text-app-text-muted">Oct 22, 09:15</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded bg-app-bg/50 border border-app-border/50 text-sm font-mono">
+<div class="flex items-center gap-3">
+<span class="text-rose-400 flex items-center gap-1 w-12">
+<i class="w-3 h-3" data-lucide="arrow-up"></i> -5
+                      </span>
+<span class="text-app-text-secondary">SO-2023-980</span>
+</div>
+<span class="text-xs text-app-text-muted">Oct 20, 11:20</span>
+</div>
+</div>
+<button class="w-full mt-4 py-2 text-xs font-mono text-app-accent hover:text-white transition-colors border border-dashed border-app-accent/30 rounded hover:border-app-accent/60 hover:bg-app-accent/5">
+                  VIEW ALL MOVEMENTS
+                </button>
+</div>
+</section>
+</div>
+</div>
+</div>
+</div>
+<!-- END: Page Content -->
+</main>
+<!-- END: Main Content Area -->
+<!-- BEGIN: Adjust Cost Modal -->
+<div class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity" id="adjust-cost-modal">
+<div class="bg-app-panel border border-app-border rounded-lg shadow-2xl w-full max-w-md overflow-hidden relative">
+<!-- Decorative top border -->
+<div class="h-1 w-full bg-gradient-to-r from-app-accent to-emerald-400"></div>
+<div class="p-6">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-xl font-bold text-white flex items-center gap-2">
+<i class="w-5 h-5 text-app-accent" data-lucide="tool"></i>
+            Ajuste Manual de Costo
+          </h3>
+<button class="text-app-text-muted hover:text-white transition-colors" onclick="document.getElementById('adjust-cost-modal').classList.add('hidden')">
+<i class="w-5 h-5" data-lucide="x"></i>
+</button>
+</div>
+<form class="space-y-4">
+<div>
+<label class="block text-xs font-mono text-app-text-secondary mb-1">Costo Actual (Referencia)</label>
+<input class="w-full bg-app-bg border border-app-border rounded px-3 py-2 text-app-text-muted font-mono cursor-not-allowed" disabled="" type="text" value="$ 1,650.00"/>
+</div>
+<div>
+<label class="block text-xs font-mono text-app-accent mb-1">Nuevo Costo Unitario *</label>
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 text-app-text-secondary font-mono">$</span>
+<input class="w-full bg-app-bg border border-app-accent/50 focus:border-app-accent rounded pl-8 pr-3 py-2 text-white font-mono focus:ring-1 focus:ring-app-accent outline-none transition-all shadow-[0_0_10px_rgba(6,182,212,0.1)]" placeholder="0.00" step="0.01" type="number"/>
+</div>
+</div>
+<div>
+<label class="block text-xs font-mono text-app-text-secondary mb-1">Motivo del Ajuste *</label>
+<select class="w-full bg-app-bg border border-app-border rounded px-3 py-2 text-white text-sm focus:border-app-accent focus:ring-1 focus:ring-app-accent outline-none">
+<option value="">Seleccionar motivo...</option>
+<option value="freight">Cambio en costos de flete</option>
+<option value="supplier">Actualización de proveedor</option>
+<option value="customs">Ajuste aduanal/impuestos</option>
+<option value="correction">Corrección de error de captura</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-mono text-app-text-secondary mb-1">Observaciones / Evidencia</label>
+<textarea class="w-full bg-app-bg border border-app-border rounded px-3 py-2 text-white text-sm focus:border-app-accent focus:ring-1 focus:ring-app-accent outline-none resize-none" placeholder="Referencia a factura, pedimento o justificación técnica..." rows="3"></textarea>
+</div>
+<div class="bg-amber-500/10 border border-amber-500/20 rounded p-3 mt-4 flex gap-3">
+<i class="w-5 h-5 text-amber-500 shrink-0" data-lucide="alert-triangle"></i>
+<p class="text-xs text-amber-500/80 leading-relaxed">
+              Este cambio recalculará el margen actual y quedará registrado en el log de auditoría con su usuario.
+            </p>
+</div>
+<div class="flex justify-end gap-3 mt-6 pt-4 border-t border-app-border">
+<button class="px-4 py-2 text-sm font-medium text-app-text-secondary hover:text-white transition-colors" onclick="document.getElementById('adjust-cost-modal').classList.add('hidden')" type="button">
+              Cancelar
+            </button>
+<button class="px-4 py-2 bg-app-accent text-app-bg font-bold rounded text-sm hover:bg-app-accent-hover transition-colors shadow-glow-accent" type="button">
+              Aplicar Ajuste
+            </button>
+</div>
+</form>
+</div>
+</div>
+</div>
+<!-- END: Adjust Cost Modal -->
+<script data-purpose="icon-initialization">
+    // Initialize Lucide icons
+    lucide.createIcons();
+  </script>
+</body></html>

@@ -1,0 +1,39 @@
+<section class="dash-panel" aria-labelledby="revision-title">
+  <solvix-section-header
+    kicker="Atención"
+    title="Productos para revisar"
+    subtitle="Stock, velocidad y tiempo sin venta. Sin recomendaciones automáticas."
+  />
+
+  <solvix-section-state [state]="state" loadingLabel="Cargando productos para revisar." (retry)="retry.emit()">
+    <div class="dash-table-wrap">
+      <table class="dash-table">
+        <caption class="sr-only">Productos para revisar</caption>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th class="is-num">Stock</th>
+            <th class="is-num">Velocidad</th>
+            <th class="is-num">Días sin venta</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (product of products; track product.productoId) {
+            <tr>
+              <td><strong>{{ product.nombre }}</strong></td>
+              <td class="is-num">{{ qty(product.stockActual) }}</td>
+              <td class="is-num">{{ velocidad(product.velocidadVenta) }}</td>
+              <td class="is-num">{{ dias(product.diasSinVenta) }}</td>
+              <td>
+                <solvix-badge [tone]="badgeTone(product.estado)">
+                  {{ badgeLabel(product.estado) }}
+                </solvix-badge>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </solvix-section-state>
+</section>

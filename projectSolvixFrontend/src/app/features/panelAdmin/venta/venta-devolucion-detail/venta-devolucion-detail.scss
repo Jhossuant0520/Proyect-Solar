@@ -1,0 +1,130 @@
+.detalle-page {
+  position: relative;
+  z-index: 1;
+  max-width: 80rem;
+}
+
+.head-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: -0.6rem 0 1.4rem;
+  color: var(--solvix-text-muted);
+}
+
+.detalle-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(16rem, 0.9fr);
+  gap: 1.25rem;
+}
+
+.panel {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid var(--solvix-border);
+  border-radius: var(--solvix-radius);
+  padding: 1.2rem 1.3rem;
+  margin-bottom: 1.25rem;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 32rem;
+}
+
+th,
+td {
+  padding: 0.7rem 0.55rem;
+  border-bottom: 1px solid var(--solvix-border-subtle);
+  text-align: left;
+}
+
+th {
+  color: var(--solvix-text-muted);
+  font-family: var(--solvix-font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.is-num {
+  text-align: right;
+  font-family: var(--solvix-font-mono);
+}
+
+.sub,
+.warn {
+  display: block;
+  font-size: 0.72rem;
+}
+
+.warn {
+  color: var(--solvix-warning);
+}
+
+.facts {
+  display: grid;
+  gap: 0.85rem;
+  margin: 0;
+}
+
+dt {
+  color: var(--solvix-text-muted);
+  font-family: var(--solvix-font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+dd {
+  margin: 0.25rem 0 0;
+  color: var(--solvix-text);
+}
+
+.total {
+  color: var(--solvix-primary);
+  font-family: var(--solvix-font-mono);
+  font-size: 1.5rem;
+}
+
+.obs,
+.form-error {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+}
+
+.form-error {
+  color: var(--solvix-error);
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: var(--solvix-text-muted);
+  font-family: var(--solvix-font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+select {
+  background: var(--solvix-surface-low);
+  border: 1px solid var(--solvix-border-subtle);
+  color: var(--solvix-text);
+  border-radius: 0.125rem;
+  padding: 0.55rem 0.7rem;
+}
+
+.form-actions {
+  margin-top: 1rem;
+}
+
+@media (max-width: 1023px) {
+  .detalle-grid {
+    grid-template-columns: 1fr;
+  }
+}

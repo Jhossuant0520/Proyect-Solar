@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=JetBrains+Mono:wght@100..900&display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-tertiary-fixed":"#001f24","on-primary-fixed":"#001f29","surface-container-high":"#23293c","surface-container-lowest":"#070d1f","secondary-fixed":"#c4e7ff","on-surface-variant":"#bcc8cf","inverse-surface":"#dce1fb","on-background":"#dce1fb","error":"#ffb4ab","on-primary":"#003545","surface-tint":"#60d4ff","surface-container":"#191f31","primary":"#b2e7ff","surface-container-highest":"#2e3447","surface-bright":"#33394c","primary-fixed-dim":"#60d4ff","on-tertiary":"#00363d","primary-fixed":"#bbe9ff","on-secondary-fixed-variant":"#004c69","on-primary-fixed-variant":"#004d63","secondary-fixed-dim":"#7bd0ff","error-container":"#93000a","on-secondary-container":"#00374d","secondary-container":"#00a6e0","text-body":"#94a3b8","tertiary-container":"#00d6ee","secondary":"#7bd0ff","outline":"#879299","inverse-on-surface":"#2a3043","surface-dim":"#0c1324","tertiary-fixed":"#9cf0ff","on-primary-container":"#00576f","tertiary":"#8aedff","inverse-primary":"#006782","outline-variant":"#3d484e","on-tertiary-container":"#005964","on-surface":"#dce1fb","on-secondary-fixed":"#001e2c","primary-container":"#4fd1ff","text-header":"#FFFFFF","tertiary-fixed-dim":"#00daf3","surface":"#0f172a","surface-variant":"#2e3447","on-error":"#690005","on-tertiary-fixed-variant":"#004f58","background":"#0c1324","on-error-container":"#ffdad6","on-secondary":"#00354a","surface-container-low":"#151b2d"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"margin-mobile":"20px","unit":"4px","gutter":"24px","container-max":"1280px","margin-desktop":"64px"},"fontFamily":{"label-sm":["JetBrains Mono"],"body-lg":["Geist"],"body-md":["Geist"],"display-lg":["Geist"],"headline-lg-mobile":["Geist"],"headline-md":["Geist"],"label-md":["JetBrains Mono"],"headline-lg":["Geist"]},"fontSize":{"label-sm":["12px",{"lineHeight":"16px","letterSpacing":"0.08em","fontWeight":"500"}],"body-lg":["18px",{"lineHeight":"28px","fontWeight":"400"}],"body-md":["16px",{"lineHeight":"24px","fontWeight":"400"}],"display-lg":["64px",{"lineHeight":"72px","letterSpacing":"-0.04em","fontWeight":"700"}],"headline-lg-mobile":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"600"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-md":["14px",{"lineHeight":"20px","letterSpacing":"0.05em","fontWeight":"500"}],"headline-lg":["40px",{"lineHeight":"48px","letterSpacing":"-0.02em","fontWeight":"600"}]}}}}</script></head><body class="bg-background font-body-md text-on-surface"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.2)] border-r border-outline-variant/10"><div class="p-gutter mb-8 flex items-center gap-3"><div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center"><span class="material-symbols-outlined text-on-primary">token</span></div><span class="font-headline-md text-headline-md tracking-tighter text-primary">SOLVIX <span class="text-on-surface font-light">CORE</span></span></div><nav class="flex-1 px-4 space-y-1" data-active-classes="bg-primary-container/20 text-primary font-bold shadow-[inset_4px_0_0_0_#b2e7ff]"><a class="flex items-center px-6 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all group" data-path="dashboard" href="#"><span class="material-symbols-outlined mr-4 group-hover:scale-110 transition-transform">dashboard</span><span class="font-label-md text-label-md uppercase tracking-widest">Dashboard</span></a><a class="flex items-center px-6 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all group" data-path="productos" href="#"><span class="material-symbols-outlined mr-4 group-hover:scale-110 transition-transform">inventory_2</span><span class="font-label-md text-label-md uppercase tracking-widest">Productos</span></a><a aria-current="page" class="flex items-center px-6 py-3 rounded-lg transition-all group bg-primary-container/20 text-primary font-bold shadow-[inset_4px_0_0_0_#b2e7ff]" data-path="ventas" href="#"><span class="material-symbols-outlined mr-4 group-hover:scale-110 transition-transform">payments</span><span class="font-label-md text-label-md uppercase tracking-widest">Ventas</span></a><a class="flex items-center px-6 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all group" data-path="compras" href="#"><span class="material-symbols-outlined mr-4 group-hover:scale-110 transition-transform">shopping_cart</span><span class="font-label-md text-label-md uppercase tracking-widest">Compras</span></a><a class="flex items-center px-6 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all group" data-path="inventario" href="#"><span class="material-symbols-outlined mr-4 group-hover:scale-110 transition-transform">shelves</span><span class="font-label-md text-label-md uppercase tracking-widest">Inventario</span></a><a class="flex items-center px-6 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all group" data-path="reportes" href="#"><span class="material-symbols-outlined mr-4 group-hover:scale-110 transition-transform">query_stats</span><span class="font-label-md text-label-md uppercase tracking-widest">Reportes</span></a></nav><div class="px-8 py-6 border-t border-outline-variant/10"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center"><span class="material-symbols-outlined text-on-secondary-container">engineering</span></div><div><p class="text-label-md font-label-md text-on-surface">Terminal v2.4</p><p class="text-xs text-on-surface-variant">Status: Online</p></div></div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-background/80 backdrop-blur-xl z-40 px-gutter flex items-center justify-between border-b border-outline-variant/5"><div class="flex items-center gap-4 flex-1"><span class="text-on-surface-variant font-label-md text-label-md uppercase tracking-tighter">SOLVIX BI Terminal</span><div class="h-4 w-[1px] bg-outline-variant/30 mx-2"></div><div class="relative max-w-md w-full group"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px] group-focus-within:text-primary transition-colors">search</span><input class="w-full bg-surface-container-highest/30 border border-outline-variant/20 rounded-xl py-1.5 pl-10 pr-4 text-sm focus:outline-none focus:border-primary/50 focus:bg-surface-container-highest/50 transition-all text-on-surface" placeholder="Buscar transacciones, SKUs o reportes..." type="text"/></div></div><div class="flex items-center gap-6"><button class="flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">notifications</span></button><div class="flex items-center gap-3 pl-4 border-l border-outline-variant/20"><div class="text-right hidden sm:block"><p class="text-label-md font-label-md text-on-surface leading-tight">Operador Alpha</p><p class="text-[10px] uppercase text-primary tracking-widest">Admin Ventas</p></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center cursor-pointer hover:ring-2 ring-primary/30 transition-all"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="relative pt-16 min-h-screen bg-background"><div class="flex flex-col w-full relative min-h-screen pb-margin-desktop">
+<div class="px-gutter pt-8 pb-12 flex flex-col gap-8 relative z-10">
+<!-- Header Section -->
+<div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+<div class="flex flex-col gap-2">
+<h1 class="text-display-lg font-display-lg text-on-surface tracking-tighter">Inventario</h1>
+<p class="text-body-md font-body-md text-on-surface-variant max-w-2xl">
+          Controla tus existencias y detecta riesgos a tiempo.
+        </p>
+</div>
+<div class="flex items-center gap-4">
+<button class="px-6 py-2 rounded-lg bg-surface-container-high text-on-surface-variant font-label-md text-label-md uppercase tracking-widest hover:text-primary transition-colors flex items-center gap-2 group">
+<span class="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform">download</span>
+          Exportar Reporte
+        </button>
+<button class="px-6 py-2 rounded-lg bg-primary text-on-primary font-label-md text-label-md uppercase tracking-widest hover:bg-primary-fixed-dim transition-colors shadow-[0_0_12px_rgba(178,231,255,0.3)] hover:shadow-[0_0_20px_rgba(178,231,255,0.5)] flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+          Nuevo Ajuste
+        </button>
+</div>
+</div>
+<!-- Strategic KPIs Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+<!-- Value Card -->
+<div class="bg-surface-container/80 backdrop-blur-xl rounded-xl p-6 relative overflow-hidden group shadow-lg flex flex-col justify-between h-40">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start relative z-10">
+<span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-widest">Valor Actual</span>
+<span class="material-symbols-outlined text-primary/70">account_balance_wallet</span>
+</div>
+<div class="relative z-10">
+<div class="text-headline-lg font-headline-lg text-on-surface tracking-tighter">$2.4M</div>
+<div class="text-label-sm font-label-sm text-on-surface-variant/50 mt-1 uppercase">Costo actual de reposición</div>
+</div>
+</div>
+<!-- Critical Stock Card -->
+<div class="bg-surface-container/80 backdrop-blur-xl rounded-xl p-6 relative overflow-hidden group shadow-lg flex flex-col justify-between h-40 ring-1 ring-error/20">
+<div class="absolute inset-0 bg-gradient-to-br from-error/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start relative z-10">
+<span class="text-label-md font-label-md text-error uppercase tracking-widest">Stock Crítico</span>
+<span class="material-symbols-outlined text-error/70">warning</span>
+</div>
+<div class="relative z-10 flex items-end justify-between">
+<div class="text-headline-lg font-headline-lg text-error tracking-tighter">12 <span class="text-headline-md text-error/60">SKU</span></div>
+<div class="h-8 w-16 bg-error/10 rounded overflow-hidden flex items-end">
+<div class="w-1/4 bg-error/30 h-2/6"></div><div class="w-1/4 bg-error/50 h-4/6 mx-0.5"></div><div class="w-1/4 bg-error/70 h-full"></div><div class="w-1/4 bg-error h-5/6 mx-0.5"></div>
+</div>
+</div>
+</div>
+<!-- Out of Stock Card -->
+<div class="bg-surface-container/80 backdrop-blur-xl rounded-xl p-6 relative overflow-hidden group shadow-lg flex flex-col justify-between h-40 ring-1 ring-error-container/50">
+<div class="absolute inset-0 bg-gradient-to-br from-error-container/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start relative z-10">
+<span class="text-label-md font-label-md text-on-error-container uppercase tracking-widest">Sin Stock</span>
+<span class="material-symbols-outlined text-on-error-container/70">inventory_2</span>
+</div>
+<div class="relative z-10">
+<div class="text-headline-lg font-headline-lg text-on-error-container tracking-tighter">4 <span class="text-headline-md text-on-error-container/60">SKU</span></div>
+<div class="text-label-sm font-label-sm text-on-error-container/60 mt-1 uppercase animate-pulse">Atención Inmediata</div>
+</div>
+</div>
+<!-- Turnover Card -->
+<div class="bg-surface-container/80 backdrop-blur-xl rounded-xl p-6 relative overflow-hidden group shadow-lg flex flex-col justify-between h-40">
+<div class="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start relative z-10">
+<span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-widest">Turnover</span>
+<span class="material-symbols-outlined text-secondary/70">sync</span>
+</div>
+<div class="relative z-10">
+<div class="text-headline-lg font-headline-lg text-on-surface tracking-tighter">4.2x</div>
+<div class="text-label-sm font-label-sm text-secondary mt-1 uppercase flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span> +0.4x vs Q3
+          </div>
+</div>
+</div>
+<!-- Sell-through Card -->
+<div class="bg-surface-container/80 backdrop-blur-xl rounded-xl p-6 relative overflow-hidden group shadow-lg flex flex-col justify-between h-40">
+<div class="absolute inset-0 bg-gradient-to-br from-tertiary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start relative z-10">
+<span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-widest">Sell-through</span>
+<span class="material-symbols-outlined text-tertiary/70">percent</span>
+</div>
+<div class="relative z-10">
+<div class="text-headline-lg font-headline-lg text-on-surface tracking-tighter">68.5%</div>
+<div class="w-full bg-surface-container-high h-1.5 mt-2 rounded-full overflow-hidden">
+<div class="bg-tertiary h-full w-[68.5%] rounded-full shadow-[0_0_8px_rgba(138,237,255,0.5)]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Analytics Row -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<!-- Turnover Details -->
+<div class="bg-surface-container-low rounded-2xl p-8 relative overflow-hidden shadow-xl">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">analytics</span>
+               Análisis de Rotación
+            </h3>
+<div class="group relative cursor-help">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">help</span>
+<div class="absolute right-0 top-8 w-64 bg-surface-container-highest p-4 rounded-lg shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 pointer-events-none">
+<p class="text-label-md text-on-surface font-label-md">Mide cuántas veces el inventario se convierte en costo de ventas durante el período.</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row gap-8">
+<div class="flex-1 space-y-4">
+<div>
+<div class="text-label-sm font-label-sm text-on-surface-variant uppercase mb-1">Costo de Ventas</div>
+<div class="text-headline-md font-headline-md text-on-surface">$1.2M</div>
+</div>
+<div class="h-[1px] bg-outline-variant/20 w-full"></div>
+<div>
+<div class="text-label-sm font-label-sm text-on-surface-variant uppercase mb-1">Inventario Promedio</div>
+<div class="text-headline-md font-headline-md text-on-surface">$285K</div>
+</div>
+</div>
+<div class="flex-1 flex flex-col justify-center items-center relative">
+<svg class="w-32 h-32 transform -rotate-90" viewbox="0 0 100 100">
+<circle class="text-surface-container-highest" cx="50" cy="50" fill="none" r="40" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary" cx="50" cy="50" fill="none" r="40" stroke="currentColor" stroke-dasharray="251.2" stroke-dashoffset="62.8" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center flex-col">
+<span class="text-headline-md font-headline-md text-on-surface">4.2x</span>
+<span class="text-[10px] text-primary uppercase font-label-sm tracking-widest">Turnover</span>
+</div>
+</div>
+</div>
+<div class="mt-6 flex items-center gap-2 bg-error-container/20 p-3 rounded-lg border border-error-container/30">
+<span class="material-symbols-outlined text-error text-[18px]">info</span>
+<span class="text-label-sm font-label-sm text-error uppercase">Alerta: Costo histórico incompleto en 3 SKUs</span>
+</div>
+</div>
+<!-- Sell-through Details -->
+<div class="bg-surface-container-low rounded-2xl p-8 relative overflow-hidden shadow-xl flex flex-col">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-tertiary/30 to-transparent"></div>
+<h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2 mb-8">
+<span class="material-symbols-outlined text-tertiary">monitoring</span>
+            Sell-through Rate
+         </h3>
+<div class="flex-1 flex flex-col justify-center space-y-8">
+<div class="flex justify-between items-end">
+<div>
+<div class="text-display-lg font-display-lg text-on-surface leading-none">68.5<span class="text-headline-lg text-on-surface-variant">%</span></div>
+</div>
+<div class="text-right">
+<div class="text-label-md font-label-md text-on-surface">854 / 1,248</div>
+<div class="text-label-sm font-label-sm text-on-surface-variant uppercase">Unidades Netas</div>
+</div>
+</div>
+<div class="relative h-4 bg-surface-container-highest rounded-full overflow-hidden">
+<!-- Tick marks for instrumentation feel -->
+<div class="absolute inset-0 flex justify-between px-2">
+<div class="w-[1px] h-full bg-background/50"></div>
+<div class="w-[1px] h-full bg-background/50"></div>
+<div class="w-[1px] h-full bg-background/50"></div>
+<div class="w-[1px] h-full bg-background/50"></div>
+</div>
+<div class="absolute top-0 left-0 h-full bg-tertiary rounded-full shadow-[0_0_12px_rgba(138,237,255,0.6)]" style="width: 68.5%">
+<!-- Animated glimmer -->
+<div class="w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
+</div>
+</div>
+<div class="flex justify-between text-label-sm font-label-sm uppercase">
+<span class="text-on-surface-variant">0%</span>
+<span class="text-tertiary">Objetivo 75%</span>
+<span class="text-on-surface-variant">100%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Stock Table & Side Panel Layout -->
+<div class="flex flex-col xl:flex-row gap-6">
+<!-- Data Table -->
+<div class="flex-[3] bg-surface-container-low rounded-2xl shadow-xl overflow-hidden flex flex-col">
+<div class="p-6 border-b border-outline-variant/10 flex justify-between items-center bg-surface-container/50">
+<h2 class="text-headline-md font-headline-md text-on-surface">Control de Existencias</h2>
+<div class="flex gap-2">
+<button class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-highest/20 text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest border-b border-outline-variant/10">
+<th class="p-4 pl-6 font-medium">Producto</th>
+<th class="p-4 font-medium">Stock</th>
+<th class="p-4 font-medium">Valor Total</th>
+<th class="p-4 font-medium hidden sm:table-cell">Velocidad</th>
+<th class="p-4 font-medium">Estado</th>
+<th class="p-4 pr-6 text-right font-medium">Acciones</th>
+</tr>
+</thead>
+<tbody class="text-body-md font-body-md text-on-surface divide-y divide-outline-variant/5">
+<!-- Row 1: Healthy -->
+<tr class="hover:bg-surface-container-highest/30 transition-colors group">
+<td class="p-4 pl-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-surface-container-high border border-outline-variant/20 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover mix-blend-lighten opacity-80" data-alt="A sleek, modern solar inverter hardware component, metallic finish, dark background, studio lighting, highly detailed tech product shot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCp7-Sh6IjBz44kPoE1L0g_zv8UG4KH2mKOdGMrdsHxxrraJoQnvVdwyO4jYWA2SA4woj4uhbiO0v2UAln7AZGGiFA8yKieAdKUr8xRlCX4eSARTbICPsTxI3qZmsVV2L4136InnqaMyuZwcWoVvighE2s01g2kKaLeLNjn71GCt5W9opGSS6RFSH1g5QLQxL-OLAAIKc1v2-V54Joh9gmoBrCNwYfEfsiAWVX_oT6HsBJx7cFxkaKi"/>
+</div>
+<div>
+<div class="font-medium text-on-surface">Inversor Tri-Phase X1</div>
+<div class="text-label-sm font-label-sm text-on-surface-variant uppercase flex gap-2">
+<span>SKU: INV-X1-992</span>
+<span class="text-primary-fixed-dim">INV</span>
+</div>
+</div>
+</div>
+</td>
+<td class="p-4">
+<div class="flex items-center gap-2">
+<span class="font-label-md">142</span>
+<div class="w-16 h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="w-[80%] h-full bg-primary"></div>
+</div>
+</div>
+</td>
+<td class="p-4 font-label-md">$120,400</td>
+<td class="p-4 hidden sm:table-cell">
+<div class="flex flex-col">
+<span>4.2 / día</span>
+<span class="text-[10px] text-on-surface-variant uppercase font-label-sm">34 días rest.</span>
+</div>
+</td>
+<td class="p-4">
+<span class="px-2 py-1 bg-primary/10 border border-primary/30 text-primary rounded text-[10px] font-label-sm uppercase tracking-widest">Saludable</span>
+</td>
+<td class="p-4 pr-6 text-right">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 2: Critical -->
+<tr class="hover:bg-surface-container-highest/30 transition-colors group bg-error/5">
+<td class="p-4 pl-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-surface-container-high border border-outline-variant/20 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover mix-blend-lighten opacity-80" data-alt="High capacity lithium solar battery module, glowing indicators, dark studio environment, premium tech aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6i7aJGoYDvNwdk9d0bAgvurNLtCM4GxPG_izGSRzKxCFjDDmk1yODeD1ODZqDUcg4abY8pdUMkdfE7LenziGYJrEinKBP_BSbvvKZAHGua0h8JjbosLiOYeM6UWTmbJUkNDIsg38EG0kmlhxkpm5r2uGXxUsfVP9iBmvt0RvGpRQTTIZbZkxNgtpDaiRulN314pB_A9yu06GQ_Ythy09PNSi_ZV5ZDZBuEunA240pAwLCXlbnkTX7"/>
+</div>
+<div>
+<div class="font-medium text-error-container">Batería LFP 5kWh</div>
+<div class="text-label-sm font-label-sm text-error/70 uppercase flex gap-2">
+<span>SKU: BAT-5K-001</span>
+<span class="text-error">BAT</span>
+</div>
+</div>
+</div>
+</td>
+<td class="p-4">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-error">12</span>
+<div class="w-16 h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="w-[10%] h-full bg-error"></div>
+</div>
+</div>
+</td>
+<td class="p-4 font-label-md">$34,800</td>
+<td class="p-4 hidden sm:table-cell">
+<div class="flex flex-col">
+<span>6.1 / día</span>
+<span class="text-[10px] text-error uppercase font-label-sm">2 días rest.</span>
+</div>
+</td>
+<td class="p-4">
+<span class="px-2 py-1 bg-error/10 border border-error/30 text-error rounded text-[10px] font-label-sm uppercase tracking-widest animate-pulse">Crítico</span>
+</td>
+<td class="p-4 pr-6 text-right flex justify-end gap-2">
+<button class="text-[10px] uppercase font-label-sm border border-error/50 text-error px-2 py-1 rounded hover:bg-error/10 transition-colors hidden xl:block">Pedir</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 3: Out of stock -->
+<tr class="hover:bg-surface-container-highest/30 transition-colors group opacity-70">
+<td class="p-4 pl-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-surface-container-high border border-outline-variant/20 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover mix-blend-lighten opacity-50 grayscale" data-alt="Microinverter hardware component, minimal dark background, technical schematic overlay, dramatic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbzzXhjKFj97CDxVIk3oSvQOfJmlX8K6MF2pfg9Scy8vA1wzrHbEBfUDVbjCGLyvoWFaG3zPDzj3E1jCPXerJvxX8rGtHkE4gFz5FcFrcImBh9KcSpiU_cJlPgL9WrbrBTr2nEBQ8x4PUPIkzz5xkZK-nmU3TOR1oiFWjD6G_V9SjYZGp40jwbl40YojSyG371sG0eyB6gvoQ2uWshjHYMs9L-6obNV5GErB-13b-7_XdcsBV7FtIS"/>
+</div>
+<div>
+<div class="font-medium text-on-surface-variant line-through">Micro-Inversor M-200</div>
+<div class="text-label-sm font-label-sm text-on-surface-variant/50 uppercase flex gap-2">
+<span>SKU: MINV-200</span>
+<span>MINV</span>
+</div>
+</div>
+</div>
+</td>
+<td class="p-4">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-on-surface-variant">0</span>
+<div class="w-16 h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="w-[0%] h-full bg-error-container"></div>
+</div>
+</div>
+</td>
+<td class="p-4 font-label-md text-on-surface-variant">$0</td>
+<td class="p-4 hidden sm:table-cell">
+<div class="flex flex-col text-on-surface-variant">
+<span>-- / día</span>
+<span class="text-[10px] uppercase font-label-sm">Agotado</span>
+</div>
+</td>
+<td class="p-4">
+<span class="px-2 py-1 bg-error-container/20 border border-error-container/30 text-on-error-container rounded text-[10px] font-label-sm uppercase tracking-widest">Sin Stock</span>
+</td>
+<td class="p-4 pr-6 text-right">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 4: Slow Moving -->
+<tr class="hover:bg-surface-container-highest/30 transition-colors group">
+<td class="p-4 pl-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-surface-container-high border border-outline-variant/20 flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-on-surface-variant">cable</span>
+</div>
+<div>
+<div class="font-medium text-on-surface">Cable Solar 4mm 100m</div>
+<div class="text-label-sm font-label-sm text-on-surface-variant uppercase flex gap-2">
+<span>SKU: CBL-4MM-100</span>
+<span class="text-secondary">ACC</span>
+</div>
+</div>
+</div>
+</td>
+<td class="p-4">
+<div class="flex items-center gap-2">
+<span class="font-label-md">84</span>
+<div class="w-16 h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="w-[60%] h-full bg-secondary-container"></div>
+</div>
+</div>
+</td>
+<td class="p-4 font-label-md">$12,600</td>
+<td class="p-4 hidden sm:table-cell">
+<div class="flex flex-col">
+<span>0.2 / día</span>
+<span class="text-[10px] text-on-surface-variant uppercase font-label-sm">> 400 días rest.</span>
+</div>
+</td>
+<td class="p-4">
+<span class="px-2 py-1 bg-secondary/10 border border-secondary/30 text-secondary rounded text-[10px] font-label-sm uppercase tracking-widest">Mov Lento</span>
+</td>
+<td class="p-4 pr-6 text-right">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 border-t border-outline-variant/10 text-center">
+<button class="text-label-sm font-label-sm text-primary uppercase tracking-widest hover:text-primary-fixed-dim transition-colors">Ver todos (2,491 SKUs)</button>
+</div>
+</div>
+<!-- Action & History Side Panel -->
+<div class="flex-1 flex flex-col gap-6">
+<!-- Quick Actions -->
+<div class="bg-surface-container-low rounded-2xl p-6 shadow-xl border border-outline-variant/5">
+<h3 class="text-label-md font-label-md text-on-surface-variant uppercase tracking-widest mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">build</span>
+               Gestión Rápida
+            </h3>
+<div class="flex flex-col gap-3">
+<button class="w-full py-3 px-4 bg-primary/10 border border-primary/30 rounded-xl text-primary font-label-md text-label-md uppercase tracking-widest hover:bg-primary/20 transition-all flex items-center justify-between group">
+<span>Ajustar Unidades</span>
+<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform text-[18px]">arrow_forward</span>
+</button>
+<button class="w-full py-3 px-4 bg-surface-container border border-outline-variant/20 rounded-xl text-on-surface font-label-md text-label-md uppercase tracking-widest hover:border-outline-variant/50 transition-all flex items-center justify-between group">
+<span>Ajustar Costo</span>
+<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- History Feed -->
+<div class="bg-surface-container-low rounded-2xl shadow-xl flex-1 flex flex-col border border-outline-variant/5 overflow-hidden">
+<div class="p-6 border-b border-outline-variant/10">
+<h3 class="text-label-md font-label-md text-on-surface-variant uppercase tracking-widest flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">history</span>
+                  Actividad Reciente
+               </h3>
+</div>
+<div class="flex-1 p-4 flex flex-col gap-1 overflow-y-auto max-h-[400px]">
+<!-- Log Item -->
+<div class="p-3 rounded-lg hover:bg-surface-container-highest/30 transition-colors flex gap-3 text-sm">
+<div class="mt-1">
+<span class="material-symbols-outlined text-primary text-[16px]">login</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<span class="font-medium text-on-surface">Entrada: INV-X1-992</span>
+<span class="text-label-sm font-label-sm text-primary">+50</span>
+</div>
+<div class="text-on-surface-variant/70 text-xs mt-1 flex justify-between">
+<span>Hace 12 min · Admin</span>
+<span>Stock: 142</span>
+</div>
+</div>
+</div>
+<!-- Log Item -->
+<div class="p-3 rounded-lg hover:bg-surface-container-highest/30 transition-colors flex gap-3 text-sm">
+<div class="mt-1">
+<span class="material-symbols-outlined text-tertiary text-[16px]">logout</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<span class="font-medium text-on-surface">Venta: PNL-450W</span>
+<span class="text-label-sm font-label-sm text-tertiary">-12</span>
+</div>
+<div class="text-on-surface-variant/70 text-xs mt-1 flex justify-between">
+<span>Hace 1 hora · Sistema</span>
+<span>Stock: 84</span>
+</div>
+</div>
+</div>
+<!-- Log Item -->
+<div class="p-3 rounded-lg hover:bg-surface-container-highest/30 transition-colors flex gap-3 text-sm">
+<div class="mt-1">
+<span class="material-symbols-outlined text-error text-[16px]">sync_alt</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<span class="font-medium text-on-surface">Ajuste: BAT-5K-001</span>
+<span class="text-label-sm font-label-sm text-error">-2</span>
+</div>
+<div class="text-on-surface-variant/70 text-xs mt-1 flex justify-between">
+<span>Hace 3 horas · Op. Alpha</span>
+<span>Stock: 12</span>
+</div>
+</div>
+</div>
+<!-- Log Item -->
+<div class="p-3 rounded-lg hover:bg-surface-container-highest/30 transition-colors flex gap-3 text-sm">
+<div class="mt-1">
+<span class="material-symbols-outlined text-tertiary text-[16px]">logout</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<span class="font-medium text-on-surface">Venta: CBL-4MM-100</span>
+<span class="text-label-sm font-label-sm text-tertiary">-1</span>
+</div>
+<div class="text-on-surface-variant/70 text-xs mt-1 flex justify-between">
+<span>Ayer · Sistema</span>
+<span>Stock: 84</span>
+</div>
+</div>
+</div>
+<!-- Log Item -->
+<div class="p-3 rounded-lg hover:bg-surface-container-highest/30 transition-colors flex gap-3 text-sm opacity-60">
+<div class="mt-1">
+<span class="material-symbols-outlined text-error-container text-[16px]">warning</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<span class="font-medium text-on-surface">Agotado: MINV-200</span>
+<span class="text-label-sm font-label-sm text-error-container">0</span>
+</div>
+<div class="text-on-surface-variant/70 text-xs mt-1 flex justify-between">
+<span>Ayer · Sistema</span>
+<span>Stock: 0</span>
+</div>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-outline-variant/10 bg-surface-container-highest/10 text-center">
+<a class="text-label-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center gap-2" href="#">
+                   Registro Completo <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div></main></div></body></html>

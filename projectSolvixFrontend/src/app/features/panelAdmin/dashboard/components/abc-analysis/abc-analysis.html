@@ -1,0 +1,21 @@
+<section class="dash-panel" aria-labelledby="abc-title">
+  <solvix-section-header
+    kicker="Concentración"
+    title="Análisis ABC"
+    subtitle="La clasificación la calcula el backend. Aquí solo se muestra."
+  />
+
+  <solvix-section-state [state]="state" loadingLabel="Cargando análisis ABC." (retry)="retry.emit()">
+    <div class="abc-grid">
+      @for (item of classes; track item.clase) {
+        <article class="abc-card" [attr.aria-label]="'Clase ' + item.clase">
+          <p class="solvix-mono abc-class">Clase {{ item.clase }}</p>
+          <p class="abc-count solvix-mono">{{ qty(item.productos) }}</p>
+          <p class="abc-cap">productos</p>
+          <p class="abc-share solvix-mono">{{ percent(item.participacion) }} de participación</p>
+          <p class="abc-hint">{{ hint(item.clase) }}</p>
+        </article>
+      }
+    </div>
+  </solvix-section-state>
+</section>

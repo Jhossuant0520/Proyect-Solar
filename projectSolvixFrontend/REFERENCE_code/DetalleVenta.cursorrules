@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=JetBrains+Mono:wght@100..900&display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-tertiary-fixed":"#001f24","on-primary-fixed":"#001f29","surface-container-high":"#23293c","surface-container-lowest":"#070d1f","secondary-fixed":"#c4e7ff","on-surface-variant":"#bcc8cf","inverse-surface":"#dce1fb","on-background":"#dce1fb","error":"#ffb4ab","on-primary":"#003545","surface-tint":"#60d4ff","surface-container":"#191f31","primary":"#b2e7ff","surface-container-highest":"#2e3447","surface-bright":"#33394c","primary-fixed-dim":"#60d4ff","on-tertiary":"#00363d","primary-fixed":"#bbe9ff","on-secondary-fixed-variant":"#004c69","on-primary-fixed-variant":"#004d63","secondary-fixed-dim":"#7bd0ff","error-container":"#93000a","on-secondary-container":"#00374d","secondary-container":"#00a6e0","text-body":"#94a3b8","tertiary-container":"#00d6ee","secondary":"#7bd0ff","outline":"#879299","inverse-on-surface":"#2a3043","surface-dim":"#0c1324","tertiary-fixed":"#9cf0ff","on-primary-container":"#00576f","tertiary":"#8aedff","inverse-primary":"#006782","outline-variant":"#3d484e","on-tertiary-container":"#005964","on-surface":"#dce1fb","on-secondary-fixed":"#001e2c","primary-container":"#4fd1ff","text-header":"#FFFFFF","tertiary-fixed-dim":"#00daf3","surface":"#0f172a","surface-variant":"#2e3447","on-error":"#690005","on-tertiary-fixed-variant":"#004f58","background":"#0c1324","on-error-container":"#ffdad6","on-secondary":"#00354a","surface-container-low":"#151b2d"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"margin-mobile":"20px","unit":"4px","gutter":"24px","container-max":"1280px","margin-desktop":"64px"},"fontFamily":{"label-sm":["JetBrains Mono"],"body-lg":["Geist"],"body-md":["Geist"],"display-lg":["Geist"],"headline-lg-mobile":["Geist"],"headline-md":["Geist"],"label-md":["JetBrains Mono"],"headline-lg":["Geist"]},"fontSize":{"label-sm":["12px",{"lineHeight":"16px","letterSpacing":"0.08em","fontWeight":"500"}],"body-lg":["18px",{"lineHeight":"28px","fontWeight":"400"}],"body-md":["16px",{"lineHeight":"24px","fontWeight":"400"}],"display-lg":["64px",{"lineHeight":"72px","letterSpacing":"-0.04em","fontWeight":"700"}],"headline-lg-mobile":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"600"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-md":["14px",{"lineHeight":"20px","letterSpacing":"0.05em","fontWeight":"500"}],"headline-lg":["40px",{"lineHeight":"48px","letterSpacing":"-0.02em","fontWeight":"600"}]}}}}</script></head><body class="bg-background font-body-md text-on-surface"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.2)] border-r border-outline-variant/10"><div class="p-gutter mb-8 flex items-center gap-3"><div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center"><span class="material-symbols-outlined text-on-primary">token</span></div><span class="font-headline-md text-headline-md tracking-tighter text-primary">SOLVIX <span class="text-on-surface font-light">CORE</span></span></div><nav class="flex-1 px-4 space-y-1" data-active-classes="bg-primary-container/20 text-primary font-bold shadow-[inset_4px_0_0_0_#b2e7ff]"><a class="flex items-center px-6 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all group" data-path="dashboard" href="#"><span class="material-symbols-outlined mr-4 group-hover:scale-110 transition-transform">dashboard</span><span class="font-label-md text-label-md uppercase tracking-widest">Dashboard</span></a><a class="flex items-center px-6 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all group" data-path="productos" href="#"><span class="material-symbols-outlined mr-4 group-hover:scale-110 transition-transform">inventory_2</span><span class="font-label-md text-label-md uppercase tracking-widest">Productos</span></a><a aria-current="page" class="flex items-center px-6 py-3 rounded-lg transition-all group bg-primary-container/20 text-primary font-bold shadow-[inset_4px_0_0_0_#b2e7ff]" data-path="ventas" href="#"><span class="material-symbols-outlined mr-4 group-hover:scale-110 transition-transform">payments</span><span class="font-label-md text-label-md uppercase tracking-widest">Ventas</span></a><a class="flex items-center px-6 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all group" data-path="compras" href="#"><span class="material-symbols-outlined mr-4 group-hover:scale-110 transition-transform">shopping_cart</span><span class="font-label-md text-label-md uppercase tracking-widest">Compras</span></a><a class="flex items-center px-6 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all group" data-path="inventario" href="#"><span class="material-symbols-outlined mr-4 group-hover:scale-110 transition-transform">shelves</span><span class="font-label-md text-label-md uppercase tracking-widest">Inventario</span></a><a class="flex items-center px-6 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all group" data-path="reportes" href="#"><span class="material-symbols-outlined mr-4 group-hover:scale-110 transition-transform">query_stats</span><span class="font-label-md text-label-md uppercase tracking-widest">Reportes</span></a></nav><div class="px-8 py-6 border-t border-outline-variant/10"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center"><span class="material-symbols-outlined text-on-secondary-container">engineering</span></div><div><p class="text-label-md font-label-md text-on-surface">Terminal v2.4</p><p class="text-xs text-on-surface-variant">Status: Online</p></div></div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-background/80 backdrop-blur-xl z-40 px-gutter flex items-center justify-between border-b border-outline-variant/5"><div class="flex items-center gap-4 flex-1"><span class="text-on-surface-variant font-label-md text-label-md uppercase tracking-tighter">SOLVIX BI Terminal</span><div class="h-4 w-[1px] bg-outline-variant/30 mx-2"></div><div class="relative max-w-md w-full group"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px] group-focus-within:text-primary transition-colors">search</span><input class="w-full bg-surface-container-highest/30 border border-outline-variant/20 rounded-xl py-1.5 pl-10 pr-4 text-sm focus:outline-none focus:border-primary/50 focus:bg-surface-container-highest/50 transition-all text-on-surface" placeholder="Buscar transacciones, SKUs o reportes..." type="text"/></div></div><div class="flex items-center gap-6"><button class="flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">notifications</span></button><div class="flex items-center gap-3 pl-4 border-l border-outline-variant/20"><div class="text-right hidden sm:block"><p class="text-label-md font-label-md text-on-surface leading-tight">Operador Alpha</p><p class="text-[10px] uppercase text-primary tracking-widest">Admin Ventas</p></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center cursor-pointer hover:ring-2 ring-primary/30 transition-all"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="relative pt-16 min-h-screen bg-background"><div class="flex flex-col w-full p-6 md:p-12 gap-8">
+<div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-4">
+<h1 class="text-display-lg font-display-lg text-primary tracking-tighter uppercase">VT-8942A</h1>
+<span class="px-3 py-1 bg-tertiary/15 text-tertiary text-label-sm font-label-sm uppercase rounded-[2px] tracking-widest backdrop-blur-md">Completada</span>
+</div>
+<div class="flex items-center gap-6 text-on-surface-variant text-label-md font-label-md uppercase tracking-wider">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-primary">calendar_month</span> 24 OCT 2023 14:32</span>
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-primary">person</span> INVERSIONES NEXUS SA</span>
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-primary">store</span> SUCURSAL CENTRO</span>
+</div>
+</div>
+<button class="group relative px-8 py-4 bg-primary text-on-primary font-label-md text-label-md uppercase tracking-widest rounded-sm overflow-hidden shadow-[0_0_24px_rgba(178,231,255,0.2)] hover:shadow-[0_0_32px_rgba(178,231,255,0.4)] transition-all duration-300">
+<div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+<span class="flex items-center gap-2 relative z-10"><span class="material-symbols-outlined text-[18px]">assignment_return</span> Registrar Devolución</span>
+</button>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+<div class="xl:col-span-8 flex flex-col gap-6">
+<div class="relative bg-surface/60 backdrop-blur-xl rounded-xl p-6 shadow-xl border-t border-primary/20 overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+<h2 class="text-headline-md font-headline-md text-on-surface mb-6 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">inventory_2</span> Desglose de Productos
+        </h2>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant/30 text-on-surface-variant text-label-sm font-label-sm uppercase tracking-widest">
+<th class="pb-4 px-4">SKU / Producto</th>
+<th class="pb-4 px-4 text-right">Cant.</th>
+<th class="pb-4 px-4 text-right">P. Unitario</th>
+<th class="pb-4 px-4 text-right">Subtotal</th>
+<th class="pb-4 px-4 text-right">Costo Hist.</th>
+</tr>
+</thead>
+<tbody class="text-body-md font-body-md text-on-surface">
+<tr class="border-b border-outline-variant/10 hover:bg-surface-container/50 transition-colors">
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-semibold">Panel Solar Monocristalino 550W</span>
+<span class="text-label-sm font-label-sm text-primary uppercase">SKU: SL-550-M</span>
+</div>
+</td>
+<td class="py-4 px-4 text-right font-label-md text-label-md">12</td>
+<td class="py-4 px-4 text-right font-label-md text-label-md">$185.00</td>
+<td class="py-4 px-4 text-right font-label-md text-label-md text-primary">$2,220.00</td>
+<td class="py-4 px-4 text-right font-label-md text-label-md text-on-surface-variant">$145.00</td>
+</tr>
+<tr class="border-b border-outline-variant/10 hover:bg-surface-container/50 transition-colors">
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-semibold">Inversor Híbrido 8kW Trifásico</span>
+<span class="text-label-sm font-label-sm text-primary uppercase">SKU: INV-8K-3P</span>
+</div>
+</td>
+<td class="py-4 px-4 text-right font-label-md text-label-md">1</td>
+<td class="py-4 px-4 text-right font-label-md text-label-md">$1,250.00</td>
+<td class="py-4 px-4 text-right font-label-md text-label-md text-primary">$1,250.00</td>
+<td class="py-4 px-4 text-right font-label-md text-label-md text-on-surface-variant">$980.00</td>
+</tr>
+<tr class="border-b border-outline-variant/10 hover:bg-surface-container/50 transition-colors">
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-semibold">Kit Estructura Coplanar 4 Paneles</span>
+<span class="text-label-sm font-label-sm text-primary uppercase">SKU: EST-COP-4</span>
+</div>
+</td>
+<td class="py-4 px-4 text-right font-label-md text-label-md">3</td>
+<td class="py-4 px-4 text-right font-label-md text-label-md">$120.00</td>
+<td class="py-4 px-4 text-right font-label-md text-label-md text-primary">$360.00</td>
+<td class="py-4 px-4 text-right">
+<span class="px-2 py-1 bg-error/10 text-error text-label-sm font-label-sm rounded-[2px] uppercase">Costo Incompleto</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container/50 transition-colors">
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-semibold">Cable Solar 6mm Negro (Metro)</span>
+<span class="text-label-sm font-label-sm text-primary uppercase">SKU: CBL-6MM-BLK</span>
+</div>
+</td>
+<td class="py-4 px-4 text-right font-label-md text-label-md">150</td>
+<td class="py-4 px-4 text-right font-label-md text-label-md">$1.50</td>
+<td class="py-4 px-4 text-right font-label-md text-label-md text-primary">$225.00</td>
+<td class="py-4 px-4 text-right font-label-md text-label-md text-on-surface-variant">$0.95</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="relative bg-surface/60 backdrop-blur-xl rounded-xl p-6 shadow-xl border-t border-secondary/20">
+<h3 class="text-label-md font-label-md text-on-surface-variant uppercase tracking-widest mb-4">Firmas y Anexos</h3>
+<div class="w-full h-32 border border-dashed border-outline-variant/30 rounded-lg flex items-center justify-center text-on-surface-variant bg-surface-container-highest/20 hover:bg-surface-container-highest/40 transition-colors cursor-pointer">
+<div class="flex flex-col items-center gap-2">
+<span class="material-symbols-outlined text-[24px]">upload_file</span>
+<span class="text-label-sm font-label-sm">Adjuntar comprobante o firma</span>
+</div>
+</div>
+</div>
+<div class="relative bg-surface/60 backdrop-blur-xl rounded-xl p-6 shadow-xl border-t border-tertiary/20">
+<h3 class="text-label-md font-label-md text-on-surface-variant uppercase tracking-widest mb-4">Rastreo de Logística</h3>
+<div class="flex flex-col gap-4">
+<div class="flex items-start gap-3">
+<div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary text-[16px]">local_shipping</span>
+</div>
+<div>
+<p class="text-body-md font-body-md text-on-surface leading-tight">En tránsito a sucursal</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant mt-1">Estimado: 25 OCT 2023</p>
+</div>
+</div>
+<div class="h-[1px] bg-outline-variant/20 w-full"></div>
+<div class="flex items-start gap-3 opacity-50">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">done_all</span>
+</div>
+<div>
+<p class="text-body-md font-body-md text-on-surface leading-tight">Entregado</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant mt-1">Pendiente de confirmación</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="xl:col-span-4 flex flex-col gap-6">
+<div class="relative bg-surface/80 backdrop-blur-2xl rounded-xl p-8 shadow-2xl overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-tertiary/5 opacity-50"></div>
+<div class="absolute -right-12 -top-12 w-48 h-48 bg-primary/10 rounded-full blur-3xl"></div>
+<h3 class="text-headline-md font-headline-md text-on-surface mb-8 relative z-10 flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary">monitoring</span> Análisis Financiero
+        </h3>
+<div class="space-y-4 relative z-10">
+<div class="flex justify-between items-center text-body-md font-body-md text-on-surface">
+<span>Subtotal</span>
+<span class="font-label-md text-label-md">$4,055.00</span>
+</div>
+<div class="flex justify-between items-center text-body-md font-body-md text-error">
+<span>Descuento (VIP 5%)</span>
+<span class="font-label-md text-label-md">-$202.75</span>
+</div>
+<div class="h-[1px] w-full bg-outline-variant/30 my-4"></div>
+<div class="flex justify-between items-end mb-6">
+<span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-widest">Total Venta</span>
+<span class="text-headline-lg font-headline-lg text-primary">$3,852.25</span>
+</div>
+<div class="bg-surface-container p-4 rounded-lg flex flex-col gap-3">
+<div class="flex justify-between items-center text-label-sm font-label-sm text-on-surface-variant uppercase">
+<span>Costo de Ventas (Est.)</span>
+<span>$2,940.00</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-label-md font-label-md text-tertiary uppercase tracking-wider">Ganancia Bruta</span>
+<span class="text-headline-md font-headline-md text-tertiary">$912.25</span>
+</div>
+<div class="mt-2">
+<div class="flex justify-between items-center mb-1 text-label-sm font-label-sm text-on-surface">
+<span>Margen de Contribución</span>
+<span class="text-secondary font-bold">23.6%</span>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
+<div class="bg-gradient-to-r from-primary to-secondary h-full rounded-full" style="width: 23.6%"></div>
+</div>
+</div>
+</div>
+<div class="mt-4 p-3 bg-error/5 border border-error/20 rounded-md flex items-start gap-2">
+<span class="material-symbols-outlined text-error text-[16px] mt-0.5">warning</span>
+<p class="text-label-sm font-label-sm text-error/80 leading-tight">Nota: Margen calculado con costos incompletos. Faltan datos históricos para 1 item(s).</p>
+</div>
+</div>
+</div>
+<div class="bg-surface/40 backdrop-blur-md rounded-xl p-6 flex items-center justify-between shadow-lg">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-tertiary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-tertiary-container">payments</span>
+</div>
+<div>
+<p class="text-label-md font-label-md text-on-surface uppercase tracking-widest">Método Pago</p>
+<p class="text-body-md font-body-md text-on-surface-variant">Transferencia SWIFT</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[24px]">verified</span>
+</div>
+</div>
+</div>
+</div></main></div></body></html>

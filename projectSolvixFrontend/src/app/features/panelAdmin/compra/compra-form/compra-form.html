@@ -1,0 +1,163 @@
+<section class="compra-form-page">
+  <solvix-page-header
+    kicker="Abastecimiento"
+    title="Nueva compra"
+    subtitle="Arma la compra. El inventario y el costo vigente se actualizan solo al completar."
+  >
+    <solvix-button family="tech" rank="tertiary" icon="arrow_back" (click)="cancelar()">
+      Volver
+    </solvix-button>
+  </solvix-page-header>
+
+  @if (loadState === 'loading') {
+    <solvix-loading-state label="Cargando proveedores y productos." />
+  } @else if (loadState === 'error') {
+    <solvix-error-state
+      [title]="errorTitle"
+      [message]="errorMessage"
+      (retry)="cargarCatalogo()"
+    />
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="registrar()" class="form-layout">
+      <div class="col">
+        <section class="panel">
+          <solvix-section-header kicker="Cabecera" title="Proveedor" />
+          <div class="form-grid">
+            <label>
+              Proveedor
+              <select formControlName="proveedorId">
+                <option [ngValue]="null" disabled>Selecciona un proveedor</option>
+                @for (proveedor of proveedores; track proveedor.id) {
+                  <option [ngValue]="proveedor.id">{{ proveedor.nombre }}</option>
+                }
+              </select>
+              @if (proveedores.length === 0) {
+                <span class="hint">No hay proveedores activos para registrar una compra.</span>
+              }
+            </label>
+            <label>
+              Descuento de la compra
+              <input type="number" formControlName="descuento" min="0" step="0.01" />
+              <span class="hint">Monto, no porcentaje. El sistema no acepta un descuento mayor al subtotal.</span>
+            </label>
+            <label class="full">
+              Observaciones
+              <textarea formControlName="observaciones" rows="3" maxlength="1000"></textarea>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel">
+          <solvix-section-header
+            kicker="Productos"
+            title="Líneas de la compra"
+            subtitle="El costo unitario pertenece a esta compra. El sistema aplica el costeo al completar."
+          />
+
+          <label class="search">
+            <span class="material-symbols-outlined" aria-hidden="true">search</span>
+            <input
+              type="search"
+              [value]="busquedaProducto"
+              (input)="onBuscarProducto($event)"
+              placeholder="Buscar producto activo por nombre, marca o ID"
+            />
+          </label>
+
+          @if (busquedaProducto.trim() && productosFiltrados.length === 0) {
+            <p class="empty-line">No hay productos activos que coincidan.</p>
+          } @else if (productosFiltrados.length > 0) {
+            <ul class="catalogo">
+              @for (producto of productosFiltrados; track producto.id) {
+                <li>
+                  <button type="button" (click)="agregarProducto(producto)">
+                    <strong>{{ producto.nombre }}</strong>
+                    <span>
+                      {{ producto.costoConocido ? money(producto.costoActual) : 'Sin costo' }}
+                      · {{ producto.stockActual ?? 0 }} u.
+                    </span>
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+
+          @if (detalles.length === 0) {
+            <p class="empty-line">Agrega al menos un producto para registrar la compra.</p>
+          } @else {
+            <div class="lineas" formArrayName="detalles">
+              @for (linea of detalles.controls; track $index; let i = $index) {
+                <article class="linea" [formGroupName]="i">
+                  <header>
+                    <div>
+                      <strong>{{ linea.get('productoNombre')?.value }}</strong>
+                      <span class="hint">
+                        Costo actual del catálogo
+                        {{ linea.get('costoCatalogo')?.value == null ? 'desconocido' : money(linea.get('costoCatalogo')?.value) }}.
+                        Stock actual {{ linea.get('stockActual')?.value }} u.
+                      </span>
+                    </div>
+                    <button type="button" class="icon-btn" (click)="quitarLinea(i)" aria-label="Quitar producto">
+                      <span class="material-symbols-outlined">close</span>
+                    </button>
+                  </header>
+                  <div class="linea-grid">
+                    <label>
+                      Cantidad
+                      <input type="number" formControlName="cantidad" min="1" step="1" />
+                    </label>
+                    <label>
+                      Costo unitario
+                      <input type="number" formControlName="costoUnitario" min="0" step="0.01" />
+                    </label>
+                  </div>
+                </article>
+              }
+            </div>
+          }
+        </section>
+      </div>
+
+      <aside class="col">
+        <section class="panel sticky">
+          <solvix-section-header
+            kicker="Resumen"
+            title="Valores a enviar"
+            subtitle="El sistema calcula subtotal y total al registrar."
+          />
+          <dl class="facts">
+            <div>
+              <dt>Productos</dt>
+              <dd>{{ detalles.length }}</dd>
+            </div>
+            <div>
+              <dt>Descuento de cabecera</dt>
+              <dd>{{ money(form.get('descuento')?.value) }}</dd>
+            </div>
+          </dl>
+          <p class="hint">
+            No mostramos un total estimado. El total oficial llega cuando el sistema registra la compra.
+          </p>
+
+          @if (submitState === 'error' && submitError) {
+            <p class="form-error" role="alert">{{ submitError }}</p>
+          }
+
+          <div class="form-actions">
+            <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
+              Cancelar
+            </solvix-button>
+            <solvix-button
+              family="tech"
+              rank="primary"
+              type="submit"
+              [disabled]="submitState === 'processing'"
+            >
+              {{ submitState === 'processing' ? 'Registrando…' : 'Registrar compra' }}
+            </solvix-button>
+          </div>
+        </section>
+      </aside>
+    </form>
+  }
+</section>

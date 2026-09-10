@@ -1,0 +1,188 @@
+<section class="detalle-page">
+  @if (state === 'loading') {
+    <solvix-loading-state label="Cargando compra." />
+  } @else if (state === 'error' || !compra) {
+    <solvix-error-state
+      [title]="errorTitle"
+      [message]="errorMessage"
+      (retry)="cargar()"
+    />
+  } @else {
+    <header class="detalle-head">
+      <div>
+        <div class="head-meta">
+          <solvix-badge [tone]="estadoTone(compra.estado)">
+            {{ estadoLabel(compra.estado) }}
+          </solvix-badge>
+          <span class="solvix-mono id">{{ compra.numero }}</span>
+        </div>
+        <h1>{{ proveedor(compra) }}</h1>
+        <p class="meta">{{ fecha(compra.fecha) }}</p>
+      </div>
+      <div class="head-actions">
+        <solvix-button family="tech" rank="tertiary" icon="arrow_back" (click)="volver()">
+          Volver
+        </solvix-button>
+        @if (compra.estado === 'PENDIENTE') {
+          <solvix-button family="tech" rank="danger" [disabled]="accionando" (click)="cancelar()">
+            Cancelar compra
+          </solvix-button>
+          <solvix-button family="tech" rank="primary" icon="check" [disabled]="accionando" (click)="completar()">
+            Completar compra
+          </solvix-button>
+        }
+        @if (puedeDevolver(compra.estado)) {
+          <solvix-button family="tech" rank="primary" icon="assignment_return" (click)="registrarDevolucion()">
+            Registrar devolución
+          </solvix-button>
+        }
+      </div>
+    </header>
+
+    <div class="detalle-grid">
+      <div class="col">
+        <section class="panel">
+          <solvix-section-header
+            kicker="Transacción"
+            title="Productos"
+            subtitle="Costos y cantidades de esta compra. No se actualizan con el catálogo."
+          />
+          <div class="table-wrap desktop-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th class="is-num">Cantidad</th>
+                  <th class="is-num">Costo histórico</th>
+                  <th class="is-num">Subtotal</th>
+                  <th class="is-num">Costo actual</th>
+                  <th class="is-num">Devuelto</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (linea of compra.detalles; track linea.id) {
+                  <tr>
+                    <td>
+                      <strong>{{ linea.productoNombre }}</strong>
+                      @if (linea.categoriaCodigo) {
+                        <span class="sub">{{ linea.categoriaCodigo }}</span>
+                      }
+                    </td>
+                    <td class="is-num">{{ linea.cantidad }}</td>
+                    <td class="is-num">{{ money(linea.costoUnitario) }}</td>
+                    <td class="is-num">{{ money(linea.subtotal) }}</td>
+                    <td class="is-num">{{ costoCatalogo(linea.productoId) }}</td>
+                    <td class="is-num">{{ linea.cantidadDevuelta }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <ul class="mobile-lines">
+            @for (linea of compra.detalles; track linea.id) {
+              <li>
+                <strong>{{ linea.productoNombre }}</strong>
+                <span>{{ linea.cantidad }} u. · Costo histórico {{ money(linea.costoUnitario) }}</span>
+                <span>Subtotal {{ money(linea.subtotal) }}</span>
+                <span>Costo actual {{ costoCatalogo(linea.productoId) }} · Devuelto {{ linea.cantidadDevuelta }}</span>
+              </li>
+            }
+          </ul>
+        </section>
+
+        <section class="panel">
+          <solvix-section-header kicker="Documentos" title="Devoluciones a proveedor" />
+          @if (devolucionesState === 'loading') {
+            <solvix-loading-state label="Cargando devoluciones." />
+          } @else if (devolucionesState === 'error') {
+            <solvix-error-state title="No pudimos cargar las devoluciones." (retry)="cargar()" />
+          } @else if (devolucionesState === 'empty') {
+            <solvix-empty-state
+              icon="assignment_return"
+              title="Esta compra no tiene devoluciones."
+              message="La compra original permanece igual. Una devolución se registra como documento aparte."
+            />
+          } @else {
+            <ul class="devoluciones">
+              @for (item of devoluciones; track item.id) {
+                <li>
+                  <button type="button" (click)="verDevolucion(item)">
+                    <div>
+                      <strong class="solvix-mono">{{ item.numero }}</strong>
+                      <span>{{ fecha(item.fecha) }} · {{ motivo(item.motivo) }}</span>
+                    </div>
+                    <div class="dev-meta">
+                      <solvix-badge [tone]="toneDevolucion(item.estado)">
+                        {{ estadoDevolucion(item.estado) }}
+                      </solvix-badge>
+                      <span class="solvix-mono">{{ money(item.montoTotalDevuelto) }}</span>
+                    </div>
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      </div>
+
+      <aside class="col">
+        <section class="panel">
+          <solvix-section-header kicker="Totales" title="Resumen de la compra" />
+          <dl class="totales">
+            <div>
+              <dt>Subtotal</dt>
+              <dd>{{ money(compra.subtotal) }}</dd>
+            </div>
+            <div>
+              <dt>Descuento</dt>
+              <dd>{{ money(compra.descuento) }}</dd>
+            </div>
+            <div class="total">
+              <dt>Total</dt>
+              <dd>{{ money(compra.total) }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="panel">
+          <solvix-section-header kicker="Ficha" title="Información adicional" />
+          <dl class="facts">
+            <div>
+              <dt>Proveedor</dt>
+              <dd>{{ proveedor(compra) }}</dd>
+            </div>
+            <div>
+              <dt>Registrada por</dt>
+              <dd>{{ compra.createdBy || '—' }}</dd>
+            </div>
+            @if (compra.fechaCompletada) {
+              <div>
+                <dt>Completada</dt>
+                <dd>{{ fecha(compra.fechaCompletada) }}</dd>
+              </div>
+            }
+            @if (compra.fechaAnulada) {
+              <div>
+                <dt>Cancelada</dt>
+                <dd>{{ fecha(compra.fechaAnulada) }}</dd>
+              </div>
+            }
+          </dl>
+          @if (compra.estado === 'PENDIENTE') {
+            <p class="obs">Esta compra todavía no tiene movimientos de inventario. Completarla entra el stock y actualiza el costo vigente.</p>
+          }
+          @if (compra.estado === 'CANCELADA') {
+            <p class="obs">La compra se canceló antes de entrar inventario. El stock y el costo vigente no cambiaron.</p>
+          }
+          @if (compra.estado === 'COMPLETADA' || compra.estado === 'PARCIALMENTE_DEVUELTA' || compra.estado === 'DEVUELTA') {
+            <p class="obs">El inventario ya se actualizó en el sistema. El costo histórico de cada línea no cambia si el costo actual del catálogo es otro.</p>
+          }
+          @if (compra.observaciones) {
+            <p class="obs">{{ compra.observaciones }}</p>
+          }
+        </section>
+      </aside>
+    </div>
+  }
+</section>

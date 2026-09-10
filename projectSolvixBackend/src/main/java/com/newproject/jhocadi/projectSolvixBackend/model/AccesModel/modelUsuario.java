@@ -45,6 +45,9 @@ public class modelUsuario {
     @Column(name = "fecha_creacion", updatable = false)
     private LocalDateTime fechaCreacion;
 
+    @Column(name = "foto_url", length = 500)
+    private String fotoUrl;
+
     @PrePersist
     protected void onCreate() {
         this.fechaCreacion = LocalDateTime.now();

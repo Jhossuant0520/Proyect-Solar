@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Register } from './register';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { UserService } from '../../core/services/user.service';
+import { UserService } from '../../../core/services/user.service';
 import { of, throwError } from 'rxjs';
 import { ReactiveFormsModule } from '@angular/forms';
 
@@ -132,7 +132,7 @@ describe('Register Component', () => {
   // ✅ 9. Getter emailValue
   it('should return email value correctly', () => {
     component.form.get('email')?.setValue('correo@test.com');
-    expect(component.emailValue).toBe('correo@test.com');
+    expect(component.form.get('email')?.value).toBe('correo@test.com');
   });
 
 });

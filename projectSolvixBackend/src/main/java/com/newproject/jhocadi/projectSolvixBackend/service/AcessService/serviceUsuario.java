@@ -26,6 +26,7 @@ public class serviceUsuario {
     private final repositoryRolUsuario rolRepo;
     private final BCryptPasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final FotoPerfilService fotoPerfilService;
 
     public void actualizarUltimoLogin(modelUsuario usuario) {
         if (usuario != null) {
@@ -113,5 +114,30 @@ public class serviceUsuario {
 
         usuario.setPasswordUsuario(passwordEncoder.encode(dto.getPasswordNueva()));
         usuarioRepo.save(usuario);
+    }
+
+    public String actualizarFoto(String nombreUsuario, org.springframework.web.multipart.MultipartFile archivo) {
+        modelUsuario usuario = obtenerPorNombreUsuario(nombreUsuario);
+        String fotoUrl = fotoPerfilService.guardar(usuario.getIdUsuario(), archivo);
+        usuario.setFotoUrl(fotoUrl);
+        usuarioRepo.save(usuario);
+        return fotoUrl;
+    }
+
+    public void eliminarFoto(String nombreUsuario) {
+        modelUsuario usuario = obtenerPorNombreUsuario(nombreUsuario);
+        if (usuario.getIdUsuario() != null) {
+            fotoPerfilService.eliminarArchivosDe(usuario.getIdUsuario());
+        }
+        usuario.setFotoUrl(null);
+        usuarioRepo.save(usuario);
+    }
+
+    public org.springframework.core.io.Resource obtenerArchivoFoto(String nombreArchivo) {
+        return fotoPerfilService.cargar(nombreArchivo);
+    }
+
+    public org.springframework.http.MediaType mediaTypeFoto(String nombreArchivo) {
+        return fotoPerfilService.mediaTypeDe(nombreArchivo);
     }
 }

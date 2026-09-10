@@ -29,3 +29,8 @@ Thumbs.db
 # VARIABLES DE ENTORNO
 # =========================
 .env
+
+# =========================
+# ARCHIVOS SUBIDOS
+# =========================
+uploads/

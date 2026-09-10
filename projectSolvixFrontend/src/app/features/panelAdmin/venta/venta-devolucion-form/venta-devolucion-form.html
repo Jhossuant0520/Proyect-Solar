@@ -1,0 +1,121 @@
+<section class="devolucion-page">
+  <solvix-page-header
+    kicker="Devolución"
+    title="Registrar devolución"
+    subtitle="La venta original no se modifica. El sistema calcula el monto y actualiza el inventario."
+  >
+    <solvix-button family="tech" rank="tertiary" icon="arrow_back" (click)="cancelar()">
+      Volver
+    </solvix-button>
+  </solvix-page-header>
+
+  @if (loadState === 'loading') {
+    <solvix-loading-state label="Cargando la venta original." />
+  } @else if (loadState === 'error' || !venta) {
+    <solvix-error-state
+      [title]="errorTitle"
+      [message]="errorMessage"
+      (retry)="cargar()"
+    />
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="registrar()" class="form-layout">
+      <div class="col">
+        <section class="panel">
+          <solvix-section-header kicker="Origen" title="Venta original" />
+          <div class="origen">
+            <div>
+              <span class="solvix-mono">{{ venta.numero }}</span>
+              <solvix-badge [tone]="estadoTone(venta.estado)">{{ estadoLabel(venta.estado) }}</solvix-badge>
+            </div>
+            <p>{{ cliente(venta) }} · {{ fecha(venta.fecha) }}</p>
+            <p class="hint">Total histórico de la venta: {{ money(venta.total) }}</p>
+          </div>
+        </section>
+
+        <section class="panel">
+          <solvix-section-header
+            kicker="Productos"
+            title="Cantidad a devolver"
+            subtitle="El sistema no acepta más unidades que las pendientes."
+          />
+          <div class="lineas" formArrayName="lineas">
+            @for (linea of lineas.controls; track $index; let i = $index) {
+              <article class="linea" [formGroupName]="i">
+                <strong>{{ linea.get('productoNombre')?.value }}</strong>
+                <div class="linea-grid">
+                  <div>
+                    <span class="hint">Vendidas</span>
+                    <p>{{ linea.get('cantidad')?.value }}</p>
+                  </div>
+                  <div>
+                    <span class="hint">Ya devueltas</span>
+                    <p>{{ linea.get('cantidadDevuelta')?.value }}</p>
+                  </div>
+                  <div>
+                    <span class="hint">Pendientes</span>
+                    <p>{{ pendiente(linea.get('cantidad')?.value, linea.get('cantidadDevuelta')?.value) }}</p>
+                  </div>
+                  <label>
+                    A devolver
+                    <input type="number" formControlName="cantidadDevolver" min="0" step="1" />
+                  </label>
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+      </div>
+
+      <aside class="col">
+        <section class="panel sticky">
+          <solvix-section-header kicker="Documento" title="Motivo y reembolso" />
+          <div class="stack">
+            <label>
+              Motivo
+              <select formControlName="motivo">
+                <option [ngValue]="null" disabled>Selecciona un motivo</option>
+                @for (motivo of motivos; track motivo.id) {
+                  <option [ngValue]="motivo.id">{{ motivo.label }}</option>
+                }
+              </select>
+            </label>
+            <label>
+              Método de reembolso
+              <select formControlName="metodoReembolso">
+                <option [ngValue]="null">Registrar sin reembolsar ahora</option>
+                @for (metodo of metodos; track metodo.id) {
+                  <option [ngValue]="metodo.id">{{ metodo.label }}</option>
+                }
+              </select>
+              <span class="hint">
+                Si eliges un método, la devolución queda reembolsada. Si no, queda solo registrada.
+              </span>
+            </label>
+            <label>
+              Observaciones
+              <textarea formControlName="observaciones" rows="3" maxlength="1000"></textarea>
+            </label>
+          </div>
+
+          @if (submitState === 'error' && submitError) {
+            <p class="form-error" role="alert">{{ submitError }}</p>
+          }
+
+          <div class="form-actions">
+            <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
+              Cancelar
+            </solvix-button>
+            <solvix-button
+              family="tech"
+              rank="primary"
+              type="submit"
+              [disabled]="submitState === 'processing'"
+            >
+              {{ submitState === 'processing' ? 'Registrando…' : 'Registrar devolución' }}
+            </solvix-button>
+          </div>
+        </section>
+      </aside>
+    </form>
+  }
+</section>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-surface-variant":"#bcc8cf","on-secondary-fixed-variant":"#004c69","on-secondary-container":"#00374d","surface-tint":"#60d4ff","on-background":"#dce1fb","primary":"#b2e7ff","on-tertiary-fixed-variant":"#004f58","surface-container":"#191f31","on-primary-fixed-variant":"#004d63","on-secondary-fixed":"#001e2c","error-container":"#93000a","inverse-primary":"#006782","outline":"#879299","secondary-container":"#00a6e0","error":"#ffb4ab","secondary-fixed":"#c4e7ff","surface":"#0f172a","inverse-on-surface":"#2a3043","primary-fixed":"#bbe9ff","surface-container-high":"#23293c","on-tertiary-container":"#005964","on-surface":"#dce1fb","on-error-container":"#ffdad6","tertiary-container":"#00d6ee","on-tertiary-fixed":"#001f24","background":"#0c1324","tertiary-fixed":"#9cf0ff","surface-container-low":"#151b2d","on-tertiary":"#00363d","text-body":"#94a3b8","outline-variant":"#3d484e","surface-container-lowest":"#070d1f","surface-dim":"#0c1324","text-header":"#FFFFFF","surface-container-highest":"#2e3447","on-error":"#690005","surface-bright":"#33394c","tertiary-fixed-dim":"#00daf3","primary-container":"#4fd1ff","secondary":"#7bd0ff","inverse-surface":"#dce1fb","on-secondary":"#00354a","surface-variant":"#2e3447","primary-fixed-dim":"#60d4ff","on-primary":"#003545","tertiary":"#8aedff","on-primary-fixed":"#001f29","on-primary-container":"#00576f","secondary-fixed-dim":"#7bd0ff"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"margin-desktop":"64px","gutter":"24px","unit":"4px","margin-mobile":"20px","container-max":"1280px"},"fontFamily":{"body-lg":["Geist"],"headline-lg":["Geist"],"headline-lg-mobile":["Geist"],"body-md":["Geist"],"label-sm":["JetBrains Mono"],"display-lg":["Geist"],"headline-md":["Geist"],"label-md":["JetBrains Mono"]},"fontSize":{"body-lg":["18px",{"lineHeight":"28px","fontWeight":"400"}],"headline-lg":["40px",{"lineHeight":"48px","letterSpacing":"-0.02em","fontWeight":"600"}],"headline-lg-mobile":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"600"}],"body-md":["16px",{"lineHeight":"24px","fontWeight":"400"}],"label-sm":["12px",{"lineHeight":"16px","letterSpacing":"0.08em","fontWeight":"500"}],"display-lg":["64px",{"lineHeight":"72px","letterSpacing":"-0.04em","fontWeight":"700"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-md":["14px",{"lineHeight":"20px","letterSpacing":"0.05em","fontWeight":"500"}]}}}}</script><link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;family=JetBrains+Mono:wght@400..700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/></head><body class="bg-background font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex flex-col shadow-[0_1px_8px_rgba(0,0,0,0.15)] transition-all"><div class="p-8 flex items-center gap-3"><div class="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(79,209,255,0.2)]"><span class="material-symbols-outlined text-on-primary-container text-[24px]">bolt</span></div><span class="font-headline-md text-text-header tracking-tight">SOLVIX</span></div><nav class="flex-1 px-4 space-y-1 overflow-y-auto" data-active-classes="bg-secondary-container/20 text-secondary border-l-2 border-secondary"><a class="flex items-center px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-all group" data-path="dashboard" href="#"><span class="material-symbols-outlined mr-4 text-[22px]">dashboard</span><span class="font-label-md">DASHBOARD</span></a><a class="flex items-center px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-all group" data-path="products" href="#"><span class="material-symbols-outlined mr-4 text-[22px]">inventory_2</span><span class="font-label-md">PRODUCTS</span></a><a class="flex items-center px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-all group" data-path="sales" href="#"><span class="material-symbols-outlined mr-4 text-[22px]">point_of_sale</span><span class="font-label-md">SALES</span></a><a aria-current="page" class="flex items-center px-4 py-3 font-bold rounded-lg transition-all group bg-secondary-container/20 text-secondary border-l-2 border-secondary" data-path="purchases" href="#"><span class="material-symbols-outlined mr-4 text-[22px]">shopping_cart</span><span class="font-label-md">PURCHASES</span></a><a class="flex items-center px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-all group" data-path="customers" href="#"><span class="material-symbols-outlined mr-4 text-[22px]">group</span><span class="font-label-md">CUSTOMERS</span></a><a class="flex items-center px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-all group" data-path="suppliers" href="#"><span class="material-symbols-outlined mr-4 text-[22px]">factory</span><span class="font-label-md">SUPPLIERS</span></a><a class="flex items-center px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-all group" data-path="inventory" href="#"><span class="material-symbols-outlined mr-4 text-[22px]">warehouse</span><span class="font-label-md">INVENTORY</span></a><a class="flex items-center px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-all group" data-path="reports" href="#"><span class="material-symbols-outlined mr-4 text-[22px]">monitoring</span><span class="font-label-md">REPORTS</span></a></nav><div class="p-4 mt-auto border-t border-outline-variant/10"><div class="bg-surface-container flex items-center gap-3 p-3 rounded-xl"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><div class="overflow-hidden"><p class="text-label-md text-on-surface truncate">ENG_CHIEF</p><p class="text-label-sm text-on-surface-variant uppercase">System Admin</p></div></div></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/80 backdrop-blur-xl z-40 border-b border-outline-variant/10 flex items-center justify-between px-8"><div class="relative w-96 group"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors">search</span><input class="w-full bg-surface-container-low border border-outline-variant/20 rounded-lg py-2 pl-10 pr-4 text-label-md focus:outline-none focus:border-primary/50 transition-all" placeholder="SYSTEM SEARCH_" type="text"/></div><div class="flex items-center gap-6"><button class="relative p-2 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">notifications</span><span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span></button><button class="p-2 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">settings</span></button><div class="h-8 w-[1px] bg-outline-variant/20 mx-2"></div><div class="flex flex-col items-end"><span class="text-label-sm text-primary">UPTIME_99.98%</span><span class="text-label-sm text-on-surface-variant">v4.2.0-STABLE</span></div></div></header><main class="flex-1 pt-16 bg-background p-spacing-gutter"><div class="flex flex-col w-full gap-gutter">
+<!-- Header Section -->
+<div class="flex items-end justify-between w-full relative pt-12 pb-8">
+<div class="absolute top-0 right-0 w-[600px] h-[300px] bg-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
+<div class="relative z-10">
+<div class="flex items-center gap-3 mb-2">
+<span class="font-label-sm text-primary uppercase tracking-widest">[PROCUREMENT_SYSTEM]</span>
+<div class="h-[1px] w-12 bg-primary/30"></div>
+</div>
+<h1 class="font-headline-lg text-text-header mb-1">Compras</h1>
+<p class="font-body-lg text-text-body">Controla el gasto y el abastecimiento de tu negocio</p>
+</div>
+<button class="relative group overflow-hidden bg-primary px-6 py-3 rounded-lg flex items-center gap-2 shadow-[0_0_20px_rgba(178,231,255,0.2)] hover:shadow-[0_0_30px_rgba(178,231,255,0.4)] transition-all duration-300 z-10">
+<div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+<span class="material-symbols-outlined text-on-primary text-[20px] relative z-10">add_shopping_cart</span>
+<span class="font-label-md text-on-primary relative z-10">NUEVA COMPRA</span>
+</button>
+</div>
+<!-- KPIs Section -->
+<div class="grid grid-cols-4 gap-gutter w-full">
+<!-- KPI 1 -->
+<div class="relative bg-surface-container-low rounded-xl p-6 group overflow-hidden border border-white/5 hover:border-primary/20 transition-colors backdrop-blur-md">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-6">
+<div class="w-10 h-10 rounded-lg bg-surface flex items-center justify-center border border-white/5 group-hover:border-primary/30 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px] group-hover:text-primary transition-colors">account_balance_wallet</span>
+</div>
+<span class="font-label-sm text-primary bg-primary/10 px-2 py-1 rounded">+12.5%</span>
+</div>
+<p class="font-label-sm text-text-body uppercase mb-1">Compras Netas</p>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-text-header">$145.2K</span>
+</div>
+<div class="mt-4 w-full h-8 flex items-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
+<div class="w-1/6 bg-primary/20 hover:bg-primary/50 transition-colors h-[30%] rounded-t-sm"></div>
+<div class="w-1/6 bg-primary/20 hover:bg-primary/50 transition-colors h-[50%] rounded-t-sm"></div>
+<div class="w-1/6 bg-primary/20 hover:bg-primary/50 transition-colors h-[40%] rounded-t-sm"></div>
+<div class="w-1/6 bg-primary/20 hover:bg-primary/50 transition-colors h-[70%] rounded-t-sm"></div>
+<div class="w-1/6 bg-primary/20 hover:bg-primary/50 transition-colors h-[60%] rounded-t-sm"></div>
+<div class="w-1/6 bg-primary hover:shadow-[0_0_10px_rgba(178,231,255,0.5)] transition-all h-[100%] rounded-t-sm"></div>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="relative bg-surface-container-low rounded-xl p-6 group overflow-hidden border border-white/5 hover:border-secondary/20 transition-colors backdrop-blur-md">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-secondary/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-6">
+<div class="w-10 h-10 rounded-lg bg-surface flex items-center justify-center border border-white/5 group-hover:border-secondary/30 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px] group-hover:text-secondary transition-colors">shopping_basket</span>
+</div>
+<span class="font-label-sm text-secondary bg-secondary/10 px-2 py-1 rounded">+8%</span>
+</div>
+<p class="font-label-sm text-text-body uppercase mb-1">Compras del Período</p>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-text-header">342</span>
+<span class="font-label-sm text-on-surface-variant">QTY</span>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="relative bg-surface-container-low rounded-xl p-6 group overflow-hidden border border-white/5 hover:border-error/20 transition-colors backdrop-blur-md">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-error/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-6">
+<div class="w-10 h-10 rounded-lg bg-surface flex items-center justify-center border border-white/5 group-hover:border-error/30 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px] group-hover:text-error transition-colors">assignment_return</span>
+</div>
+<span class="font-label-sm text-error bg-error/10 px-2 py-1 rounded">-2.4%</span>
+</div>
+<p class="font-label-sm text-text-body uppercase mb-1">Devoluciones (Valor)</p>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-text-header">$8.4K</span>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="relative bg-surface-container-low rounded-xl p-6 group overflow-hidden border border-white/5 hover:border-tertiary/20 transition-colors backdrop-blur-md">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-tertiary/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-6">
+<div class="w-10 h-10 rounded-lg bg-surface flex items-center justify-center border border-white/5 group-hover:border-tertiary/30 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px] group-hover:text-tertiary transition-colors">conveyor_belt</span>
+</div>
+<span class="font-label-sm text-on-surface-variant bg-surface px-2 py-1 rounded">ESTABLE</span>
+</div>
+<p class="font-label-sm text-text-body uppercase mb-1">Proveedores Activos</p>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-text-header">45</span>
+</div>
+<div class="flex -space-x-2 mt-4">
+<img class="w-8 h-8 rounded-full border-2 border-surface-container-low object-cover" data-alt="Small round avatar logo of a solar panel manufacturing company, corporate blue and white, minimal, clean" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsCsRXxo6oeh9he4pR37WrBh96yAPVDdNeF-IhSi2CMqvJyQz3vrDYcPvmVA_yxqp8_vMRdOjDcgOta67Z23qsKA_BKq7dXTP9C_Vmn98ykBEN3bnrISWT5TKG2fgcs-45L57TT8wLUFzo32iOUUd6orAQ6LlUcflnStR021jzFPDAxNd0syoP3KVSj4Q35oDTT91cQZfDOWTtVdZ6voV4RLY2BXvjGkcfXvBn3QoxFLn7Wiz9nJAN"/>
+<img class="w-8 h-8 rounded-full border-2 border-surface-container-low object-cover" data-alt="Small round avatar logo of an electronics supplier, geometric orange and grey, high-tech, minimal" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBP7djIcGxHdrV9oj64NhBLt7_-u_dzpL8toBzDtgh3q5pVI7Qxs2VvmpgfOE-nalWcS2e0_URBRr5rKzB31QPj5KTEU13Sbv5kqGQz-yhqgy6bhJb2u3ziEu6so4CT_7wZtQ0RQajV8ijvAn_wZsY2Sj41niXEwt7Whn37x_-wADvKwc_3Z-VxhtcMziQ85OTXjbhV5BoYK8xLeVrTAnq8FL5T5_0ohfQvM61ezWLVOV-ILJ9fnTIq"/>
+<img class="w-8 h-8 rounded-full border-2 border-surface-container-low object-cover" data-alt="Small round avatar logo of a logistics company, dynamic green and black, vector style, minimal" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBu25rHWRgCVsmv86nWLsk-0DY8uADkWbDJ7PU_2IY26PQOqMIX4PoG5HY5QgpdzFmipE71JADRlQng3A867PX2hdWdmaciIRxDuxHmvc8fZIWqB2h7EYQPDGN0j1OSm2OK9YugVUNu05wrLG_9sEJbGvMF5Uft8731Suy5S_eq4T65fEvGgIA1ZdxTT7QdL9ogDWX_YBgd_i3EDA3jPxI7obcpffMnAaHFDTCXBUoAGnpjJZoh7u9W"/>
+<div class="w-8 h-8 rounded-full border-2 border-surface-container-low bg-surface flex items-center justify-center font-label-sm text-text-body text-[10px]">+42</div>
+</div>
+</div>
+</div>
+<!-- Main Content Area -->
+<div class="flex flex-col bg-surface-container-low rounded-xl border border-white/5 backdrop-blur-md shadow-2xl mt-4">
+<!-- Toolbar -->
+<div class="p-4 flex items-center justify-between border-b border-white/5 bg-surface/30 rounded-t-xl">
+<div class="relative w-80 group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors text-[20px]">search</span>
+<input class="w-full bg-surface border border-white/10 rounded-lg py-2 pl-10 pr-4 font-body-md text-text-body focus:outline-none focus:border-primary/50 focus:shadow-[0_0_15px_rgba(178,231,255,0.1)] transition-all" placeholder="Buscar por #OC o proveedor..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-white/10 hover:border-white/20 text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span class="font-label-md">Este Mes</span>
+<span class="material-symbols-outlined text-[18px] ml-1">arrow_drop_down</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-white/10 hover:border-white/20 text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+<span class="font-label-md">Filtros (2)</span>
+</button>
+<button class="p-2 rounded-lg bg-surface border border-white/10 hover:border-white/20 text-on-surface-variant hover:text-on-surface transition-colors ml-2">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</div>
+</div>
+<!-- Table -->
+<div class="w-full overflow-x-auto pb-4">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-white/5">
+<th class="py-4 px-6 font-label-sm text-text-body uppercase tracking-wider">Número</th>
+<th class="py-4 px-6 font-label-sm text-text-body uppercase tracking-wider">Fecha</th>
+<th class="py-4 px-6 font-label-sm text-text-body uppercase tracking-wider">Proveedor</th>
+<th class="py-4 px-6 font-label-sm text-text-body uppercase tracking-wider">Productos</th>
+<th class="py-4 px-6 font-label-sm text-text-body uppercase tracking-wider text-right">Subtotal</th>
+<th class="py-4 px-6 font-label-sm text-text-body uppercase tracking-wider text-right">Total</th>
+<th class="py-4 px-6 font-label-sm text-text-body uppercase tracking-wider text-center">Estado</th>
+<th class="py-4 px-6 font-label-sm text-text-body uppercase tracking-wider text-right">Acciones</th>
+</tr>
+</thead>
+<tbody class="font-body-md">
+<!-- Row 1 -->
+<tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
+<td class="py-4 px-6 font-label-md text-primary">#OC-1042</td>
+<td class="py-4 px-6 text-on-surface-variant">24 Oct, 2023</td>
+<td class="py-4 px-6">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface border border-white/10 flex items-center justify-center p-1">
+<img class="w-full h-full object-contain" data-alt="Tiny logo of a fictional solar component supplier, minimalist geometric sun icon, blue background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBC1JxqgKNlK6MtZHX7iDHGs5SvekLGQeeZrLiVxbE3HsnP7AojVut6xPoAiJq_8impNOoxux1gyR5HZZP1PJ2HHrNkszndhGua7w2KUBKZrZi0NEJ6tdO4bnYKJIbmJh0NFngfMKksD6nn0nKY1ll1jrbt5im3lx40gTPaEGwZ5tWZNbkjmFwQUmJrEme6yOas8RsMsYFPrO95AqEkTRYqQ41HI7lVVKATCh3iOtma2-TmJhV8lGqW"/>
+</div>
+<span class="text-on-surface font-headline-md text-[16px]">SunTech Industries</span>
+</div>
+</td>
+<td class="py-4 px-6 text-on-surface-variant">
+<div class="truncate max-w-[200px]" title="Panel Solar X-100 x50, Inversor Alpha x10">Panel Solar X-100 x50, Inversor...</div>
+</td>
+<td class="py-4 px-6 text-right text-on-surface-variant">$12,500.00</td>
+<td class="py-4 px-6 text-right font-headline-md text-[16px] text-on-surface">$14,875.00</td>
+<td class="py-4 px-6 text-center">
+<span class="inline-block px-3 py-1 rounded bg-secondary/10 border border-secondary/30 text-secondary font-label-sm">COMPLETADA</span>
+</td>
+<td class="py-4 px-6 text-right">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1"><span class="material-symbols-outlined text-[20px]">visibility</span></button>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors p-1 ml-1"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
+<td class="py-4 px-6 font-label-md text-primary">#OC-1041</td>
+<td class="py-4 px-6 text-on-surface-variant">22 Oct, 2023</td>
+<td class="py-4 px-6">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface border border-white/10 flex items-center justify-center p-1">
+<img class="w-full h-full object-contain" data-alt="Tiny logo of a logistics and cabling company, lightning bolt icon, dark grey background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuByvsoHcMkEKR8eh0lcFDZx8QBXAPYfGfN2eJWkhYtw1anQfvOdx1zckodHMI8yQC8d9Z0cnSAeKrjh4x-C3cme23htUSpxvOjGQUvhtGbCzoY23-c8lQ86trUHmOREq6AskMstXlzmKvm-D4xfXgdta68VMGsaefmEYoybnorXDLqXOW_3v2ulJS4DD1cHNoRESKk-hJGLiR7BOLLgGNPca0TTLOO4zxFNP38mAnA_CH83QXtBZNpM"/>
+</div>
+<span class="text-on-surface font-headline-md text-[16px]">VoltCables Ltd.</span>
+</div>
+</td>
+<td class="py-4 px-6 text-on-surface-variant">
+<div class="truncate max-w-[200px]">Cable PV 4mm x500m, Conectores MC4...</div>
+</td>
+<td class="py-4 px-6 text-right text-on-surface-variant">$3,200.00</td>
+<td class="py-4 px-6 text-right font-headline-md text-[16px] text-on-surface">$3,808.00</td>
+<td class="py-4 px-6 text-center">
+<span class="inline-block px-3 py-1 rounded bg-surface-bright border border-outline-variant text-on-surface font-label-sm">PENDIENTE</span>
+</td>
+<td class="py-4 px-6 text-right">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1"><span class="material-symbols-outlined text-[20px]">visibility</span></button>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors p-1 ml-1"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
+<td class="py-4 px-6 font-label-md text-primary">#OC-1038</td>
+<td class="py-4 px-6 text-on-surface-variant">18 Oct, 2023</td>
+<td class="py-4 px-6">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface border border-white/10 flex items-center justify-center p-1">
+<span class="material-symbols-outlined text-on-surface-variant">factory</span>
+</div>
+<span class="text-on-surface font-headline-md text-[16px]">Estructuras Metálicas Pro</span>
+</div>
+</td>
+<td class="py-4 px-6 text-on-surface-variant">
+<div class="truncate max-w-[200px]">Riel de aluminio 3m x100, Clamps...</div>
+</td>
+<td class="py-4 px-6 text-right text-on-surface-variant">$5,100.00</td>
+<td class="py-4 px-6 text-right font-headline-md text-[16px] text-on-surface">$6,069.00</td>
+<td class="py-4 px-6 text-center">
+<span class="inline-block px-3 py-1 rounded bg-tertiary/10 border border-tertiary/30 text-tertiary font-label-sm">DEV. PARCIAL</span>
+</td>
+<td class="py-4 px-6 text-right">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1"><span class="material-symbols-outlined text-[20px]">visibility</span></button>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors p-1 ml-1"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="p-4 border-t border-white/5 flex items-center justify-between text-on-surface-variant">
+<span class="font-label-md">Mostrando 1-10 de 342</span>
+<div class="flex items-center gap-2">
+<button class="p-1 rounded bg-surface border border-white/5 hover:border-white/20 transition-colors opacity-50 cursor-not-allowed">
+<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+</button>
+<button class="p-1 rounded bg-surface border border-white/5 hover:border-white/20 transition-colors hover:text-on-surface">
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div></main></div></body></html>

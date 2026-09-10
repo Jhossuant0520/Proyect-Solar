@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ProductoFiltros, ProductoModel } from '../../features/panelAdmin/producto/productoClase';
+import { ProductoFiltros, ProductoModel, ProductoRequestDTO } from '../../features/panelAdmin/producto/productoClase';
 
 @Injectable({
   providedIn: 'root'
@@ -27,11 +27,11 @@ export class ProductoService {
     return this.http.get<ProductoModel>(`${this.apiUrl}/${id}`);
   }
 
-  crear(producto: ProductoModel): Observable<ProductoModel> {
+  crear(producto: ProductoRequestDTO): Observable<ProductoModel> {
     return this.http.post<ProductoModel>(this.apiUrl, producto);
   }
 
-  actualizar(id: number, producto: ProductoModel): Observable<ProductoModel> {
+  actualizar(id: number, producto: ProductoRequestDTO): Observable<ProductoModel> {
     return this.http.put<ProductoModel>(`${this.apiUrl}/${id}`, producto);
   }
 

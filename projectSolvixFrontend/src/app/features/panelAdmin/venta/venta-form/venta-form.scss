@@ -1,0 +1,200 @@
+.venta-form-page {
+  position: relative;
+  z-index: 1;
+  max-width: 80rem;
+}
+
+.form-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(16rem, 0.8fr);
+  gap: 1.25rem;
+}
+
+.panel {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid var(--solvix-border);
+  border-radius: var(--solvix-radius);
+  padding: 1.2rem 1.3rem;
+  margin-bottom: 1.25rem;
+}
+
+.sticky {
+  position: sticky;
+  top: 1rem;
+}
+
+.form-grid,
+.linea-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  color: var(--solvix-text-muted);
+  font-family: var(--solvix-font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+input,
+select,
+textarea {
+  background: var(--solvix-surface-low);
+  border: 1px solid var(--solvix-border-subtle);
+  color: var(--solvix-text);
+  border-radius: 0.125rem;
+  padding: 0.55rem 0.7rem;
+  font-family: var(--solvix-font-mono);
+  font-size: 0.85rem;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--solvix-secondary);
+}
+
+.hint,
+.empty-line {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.75rem;
+  color: var(--solvix-text-muted);
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+.search {
+  position: relative;
+  margin: 0.8rem 0 1rem;
+}
+
+.search .material-symbols-outlined {
+  position: absolute;
+  left: 0.55rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--solvix-text-muted);
+}
+
+.search input {
+  width: 100%;
+  padding-left: 2rem;
+}
+
+.catalogo {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  border: 1px solid var(--solvix-border-subtle);
+  border-radius: 0.35rem;
+}
+
+.catalogo button {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--solvix-border-subtle);
+  color: var(--solvix-text);
+  padding: 0.7rem 0.85rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.catalogo li:last-child button {
+  border-bottom: 0;
+}
+
+.catalogo button:hover,
+.catalogo button:focus-visible {
+  background: rgba(79, 209, 255, 0.08);
+}
+
+.catalogo span {
+  color: var(--solvix-text-muted);
+  font-family: var(--solvix-font-mono);
+  font-size: 0.75rem;
+}
+
+.linea {
+  border: 1px solid var(--solvix-border-subtle);
+  border-radius: 0.35rem;
+  padding: 0.9rem;
+  margin-bottom: 0.8rem;
+}
+
+.linea header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.7rem;
+  margin-bottom: 0.8rem;
+}
+
+.linea strong {
+  display: block;
+  color: var(--solvix-text);
+}
+
+.icon-btn {
+  background: transparent;
+  border: 0;
+  color: var(--solvix-text-muted);
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  color: var(--solvix-error);
+}
+
+.facts {
+  display: grid;
+  gap: 0.8rem;
+  margin: 0 0 1rem;
+}
+
+dt {
+  color: var(--solvix-text-muted);
+  font-family: var(--solvix-font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+dd {
+  margin: 0.2rem 0 0;
+  color: var(--solvix-text);
+  font-family: var(--solvix-font-mono);
+}
+
+.form-error {
+  color: var(--solvix-error);
+  font-size: 0.85rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 1.2rem;
+}
+
+@media (max-width: 1023px) {
+  .form-layout,
+  .form-grid,
+  .linea-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sticky {
+    position: static;
+  }
+}

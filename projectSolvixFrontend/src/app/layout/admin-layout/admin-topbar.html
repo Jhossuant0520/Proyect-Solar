@@ -1,0 +1,42 @@
+<header class="admin-topbar">
+  <button
+    class="admin-topbar__menu"
+    type="button"
+    [attr.aria-expanded]="menuOpen"
+    aria-controls="admin-sidebar"
+    aria-label="Abrir o cerrar el menú"
+    (click)="menuToggle.emit()"
+  >
+    <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+  </button>
+
+  <label class="admin-topbar__search">
+    <span class="material-symbols-outlined" aria-hidden="true">search</span>
+    <input
+      type="search"
+      placeholder="Buscar producto o identificador"
+      aria-label="Búsqueda. Disponible en una fase posterior."
+      autocomplete="off"
+    />
+  </label>
+
+  <div class="admin-topbar__actions">
+    <button type="button" class="admin-topbar__icon" disabled aria-label="Notificaciones. Disponible más adelante.">
+      <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
+    </button>
+    <button type="button" class="admin-topbar__icon" disabled aria-label="Configuración. Disponible más adelante.">
+      <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+    </button>
+    <a routerLink="/mi-cuenta" class="admin-topbar__user" [attr.aria-label]="'Cuenta de ' + userName">
+      @if (fotoUrl) {
+        <img class="admin-topbar__photo" [src]="fotoUrl" alt="" />
+      } @else {
+        <span class="admin-topbar__avatar" aria-hidden="true">{{ initials }}</span>
+      }
+      <span class="admin-topbar__name">{{ userName }}</span>
+    </a>
+    <button type="button" class="admin-topbar__icon" aria-label="Cerrar sesión" (click)="logout.emit()">
+      <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+    </button>
+  </div>
+</header>

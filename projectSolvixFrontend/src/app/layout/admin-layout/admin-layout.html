@@ -1,0 +1,25 @@
+<div class="admin-shell" [class.sidebar-open]="sidebarOpen">
+  <div
+    class="admin-shell__backdrop"
+    [class.is-visible]="sidebarOpen"
+    (click)="closeSidebar()"
+    aria-hidden="true"
+  ></div>
+
+  <div id="admin-sidebar" class="admin-shell__sidebar">
+    <solvix-admin-sidebar [items]="navItems" />
+  </div>
+
+  <div class="admin-shell__main">
+    <solvix-admin-topbar
+      [userName]="userName"
+      [fotoUrl]="fotoUrl"
+      [menuOpen]="sidebarOpen"
+      (menuToggle)="toggleSidebar()"
+      (logout)="logout()"
+    />
+    <main class="admin-shell__content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

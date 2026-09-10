@@ -1,0 +1,84 @@
+:host {
+  display: contents;
+}
+
+.admin-sidebar {
+  width: var(--solvix-sidebar-width);
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--solvix-surface);
+  border-right: 1px solid var(--solvix-border-subtle);
+  padding: 1.5rem 0.75rem;
+}
+
+.admin-sidebar__brand {
+  padding: 0 1rem 1.75rem;
+}
+
+.admin-sidebar__name {
+  margin: 0;
+  color: var(--solvix-primary);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.admin-sidebar__kicker {
+  margin: 0.35rem 0 0;
+  color: var(--solvix-text-muted);
+  font-size: 0.7rem;
+}
+
+.admin-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  overflow: visible;
+}
+
+.admin-sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  color: var(--solvix-text-muted);
+  text-decoration: none;
+  border-radius: 0.25rem;
+  font-size: 0.95rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.admin-sidebar__link:hover,
+.admin-sidebar__link:focus-visible {
+  color: var(--solvix-text);
+  background: rgba(46, 52, 71, 0.45);
+  outline: none;
+}
+
+.admin-sidebar__link.is-active {
+  color: var(--solvix-primary);
+  background: rgba(0, 166, 224, 0.16);
+  border-right: 3px solid var(--solvix-primary);
+  font-weight: 600;
+}
+
+.admin-sidebar__link.is-active .material-symbols-outlined {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+@media (max-width: 1023px) {
+  .admin-sidebar {
+    height: 100%;
+    max-height: 100vh;
+    overflow: hidden;
+  }
+
+  .admin-sidebar__nav {
+    flex: 1;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+}

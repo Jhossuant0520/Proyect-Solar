@@ -4,9 +4,12 @@ package com.newproject.jhocadi.projectSolvixBackend.controller.AccesController;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.newproject.jhocadi.projectSolvixBackend.dtos.AccesDtos.CambiarPasswordDTO;
@@ -56,6 +59,7 @@ public class controllerCuenta {
         datos.put("ultimoLogin", usuario.getUltimoLogin() != null
                 ? usuario.getUltimoLogin().format(DATE_FORMATTER)
                 : "Nunca");
+        datos.put("fotoUrl", usuario.getFotoUrl());
 
         return ResponseEntity.ok(datos);
     }
@@ -67,5 +71,33 @@ public class controllerCuenta {
         String username = extraerUsernameDelToken(request);
         usuarioService.cambiarPassword(username, dto);
         return ResponseEntity.ok(Map.of("mensaje", "Contraseña actualizada correctamente"));
+    }
+
+    @PostMapping(value = "/foto", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, String>> subirFoto(
+            @RequestParam("archivo") MultipartFile archivo,
+            HttpServletRequest request) {
+        String username = extraerUsernameDelToken(request);
+        String fotoUrl = usuarioService.actualizarFoto(username, archivo);
+        return ResponseEntity.ok(Map.of(
+            "fotoUrl", fotoUrl,
+            "mensaje", "Foto actualizada."
+        ));
+    }
+
+    @DeleteMapping("/foto")
+    public ResponseEntity<Map<String, String>> eliminarFoto(HttpServletRequest request) {
+        String username = extraerUsernameDelToken(request);
+        usuarioService.eliminarFoto(username);
+        return ResponseEntity.ok(Map.of("mensaje", "Foto eliminada."));
+    }
+
+    @GetMapping("/avatares/{nombreArchivo:.+}")
+    public ResponseEntity<Resource> verAvatar(@PathVariable String nombreArchivo) {
+        Resource archivo = usuarioService.obtenerArchivoFoto(nombreArchivo);
+        return ResponseEntity.ok()
+            .contentType(usuarioService.mediaTypeFoto(nombreArchivo))
+            .header("Cache-Control", "no-store")
+            .body(archivo);
     }
 }

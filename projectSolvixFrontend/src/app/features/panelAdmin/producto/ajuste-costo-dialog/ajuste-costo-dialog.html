@@ -1,0 +1,68 @@
+<div class="ajuste-dialog">
+  <div class="ajuste-dialog__accent" aria-hidden="true"></div>
+
+  <header class="ajuste-dialog__head">
+    <div>
+      <p class="solvix-mono kicker">Inventario</p>
+      <h2>Ajustar costo</h2>
+      <p>{{ data.nombre }}</p>
+    </div>
+    <button type="button" class="icon-btn" (click)="cancelar()" aria-label="Cerrar">
+      <span class="material-symbols-outlined" aria-hidden="true">close</span>
+    </button>
+  </header>
+
+  <p class="aviso">
+    Este ajuste no cambia el stock. El inventario sigue en {{ data.stockActual }} unidades.
+  </p>
+
+  <form [formGroup]="form" (ngSubmit)="aplicar()">
+    <label>
+      Costo actual
+      <input
+        type="text"
+        [value]="data.costoConocido ? money(data.costoActual) : 'Sin costo'"
+        disabled
+      />
+    </label>
+
+    <label>
+      Nuevo costo
+      <input type="number" formControlName="costoNuevo" min="0" step="1" placeholder="0" />
+    </label>
+    @if (form.controls.costoNuevo.touched && form.controls.costoNuevo.invalid) {
+      <p class="field-error">El costo no puede ser negativo.</p>
+    }
+    @if (costoIgual) {
+      <p class="field-error">El costo indicado es el que ya está vigente.</p>
+    }
+
+    <label>
+      Motivo
+      <select formControlName="motivo">
+        <option value="" disabled>Selecciona un motivo</option>
+        @for (motivo of motivos; track motivo.id) {
+          <option [value]="motivo.id">{{ motivo.label }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Observaciones
+      <textarea formControlName="observaciones" rows="3" maxlength="500" placeholder="Opcional"></textarea>
+    </label>
+
+    @if (error) {
+      <p class="form-error" role="alert">{{ error }}</p>
+    }
+
+    <div class="ajuste-dialog__actions">
+      <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
+        Cancelar
+      </solvix-button>
+      <solvix-button family="tech" rank="primary" type="submit" [disabled]="enviando || form.invalid || costoIgual">
+        Aplicar ajuste
+      </solvix-button>
+    </div>
+  </form>
+</div>

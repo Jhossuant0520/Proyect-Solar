@@ -1,0 +1,44 @@
+// SOLVIX scrollbars — un estilo global. No duplicar por pantalla.
+// Track integrado en el fondo. Thumb delgado y oscuro. Cyan solo en hover.
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--solvix-scrollbar-thumb) transparent;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--solvix-scrollbar-thumb) transparent;
+}
+
+::-webkit-scrollbar {
+  width: var(--solvix-scrollbar-size);
+  height: var(--solvix-scrollbar-size);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--solvix-scrollbar-thumb);
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:active {
+  background: var(--solvix-scrollbar-thumb-hover);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.table-wrap,
+.dash-table-wrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+}

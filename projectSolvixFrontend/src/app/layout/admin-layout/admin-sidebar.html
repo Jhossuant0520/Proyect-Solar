@@ -1,0 +1,20 @@
+<aside class="admin-sidebar" aria-label="Navegación principal">
+  <div class="admin-sidebar__brand">
+    <p class="admin-sidebar__name">SOLVIX</p>
+    <p class="admin-sidebar__kicker solvix-mono">BI Terminal</p>
+  </div>
+
+  <nav class="admin-sidebar__nav">
+    @for (item of items; track item.path) {
+      <a
+        [routerLink]="item.path"
+        routerLinkActive="is-active"
+        [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
+        class="admin-sidebar__link"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+</aside>

@@ -26,6 +26,19 @@ export interface ProductoModel {
   fechaActualizacion?: string;
 }
 
+/** Body de POST/PUT /api/v1/productos. Nombres y tipos iguales al DTO Java. */
+export interface ProductoRequestDTO {
+  nombre: string;
+  marca: string;
+  categoriaId: number;
+  precioVentaActual: number;
+  costoActual?: number | null;
+  stockInicial?: number | null;
+  descripcion?: string | null;
+  imagenUrl?: string | null;
+  activo?: boolean | null;
+}
+
 export interface ProductoFiltros {
   marca?: string;
   categoriaId?: number;

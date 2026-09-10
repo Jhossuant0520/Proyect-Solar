@@ -1,0 +1,14 @@
+@use '../../dashboard-ui';
+
+strong {
+  color: var(--solvix-text);
+  font-weight: 600;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}

@@ -1,0 +1,52 @@
+<section class="dash-panel" aria-labelledby="top-title">
+  <solvix-section-header
+    kicker="Ranking"
+    title="Productos más vendidos"
+    subtitle="Orden visual. El criterio real lo define el backend."
+  >
+    <div class="dash-chips" role="group" aria-label="Criterio de ranking">
+      @for (item of criterios; track item.id) {
+        <button
+          type="button"
+          class="dash-chip"
+          [class.is-active]="criterio === item.id"
+          [attr.aria-pressed]="criterio === item.id"
+          (click)="criterioChange.emit(item.id)"
+        >
+          {{ item.label }}
+        </button>
+      }
+    </div>
+  </solvix-section-header>
+
+  <solvix-section-state [state]="state" loadingLabel="Cargando productos." (retry)="retry.emit()">
+    <div class="dash-table-wrap">
+      <table class="dash-table">
+        <caption class="sr-only">Productos más vendidos</caption>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Producto</th>
+            <th class="is-num">Unidades</th>
+            <th class="is-num">Ingresos</th>
+            <th class="is-num">Ganancia</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (product of products; track product.productoId; let i = $index) {
+            <tr>
+              <td class="solvix-mono">{{ i + 1 }}</td>
+              <td>
+                <strong>{{ product.nombre }}</strong>
+                <span class="sub solvix-mono">{{ product.categoriaNombre }}</span>
+              </td>
+              <td class="is-num">{{ qty(product.unidades) }}</td>
+              <td class="is-num">{{ money(product.ingresos, 'OK', true) }}</td>
+              <td class="is-num">{{ money(product.ganancia, product.estadoGanancia, true) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </solvix-section-state>
+</section>

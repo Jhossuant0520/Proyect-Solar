@@ -1,29 +1,50 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
+import { AuthService } from '../../../core/services/auth.service';
 import { CuentaService, MisDatos, CambiarPassword } from '../../../core/services/cuenta.service';
+import { SolvixBadgeComponent } from '../../../shared/components/solvix-badge/solvix-badge';
+import { SolvixButtonComponent } from '../../../shared/components/solvix-button/solvix-button';
+import { SolvixCardComponent } from '../../../shared/components/solvix-card/solvix-card';
+import { SolvixErrorStateComponent } from '../../../shared/components/solvix-error-state/solvix-error-state';
+import { SolvixLoadingStateComponent } from '../../../shared/components/solvix-loading-state/solvix-loading-state';
+import { SolvixPageHeaderComponent } from '../../../shared/components/solvix-page-header/solvix-page-header';
+import { SolvixSectionHeaderComponent } from '../../../shared/components/solvix-section-header/solvix-section-header';
 
 @Component({
   selector: 'app-mi-cuenta',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    ReactiveFormsModule,
+    SolvixPageHeaderComponent,
+    SolvixSectionHeaderComponent,
+    SolvixCardComponent,
+    SolvixButtonComponent,
+    SolvixBadgeComponent,
+    SolvixLoadingStateComponent,
+    SolvixErrorStateComponent
+  ],
   templateUrl: './mi-cuenta.html',
   styleUrl: './mi-cuenta.scss'
 })
 export class MiCuenta implements OnInit {
+  private readonly cuentaService = inject(CuentaService);
+  private readonly authService = inject(AuthService);
+  private readonly fb = inject(FormBuilder);
+
+  @ViewChild('fotoInput') fotoInput?: ElementRef<HTMLInputElement>;
+
   misDatos: MisDatos | null = null;
   cargandoDatos = false;
   errorGeneral = '';
   guardando = false;
   errorPassword = '';
   exitoPassword = false;
+  subiendoFoto = false;
+  errorFoto = '';
   form: FormGroup;
 
-  constructor(
-    private fb: FormBuilder,
-    private cuentaService: CuentaService
-  ) {
+  constructor() {
     this.form = this.fb.group({
       passwordActual: ['', Validators.required],
       passwordNueva: ['', [Validators.required, Validators.minLength(8)]],
@@ -35,7 +56,36 @@ export class MiCuenta implements OnInit {
     this.cargarMisDatos();
   }
 
-  private cargarMisDatos(): void {
+  get fotoVisible(): string | null {
+    return this.cuentaService.fotoUrl();
+  }
+
+  get iniciales(): string {
+    const nombre = this.misDatos?.nombreUsuario?.trim() || this.authService.obtenerNombreUsuario() || 'U';
+    return nombre.slice(0, 1).toUpperCase();
+  }
+
+  get rolVisible(): string {
+    return this.authService.esAdmin() ? 'Administrador' : 'Usuario';
+  }
+
+  get mismatch(): boolean {
+    return this.form.hasError('mismatch') && (this.form.touched || this.form.dirty);
+  }
+
+  get passwordActualControl() {
+    return this.form.get('passwordActual');
+  }
+
+  get passwordNuevaControl() {
+    return this.form.get('passwordNueva');
+  }
+
+  get confirmarPasswordNuevaControl() {
+    return this.form.get('confirmarPasswordNueva');
+  }
+
+  cargarMisDatos(): void {
     this.cargandoDatos = true;
     this.errorGeneral = '';
 
@@ -44,7 +94,51 @@ export class MiCuenta implements OnInit {
         this.misDatos = datos;
       },
       error: err => {
-        this.errorGeneral = this.extraerMensajeError(err) || 'No se pudieron cargar tus datos. Intenta nuevamente.';
+        this.errorGeneral = this.extraerMensajeError(err) || 'No pudimos cargar tu cuenta. Inténtalo de nuevo.';
+      }
+    });
+  }
+
+  elegirFoto(): void {
+    this.fotoInput?.nativeElement.click();
+  }
+
+  onFotoSeleccionada(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const archivo = input.files?.[0];
+    input.value = '';
+    if (!archivo) {
+      return;
+    }
+
+    const tipos = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!tipos.includes(archivo.type)) {
+      this.errorFoto = 'Usa una imagen JPG, PNG o WEBP.';
+      return;
+    }
+    if (archivo.size > 2 * 1024 * 1024) {
+      this.errorFoto = 'La foto debe pesar máximo 2 MB.';
+      return;
+    }
+
+    this.subiendoFoto = true;
+    this.errorFoto = '';
+    this.cuentaService.subirFoto(archivo).pipe(finalize(() => { this.subiendoFoto = false; })).subscribe({
+      error: err => {
+        this.errorFoto = this.extraerMensajeError(err) || 'No se pudo guardar la foto. Inténtalo de nuevo.';
+      }
+    });
+  }
+
+  quitarFoto(): void {
+    if (!this.fotoVisible || this.subiendoFoto) {
+      return;
+    }
+    this.subiendoFoto = true;
+    this.errorFoto = '';
+    this.cuentaService.eliminarFoto().pipe(finalize(() => { this.subiendoFoto = false; })).subscribe({
+      error: err => {
+        this.errorFoto = this.extraerMensajeError(err) || 'No se pudo quitar la foto. Inténtalo de nuevo.';
       }
     });
   }
@@ -71,7 +165,7 @@ export class MiCuenta implements OnInit {
         this.form.reset();
       },
       error: err => {
-        this.errorPassword = this.extraerMensajeError(err) || 'Error al cambiar la contraseña. Intenta nuevamente.';
+        this.errorPassword = this.extraerMensajeError(err) || 'No se pudo cambiar la contraseña. Inténtalo de nuevo.';
       }
     });
   }
@@ -82,36 +176,15 @@ export class MiCuenta implements OnInit {
     return nueva && confirmar && nueva !== confirmar ? { mismatch: true } : null;
   }
 
-  private extraerMensajeError(err: any): string {
-    const body = err?.error;
+  private extraerMensajeError(err: unknown): string {
+    const body = (err as { error?: unknown })?.error;
     if (typeof body === 'string') {
       return body;
     }
-    if (body?.message) {
-      return body.message;
-    }
-    if (body?.error) {
-      return body.error;
-    }
-    if (body?.mensaje) {
-      return body.mensaje;
+    if (body && typeof body === 'object') {
+      const mensaje = body as { message?: string; error?: string; mensaje?: string };
+      return mensaje.message || mensaje.error || mensaje.mensaje || '';
     }
     return '';
-  }
-
-  get mismatch(): boolean {
-    return this.form.hasError('mismatch') && (this.form.touched || this.form.dirty);
-  }
-
-  get passwordActualControl() {
-    return this.form.get('passwordActual');
-  }
-
-  get passwordNuevaControl() {
-    return this.form.get('passwordNueva');
-  }
-
-  get confirmarPasswordNuevaControl() {
-    return this.form.get('confirmarPasswordNueva');
   }
 }
