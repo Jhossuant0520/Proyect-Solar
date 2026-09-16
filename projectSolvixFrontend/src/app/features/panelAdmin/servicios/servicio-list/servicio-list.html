@@ -1,0 +1,121 @@
+<section class="servicios-page">
+  <solvix-page-header
+    kicker="Taller"
+    title="Servicios técnicos"
+    subtitle="Órdenes de servicio: cliente, equipo y estado."
+  >
+    <solvix-button family="tech" rank="primary" icon="add" (click)="nueva()">
+      Nueva orden
+    </solvix-button>
+  </solvix-page-header>
+
+  <div class="filter-bar">
+    <label class="search">
+      <span class="material-symbols-outlined" aria-hidden="true">search</span>
+      <input
+        type="search"
+        [value]="search"
+        (input)="onSearch($event)"
+        placeholder="Buscar por número, cliente o equipo"
+      />
+    </label>
+    <select [value]="filtroClienteId ?? ''" (change)="onCliente($event)" aria-label="Cliente">
+      <option value="">Cliente: todos</option>
+      @for (cliente of clientesFiltro; track cliente.id) {
+        <option [value]="cliente.id">{{ cliente.nombre }}</option>
+      }
+    </select>
+    <select [value]="filtroEstado" (change)="onEstado($event)" aria-label="Estado">
+      <option value="">Estado: todos</option>
+      @for (estado of estados; track estado.id) {
+        <option [value]="estado.id">{{ estado.label }}</option>
+      }
+    </select>
+    @if (hayFiltros) {
+      <button type="button" class="clear" (click)="limpiarFiltros()">Limpiar filtros</button>
+    }
+  </div>
+
+  @if (state === 'loading') {
+    <solvix-loading-state label="Cargando órdenes de servicio." />
+  } @else if (state === 'error') {
+    <solvix-error-state
+      [title]="errorTitle"
+      [message]="errorMessage"
+      (retry)="cargar()"
+    />
+  } @else if (state === 'empty') {
+    <solvix-empty-state
+      icon="build"
+      title="Aún no hay órdenes de servicio."
+      message="Registra la primera orden del taller."
+      actionLabel="Nueva orden"
+      actionIcon="add"
+      (action)="nueva()"
+    />
+  } @else if (visibles.length === 0) {
+    <solvix-empty-state
+      icon="search_off"
+      title="No encontramos órdenes con estos filtros."
+      message="Prueba con otro número, cliente o estado."
+      actionLabel="Limpiar filtros"
+      (action)="limpiarFiltros()"
+    />
+  } @else {
+    <div class="table-panel">
+      <div class="table-wrap desktop-table">
+        <table class="svc-table">
+          <caption class="sr-only">Lista de órdenes de servicio</caption>
+          <thead>
+            <tr>
+              <th>Número</th>
+              <th>Cliente</th>
+              <th>Equipo</th>
+              <th>Estado</th>
+              <th>Recepción</th>
+              <th><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (orden of visibles; track orden.id) {
+              <tr>
+                <td>
+                  <strong class="solvix-mono">{{ orden.numero }}</strong>
+                </td>
+                <td>{{ orden.clienteNombre }}</td>
+                <td>{{ equipo(orden) }}</td>
+                <td>
+                  <solvix-badge [tone]="estadoTone(orden.estado)">
+                    {{ estadoLabel(orden.estado) }}
+                  </solvix-badge>
+                </td>
+                <td class="solvix-mono">{{ fecha(orden.fechaRecepcion) }}</td>
+                <td class="actions">
+                  <solvix-button family="tech" rank="secondary" icon="visibility" (click)="abrir(orden.id)">
+                    Ver
+                  </solvix-button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <ul class="mobile-cards">
+        @for (orden of visibles; track orden.id) {
+          <li class="card" (click)="abrir(orden.id)" (keyup.enter)="abrir(orden.id)" tabindex="0" role="button">
+            <div class="card-top">
+              <strong class="solvix-mono">{{ orden.numero }}</strong>
+              <solvix-badge [tone]="estadoTone(orden.estado)">
+                {{ estadoLabel(orden.estado) }}
+              </solvix-badge>
+            </div>
+            <p>{{ orden.clienteNombre }}</p>
+            <p class="muted">{{ equipo(orden) }}</p>
+            <p class="muted solvix-mono">{{ fecha(orden.fechaRecepcion) }}</p>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</section>

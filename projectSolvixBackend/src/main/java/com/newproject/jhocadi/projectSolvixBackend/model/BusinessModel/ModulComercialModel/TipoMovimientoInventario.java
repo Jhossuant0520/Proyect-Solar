@@ -13,7 +13,11 @@ public enum TipoMovimientoInventario {
     AJUSTE_ENTRADA(DireccionMovimiento.ENTRADA),
     AJUSTE_SALIDA(DireccionMovimiento.SALIDA),
     MERMA(DireccionMovimiento.SALIDA),
-    CARGA_INICIAL(DireccionMovimiento.ENTRADA);
+    CARGA_INICIAL(DireccionMovimiento.ENTRADA),
+    /** Salida de repuesto consumido en una orden de servicio. */
+    CONSUMO_SERVICIO(DireccionMovimiento.SALIDA),
+    /** Entrada al devolver un repuesto previamente consumido en taller. */
+    DEVOLUCION_SERVICIO(DireccionMovimiento.ENTRADA);
 
     private final DireccionMovimiento direccion;
 

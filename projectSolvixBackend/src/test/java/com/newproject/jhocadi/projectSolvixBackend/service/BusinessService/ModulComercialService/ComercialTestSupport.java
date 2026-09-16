@@ -23,6 +23,9 @@ import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.Modul
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulComercialRepo.VentaRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulProductoRepo.CategoriaProductoRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulProductoRepo.ProductoRepository;
+import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.EquipoRepository;
+import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.OrdenServicioRepuestoRepository;
+import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.OrdenServicioRepository;
 
 /**
  * Base de pruebas del módulo comercial. No usa @Transactional para que las reglas
@@ -67,6 +70,15 @@ public abstract class ComercialTestSupport {
     @Autowired
     protected SecuenciaDocumentoRepository secuenciaRepository;
 
+    @Autowired
+    protected OrdenServicioRepository ordenServicioRepository;
+
+    @Autowired
+    protected EquipoRepository equipoRepository;
+
+    @Autowired
+    protected OrdenServicioRepuestoRepository ordenServicioRepuestoRepository;
+
     @BeforeEach
     protected void limpiarDatos() {
         movimientoRepository.deleteAll();
@@ -77,6 +89,9 @@ public abstract class ComercialTestSupport {
         devolucionCompraRepository.deleteAll();
         compraRepository.deleteAll();
         ajusteCostoRepository.deleteAll();
+        ordenServicioRepuestoRepository.deleteAll();
+        ordenServicioRepository.deleteAll();
+        equipoRepository.deleteAll();
         productoRepository.deleteAll();
         categoriaRepository.deleteAll();
         clienteRepository.deleteAll();

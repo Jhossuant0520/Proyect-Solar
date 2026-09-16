@@ -1,0 +1,242 @@
+.detalle-page {
+  position: relative;
+  z-index: 1;
+  max-width: 52rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.detalle-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.25rem;
+  padding: 1.25rem 1.35rem;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid var(--solvix-border);
+  border-radius: var(--solvix-radius);
+}
+
+.kicker {
+  margin: 0 0 0.35rem;
+  color: var(--solvix-text-muted);
+  font-family: var(--solvix-font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0 0 0.55rem;
+  color: var(--solvix-text);
+  font-size: 1.85rem;
+  letter-spacing: -0.02em;
+}
+
+.head-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.panel {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid var(--solvix-border);
+  border-radius: var(--solvix-radius);
+  padding: 1.2rem 1.3rem;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem 1.25rem;
+  margin: 0.85rem 0 0;
+}
+
+.facts div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+dt {
+  color: var(--solvix-text-muted);
+  font-family: var(--solvix-font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+dd {
+  margin: 0;
+  color: var(--solvix-text-secondary);
+  font-size: 0.92rem;
+}
+
+.tecnico-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.lectura-hint {
+  margin: 0 0 0.85rem;
+}
+
+.campos-tecnicos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.campo-tecnico,
+.campo-edit {
+  border: 1px solid var(--solvix-border-subtle);
+  border-radius: var(--solvix-radius);
+  padding: 0.9rem 1rem;
+  background: rgba(2, 6, 23, 0.35);
+}
+
+.campo-tecnico.is-destacado,
+.campo-edit.is-destacado {
+  border-color: rgba(79, 209, 255, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(79, 209, 255, 0.18);
+  background: rgba(79, 209, 255, 0.06);
+}
+
+.campo-head,
+.label-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.campo-head h3 {
+  margin: 0;
+  color: var(--solvix-text);
+  font-size: 0.95rem;
+}
+
+.foco-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.45rem;
+  border-radius: 0.25rem;
+  font-family: var(--solvix-font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--solvix-primary);
+  background: rgba(79, 209, 255, 0.12);
+}
+
+.campo-hint {
+  margin: 0.3rem 0 0;
+  color: var(--solvix-text-muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.body-text {
+  margin: 0.55rem 0 0;
+  color: var(--solvix-text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.body-text.is-empty {
+  color: var(--solvix-text-muted);
+  font-style: italic;
+}
+
+.tecnico-panel.is-resumen .campo-tecnico {
+  border-color: var(--solvix-border-subtle);
+}
+
+.edit-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.campo-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: var(--solvix-text-muted);
+  font-family: var(--solvix-font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.campo-edit .campo-hint {
+  text-transform: none;
+  font-family: var(--solvix-font-body, inherit);
+  font-size: 0.78rem;
+  letter-spacing: normal;
+}
+
+textarea {
+  background: var(--solvix-surface-low);
+  border: 1px solid var(--solvix-border-subtle);
+  color: var(--solvix-text);
+  border-radius: 0.125rem;
+  padding: 0.55rem 0.7rem;
+  font-family: var(--solvix-font-mono);
+  font-size: 0.85rem;
+  text-transform: none;
+}
+
+.inline-actions,
+.estado-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.hint {
+  margin: 0;
+  color: var(--solvix-text-muted);
+  font-size: 0.82rem;
+}
+
+.form-error {
+  margin: 0.55rem 0 0;
+  color: var(--solvix-error);
+  font-size: 0.82rem;
+}
+
+@media (max-width: 720px) {
+  .detalle-head,
+  .tecnico-head {
+    flex-direction: column;
+  }
+
+  .facts {
+    grid-template-columns: 1fr;
+  }
+
+  .head-actions,
+  .inline-actions,
+  .estado-actions,
+  .tecnico-head solvix-button {
+    width: 100%;
+  }
+
+  .head-actions solvix-button,
+  .inline-actions solvix-button,
+  .estado-actions solvix-button {
+    flex: 1 1 auto;
+  }
+}

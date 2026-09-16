@@ -1,0 +1,134 @@
+<section class="servicio-form-page">
+  <solvix-page-header
+    kicker="Taller"
+    title="Nueva orden de servicio"
+    subtitle="Elige el cliente, su equipo y describe el problema."
+  />
+
+  @if (loadState === 'loading') {
+    <solvix-loading-state label="Cargando clientes." />
+  } @else if (loadState === 'error') {
+    <solvix-error-state
+      [title]="errorTitle"
+      [message]="errorMessage"
+      (retry)="cargarClientes()"
+    />
+  } @else {
+    <form class="form-panel" [formGroup]="form" (ngSubmit)="guardar()">
+      <solvix-section-header
+        kicker="Paso 1"
+        title="Cliente y equipo"
+        subtitle="Primero el cliente. Luego solo sus equipos activos."
+      />
+
+      <div class="form-grid">
+        <label>
+          <span class="label-row">Cliente <span class="req">requerido</span></span>
+          <select formControlName="clienteId" (change)="onClienteChange()">
+            <option [ngValue]="null">Selecciona un cliente</option>
+            @for (cliente of clientesSeleccionables; track cliente.id) {
+              <option [ngValue]="cliente.id">{{ cliente.nombre }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span class="label-row">Equipo <span class="req">requerido</span></span>
+          <select formControlName="equipoId">
+            <option [ngValue]="null">
+              @if (!form.controls.clienteId.value) {
+                Primero elige un cliente
+              } @else if (equiposState === 'loading') {
+                Cargando equipos…
+              } @else if (equiposState === 'empty') {
+                Este cliente no tiene equipos activos
+              } @else {
+                Selecciona un equipo
+              }
+            </option>
+            @for (equipo of equipos; track equipo.id) {
+              <option [ngValue]="equipo.id">{{ labelEquipo(equipo) }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      @if (equiposState === 'error') {
+        <p class="field-error">{{ equiposError }}</p>
+      }
+      @if (equiposState === 'empty') {
+        <p class="hint">
+          Este cliente no tiene equipos activos.
+          @if (clienteSeleccionadoId; as id) {
+            <a [routerLink]="['/clientes', id]">Registra un equipo en su ficha</a>
+            antes de crear la orden.
+          }
+        </p>
+      }
+
+      <solvix-section-header
+        kicker="Paso 2"
+        title="Detalle del servicio"
+        subtitle="El número de orden lo genera el sistema al guardar."
+      />
+
+      <div class="form-grid">
+        <label class="full">
+          Problema reportado
+          <textarea
+            formControlName="problemaReportado"
+            rows="3"
+            maxlength="2000"
+            placeholder="Qué reporta el cliente"
+          ></textarea>
+        </label>
+        <label class="full">
+          Diagnóstico
+          <textarea
+            formControlName="diagnostico"
+            rows="3"
+            maxlength="2000"
+            placeholder="Opcional al crear"
+          ></textarea>
+        </label>
+        <label class="full">
+          Trabajo realizado
+          <textarea
+            formControlName="trabajoRealizado"
+            rows="3"
+            maxlength="2000"
+            placeholder="Opcional al crear"
+          ></textarea>
+        </label>
+        <label class="full">
+          Observaciones
+          <textarea
+            formControlName="observaciones"
+            rows="2"
+            maxlength="1000"
+            placeholder="Notas internas"
+          ></textarea>
+        </label>
+      </div>
+
+      @if (submitError) {
+        <p class="form-error">{{ submitError }}</p>
+      }
+
+      <div class="form-actions">
+        <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
+          Cancelar
+        </solvix-button>
+        <solvix-button
+          family="tech"
+          rank="primary"
+          type="submit"
+          icon="save"
+          [disabled]="enviando || equiposState === 'loading' || form.invalid"
+        >
+          {{ enviando ? 'Creando…' : 'Crear orden' }}
+        </solvix-button>
+      </div>
+    </form>
+  }
+</section>

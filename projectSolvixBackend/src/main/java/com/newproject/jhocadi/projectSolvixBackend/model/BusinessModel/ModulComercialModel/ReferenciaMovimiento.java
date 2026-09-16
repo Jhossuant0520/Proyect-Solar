@@ -10,5 +10,7 @@ public enum ReferenciaMovimiento {
     DEVOLUCION_VENTA,
     DEVOLUCION_COMPRA,
     AJUSTE_MANUAL,
-    CARGA_INICIAL
+    CARGA_INICIAL,
+    /** Orden de servicio técnico (consumo/devolución de repuestos). */
+    ORDEN_SERVICIO
 }

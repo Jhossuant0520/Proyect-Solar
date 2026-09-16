@@ -27,6 +27,7 @@ import {
   puedeDesactivarCliente,
   puedeEditarCliente
 } from '../cliente-ui';
+import { ClienteEquiposPanelComponent } from '../cliente-equipos-panel/cliente-equipos-panel';
 import { showSolvixSnack } from '../../../../shared/utils/solvix-snack';
 
 type BloqueEstado = 'loading' | 'ready' | 'empty' | 'error';
@@ -46,7 +47,8 @@ type BloqueEstado = 'loading' | 'ready' | 'empty' | 'error';
     SolvixBadgeComponent,
     SolvixLoadingStateComponent,
     SolvixEmptyStateComponent,
-    SolvixErrorStateComponent
+    SolvixErrorStateComponent,
+    ClienteEquiposPanelComponent
   ]
 })
 export class ClienteDetailComponent implements OnInit {

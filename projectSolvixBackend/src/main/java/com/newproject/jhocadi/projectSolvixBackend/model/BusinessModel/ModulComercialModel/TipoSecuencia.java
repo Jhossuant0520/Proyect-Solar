@@ -2,14 +2,15 @@ package com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulCom
 
 /**
  * Series de numeración legible de documentos de negocio
- * (V-{yyyy}-{seq}, C-{yyyy}-{seq}, D-{yyyy}-{seq}, DC-{yyyy}-{seq}).
+ * (V-{yyyy}-{seq}, C-{yyyy}-{seq}, D-{yyyy}-{seq}, DC-{yyyy}-{seq}, OS-{yyyy}-{seq}).
  */
 public enum TipoSecuencia {
 
     VENTA("V"),
     COMPRA("C"),
     DEVOLUCION_VENTA("D"),
-    DEVOLUCION_COMPRA("DC");
+    DEVOLUCION_COMPRA("DC"),
+    ORDEN_SERVICIO("OS");
 
     private final String prefijo;
 

@@ -1,0 +1,211 @@
+<section class="detalle-page">
+  @if (state === 'loading') {
+    <solvix-loading-state label="Cargando orden de servicio." />
+  } @else if (state === 'error' || !orden) {
+    <solvix-error-state
+      [title]="errorTitle"
+      [message]="errorMessage"
+      (retry)="cargar()"
+    />
+  } @else {
+    <header class="detalle-head">
+      <div>
+        <p class="kicker">Orden de servicio</p>
+        <h1 class="solvix-mono">{{ orden.numero }}</h1>
+        <div class="head-meta">
+          <solvix-badge [tone]="estadoTone(orden.estado)">
+            {{ estadoLabel(orden.estado) }}
+          </solvix-badge>
+        </div>
+      </div>
+      <div class="head-actions">
+        <solvix-button family="tech" rank="tertiary" icon="arrow_back" (click)="volver()">
+          Volver
+        </solvix-button>
+      </div>
+    </header>
+
+    <section class="panel">
+      <solvix-section-header kicker="Relación" title="Cliente" />
+      <dl class="facts">
+        <div>
+          <dt>Nombre</dt>
+          <dd>{{ orden.clienteNombre }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="panel">
+      <solvix-section-header kicker="Relación" title="Equipo" />
+      <dl class="facts">
+        <div>
+          <dt>Equipo</dt>
+          <dd>{{ equipo(orden) }}</dd>
+        </div>
+        <div>
+          <dt>Tipo</dt>
+          <dd>{{ tipoEquipo(orden.equipoTipo) }}</dd>
+        </div>
+        @if (orden.equipoMarca) {
+          <div>
+            <dt>Marca</dt>
+            <dd>{{ orden.equipoMarca }}</dd>
+          </div>
+        }
+        @if (orden.equipoModelo) {
+          <div>
+            <dt>Modelo</dt>
+            <dd>{{ orden.equipoModelo }}</dd>
+          </div>
+        }
+      </dl>
+    </section>
+
+    <section class="panel tecnico-panel" [class.is-resumen]="esResumenCompleto">
+      <div class="tecnico-head">
+        <solvix-section-header
+          kicker="Taller"
+          title="Sección técnica"
+          [subtitle]="
+            esResumenCompleto
+              ? 'Resumen completo de la información técnica de esta orden.'
+              : 'Registra el problema, el diagnóstico y el trabajo realizado.'
+          "
+        />
+        @if (puedeEditar(orden.estado) && !editando) {
+          <solvix-button family="tech" rank="secondary" icon="edit" (click)="iniciarEdicion()">
+            Editar información
+          </solvix-button>
+        }
+      </div>
+
+      @if (!puedeEditar(orden.estado)) {
+        <p class="hint lectura-hint">
+          Esta orden está {{ estadoLabel(orden.estado).toLowerCase() }}. La información técnica es de solo lectura.
+        </p>
+      }
+
+      @if (!editando) {
+        <div class="campos-tecnicos">
+          @for (campo of campos; track campo.id) {
+            <article
+              class="campo-tecnico"
+              [class.is-destacado]="esCampoDestacado(campo.id)"
+              [attr.data-campo]="campo.id"
+            >
+              <header class="campo-head">
+                <h3>{{ campo.label }}</h3>
+                @if (esCampoDestacado(campo.id)) {
+                  <span class="foco-tag">En foco</span>
+                }
+              </header>
+              <p class="campo-hint">{{ campo.hint }}</p>
+              <p class="body-text" [class.is-empty]="!valorCampo(orden, campo.id)">
+                {{ texto(valorCampo(orden, campo.id)) }}
+              </p>
+            </article>
+          }
+        </div>
+      } @else {
+        <form class="edit-panel" [formGroup]="form" (ngSubmit)="guardarTextos()">
+          <p class="hint">
+            Solo se guardan estos textos. Cliente, equipo y estado no cambian aquí.
+          </p>
+
+          @for (campo of campos; track campo.id) {
+            <label
+              class="campo-edit"
+              [class.is-destacado]="esCampoDestacado(campo.id)"
+              [attr.data-campo]="campo.id"
+            >
+              <span class="label-row">
+                {{ campo.label }}
+                @if (esCampoDestacado(campo.id)) {
+                  <span class="foco-tag">En foco</span>
+                }
+              </span>
+              <span class="campo-hint">{{ campo.hint }}</span>
+              <textarea
+                [formControlName]="campo.id"
+                [attr.maxlength]="campo.maxLength"
+                [attr.rows]="campo.id === 'observaciones' ? 2 : 3"
+                [attr.placeholder]="campo.hint"
+              ></textarea>
+            </label>
+          }
+
+          @if (editError) {
+            <p class="form-error">{{ editError }}</p>
+          }
+
+          <div class="inline-actions">
+            <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelarEdicion()">
+              Cancelar
+            </solvix-button>
+            <solvix-button
+              family="tech"
+              rank="primary"
+              type="submit"
+              icon="save"
+              [disabled]="guardando || form.invalid || !hayCambiosTextos"
+            >
+              {{ guardando ? 'Guardando…' : 'Guardar' }}
+            </solvix-button>
+          </div>
+        </form>
+      }
+    </section>
+
+    <section class="panel">
+      <solvix-section-header kicker="Tiempo" title="Fechas" />
+      <dl class="facts">
+        <div>
+          <dt>Recepción</dt>
+          <dd class="solvix-mono">{{ fecha(orden.fechaRecepcion) }}</dd>
+        </div>
+        <div>
+          <dt>Actualización</dt>
+          <dd class="solvix-mono">{{ fecha(orden.fechaActualizacion) }}</dd>
+        </div>
+        <div>
+          <dt>Cierre</dt>
+          <dd class="solvix-mono">{{ fecha(orden.fechaCierre) }}</dd>
+        </div>
+        @if (orden.createdBy) {
+          <div>
+            <dt>Registrado por</dt>
+            <dd>{{ orden.createdBy }}</dd>
+          </div>
+        }
+      </dl>
+    </section>
+
+    <section class="panel actions-panel">
+      <solvix-section-header
+        kicker="Acciones"
+        title="Cambiar estado"
+        subtitle="Usa solo las transiciones que el sistema permite. No modifica los textos técnicos."
+      />
+
+      @if (siguientesEstados.length === 0) {
+        <p class="hint">No hay más cambios de estado disponibles.</p>
+      } @else {
+        <div class="estado-actions">
+          @for (destino of siguientesEstados; track destino) {
+            <solvix-button
+              family="tech"
+              [rank]="destino === 'CANCELADO' ? 'danger' : 'secondary'"
+              [disabled]="cambiandoEstado || editando"
+              (click)="cambiarEstado(destino)"
+            >
+              {{ estadoLabel(destino) }}
+            </solvix-button>
+          }
+        </div>
+      }
+      @if (estadoError) {
+        <p class="form-error">{{ estadoError }}</p>
+      }
+    </section>
+  }
+</section>

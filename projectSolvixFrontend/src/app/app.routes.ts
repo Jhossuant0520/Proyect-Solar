@@ -30,6 +30,9 @@ import { InventarioComponent } from './features/panelAdmin/inventario/inventario
 import { ClienteListComponent } from './features/panelAdmin/cliente/cliente-list/cliente-list';
 import { ClienteFormComponent } from './features/panelAdmin/cliente/cliente-form/cliente-form';
 import { ClienteDetailComponent } from './features/panelAdmin/cliente/cliente-detail/cliente-detail';
+import { ServicioListComponent } from './features/panelAdmin/servicios/servicio-list/servicio-list';
+import { ServicioFormComponent } from './features/panelAdmin/servicios/servicio-form/servicio-form';
+import { ServicioDetailComponent } from './features/panelAdmin/servicios/servicio-detail/servicio-detail';
 
 const comingSoon = (
   path: string,
@@ -86,6 +89,10 @@ export const routes: Routes = [
       { path: 'clientes/nuevo', component: ClienteFormComponent, canActivate: [adminGuard] },
       { path: 'clientes/:id/editar', component: ClienteFormComponent, canActivate: [adminGuard] },
       { path: 'clientes/:id', component: ClienteDetailComponent, canActivate: [adminGuard] },
+
+      { path: 'servicios', component: ServicioListComponent, canActivate: [adminGuard] },
+      { path: 'servicios/nueva', component: ServicioFormComponent, canActivate: [adminGuard] },
+      { path: 'servicios/:id', component: ServicioDetailComponent, canActivate: [adminGuard] },
 
       comingSoon('proveedores', 'Proveedores', moduloPendiente),
       comingSoon('proveedores/nuevo', 'Nuevo proveedor', moduloPendiente),

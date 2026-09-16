@@ -1,0 +1,171 @@
+# SOLVIX — FASE 3.15.6 Repuestos + Inventario (Backend)
+
+**Tipo:** IMPLEMENTACIÓN BACKEND  
+**Diseño:** `FASE_3_15_5_DISENO_REPUESTOS.md`  
+**Restricción:** Sin frontend, Venta/cobro, técnico, garantías ni analytics.
+
+---
+
+## Objetivo
+
+Permitir planificar y consumir Productos como repuestos en una `OrdenServicio`, moviendo inventario **solo** al confirmar consumo o devolución, siempre vía `InventarioService`.
+
+---
+
+## Modelo
+
+Entidad `OrdenServicioRepuesto` (`orden_servicio_repuestos`):
+
+| Campo | Rol |
+|-------|-----|
+| ordenServicio / producto | FKs |
+| productoNombre | Snapshot |
+| cantidadPlanificada / Consumida / Devuelta | Contadores |
+| costoUnitario + costoConocido | Histórico congelado (DTO: `costoHistorico`) |
+| anulado | Baja lógica |
+| fechas | registro / último consumo / última devolución |
+
+Estado **derivado** (`EstadoRepuestoOrdenServicio`): PLANIFICADO, PARCIAL, CONSUMIDO, DEVUELTO, ANULADO.
+
+```
+cantidadNetaConsumida = cantidadConsumida - cantidadDevuelta
+```
+
+---
+
+## API
+
+Base: `/api/v1/ordenes-servicio/{id}/repuestos` — `ADMIN`
+
+| Método | Ruta | Inventario |
+|--------|------|------------|
+| GET | `/` | No |
+| POST | `/` | No (planificar) |
+| PUT | `/{repuestoId}` | No |
+| DELETE | `/{repuestoId}` | No (anular si neta=0) |
+| POST | `/{repuestoId}/consumir` | CONSUMO_SERVICIO |
+| POST | `/{repuestoId}/devolver` | DEVOLUCION_SERVICIO |
+
+---
+
+## Planificación
+
+- Producto activo, cantidad ≥ 1, OT en estados permitidos (hasta ESPERA_REPUESTO).
+- Stock 0 permitido al planificar.
+- **No** llama a InventarioService.
+
+---
+
+## Consumo
+
+- Cantidad ≤ planificada − consumida.
+- Primer consumo congela `Producto.costoActual` (o null).
+- Consumos siguientes reutilizan el mismo costo.
+- `InventarioService.registrarMovimiento(CONSUMO_SERVICIO, ORDEN_SERVICIO, ordenId, …)`.
+
+---
+
+## Devolución
+
+- Cantidad ≤ consumida − devuelta.
+- Movimiento `DEVOLUCION_SERVICIO` con costo histórico de la línea.
+- **No** usa AJUSTE_ENTRADA.
+
+---
+
+## Costeo histórico
+
+| Caso | Resultado |
+|------|-----------|
+| costoActual conocido | Snapshot en línea + movimiento |
+| costoActual null | null; nunca 0 |
+| Cambio posterior de costoActual | No altera la línea |
+
+---
+
+## Inventario
+
+```
+OrdenServicioRepuestoService → InventarioService → MovimientoInventario + stock
+```
+
+Único dueño del stock: InventarioService.
+
+---
+
+## Movimientos
+
+| Tipo | Dirección |
+|------|-----------|
+| CONSUMO_SERVICIO | SALIDA |
+| DEVOLUCION_SERVICIO | ENTRADA |
+
+`ReferenciaMovimiento.ORDEN_SERVICIO` + `referenciaId = ordenServicio.id`.
+
+---
+
+## Trazabilidad
+
+Consulta por `referenciaTipo=ORDEN_SERVICIO` y `referenciaId` de la OT.  
+Observaciones incluyen número OT y id de línea.
+
+---
+
+## Validaciones
+
+- Cantidades no negativas; consumida ≤ planificada; devuelta ≤ consumida.
+- No operar líneas anuladas / OT CERRADA o CANCELADA.
+- LISTO/ENTREGADO: no planificar ni consumir; sí devolver.
+- Cancelar OT (`CANCELADO`) bloqueado si existe consumo neto > 0.
+- CERRADO: sin regla extra sobre planificados pendientes (diseño 3.15.5).
+
+---
+
+## Transaccionalidad
+
+`consumir` y `devolver` son `@Transactional`: línea + movimiento + stock en una sola unidad; fallo ⇒ rollback.
+
+---
+
+## Seguridad
+
+`@PreAuthorize("hasRole('ADMIN')")` en `OrdenServicioController`. Sin cambios a SecurityConfig.
+
+---
+
+## Migración
+
+`V7__orden_servicio_repuestos.sql`:
+
+- Amplía CHECKs de tipo/referencia de movimientos.
+- Crea `orden_servicio_repuestos` con FKs e índices.
+
+---
+
+## Tests
+
+`OrdenServicioRepuestoServiceTest` + limpieza en `ComercialTestSupport`.
+
+Cobertura: planificación, edición, anulación, consumo parcial/total, stock, costo null/congelado, devolución, cancelación OT, producto inactivo, pertenencia a OT.
+
+`mvn test` → **BUILD SUCCESS**.
+
+---
+
+## Limitaciones
+
+- Sin reservas de stock.
+- Sin cobro/Venta automática.
+- Sin frontend.
+- Sin idempotency-key en consumir.
+- Costo único por línea (no promedio por lote).
+
+---
+
+## Pendientes
+
+- Frontend sección Repuestos (3.15.x)
+- Cobro OT / vínculo Venta sin doble stock
+- Mano de obra
+- Analytics de CONSUMO_SERVICIO / DEVOLUCION_SERVICIO
+- Locking optimista de Producto (transversal)

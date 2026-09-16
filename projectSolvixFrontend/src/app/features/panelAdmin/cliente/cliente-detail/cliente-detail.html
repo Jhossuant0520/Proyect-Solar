@@ -75,6 +75,14 @@
     </section>
 
     <section class="panel">
+      <app-cliente-equipos-panel
+        [clienteId]="cliente.id"
+        [clienteActivo]="cliente.activo"
+        [bloqueado]="reservado(cliente)"
+      />
+    </section>
+
+    <section class="panel">
       <solvix-section-header
         kicker="Operaciones"
         title="Historial de ventas"

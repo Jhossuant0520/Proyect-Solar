@@ -1,0 +1,130 @@
+<section class="equipos-panel">
+  <div class="equipos-head">
+    <solvix-section-header
+      kicker="Taller"
+      title="Equipos del cliente"
+      subtitle="Equipos asociados a este cliente para órdenes de servicio."
+    />
+    @if (puedeGestionar && formMode === 'hidden') {
+      <solvix-button family="tech" rank="primary" icon="add" (click)="abrirCrear()">
+        Registrar equipo
+      </solvix-button>
+    }
+  </div>
+
+  @if (bloqueado) {
+    <p class="hint">El consumidor final no usa equipos de taller.</p>
+  } @else {
+    <label class="toggle-inactivos">
+      <input type="checkbox" [checked]="verInactivos" (change)="onToggleInactivos($event)" />
+      Ver equipos inactivos
+    </label>
+
+    @if (formMode !== 'hidden') {
+      <form class="equipo-form" [formGroup]="form" (ngSubmit)="guardar()">
+        <p class="form-title">
+          {{ formMode === 'editar' ? 'Editar equipo' : 'Registrar equipo' }}
+        </p>
+        <div class="form-grid">
+          <label>
+            <span class="label-row">Tipo <span class="req">requerido</span></span>
+            <select formControlName="tipoEquipo">
+              @for (tipo of tipos; track tipo.id) {
+                <option [value]="tipo.id">{{ tipo.label }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            Nombre
+            <input formControlName="nombre" maxlength="120" placeholder="Alias interno" />
+          </label>
+          <label>
+            Marca
+            <input formControlName="marca" maxlength="80" />
+          </label>
+          <label>
+            Modelo
+            <input formControlName="modelo" maxlength="80" />
+          </label>
+          <label class="full">
+            Número de serie
+            <input formControlName="numeroSerie" maxlength="100" />
+          </label>
+          <label class="full">
+            Observaciones
+            <textarea formControlName="observaciones" rows="2" maxlength="1000"></textarea>
+          </label>
+        </div>
+        @if (formError) {
+          <p class="form-error">{{ formError }}</p>
+        }
+        <div class="form-actions">
+          <solvix-button family="tech" rank="tertiary" type="button" (click)="cerrarFormulario()">
+            Cancelar
+          </solvix-button>
+          <solvix-button
+            family="tech"
+            rank="primary"
+            type="submit"
+            icon="save"
+            [disabled]="enviando || form.invalid"
+          >
+            {{ enviando ? 'Guardando…' : 'Guardar' }}
+          </solvix-button>
+        </div>
+      </form>
+    }
+
+    @if (state === 'loading') {
+      <solvix-loading-state label="Cargando equipos." />
+    } @else if (state === 'error') {
+      <solvix-error-state
+        title="No pudimos cargar los equipos."
+        message="Revisa la conexión e inténtalo de nuevo."
+        (retry)="cargar()"
+      />
+    } @else if (state === 'empty') {
+      <solvix-empty-state
+        icon="devices"
+        title="Este cliente todavía no tiene equipos registrados."
+        message="Registra un equipo para poder crear órdenes de servicio."
+        [actionLabel]="puedeGestionar ? 'Registrar equipo' : ''"
+        actionIcon="add"
+        (action)="abrirCrear()"
+      />
+    } @else {
+      <ul class="equipo-list">
+        @for (equipo of equipos; track equipo.id) {
+          <li class="equipo-card">
+            <div class="equipo-main">
+              <strong>{{ titulo(equipo) }}</strong>
+              <span class="meta">{{ tipoLabel(equipo.tipoEquipo) }}</span>
+              @if (equipo.numeroSerie) {
+                <span class="meta">Serial: {{ equipo.numeroSerie }}</span>
+              }
+              <solvix-badge [tone]="equipo.activo ? 'success' : 'neutral'">
+                {{ equipo.activo ? 'Activo' : 'Inactivo' }}
+              </solvix-badge>
+            </div>
+            @if (puedeGestionar) {
+              <div class="equipo-actions">
+                @if (equipo.activo) {
+                  <solvix-button family="tech" rank="secondary" icon="edit" (click)="abrirEditar(equipo)">
+                    Editar
+                  </solvix-button>
+                  <solvix-button family="tech" rank="danger" (click)="desactivar(equipo)">
+                    Desactivar equipo
+                  </solvix-button>
+                } @else {
+                  <solvix-button family="tech" rank="secondary" (click)="activar(equipo)">
+                    Activar equipo
+                  </solvix-button>
+                }
+              </div>
+            }
+          </li>
+        }
+      </ul>
+    }
+  }
+</section>
