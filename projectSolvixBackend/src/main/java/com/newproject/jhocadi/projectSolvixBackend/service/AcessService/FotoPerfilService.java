@@ -42,7 +42,8 @@ public class FotoPerfilService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La foto debe pesar máximo 2 MB.");
         }
 
-        String contentType = archivo.getContentType() == null ? "" : archivo.getContentType().toLowerCase(Locale.ROOT);
+        String rawContentType = archivo.getContentType();
+        String contentType = rawContentType == null ? "" : rawContentType.toLowerCase(Locale.ROOT);
         if (!TIPOS_PERMITIDOS.contains(contentType)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usa una imagen JPG, PNG o WEBP.");
         }

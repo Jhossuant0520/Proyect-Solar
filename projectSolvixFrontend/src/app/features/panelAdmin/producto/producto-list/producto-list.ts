@@ -17,6 +17,7 @@ import { CategoriaProductoModel, ProductoFiltros, ProductoModel } from '../produ
 import { formatMoney, formatMetricValue, labelEstadoMetrica, notaEstadoMetrica } from '../../dashboard/utils/dashboard-format';
 import { periodoInicial, toQueryDesde, toQueryHasta } from '../../dashboard/utils/dashboard-period';
 import { AjusteCostoDialogComponent } from '../ajuste-costo-dialog/ajuste-costo-dialog';
+import { productoCoincideBusqueda } from '../producto-ui';
 
 type ListaEstado = 'loading' | 'ready' | 'empty' | 'error';
 
@@ -66,15 +67,11 @@ export class ProductoList implements OnInit {
   }
 
   get visibles(): ProductoModel[] {
-    const query = this.searchNombre.trim().toLowerCase();
+    const query = this.searchNombre.trim();
     if (!query) {
       return this.productos;
     }
-    return this.productos.filter(producto =>
-      producto.nombre.toLowerCase().includes(query)
-      || producto.marca.toLowerCase().includes(query)
-      || String(producto.id ?? '').includes(query)
-    );
+    return this.productos.filter(producto => productoCoincideBusqueda(producto, query));
   }
 
   get activosCount(): number {

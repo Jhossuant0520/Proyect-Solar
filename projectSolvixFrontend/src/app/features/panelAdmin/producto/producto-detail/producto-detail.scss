@@ -123,6 +123,18 @@ dd {
   object-fit: cover;
 }
 
+.image-fallback {
+  margin: 0;
+  min-height: 12rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  text-align: center;
+  color: var(--solvix-text-muted);
+  font-size: 0.9rem;
+}
+
 .subhead {
   margin: 1.2rem 0 0.6rem;
   color: var(--solvix-text-secondary);
@@ -144,9 +156,16 @@ dd {
   border-bottom: 1px solid var(--solvix-border-subtle);
 }
 
-.timeline__top,
+.timeline__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.7rem;
+  align-items: baseline;
+}
+
 .moves li {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 0.7rem;
   align-items: baseline;

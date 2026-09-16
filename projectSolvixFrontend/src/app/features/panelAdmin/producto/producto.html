@@ -38,6 +38,22 @@
         </label>
         <label>
           <span class="label-row">
+            Código de barras
+            <span class="opt">Opcional</span>
+            <solvix-field-help text="El código de barras permite identificar rápidamente este producto." />
+          </span>
+          <input
+            type="text"
+            formControlName="codigoBarras"
+            maxlength="50"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="Ej. 7701234567890"
+          />
+          <span class="hint">Opcional. Puedes escribirlo o usar un lector de código de barras.</span>
+        </label>
+        <label>
+          <span class="label-row">
             Categoría
             <span class="req">Obligatorio</span>
             <solvix-field-help text="Agrupa el producto. Elige una de las categorías activas del sistema." />
@@ -105,14 +121,84 @@
           </div>
         }
 
-        <label class="full">
+        <div class="full imagen-block">
           <span class="label-row">
-            URL de imagen
+            Imagen del producto
             <span class="opt">Opcional</span>
-            <solvix-field-help text="Enlace de la foto del producto. Si no tienes uno, déjalo vacío. No sube un archivo desde este formulario." />
+            <solvix-field-help text="Puedes subir una imagen desde tu equipo o pegar una URL. SOLVIX guarda una sola referencia en imagenUrl." />
           </span>
-          <input type="text" formControlName="imagenUrl" maxlength="500" placeholder="https://" />
-        </label>
+          <p class="hint">Puedes subir una imagen desde tu equipo o pegar una URL.</p>
+
+          <div class="imagen-options">
+            <div class="file-pick">
+              <input
+                #imagenInput
+                class="sr-only"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                (change)="onArchivoSeleccionado($event)"
+              />
+              <button
+                type="button"
+                class="btn-tech-secondary imagen-upload-btn"
+                (click)="imagenInput.click()"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">upload_file</span>
+                {{ archivoImagen ? 'Cambiar imagen' : 'Elegir imagen' }}
+              </button>
+              @if (archivoImagen) {
+                <span class="archivo-nombre" [title]="archivoImagen.name">{{ archivoImagen.name }}</span>
+              } @else {
+                <span class="hint">JPG, PNG o WEBP · máx. 2 MB</span>
+              }
+            </div>
+
+            <label class="url-pick">
+              <span class="hint">O pega una URL de imagen</span>
+              <input
+                type="text"
+                formControlName="imagenUrl"
+                maxlength="500"
+                placeholder="https://"
+                (input)="onImagenUrlChange()"
+              />
+            </label>
+          </div>
+
+          @if (errorImagen) {
+            <p class="imagen-error">{{ errorImagen }}</p>
+          }
+
+          @if (avisoImagenParcial) {
+            <div class="imagen-aviso">
+              <p>{{ avisoImagenParcial }}</p>
+              @if (archivoImagen && productoId) {
+                <solvix-button family="tech" rank="secondary" type="button" (click)="reintentarImagen()">
+                  Reintentar imagen
+                </solvix-button>
+              }
+            </div>
+          }
+
+          @if (previewVisible && !previewFallida) {
+            <div class="imagen-preview">
+              <img [src]="previewVisible" alt="Vista previa" (error)="onPreviewError()" />
+              <solvix-button family="tech" rank="tertiary" type="button" (click)="quitarImagen()">
+                Eliminar imagen
+              </solvix-button>
+            </div>
+          } @else if (previewFallida) {
+            <div class="imagen-preview imagen-preview--error">
+              <p>{{ mensajeErrorPreview }}</p>
+              <solvix-button family="tech" rank="tertiary" type="button" (click)="quitarImagen()">
+                Quitar URL
+              </solvix-button>
+            </div>
+          } @else if (eliminarImagen) {
+            <p class="hint">La imagen se eliminará al guardar.</p>
+          }
+        </div>
+
         <label class="full">
           <span class="label-row">
             Descripción

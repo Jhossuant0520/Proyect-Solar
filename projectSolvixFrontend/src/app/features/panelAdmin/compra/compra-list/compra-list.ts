@@ -13,15 +13,27 @@ import { CompraService } from '../../../../core/services/compra.service';
 import { ProveedorService } from '../../../../core/services/proveedor.service';
 import { CompraFiltros, CompraResponseDTO, EstadoCompra } from '../../../../core/models/compra.models';
 import { ProveedorResponseDTO } from '../../../../core/models/proveedor.models';
-import { PeriodoPreset } from '../../dashboard/models/dashboard.models';
+import { Agrupacion, PeriodoPreset, SeccionEstado } from '../../dashboard/models/dashboard.models';
 import { formatMetricValue, labelEstadoMetrica, notaEstadoMetrica } from '../../dashboard/utils/dashboard-format';
 import { PERIODO_PRESETS, periodoInicial, rangoDePreset, toQueryDesde, toQueryHasta } from '../../dashboard/utils/dashboard-period';
 import { formatFechaVenta, formatImporte, mapHttpError } from '../../venta/venta-ui';
-import { CompraKpiVista, mapKpisCompras, proveedorVisible, resumenProductosCompra } from '../compra-mapper';
+import { CompraGastoEvolutionComponent } from '../compra-gasto-evolution/compra-gasto-evolution';
+import { CompraGastoProveedorComponent } from '../compra-gasto-proveedor/compra-gasto-proveedor';
+import {
+  CompraKpiVista,
+  CompraSerieMetrica,
+  CompraSeriePunto,
+  ProveedorGastoVista,
+  mapGastoPorProveedor,
+  mapKpisCompras,
+  mapSerieCompras,
+  proveedorVisible,
+  resumenProductosCompra
+} from '../compra-mapper';
 import { ESTADOS_COMPRA, labelEstadoCompra, permiteDevolucionCompra, toneEstadoCompra } from '../compra-ui';
 
 type ListaEstado = 'loading' | 'ready' | 'empty' | 'error';
-type KpiEstado = 'loading' | 'ready' | 'error' | 'hidden';
+type AnalyticsEstado = 'loading' | 'ready' | 'error' | 'hidden';
 
 @Component({
   selector: 'app-compra-list',
@@ -35,21 +47,29 @@ type KpiEstado = 'loading' | 'ready' | 'error' | 'hidden';
     SolvixMetricCardComponent,
     SolvixLoadingStateComponent,
     SolvixEmptyStateComponent,
-    SolvixErrorStateComponent
+    SolvixErrorStateComponent,
+    CompraGastoEvolutionComponent,
+    CompraGastoProveedorComponent
   ]
 })
 export class CompraListComponent implements OnInit {
   compras: CompraResponseDTO[] = [];
   proveedores: ProveedorResponseDTO[] = [];
   kpis: CompraKpiVista[] = [];
+  serie: CompraSeriePunto[] = [];
+  gastoProveedores: ProveedorGastoVista[] = [];
   state: ListaEstado = 'loading';
-  kpiState: KpiEstado = 'loading';
+  analyticsState: AnalyticsEstado = 'loading';
+  serieState: SeccionEstado = 'loading';
+  proveedorState: SeccionEstado = 'loading';
   errorTitle = 'No pudimos cargar las compras.';
   errorMessage = 'Revisa la conexión e inténtalo de nuevo.';
   searchNumero = '';
   filtroProveedorId: number | null = null;
   filtroEstado: EstadoCompra | '' = '';
   filtroPeriodo: PeriodoPreset | 'todas' = 'mes';
+  agrupacion: Agrupacion = 'MES';
+  serieMetrica: CompraSerieMetrica = 'comprasNetas';
   desde = '';
   hasta = '';
 
@@ -100,6 +120,10 @@ export class CompraListComponent implements OnInit {
     );
   }
 
+  get muestraAnalytics(): boolean {
+    return this.analyticsState !== 'hidden';
+  }
+
   cargar(): void {
     this.state = 'loading';
     this.compraService.listar(this.filtrosApi()).subscribe({
@@ -114,31 +138,55 @@ export class CompraListComponent implements OnInit {
         this.state = 'error';
       }
     });
-    this.cargarKpis();
+    this.cargarAnalytics();
   }
 
-  cargarKpis(): void {
+  cargarAnalytics(): void {
     if (this.filtroPeriodo === 'todas') {
       this.kpis = [];
-      this.kpiState = 'hidden';
+      this.serie = [];
+      this.gastoProveedores = [];
+      this.analyticsState = 'hidden';
+      this.serieState = 'empty';
+      this.proveedorState = 'empty';
       return;
     }
-    this.kpiState = 'loading';
+
+    this.analyticsState = 'loading';
+    this.serieState = 'loading';
+    this.proveedorState = 'loading';
+
     this.analytics.compras(
       toQueryDesde(this.desde),
       toQueryHasta(this.hasta),
-      'MES',
+      this.agrupacion,
       this.filtroProveedorId ?? undefined
     ).subscribe({
       next: dto => {
         this.kpis = mapKpisCompras(dto);
-        this.kpiState = 'ready';
+        this.serie = mapSerieCompras(dto.serie);
+        this.gastoProveedores = mapGastoPorProveedor(dto.gastoPorProveedor);
+        this.analyticsState = 'ready';
+
+        if (dto.estado === 'SIN_DATOS' || this.serie.length === 0) {
+          this.serieState = 'empty';
+        } else {
+          this.serieState = 'ready';
+        }
+
+        if (dto.estado === 'SIN_DATOS' || this.gastoProveedores.length === 0) {
+          this.proveedorState = 'empty';
+        } else {
+          this.proveedorState = 'ready';
+        }
       },
       error: error => {
         const mapped = mapHttpError(error, 'No pudimos cargar el resumen.');
         this.errorTitle = this.state === 'error' ? this.errorTitle : mapped.title;
         this.errorMessage = this.state === 'error' ? this.errorMessage : mapped.message;
-        this.kpiState = 'error';
+        this.analyticsState = 'error';
+        this.serieState = 'error';
+        this.proveedorState = 'error';
       }
     });
   }
@@ -169,12 +217,26 @@ export class CompraListComponent implements OnInit {
     this.cargar();
   }
 
+  onAgrupacion(agrupacion: Agrupacion): void {
+    if (this.agrupacion === agrupacion) {
+      return;
+    }
+    this.agrupacion = agrupacion;
+    this.cargarAnalytics();
+  }
+
+  onSerieMetrica(metrica: CompraSerieMetrica): void {
+    this.serieMetrica = metrica;
+  }
+
   limpiarFiltros(): void {
     const inicial = periodoInicial();
     this.searchNumero = '';
     this.filtroProveedorId = null;
     this.filtroEstado = '';
     this.filtroPeriodo = 'mes';
+    this.agrupacion = 'MES';
+    this.serieMetrica = 'comprasNetas';
     this.desde = inicial.desde;
     this.hasta = inicial.hasta;
     this.cargar();

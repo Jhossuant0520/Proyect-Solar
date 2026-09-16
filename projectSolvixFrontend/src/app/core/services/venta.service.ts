@@ -56,6 +56,11 @@ export class VentaService {
     return this.http.get<DevolucionVentaResponseDTO[]>(`${this.ventasUrl}/${ventaId}/devoluciones`);
   }
 
+  listarDevolucionesPorCliente(clienteId: number): Observable<DevolucionVentaResponseDTO[]> {
+    const params = new HttpParams().set('clienteId', String(clienteId));
+    return this.http.get<DevolucionVentaResponseDTO[]>(this.devolucionesUrl, { params });
+  }
+
   registrarDevolucion(
     ventaId: number,
     request: DevolucionVentaRequestDTO

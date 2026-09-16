@@ -129,7 +129,7 @@ public class DevolucionCompraService {
             devolucion.agregarDetalle(detalle);
 
             montoTotal = montoTotal.add(montoLinea);
-            if (costoConocido) {
+            if (costoHistorico != null) {
                 costoTotal = costoTotal.add(costoHistorico.multiply(BigDecimal.valueOf(linea.getCantidad())));
             } else {
                 costoCompleto = false;

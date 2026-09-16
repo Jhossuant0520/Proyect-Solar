@@ -19,13 +19,14 @@ public final class ProductoSpecifications {
             Integer stockMin,
             Boolean activo) {
 
-        return Specification
-            .where(marcaContiene(marca))
-            .and(categoriaEs(categoriaId))
-            .and(precioDesde(precioMin))
-            .and(precioHasta(precioMax))
-            .and(stockMayorQue(stockMin))
-            .and(activoEs(activo));
+        return Specification.allOf(
+            marcaContiene(marca),
+            categoriaEs(categoriaId),
+            precioDesde(precioMin),
+            precioHasta(precioMax),
+            stockMayorQue(stockMin),
+            activoEs(activo)
+        );
     }
 
     private static Specification<Producto> marcaContiene(String marca) {

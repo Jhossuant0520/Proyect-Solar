@@ -83,7 +83,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             usuario.getIdUsuario(), usuario.getNombreUsuario(), usuario.isActivo());
 
         modelRolUsuario rol = usuario.getRol();
-        String nombreRol = rol != null ? StringUtils.trimWhitespace(rol.getNombreRol()) : null;
+        String nombreRol = recortarRol(rol != null ? rol.getNombreRol() : null);
         log.debug("Rol encontrado={}", nombreRol);
 
         if (!usuario.isActivo() || !StringUtils.hasText(nombreRol)) {
@@ -117,6 +117,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return header.substring(7);
         }
         return null;
+    }
+
+    /**
+     * Equivale a {@code StringUtils.trimWhitespace}: recorta solo extremos (Unicode),
+     * conserva espacios internos y deja {@code null} como {@code null}.
+     * No usa {@code trimAllWhitespace}, que borraría espacios internos.
+     */
+    private static String recortarRol(String nombreRol) {
+        return nombreRol == null ? null : nombreRol.strip();
     }
 
     private static String authoritiesToString(Collection<? extends GrantedAuthority> authorities) {

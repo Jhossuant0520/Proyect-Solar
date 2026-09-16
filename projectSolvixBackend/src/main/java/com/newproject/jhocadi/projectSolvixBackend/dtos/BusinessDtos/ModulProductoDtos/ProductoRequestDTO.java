@@ -20,6 +20,13 @@ public class ProductoRequestDTO {
     @Size(max = 100)
     private String marca;
 
+    /**
+     * Identificador de código de barras opcional. Vacío o null = sin código.
+     * No se convierte a número: se conserva el texto exacto (tras trim).
+     */
+    @Size(max = 50, message = "El código de barras no puede superar 50 caracteres.")
+    private String codigoBarras;
+
     @NotNull(message = "La categoría es obligatoria.")
     private Long categoriaId;
 

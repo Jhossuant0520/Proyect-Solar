@@ -41,6 +41,13 @@ public class Producto {
     @Column(nullable = false, length = 100)
     private String marca;
 
+    /**
+     * Identificador operativo opcional (EAN/UPC u otro). Se trata como STRING
+     * (conserva ceros a la izquierda). UNIQUE cuando no es null.
+     */
+    @Column(name = "codigo_barras", length = 50, unique = true)
+    private String codigoBarras;
+
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "categoria_id", nullable = false)
     private CategoriaProducto categoria;

@@ -14,6 +14,16 @@ import { ProveedorService } from '../../../../core/services/proveedor.service';
 import { CompraRequestDTO, DetalleCompraRequestDTO } from '../../../../core/models/compra.models';
 import { ProveedorResponseDTO } from '../../../../core/models/proveedor.models';
 import { ProductoModel } from '../../producto/productoClase';
+import {
+  mensajeErrorLookupCodigoBarras,
+  resolverProductoPorCodigoBarras
+} from '../../producto/producto-barcode-lookup';
+import {
+  MENSAJE_PRODUCTO_YA_EN_COMPRA,
+  idsProductosEnLineas,
+  labelCodigoBarras,
+  productoCoincideBusqueda
+} from '../../producto/producto-ui';
 import { formatImporte, mapHttpError } from '../../venta/venta-ui';
 
 type FormEstado = 'loading' | 'ready' | 'error';
@@ -39,12 +49,14 @@ export class CompraFormComponent implements OnInit {
   proveedores: ProveedorResponseDTO[] = [];
   catalogo: ProductoModel[] = [];
   busquedaProducto = '';
+  buscandoCodigo = false;
   loadState: FormEstado = 'loading';
   submitState: SubmitEstado = 'idle';
   errorTitle = 'No pudimos cargar el formulario.';
   errorMessage = 'Revisa la conexión e inténtalo de nuevo.';
   submitError = '';
   readonly money = formatImporte;
+  readonly labelCodigo = labelCodigoBarras;
 
   constructor(
     private fb: FormBuilder,
@@ -71,22 +83,11 @@ export class CompraFormComponent implements OnInit {
   }
 
   get productosFiltrados(): ProductoModel[] {
-    const query = this.busquedaProducto.trim().toLowerCase();
-    const usados = new Set(
-      this.detalles.controls
-        .map(control => Number(control.get('productoId')?.value))
-        .filter(id => Number.isFinite(id))
-    );
+    const query = this.busquedaProducto.trim();
+    const usados = idsProductosEnLineas(this.detalles.controls);
     return this.catalogo
       .filter(producto => producto.id != null && !usados.has(producto.id))
-      .filter(producto => {
-        if (!query) {
-          return true;
-        }
-        return producto.nombre.toLowerCase().includes(query)
-          || (producto.marca ?? '').toLowerCase().includes(query)
-          || String(producto.id).includes(query);
-      })
+      .filter(producto => productoCoincideBusqueda(producto, query))
       .slice(0, 8);
   }
 
@@ -109,13 +110,56 @@ export class CompraFormComponent implements OnInit {
     this.busquedaProducto = (event.target as HTMLInputElement).value;
   }
 
+  /** HID/teclado: Enter confirma el código sin enviar el formulario. */
+  onBusquedaEnter(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.resolverYAgregarPorCodigo();
+  }
+
+  resolverYAgregarPorCodigo(): void {
+    const query = this.busquedaProducto.trim();
+    if (!query || this.buscandoCodigo) {
+      return;
+    }
+
+    const unSoloResultado = this.productosFiltrados;
+    if (unSoloResultado.length === 1) {
+      this.agregarProducto(unSoloResultado[0]);
+      return;
+    }
+
+    this.buscandoCodigo = true;
+    resolverProductoPorCodigoBarras(this.productoService, this.catalogo, query).subscribe({
+      next: producto => {
+        this.buscandoCodigo = false;
+        this.integrarProductoResuelto(producto);
+      },
+      error: error => {
+        this.buscandoCodigo = false;
+        const mapped = mapHttpError(error, 'No pudimos buscar el producto.');
+        this.snackBar.open(
+          mensajeErrorLookupCodigoBarras(error, mapped.message),
+          'Cerrar',
+          { duration: 4000 }
+        );
+      }
+    });
+  }
+
   agregarProducto(producto: ProductoModel): void {
     if (producto.id == null) {
+      return;
+    }
+    if (idsProductosEnLineas(this.detalles.controls).has(producto.id)) {
+      this.snackBar.open(MENSAJE_PRODUCTO_YA_EN_COMPRA, 'Cerrar', { duration: 3000 });
+      this.busquedaProducto = '';
       return;
     }
     this.detalles.push(this.fb.group({
       productoId: [producto.id, Validators.required],
       productoNombre: [producto.nombre],
+      productoCodigoBarras: [producto.codigoBarras ?? null],
       stockActual: [producto.stockActual ?? 0],
       costoCatalogo: [producto.costoConocido ? producto.costoActual : null],
       cantidad: [1, [Validators.required, Validators.min(1)]],
@@ -177,6 +221,17 @@ export class CompraFormComponent implements OnInit {
 
   cancelar(): void {
     this.router.navigate(['/compras']);
+  }
+
+  private integrarProductoResuelto(producto: ProductoModel): void {
+    if (producto.activo === false) {
+      this.snackBar.open('Ese producto está inactivo y no se puede comprar.', 'Cerrar', { duration: 4000 });
+      return;
+    }
+    if (producto.id != null && !this.catalogo.some(item => item.id === producto.id)) {
+      this.catalogo = [producto, ...this.catalogo];
+    }
+    this.agregarProducto(producto);
   }
 
   private marcarErrorCarga(error: unknown): void {

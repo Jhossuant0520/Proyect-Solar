@@ -1,0 +1,184 @@
+.clientes-page {
+  position: relative;
+  z-index: 1;
+  max-width: 80rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.search {
+  position: relative;
+  flex: 1 1 16rem;
+}
+
+.search .material-symbols-outlined {
+  position: absolute;
+  left: 0.55rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--solvix-text-muted);
+  font-size: 1.1rem;
+}
+
+.search input,
+.filter-bar select {
+  background: var(--solvix-surface-low);
+  border: 1px solid var(--solvix-border-subtle);
+  color: var(--solvix-text);
+  border-radius: 0.125rem;
+  padding: 0.5rem 0.7rem;
+  font-family: var(--solvix-font-mono);
+  font-size: 0.78rem;
+}
+
+.search input {
+  width: 100%;
+  padding-left: 2rem;
+}
+
+.filter-bar select {
+  min-width: 9.5rem;
+}
+
+.clear {
+  background: transparent;
+  border: 0;
+  color: var(--solvix-primary);
+  font-family: var(--solvix-font-mono);
+  font-size: 0.72rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.table-panel {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid var(--solvix-border);
+  border-radius: var(--solvix-radius);
+  overflow: hidden;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.cli-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 58rem;
+}
+
+.cli-table th,
+.cli-table td {
+  padding: 0.8rem 0.7rem;
+  border-bottom: 1px solid var(--solvix-border-subtle);
+  text-align: left;
+  vertical-align: top;
+}
+
+.cli-table th {
+  color: var(--solvix-text-muted);
+  font-family: var(--solvix-font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cli-table td {
+  color: var(--solvix-text-secondary);
+}
+
+.cli-table tbody tr:hover {
+  background: rgba(46, 52, 71, 0.35);
+}
+
+.name-btn {
+  background: none;
+  border: 0;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+
+.name-btn strong,
+.card-main strong {
+  display: block;
+  color: var(--solvix-text);
+}
+
+.sub {
+  display: block;
+  color: var(--solvix-text-muted);
+  font-size: 0.72rem;
+}
+
+.icon-btn {
+  background: transparent;
+  border: 0;
+  color: var(--solvix-text-muted);
+  cursor: pointer;
+  width: 2rem;
+  height: 2rem;
+}
+
+.icon-btn:hover,
+.icon-btn:focus-visible {
+  color: var(--solvix-primary);
+}
+
+.actions {
+  white-space: nowrap;
+}
+
+.mobile-list {
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mobile-list li {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--solvix-border-subtle);
+}
+
+.card-main {
+  width: 100%;
+  background: none;
+  border: 0;
+  padding: 0;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+
+.card-meta {
+  margin-top: 0.45rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+@media (max-width: 767px) {
+  .desktop-table {
+    display: none;
+  }
+
+  .mobile-list {
+    display: block;
+  }
+}

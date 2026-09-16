@@ -44,17 +44,17 @@ public class SecurityConfig {
                 // Públicos: autenticación y preflight CORS
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                // Catálogo de productos y categorías (lectura pública)
-                .requestMatchers(HttpMethod.GET, "/api/v1/productos", "/api/v1/productos/**").permitAll()
-                .requestMatchers(HttpMethod.GET,
-                    "/api/v1/categorias-producto", "/api/v1/categorias-producto/**").permitAll()
+                // Catálogo público (sin costo, stock numérico ni datos administrativos)
+                .requestMatchers(HttpMethod.GET, "/api/v1/catalogo", "/api/v1/catalogo/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/cuenta/avatares/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/productos/imagenes/**").permitAll()
                 // Documentación OpenAPI / Swagger (si se habilita a futuro)
                 .requestMatchers(
                     "/v3/api-docs/**",
                     "/swagger-ui/**",
                     "/swagger-ui.html"
                 ).permitAll()
+                // Productos y categorías administrativas: JWT + @PreAuthorize ADMIN
                 // Todo lo demás requiere JWT
                 .anyRequest().authenticated()
             )

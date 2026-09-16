@@ -1,0 +1,36 @@
+<section class="dash-panel" aria-labelledby="compra-proveedor-title">
+  <solvix-section-header
+    kicker="Proveedores"
+    title="Gasto por proveedor"
+    subtitle="A qué proveedores les estás comprando más en este período."
+  />
+
+  <solvix-section-state
+    [state]="state"
+    loadingLabel="Cargando gasto por proveedor."
+    emptyMessage="No hay gasto por proveedor en este período."
+    (retry)="retry.emit()"
+  >
+    <ul class="prov-list">
+      @for (item of proveedores; track item.proveedorId) {
+        <li>
+          <div class="prov-row">
+            <span>{{ item.nombre }}</span>
+            <span class="solvix-mono">{{ money(item.comprasNetas, true) }}</span>
+          </div>
+          <div
+            class="prov-bar"
+            role="img"
+            [attr.aria-label]="'Participación ' + percent(item.participacion)"
+          >
+            <span [style.width]="barWidth(item.participacion)"></span>
+          </div>
+          <div class="prov-meta solvix-mono">
+            <span>{{ percent(item.participacion) }} del gasto neto</span>
+            <span>{{ item.ordenes }} órdenes</span>
+          </div>
+        </li>
+      }
+    </ul>
+  </solvix-section-state>
+</section>

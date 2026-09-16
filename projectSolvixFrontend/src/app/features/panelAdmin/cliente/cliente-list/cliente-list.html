@@ -1,0 +1,138 @@
+<section class="clientes-page">
+  <solvix-page-header
+    kicker="Comercial"
+    title="Clientes"
+    subtitle="Consulta quién compra y mantén sus datos al día."
+  >
+    <solvix-button family="tech" rank="primary" icon="person_add" (click)="nuevo()">
+      Nuevo cliente
+    </solvix-button>
+  </solvix-page-header>
+
+  <div class="filter-bar">
+    <label class="search">
+      <span class="material-symbols-outlined" aria-hidden="true">search</span>
+      <input
+        type="search"
+        [value]="search"
+        placeholder="Nombre, documento, correo o teléfono"
+        (input)="onSearch($event)"
+      />
+    </label>
+    <select [value]="filtroTipo" (change)="onTipo($event)" aria-label="Tipo de cliente">
+      <option value="">Todos los tipos</option>
+      <option value="PERSONA">Persona</option>
+      <option value="EMPRESA">Empresa</option>
+      <option value="CONSUMIDOR_FINAL">Consumidor final</option>
+    </select>
+    <select [value]="filtroActivo" (change)="onActivo($event)" aria-label="Estado">
+      <option value="">Activos e inactivos</option>
+      <option value="true">Activos</option>
+      <option value="false">Inactivos</option>
+    </select>
+    @if (hayFiltros) {
+      <button type="button" class="clear" (click)="limpiar()">Limpiar</button>
+    }
+  </div>
+
+  @if (state === 'loading') {
+    <solvix-loading-state label="Cargando clientes." />
+  } @else if (state === 'error') {
+    <solvix-error-state
+      title="No pudimos cargar los clientes."
+      message="Revisa la conexión e inténtalo de nuevo."
+      (retry)="cargar()"
+    />
+  } @else if (state === 'empty') {
+    <solvix-empty-state
+      icon="group"
+      title="No hay clientes registrados."
+      message="Cuando registres uno, aparecerá aquí."
+      actionLabel="Nuevo cliente"
+      actionIcon="person_add"
+      (action)="nuevo()"
+    />
+  } @else if (visibles.length === 0) {
+    <solvix-empty-state
+      icon="search_off"
+      title="No encontramos clientes que coincidan con tu búsqueda."
+      message="Prueba con otro nombre, documento, correo o teléfono."
+      actionLabel="Limpiar búsqueda"
+      (action)="limpiar()"
+    />
+  } @else {
+    <div class="table-panel">
+      <div class="table-wrap desktop-table">
+        <table class="cli-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Tipo</th>
+              <th>Documento</th>
+              <th>Correo</th>
+              <th>Teléfono</th>
+              <th>Estado</th>
+              <th><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cliente of visibles; track cliente.id) {
+              <tr>
+                <td>
+                  <button type="button" class="name-btn" (click)="ver(cliente)">
+                    <strong>{{ cliente.nombre }}</strong>
+                    <span class="sub">ID {{ cliente.id }}</span>
+                  </button>
+                </td>
+                <td>{{ tipo(cliente.tipoCliente) }}</td>
+                <td>{{ documento(cliente) }}</td>
+                <td>{{ cliente.email || '—' }}</td>
+                <td>{{ cliente.telefono || '—' }}</td>
+                <td>
+                  <solvix-badge [tone]="cliente.activo ? 'success' : 'neutral'">
+                    {{ cliente.activo ? 'Activo' : 'Inactivo' }}
+                  </solvix-badge>
+                </td>
+                <td class="actions">
+                  <button type="button" class="icon-btn" aria-label="Ver cliente" (click)="ver(cliente)">
+                    <span class="material-symbols-outlined">visibility</span>
+                  </button>
+                  @if (puedeEditar(cliente)) {
+                    <button type="button" class="icon-btn" aria-label="Editar cliente" (click)="editar(cliente)">
+                      <span class="material-symbols-outlined">edit</span>
+                    </button>
+                  }
+                  @if (puedeDesactivar(cliente)) {
+                    <button type="button" class="icon-btn" aria-label="Desactivar cliente" (click)="desactivar(cliente)">
+                      <span class="material-symbols-outlined">person_off</span>
+                    </button>
+                  } @else if (!reservado(cliente) && !cliente.activo) {
+                    <button type="button" class="icon-btn" aria-label="Activar cliente" (click)="activar(cliente)">
+                      <span class="material-symbols-outlined">person_check</span>
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <ul class="mobile-list">
+        @for (cliente of visibles; track cliente.id) {
+          <li>
+            <button type="button" class="card-main" (click)="ver(cliente)">
+              <strong>{{ cliente.nombre }}</strong>
+              <span class="sub">{{ tipo(cliente.tipoCliente) }} · {{ documento(cliente) }}</span>
+            </button>
+            <div class="card-meta">
+              <solvix-badge [tone]="cliente.activo ? 'success' : 'neutral'">
+                {{ cliente.activo ? 'Activo' : 'Inactivo' }}
+              </solvix-badge>
+            </div>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</section>

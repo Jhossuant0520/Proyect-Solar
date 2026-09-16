@@ -2,6 +2,7 @@ package com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.Modu
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -11,6 +12,8 @@ import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulProd
 
 @Repository
 public interface ProductoRepository extends JpaRepository<Producto, Long>, JpaSpecificationExecutor<Producto> {
+
+    Optional<Producto> findByCodigoBarras(String codigoBarras);
 
     List<Producto> findByMarcaContainingIgnoreCase(String marca);
 

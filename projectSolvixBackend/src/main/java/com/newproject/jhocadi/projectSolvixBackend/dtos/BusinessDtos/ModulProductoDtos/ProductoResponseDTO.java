@@ -15,6 +15,8 @@ public class ProductoResponseDTO {
     private Long id;
     private String nombre;
     private String marca;
+    /** null cuando el producto no tiene código de barras registrado. */
+    private String codigoBarras;
     private Long categoriaId;
     private String categoriaCodigo;
     private String categoriaNombre;
@@ -34,6 +36,7 @@ public class ProductoResponseDTO {
             .id(producto.getId())
             .nombre(producto.getNombre())
             .marca(producto.getMarca())
+            .codigoBarras(producto.getCodigoBarras())
             .categoriaId(producto.getCategoria() != null ? producto.getCategoria().getId() : null)
             .categoriaCodigo(producto.getCategoria() != null ? producto.getCategoria().getCodigo() : null)
             .categoriaNombre(producto.getCategoria() != null ? producto.getCategoria().getNombre() : null)

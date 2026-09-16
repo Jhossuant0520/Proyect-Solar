@@ -22,6 +22,31 @@ export type TipoMovimientoInventario =
   | 'MERMA'
   | 'CARGA_INICIAL';
 
+export type ReferenciaMovimiento =
+  | 'VENTA'
+  | 'COMPRA'
+  | 'DEVOLUCION_VENTA'
+  | 'DEVOLUCION_COMPRA'
+  | 'AJUSTE_MANUAL'
+  | 'CARGA_INICIAL';
+
+/** Tipos que acepta POST /api/v1/inventario/ajustes. */
+export type TipoAjusteUnidades = 'AJUSTE_ENTRADA' | 'AJUSTE_SALIDA' | 'MERMA';
+
+export interface AjusteInventarioRequestDTO {
+  productoId: number;
+  tipo: TipoAjusteUnidades;
+  cantidad: number;
+  observaciones?: string | null;
+}
+
+export interface MovimientoInventarioFiltros {
+  productoId?: number;
+  tipo?: TipoMovimientoInventario;
+  desde?: string;
+  hasta?: string;
+}
+
 export interface AjusteCostoRequestDTO {
   productoId: number;
   costoNuevo: number;

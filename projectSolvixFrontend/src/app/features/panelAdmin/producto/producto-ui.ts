@@ -102,3 +102,67 @@ export function formatFechaCorta(value: unknown): string {
     timeStyle: 'short'
   });
 }
+
+/** Trim; vacío → null. Nunca convierte el código a número. */
+export function normalizarCodigoBarras(valor: unknown): string | null {
+  if (valor == null) {
+    return null;
+  }
+  const texto = String(valor).trim();
+  return texto ? texto : null;
+}
+
+/** Coincide nombre, marca, id o código de barras (búsqueda local). */
+export function productoCoincideBusqueda(
+  producto: { id?: number; nombre: string; marca: string; codigoBarras?: string | null },
+  query: string
+): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) {
+    return true;
+  }
+  const codigo = (producto.codigoBarras ?? '').toLowerCase();
+  return producto.nombre.toLowerCase().includes(q)
+    || producto.marca.toLowerCase().includes(q)
+    || String(producto.id ?? '').includes(q)
+    || (codigo.length > 0 && codigo.includes(q));
+}
+
+export function labelCodigoBarras(codigo: string | null | undefined): string {
+  return normalizarCodigoBarras(codigo) ?? 'No registrado';
+}
+
+export const MENSAJE_PRODUCTO_NO_ENCONTRADO_CODIGO =
+  'No encontramos un producto con ese código de barras.';
+
+export const MENSAJE_PRODUCTO_YA_EN_VENTA =
+  'Este producto ya está en la venta.';
+
+export const MENSAJE_PRODUCTO_YA_EN_COMPRA =
+  'Este producto ya está en la compra.';
+
+/**
+ * Coincidencia exacta por código (string). Conserva ceros iniciales.
+ * No convierte a Number.
+ */
+export function encontrarPorCodigoExacto<T extends { codigoBarras?: string | null }>(
+  catalogo: T[],
+  codigoRaw: string
+): T | undefined {
+  const codigo = normalizarCodigoBarras(codigoRaw);
+  if (!codigo) {
+    return undefined;
+  }
+  return catalogo.find(producto => producto.codigoBarras === codigo);
+}
+
+export function idsProductosEnLineas(
+  lineas: Array<{ get: (name: string) => { value: unknown } | null }>
+): Set<number> {
+  return new Set(
+    lineas
+      .map(control => Number(control.get('productoId')?.value))
+      .filter(id => Number.isFinite(id))
+  );
+}
+

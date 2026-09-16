@@ -1,0 +1,157 @@
+<section class="detalle-page">
+  @if (state === 'loading') {
+    <solvix-loading-state label="Cargando cliente." />
+  } @else if (state === 'error' || !cliente) {
+    <solvix-error-state
+      title="No pudimos cargar este cliente."
+      message="Puede que no exista o que no tengas permiso."
+      (retry)="cargar()"
+    />
+  } @else {
+    <solvix-page-header
+      kicker="Comercial"
+      [title]="cliente.nombre"
+      subtitle="Datos y operaciones relacionadas."
+    >
+      @if (!reservado(cliente) && cliente.activo) {
+        <solvix-button family="tech" rank="danger" icon="person_off" (click)="desactivar()">
+          Desactivar
+        </solvix-button>
+      }
+      @if (!reservado(cliente) && !cliente.activo) {
+        <solvix-button family="tech" rank="secondary" icon="person_check" (click)="activar()">
+          Activar
+        </solvix-button>
+      }
+      @if (!reservado(cliente)) {
+        <solvix-button family="tech" rank="primary" icon="edit" (click)="editar()">
+          Editar
+        </solvix-button>
+      }
+    </solvix-page-header>
+
+    @if (reservado(cliente)) {
+      <p class="aviso" role="status">{{ mensajeReservado }}</p>
+    } @else if (!cliente.activo) {
+      <p class="aviso" role="status">Este cliente está inactivo. Sus ventas siguen registradas.</p>
+    }
+
+    <section class="panel">
+      <solvix-section-header kicker="Ficha" title="Información del cliente" />
+      <dl class="facts">
+        <div>
+          <dt>Tipo</dt>
+          <dd>{{ tipo(cliente.tipoCliente) }}</dd>
+        </div>
+        <div>
+          <dt>Estado</dt>
+          <dd>
+            <solvix-badge [tone]="cliente.activo ? 'success' : 'neutral'">
+              {{ cliente.activo ? 'Activo' : 'Inactivo' }}
+            </solvix-badge>
+          </dd>
+        </div>
+        <div>
+          <dt>Documento</dt>
+          <dd>{{ documento(cliente) }}</dd>
+        </div>
+        <div>
+          <dt>Correo</dt>
+          <dd>{{ cliente.email || 'No registrado' }}</dd>
+        </div>
+        <div>
+          <dt>Teléfono</dt>
+          <dd>{{ cliente.telefono || 'No registrado' }}</dd>
+        </div>
+        <div>
+          <dt>Registro</dt>
+          <dd>{{ fecha(cliente.fechaRegistro) }}</dd>
+        </div>
+        <div class="full">
+          <dt>Notas</dt>
+          <dd>{{ cliente.notas || 'Sin notas' }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="panel">
+      <solvix-section-header
+        kicker="Operaciones"
+        title="Historial de ventas"
+        [subtitle]="notaHistorial"
+      />
+      @if (ventasState === 'loading') {
+        <solvix-loading-state label="Cargando ventas." />
+      } @else if (ventasState === 'error') {
+        <solvix-error-state title="No pudimos cargar las ventas." (retry)="cargar()" />
+      } @else if (ventasState === 'empty') {
+        <solvix-empty-state
+          icon="payments"
+          title="Este cliente no tiene ventas registradas."
+          message="Las ventas aparecen aquí cuando el sistema las asocia a este cliente."
+        />
+      } @else {
+        <ul class="historial">
+          @for (venta of ventas; track venta.id) {
+            <li>
+              <div>
+                @if (rutaVenta(venta.id); as ruta) {
+                  <a [routerLink]="ruta"><strong>{{ venta.numero }}</strong></a>
+                } @else {
+                  <strong>{{ venta.numero }}</strong>
+                }
+                <span class="sub">{{ fecha(venta.fecha) }} · {{ pago(venta.metodoPago) }}</span>
+              </div>
+              <span class="solvix-mono">{{ money(venta.total) }}</span>
+              <solvix-badge [tone]="tonoVenta(venta.estado)">{{ estadoVenta(venta.estado) }}</solvix-badge>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <section class="panel">
+      <solvix-section-header
+        kicker="Operaciones"
+        title="Historial de devoluciones"
+        [subtitle]="notaHistorial"
+      />
+      @if (devolucionesState === 'loading') {
+        <solvix-loading-state label="Cargando devoluciones." />
+      } @else if (devolucionesState === 'error') {
+        <solvix-error-state title="No pudimos cargar las devoluciones." (retry)="cargar()" />
+      } @else if (devolucionesState === 'empty') {
+        <solvix-empty-state
+          icon="assignment_return"
+          title="Este cliente no tiene devoluciones registradas."
+          message="Las devoluciones de sus ventas aparecen aquí cuando existen."
+        />
+      } @else {
+        <ul class="historial">
+          @for (devolucion of devoluciones; track devolucion.id) {
+            <li>
+              <div>
+                @if (rutaDevolucion(devolucion.ventaId, devolucion.id); as ruta) {
+                  <a [routerLink]="ruta"><strong>{{ devolucion.numero }}</strong></a>
+                } @else {
+                  <strong>{{ devolucion.numero }}</strong>
+                }
+                <span class="sub">
+                  {{ fecha(devolucion.fecha) }}
+                  · {{ motivo(devolucion.motivo) }}
+                  @if (devolucion.ventaNumero) {
+                    · Venta {{ devolucion.ventaNumero }}
+                  }
+                </span>
+              </div>
+              <span class="solvix-mono">{{ money(devolucion.montoTotalDevuelto) }}</span>
+              <solvix-badge [tone]="tonoDevolucion(devolucion.estado)">
+                {{ estadoDevolucion(devolucion.estado) }}
+              </solvix-badge>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+</section>

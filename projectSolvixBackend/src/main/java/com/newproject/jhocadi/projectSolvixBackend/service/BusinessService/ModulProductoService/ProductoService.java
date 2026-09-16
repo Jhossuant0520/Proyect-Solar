@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulProductoDtos.ProductoRequestDTO;
@@ -35,6 +36,7 @@ public class ProductoService {
     private final ProductoRepository productoRepository;
     private final CategoriaProductoRepository categoriaRepository;
     private final InventarioService inventarioService;
+    private final ProductoImagenService productoImagenService;
 
     @Transactional
     public ProductoResponseDTO crear(ProductoRequestDTO request, String usuario) {
@@ -78,13 +80,53 @@ public class ProductoService {
         return ProductoResponseDTO.fromEntity(buscarOFallar(id));
     }
 
+    @Transactional(readOnly = true)
+    public ProductoResponseDTO obtenerPorCodigoBarras(String codigoBarras) {
+        String limpio = normalizarCodigoBarras(codigoBarras);
+        if (limpio == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado.");
+        }
+        return productoRepository.findByCodigoBarras(limpio)
+            .map(ProductoResponseDTO::fromEntity)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado."));
+    }
+
     @Transactional
     public ProductoResponseDTO actualizar(Long id, ProductoRequestDTO request) {
         Producto producto = buscarOFallar(id);
         rechazarCambioDirectoDeStock(producto, request);
         rechazarCambioDirectoDeCosto(producto, request);
+        String imagenAnterior = producto.getImagenUrl();
         aplicarDatosMaestros(producto, request);
-        return ProductoResponseDTO.fromEntity(productoRepository.save(producto));
+        Producto guardado = productoRepository.save(producto);
+        reemplazarImagenLocalSiCambio(imagenAnterior, guardado.getImagenUrl());
+        return ProductoResponseDTO.fromEntity(guardado);
+    }
+
+    /**
+     * Sube una imagen local, actualiza {@code imagenUrl} y elimina el archivo anterior
+     * solo si era una imagen administrada por SOLVIX.
+     */
+    @Transactional
+    public ProductoResponseDTO subirImagen(Long id, MultipartFile archivo) {
+        Producto producto = buscarOFallar(id);
+        String imagenAnterior = producto.getImagenUrl();
+        String nuevaUrl = productoImagenService.guardarArchivo(archivo);
+        producto.setImagenUrl(nuevaUrl);
+        Producto guardado = productoRepository.save(producto);
+        productoImagenService.eliminarSiEsLocal(imagenAnterior);
+        return ProductoResponseDTO.fromEntity(guardado);
+    }
+
+    /** Quita la referencia de imagen. Si era local de SOLVIX, borra el archivo. */
+    @Transactional
+    public ProductoResponseDTO eliminarImagen(Long id) {
+        Producto producto = buscarOFallar(id);
+        String imagenAnterior = producto.getImagenUrl();
+        producto.setImagenUrl(null);
+        Producto guardado = productoRepository.save(producto);
+        productoImagenService.eliminarSiEsLocal(imagenAnterior);
+        return ProductoResponseDTO.fromEntity(guardado);
     }
 
     /** Soft-delete: marca el producto como inactivo en lugar de borrarlo físicamente. */
@@ -93,6 +135,13 @@ public class ProductoService {
         Producto producto = buscarOFallar(id);
         producto.setActivo(false);
         return ProductoResponseDTO.fromEntity(productoRepository.save(producto));
+    }
+
+    private void reemplazarImagenLocalSiCambio(String imagenAnterior, String imagenNueva) {
+        if (imagenAnterior == null || imagenAnterior.equals(imagenNueva)) {
+            return;
+        }
+        productoImagenService.eliminarSiEsLocal(imagenAnterior);
     }
 
     @Transactional(readOnly = true)
@@ -105,15 +154,48 @@ public class ProductoService {
         CategoriaProducto categoria = categoriaRepository.findById(request.getCategoriaId())
             .orElseThrow(() -> new BusinessException("La categoría indicada no existe."));
 
+        String codigoBarras = normalizarCodigoBarras(request.getCodigoBarras());
+        validarCodigoBarrasUnico(codigoBarras, producto.getId());
+
         producto.setNombre(request.getNombre().trim());
         producto.setMarca(request.getMarca().trim());
+        producto.setCodigoBarras(codigoBarras);
         producto.setCategoria(categoria);
         producto.setPrecioVentaActual(request.getPrecioVentaActual());
         producto.setDescripcion(request.getDescripcion() != null ? request.getDescripcion().trim() : null);
-        producto.setImagenUrl(request.getImagenUrl() != null ? request.getImagenUrl().trim() : null);
+        producto.setImagenUrl(normalizarImagenUrl(request.getImagenUrl()));
         if (request.getActivo() != null) {
             producto.setActivo(request.getActivo());
         }
+    }
+
+    private void validarCodigoBarrasUnico(String codigoBarras, Long idActual) {
+        if (codigoBarras == null) {
+            return;
+        }
+        productoRepository.findByCodigoBarras(codigoBarras)
+            .filter(existente -> idActual == null || !existente.getId().equals(idActual))
+            .ifPresent(existente -> {
+                throw new BusinessException("Ya existe un producto con este código de barras.");
+            });
+    }
+
+    /** Trim; vacío → null. Nunca convierte a número. */
+    private String normalizarCodigoBarras(String valor) {
+        if (valor == null) {
+            return null;
+        }
+        String limpio = valor.trim();
+        return limpio.isEmpty() ? null : limpio;
+    }
+
+    /** Trim; vacío → null. Conserva URLs externas o rutas relativas de SOLVIX. */
+    private String normalizarImagenUrl(String valor) {
+        if (valor == null) {
+            return null;
+        }
+        String limpio = valor.trim();
+        return limpio.isEmpty() ? null : limpio;
     }
 
     private void rechazarCambioDirectoDeStock(Producto producto, ProductoRequestDTO request) {

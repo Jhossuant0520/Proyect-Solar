@@ -1,0 +1,393 @@
+<section class="inventario-page">
+  <solvix-page-header
+    kicker="Bodega"
+    title="Inventario"
+    subtitle="Stock, dinero invertido y movimientos de ahora."
+  />
+
+  @if (kpiState === 'loading') {
+    <solvix-loading-state label="Cargando el estado del inventario." />
+  } @else if (kpiState === 'error') {
+    <solvix-error-state
+      title="No pudimos cargar los indicadores."
+      message="El stock de cada producto sigue disponible más abajo."
+      (retry)="cargarIndicadores()"
+    />
+  } @else if (inventario) {
+    <div class="kpi-grid">
+      <solvix-metric-card
+        label="Dinero invertido en inventario"
+        [value]="valorInventarioTexto()"
+        hint="Valor de los productos que tienes en stock según su costo actual."
+        help="Representa cuánto te ha costado el inventario que tienes actualmente. No corresponde al valor total de venta."
+        [statusNote]="valorInventarioNota()"
+        icon="monetization_on"
+        [incomplete]="valorInventarioIncompleto()"
+      />
+      <solvix-metric-card
+        label="Unidades en stock"
+        [value]="'' + inventario.stockTotal"
+        hint="Unidades activas en bodega ahora."
+        help="Es el stock total que entrega el indicador de inventario. No es un conteo hecho en esta pantalla."
+        icon="inventory_2"
+      />
+      <solvix-metric-card
+        label="Stock crítico"
+        [value]="'' + inventario.productosStockCritico"
+        [hint]="umbralTexto()"
+        help="Productos activos con stock igual o menor al umbral. Incluye los que están en cero."
+        icon="warning"
+        [tone]="inventario.productosStockCritico > 0 ? 'warning' : 'neutral'"
+      />
+      <solvix-metric-card
+        label="Unidades ingresadas"
+        [value]="'' + inventario.unidadesIngresadas"
+        hint="Entradas del período, sin contar devoluciones de venta."
+        help="Este número es del período consultado. No es el stock de hoy."
+        icon="move_to_inbox"
+      />
+    </div>
+
+    @if (historicoIncompleto()) {
+      <p class="status-note" role="status">{{ mensajeHistorico }}</p>
+    }
+  }
+
+  <section class="panel">
+    <solvix-section-header
+      kicker="Atención"
+      title="Productos con stock crítico"
+      [subtitle]="inventario ? umbralTexto() : 'Esperando el umbral del inventario.'"
+    />
+    @if (kpiState === 'loading' || catalogoState === 'loading') {
+      <solvix-loading-state label="Revisando stock crítico." />
+    } @else if (kpiState === 'error') {
+      <p class="empty-line">No hay umbral disponible. No inventamos una lista de stock crítico.</p>
+    } @else if (criticos.length === 0) {
+      <solvix-empty-state
+        icon="check_circle"
+        title="No hay productos con stock crítico."
+        message="Ningún producto activo está en el umbral o por debajo."
+      />
+    } @else {
+      <ul class="criticos">
+        @for (producto of criticos; track producto.id) {
+          <li>
+            <button type="button" class="name-btn" (click)="verProducto(producto)">
+              <strong>{{ producto.nombre }}</strong>
+              <span class="sub">{{ producto.marca }} · ID {{ producto.id }}</span>
+            </button>
+            <span class="solvix-mono">{{ producto.stockActual }} u.</span>
+            <solvix-badge [tone]="tonoEstado(estadoStock(producto.stockActual, inventario?.umbralStockCritico))">
+              {{ labelEstado(estadoStock(producto.stockActual, inventario?.umbralStockCritico)) }}
+            </solvix-badge>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  <section class="panel">
+    <solvix-section-header
+      kicker="Consulta"
+      title="Productos en inventario"
+      subtitle="Stock, costo actual y valor de cada producto."
+    />
+
+    <div class="filter-bar">
+      <label class="search">
+        <span class="material-symbols-outlined" aria-hidden="true">search</span>
+        <input
+          type="search"
+          [value]="searchNombre"
+          placeholder="Nombre, ID, código de barras, marca o categoría"
+          (input)="onSearch($event)"
+          (keydown.enter)="onBarcodeEnter($event)"
+        />
+      </label>
+      <select [value]="filtroMarca" (change)="onMarca($event)" aria-label="Marca">
+        <option value="">Todas las marcas</option>
+        @for (marca of marcas; track marca) {
+          <option [value]="marca">{{ marca }}</option>
+        }
+      </select>
+      <select [value]="filtroCategoriaId ?? ''" (change)="onCategoria($event)" aria-label="Categoría">
+        <option value="">Todas las categorías</option>
+        @for (categoria of categorias; track categoria.id) {
+          <option [value]="categoria.id">{{ categoria.nombre }}</option>
+        }
+      </select>
+      <select [value]="filtroActivo" (change)="onEstadoCatalogo($event)" aria-label="Estado del producto">
+        <option value="">Activos e inactivos</option>
+        <option value="true">Activos</option>
+        <option value="false">Inactivos</option>
+      </select>
+      @if (hayFiltrosCatalogo) {
+        <button type="button" class="clear" (click)="limpiarFiltros()">Limpiar</button>
+      }
+    </div>
+
+    @if (catalogoState === 'loading') {
+      <solvix-loading-state label="Cargando productos." />
+    } @else if (catalogoState === 'error') {
+      <solvix-error-state
+        title="No pudimos cargar el inventario."
+        message="Revisa la conexión e inténtalo de nuevo."
+        (retry)="cargarProductos()"
+      />
+    } @else if (catalogoState === 'empty') {
+      <solvix-empty-state
+        title="No hay productos en el catálogo."
+        message="Cuando registres productos, aquí verás su stock y su costo."
+      />
+    } @else if (visibles.length === 0) {
+      <solvix-empty-state
+        title="Ningún producto coincide con la búsqueda."
+        message="Prueba con otro nombre, ID o código de barras."
+        actionLabel="Limpiar búsqueda"
+        (action)="limpiarFiltros()"
+      />
+    } @else {
+      <div class="table-wrap desktop-table">
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Código de barras</th>
+              <th>Categoría</th>
+              <th class="is-num">Stock</th>
+              <th class="is-num">Costo actual</th>
+              <th class="is-num">Valor según costo actual</th>
+              <th>Estado</th>
+              <th><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (producto of visibles; track producto.id) {
+              <tr>
+                <td>
+                  <button type="button" class="name-btn" (click)="verProducto(producto)">
+                    <strong>{{ producto.nombre }}</strong>
+                    <span class="sub">{{ producto.marca }} · ID {{ producto.id }}</span>
+                  </button>
+                </td>
+                <td class="solvix-mono">{{ codigo(producto.codigoBarras) }}</td>
+                <td>{{ producto.categoriaNombre || '—' }}</td>
+                <td class="is-num">{{ producto.stockActual ?? '—' }}</td>
+                <td class="is-num">
+                  {{ producto.costoConocido ? money(producto.costoActual) : 'Costo desconocido' }}
+                </td>
+                <td class="is-num">
+                  {{ valorLinea(producto) != null ? money(valorLinea(producto)) : 'Costo desconocido' }}
+                </td>
+                <td>
+                  <div class="estados">
+                    <solvix-badge [tone]="tonoEstado(estadoStock(producto.stockActual, inventario?.umbralStockCritico))">
+                      {{ labelEstado(estadoStock(producto.stockActual, inventario?.umbralStockCritico)) }}
+                    </solvix-badge>
+                    @if (costoDesconocido(producto)) {
+                      <solvix-badge tone="neutral">Costo desconocido</solvix-badge>
+                    }
+                  </div>
+                </td>
+                <td class="actions">
+                  <button type="button" class="icon-btn" aria-label="Ver producto" (click)="verProducto(producto)">
+                    <span class="material-symbols-outlined">visibility</span>
+                  </button>
+                  <button type="button" class="icon-btn" aria-label="Ver movimientos" (click)="verMovimientos(producto)">
+                    <span class="material-symbols-outlined">history</span>
+                  </button>
+                  <button type="button" class="icon-btn" aria-label="Ajustar unidades" (click)="ajustarUnidades(producto)">
+                    <span class="material-symbols-outlined">tune</span>
+                  </button>
+                  <button type="button" class="icon-btn" aria-label="Ajustar costo" (click)="ajustarCosto(producto)">
+                    <span class="material-symbols-outlined">payments</span>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <ul class="mobile-list">
+        @for (producto of visibles; track producto.id) {
+          <li>
+            <button type="button" class="card-main" (click)="verProducto(producto)">
+              <strong>{{ producto.nombre }}</strong>
+              <span class="sub">{{ codigo(producto.codigoBarras) }}</span>
+              <span class="row">
+                <span>{{ producto.stockActual ?? '—' }} u.</span>
+                <span>{{ producto.costoConocido ? money(producto.costoActual) : 'Costo desconocido' }}</span>
+              </span>
+            </button>
+            <div class="card-meta">
+              <solvix-badge [tone]="tonoEstado(estadoStock(producto.stockActual, inventario?.umbralStockCritico))">
+                {{ labelEstado(estadoStock(producto.stockActual, inventario?.umbralStockCritico)) }}
+              </solvix-badge>
+              <span class="actions">
+                <button type="button" class="icon-btn" aria-label="Ver movimientos" (click)="verMovimientos(producto)">
+                  <span class="material-symbols-outlined">history</span>
+                </button>
+                <button type="button" class="icon-btn" aria-label="Ajustar unidades" (click)="ajustarUnidades(producto)">
+                  <span class="material-symbols-outlined">tune</span>
+                </button>
+                <button type="button" class="icon-btn" aria-label="Ajustar costo" (click)="ajustarCosto(producto)">
+                  <span class="material-symbols-outlined">payments</span>
+                </button>
+              </span>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  <section class="panel" id="movimientos">
+    <solvix-section-header
+      kicker="Trazabilidad"
+      title="Movimientos"
+      [subtitle]="productoEnConsulta ? 'Movimientos de ' + productoEnConsulta.nombre : 'Los más recientes de la bodega.'"
+    />
+
+    <div class="filter-bar">
+      <select [value]="filtroTipo" (change)="onTipoMovimiento($event)" aria-label="Tipo de movimiento">
+        <option value="">Todos los tipos</option>
+        @for (tipo of tiposMovimiento; track tipo.id) {
+          <option [value]="tipo.id">{{ tipo.label }}</option>
+        }
+      </select>
+      @if (productoIdFiltro != null) {
+        <button type="button" class="clear" (click)="limpiarConsultaProducto()">
+          Ver todos los productos
+        </button>
+      }
+    </div>
+
+    @if (movimientosState === 'loading') {
+      <solvix-loading-state label="Cargando movimientos." />
+    } @else if (movimientosState === 'error') {
+      <solvix-error-state
+        title="No pudimos cargar los movimientos."
+        message="El stock no se modifica desde esta pantalla si no confirmas un ajuste."
+        (retry)="cargarMovimientos()"
+      />
+    } @else if (movimientosState === 'empty') {
+      <solvix-empty-state
+        icon="history"
+        title="No hay movimientos registrados para este criterio."
+        message="Compras, ventas, devoluciones y ajustes aparecen aquí cuando el sistema los registra."
+      />
+    } @else {
+      <ul class="movimientos">
+        @for (movimiento of movimientosVisibles; track movimiento.id) {
+          <li>
+            <div class="mov-top">
+              <div>
+                <strong>{{ movimiento.productoNombre }}</strong>
+                <span class="sub">{{ tipoMovimiento(movimiento.tipo) }} · {{ fecha(movimiento.fecha) }}</span>
+              </div>
+              <span
+                class="cantidad solvix-mono"
+                [class.entrada]="movimiento.direccion === 'ENTRADA'"
+                [class.salida]="movimiento.direccion === 'SALIDA'"
+              >
+                {{ signo(movimiento.direccion) }}{{ movimiento.cantidad }}
+              </span>
+            </div>
+            <div class="traza">
+              <span>
+                <small>Stock anterior</small>
+                <strong class="solvix-mono">{{ movimiento.stockAnterior }}</strong>
+              </span>
+              <span class="traza-arrow" aria-hidden="true">→</span>
+              <span>
+                <small>Cantidad</small>
+                <strong class="solvix-mono">{{ signo(movimiento.direccion) }}{{ movimiento.cantidad }}</strong>
+              </span>
+              <span class="traza-arrow" aria-hidden="true">→</span>
+              <span>
+                <small>Stock nuevo</small>
+                <strong class="solvix-mono">{{ movimiento.stockNuevo }}</strong>
+              </span>
+            </div>
+            <p class="meta">
+              <span>Costo en ese momento: {{ costoHistorico(movimiento.costoProductoResultante) }}</span>
+              <span>
+                Origen:
+                @if (rutaReferencia(movimiento.referenciaTipo, movimiento.referenciaId); as ruta) {
+                  <a [routerLink]="ruta">{{ referencia(movimiento.referenciaTipo) }} #{{ movimiento.referenciaId }}</a>
+                } @else {
+                  {{ referencia(movimiento.referenciaTipo) }}
+                  @if (movimiento.referenciaId != null) {
+                    #{{ movimiento.referenciaId }}
+                  }
+                }
+              </span>
+              @if (movimiento.usuarioRegistro) {
+                <span>Registró: {{ movimiento.usuarioRegistro }}</span>
+              }
+            </p>
+            @if (movimiento.observaciones) {
+              <p class="obs">{{ movimiento.observaciones }}</p>
+            }
+          </li>
+        }
+      </ul>
+      @if (!productoIdFiltro && !filtroTipo && movimientos.length > movimientosVisibles.length) {
+        <p class="empty-line">Mostramos los {{ movimientosVisibles.length }} más recientes. El listado completo no está paginado.</p>
+      }
+    }
+  </section>
+
+  <section class="panel">
+    <solvix-section-header
+      kicker="Costo"
+      title="Ajustes de costo"
+      subtitle="Cambian la valoración. No mueven unidades."
+    />
+
+    @if (historicoIncompleto()) {
+      <p class="status-note" role="status">{{ mensajeHistorico }}</p>
+    }
+
+    @if (ajustesState === 'loading') {
+      <solvix-loading-state label="Cargando ajustes de costo." />
+    } @else if (ajustesState === 'error') {
+      <solvix-error-state
+        title="No pudimos cargar los ajustes de costo."
+        (retry)="cargarAjustes()"
+      />
+    } @else if (ajustesState === 'empty') {
+      <solvix-empty-state
+        icon="payments"
+        title="No hay ajustes de costo registrados."
+        message="Un ajuste de costo corrige el costo vigente. No cambia las unidades."
+      />
+    } @else {
+      <ul class="ajustes">
+        @for (ajuste of ajustesVisibles; track ajuste.id) {
+          <li>
+            <div class="mov-top">
+              <div>
+                <strong>{{ ajuste.productoNombre }}</strong>
+                <span class="sub">{{ motivo(ajuste.motivo) }} · {{ fecha(ajuste.fecha) }}</span>
+              </div>
+              <span class="solvix-mono">{{ money(ajuste.costoAnterior) }} → {{ money(ajuste.costoNuevo) }}</span>
+            </div>
+            <p class="meta">
+              <span>Costo resultante: {{ costoHistorico(ajuste.costoProductoResultante) }}</span>
+              <span>Stock al ajustar: {{ ajuste.stockAlAjustar }} unidades</span>
+              @if (ajuste.usuarioRegistro) {
+                <span>Registró: {{ ajuste.usuarioRegistro }}</span>
+              }
+            </p>
+            @if (ajuste.observaciones) {
+              <p class="obs">{{ ajuste.observaciones }}</p>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</section>

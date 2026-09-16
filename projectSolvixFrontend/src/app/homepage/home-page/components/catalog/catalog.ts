@@ -1,95 +1,102 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { forkJoin, Subject, takeUntil } from 'rxjs';
+import { CatalogoCategoria, CatalogoProducto } from '../../../../core/models/catalogo.models';
+import { CatalogoService } from '../../../../core/services/catalogo.service';
+import { formatMoney } from '../../../../features/panelAdmin/dashboard/utils/dashboard-format';
+import { SolvixBadgeComponent } from '../../../../shared/components/solvix-badge/solvix-badge';
+import { resolverUrlMedia } from '../../../../core/utils/media-url';
+import {
+  filtrarProductosCatalogo,
+  labelDisponibilidad,
+  tonoDisponibilidad
+} from './catalogo-ui';
+
+type CatalogoViewState = 'LOADING' | 'SUCCESS' | 'EMPTY' | 'ERROR';
 
 @Component({
   selector: 'app-catalog',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatCardModule],
+  imports: [CommonModule, FormsModule, RouterLink, SolvixBadgeComponent],
   templateUrl: './catalog.html',
   styleUrl: './catalog.scss'
 })
-export class Catalog {
+export class Catalog implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject<void>();
 
-  categoriaSeleccionada = 'TODOS';
+  viewState: CatalogoViewState = 'LOADING';
+  productos: CatalogoProducto[] = [];
+  categorias: CatalogoCategoria[] = [];
+  categoriaSeleccionadaId: number | null = null;
+  busqueda = '';
+  imagenesRotas = new Set<number>();
 
-  equipos = [
-    {
-      nombre: 'Computador All-in-One HP 24”',
-      precio: 1299,
-      categoria: 'COMPUTO',
-      imagen: 'https://##',
-      caracteristicas: [
-        'Intel Core i5 12th Gen',
-        '8 GB RAM DDR4',
-        'SSD 512 GB',
-        'Windows 11 Pro'
-      ]
-    },
-    {
-      nombre: 'Laptop Lenovo ThinkPad E14',
-      precio: 999,
-      categoria: 'COMPUTO',
-      imagen: 'https://i.ibb.co/KX3W8v7/canon-g3110.png',
-      caracteristicas: [
-        'AMD Ryzen 5 7530U',
-        '16 GB RAM',
-        'SSD 1 TB',
-        'Pantalla FHD 14”'
-      ]
-    },
-    {
-      nombre: 'Impresora Canon G3110',
-      precio: 320,
-      categoria: 'IMPRESION',
-      imagen: 'https://i.ibb.co/KX3W8v7/canon-g3110.png',
-      caracteristicas: [
-        'Impresión a color',
-        'WiFi',
-        'Sistema continuo'
-      ]
-    },
-    {
-      nombre: 'Kit Panel Solar Portátil 200W',
-      precio: 450,
-      categoria: 'SOLAR',
-      imagen: 'https://i.ibb.co/3N9sZqG/panel.png',
-      caracteristicas: [
-        'Portátil',
-        'Alta eficiencia',
-        'Uso exterior'
-      ]
-    },
-    {
-      nombre: 'Inversor Solar Inteligente 3KW',
-      precio: 780,
-      categoria: 'SOLAR',
-      imagen: 'https://i.ibb.co/3N9sZqG/panel.png',
-      caracteristicas: [
-        'Monitoreo inteligente',
-        'Alta eficiencia',
-        'Instalación fácil'
-      ]
-    }
-  ];
+  readonly formatMoney = formatMoney;
+  readonly labelDisponibilidad = labelDisponibilidad;
+  readonly tonoDisponibilidad = tonoDisponibilidad;
 
-  /* FILTRO */
-  get equiposFiltrados() {
-    if (this.categoriaSeleccionada === 'TODOS') {
-      return this.equipos;
-    }
-    return this.equipos.filter(e => e.categoria === this.categoriaSeleccionada);
+  constructor(private catalogoService: CatalogoService) {}
+
+  ngOnInit(): void {
+    this.cargar();
   }
 
-  seleccionarCategoria(cat: string) {
-    this.categoriaSeleccionada = cat;
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  /* WHATSAPP */
-  getWhatsAppLink(equipo: any): string {
-    const numero = '573172901206';
-    const mensaje = `Hola! Estoy interesado en: *${equipo.nombre}* - Precio: $${equipo.precio}`;
-    return `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
+  get productosFiltrados(): CatalogoProducto[] {
+    return filtrarProductosCatalogo(this.productos, {
+      categoriaId: this.categoriaSeleccionadaId,
+      query: this.busqueda
+    });
+  }
+
+  get mostrarVacioFiltro(): boolean {
+    return this.viewState === 'SUCCESS'
+      && this.productos.length > 0
+      && this.productosFiltrados.length === 0;
+  }
+
+  cargar(): void {
+    this.viewState = 'LOADING';
+    this.imagenesRotas.clear();
+
+    forkJoin({
+      productos: this.catalogoService.listarProductos(),
+      categorias: this.catalogoService.listarCategorias()
+    })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: ({ productos, categorias }) => {
+          this.productos = productos;
+          this.categorias = categorias;
+          this.viewState = productos.length === 0 ? 'EMPTY' : 'SUCCESS';
+        },
+        error: () => {
+          this.productos = [];
+          this.categorias = [];
+          this.viewState = 'ERROR';
+        }
+      });
+  }
+
+  seleccionarCategoria(id: number | null): void {
+    this.categoriaSeleccionadaId = id;
+  }
+
+  onImagenError(productoId: number): void {
+    this.imagenesRotas.add(productoId);
+  }
+
+  imagenDisponible(producto: CatalogoProducto): boolean {
+    return Boolean(resolverUrlMedia(producto.imagenUrl)) && !this.imagenesRotas.has(producto.id);
+  }
+
+  urlImagen(producto: CatalogoProducto): string | null {
+    return resolverUrlMedia(producto.imagenUrl);
   }
 }

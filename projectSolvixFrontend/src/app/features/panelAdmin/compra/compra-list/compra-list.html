@@ -9,31 +9,6 @@
     </solvix-button>
   </solvix-page-header>
 
-  @if (kpiState === 'loading') {
-    <solvix-loading-state label="Cargando resumen." />
-  } @else if (kpiState === 'error') {
-    <solvix-error-state
-      [title]="errorTitle"
-      [message]="errorMessage"
-      (retry)="cargarKpis()"
-    />
-  } @else if (kpiState === 'ready') {
-    <div class="kpi-grid">
-      @for (metric of kpis; track metric.id) {
-        <solvix-metric-card
-          [label]="metric.label"
-          [value]="valorKpi(metric)"
-          [hint]="metric.hint"
-          [help]="metric.help ?? ''"
-          [statusNote]="kpiNota(metric)"
-          [icon]="metric.icon"
-          [tone]="kpiTone(metric)"
-          [incomplete]="kpiIncompleto(metric)"
-        />
-      }
-    </div>
-  }
-
   <div class="filter-bar">
     <label class="search">
       <span class="material-symbols-outlined" aria-hidden="true">search</span>
@@ -63,6 +38,50 @@
     </select>
     <button type="button" class="clear" (click)="limpiarFiltros()">Limpiar filtros</button>
   </div>
+
+  @if (muestraAnalytics) {
+    @if (analyticsState === 'loading') {
+      <solvix-loading-state label="Cargando resumen de compras." />
+    } @else if (analyticsState === 'error') {
+      <solvix-error-state
+        [title]="errorTitle"
+        [message]="errorMessage"
+        (retry)="cargarAnalytics()"
+      />
+    } @else if (analyticsState === 'ready') {
+      <div class="kpi-grid">
+        @for (metric of kpis; track metric.id) {
+          <solvix-metric-card
+            [label]="metric.label"
+            [value]="valorKpi(metric)"
+            [hint]="metric.hint"
+            [help]="metric.help ?? ''"
+            [statusNote]="kpiNota(metric)"
+            [icon]="metric.icon"
+            [tone]="kpiTone(metric)"
+            [incomplete]="kpiIncompleto(metric)"
+          />
+        }
+      </div>
+
+      <div class="analytics-split">
+        <solvix-compra-gasto-evolution
+          [points]="serie"
+          [metrica]="serieMetrica"
+          [agrupacion]="agrupacion"
+          [state]="serieState"
+          (metricaChange)="onSerieMetrica($event)"
+          (agrupacionChange)="onAgrupacion($event)"
+          (retry)="cargarAnalytics()"
+        />
+        <solvix-compra-gasto-proveedor
+          [proveedores]="gastoProveedores"
+          [state]="proveedorState"
+          (retry)="cargarAnalytics()"
+        />
+      </div>
+    }
+  }
 
   @if (state === 'loading') {
     <solvix-loading-state label="Cargando compras." />

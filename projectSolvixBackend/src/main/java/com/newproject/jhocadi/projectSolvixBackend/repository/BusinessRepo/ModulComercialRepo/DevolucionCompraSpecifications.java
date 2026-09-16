@@ -21,13 +21,14 @@ public final class DevolucionCompraSpecifications {
             LocalDateTime desde,
             LocalDateTime hasta) {
 
-        return Specification
-            .where(compraEs(compraId))
-            .and(proveedorEs(proveedorId))
-            .and(estadoEs(estado))
-            .and(motivoEs(motivo))
-            .and(fechaDesde(desde))
-            .and(fechaHasta(hasta));
+        return Specification.allOf(
+            compraEs(compraId),
+            proveedorEs(proveedorId),
+            estadoEs(estado),
+            motivoEs(motivo),
+            fechaDesde(desde),
+            fechaHasta(hasta)
+        );
     }
 
     private static Specification<DevolucionCompra> compraEs(Long compraId) {

@@ -5,6 +5,7 @@
 @use './styles/solvix-tokens';
 @use './styles/solvix-buttons';
 @use './styles/solvix-scrollbars';
+@use './styles/solvix-snackbar';
 
 :root {
   --app-bg-color: var(--solvix-bg);

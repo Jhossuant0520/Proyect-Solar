@@ -18,11 +18,12 @@ public final class CompraSpecifications {
             LocalDateTime desde,
             LocalDateTime hasta) {
 
-        return Specification
-            .where(proveedorEs(proveedorId))
-            .and(estadoEs(estado))
-            .and(fechaDesde(desde))
-            .and(fechaHasta(hasta));
+        return Specification.allOf(
+            proveedorEs(proveedorId),
+            estadoEs(estado),
+            fechaDesde(desde),
+            fechaHasta(hasta)
+        );
     }
 
     private static Specification<Compra> proveedorEs(Long proveedorId) {

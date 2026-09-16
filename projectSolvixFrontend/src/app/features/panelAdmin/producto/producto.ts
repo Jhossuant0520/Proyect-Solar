@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { catchError, of, switchMap } from 'rxjs';
 import { SolvixButtonComponent } from '../../../shared/components/solvix-button/solvix-button';
 import { SolvixErrorStateComponent } from '../../../shared/components/solvix-error-state/solvix-error-state';
 import { SolvixFieldHelpComponent } from '../../../shared/components/solvix-field-help/solvix-field-help';
@@ -10,11 +11,17 @@ import { SolvixLoadingStateComponent } from '../../../shared/components/solvix-l
 import { SolvixPageHeaderComponent } from '../../../shared/components/solvix-page-header/solvix-page-header';
 import { CategoriaProductoService } from '../../../core/services/categoria-producto.service';
 import { ProductoService } from '../../../core/services/producto.service';
-import { CategoriaProductoModel, ProductoRequestDTO } from './productoClase';
+import { resolverUrlMedia } from '../../../core/utils/media-url';
+import { CategoriaProductoModel, ProductoModel, ProductoRequestDTO } from './productoClase';
 import { formatMoney } from '../dashboard/utils/dashboard-format';
 import { mapHttpError } from '../venta/venta-ui';
-import { formatMontoEntrada, parseMontoEntrada } from './producto-ui';
+import { formatMontoEntrada, normalizarCodigoBarras, parseMontoEntrada } from './producto-ui';
+import {
+  MENSAJE_IMAGEN_EXTERNA_FALLA,
+  validarArchivoImagenProducto
+} from './producto-imagen';
 import { AjusteCostoDialogComponent } from './ajuste-costo-dialog/ajuste-costo-dialog';
+import { showSolvixSnack } from '../../../shared/utils/solvix-snack';
 
 @Component({
   selector: 'app-producto',
@@ -26,14 +33,16 @@ import { AjusteCostoDialogComponent } from './ajuste-costo-dialog/ajuste-costo-d
     FormsModule,
     MatSnackBarModule,
     MatDialogModule,
-    SolvixPageHeaderComponent,
     SolvixButtonComponent,
     SolvixFieldHelpComponent,
     SolvixLoadingStateComponent,
-    SolvixErrorStateComponent
+    SolvixErrorStateComponent,
+    SolvixPageHeaderComponent
   ]
 })
-export class ProductoComponent implements OnInit {
+export class ProductoComponent implements OnInit, OnDestroy {
+  @ViewChild('imagenInput') imagenInput?: ElementRef<HTMLInputElement>;
+
   productoForm: FormGroup;
   productoId?: number;
   modoEdicion = false;
@@ -46,6 +55,14 @@ export class ProductoComponent implements OnInit {
   precioTexto = '';
   costoTexto = '';
   readonly money = formatMoney;
+
+  archivoImagen: File | null = null;
+  previewLocalUrl: string | null = null;
+  previewFallida = false;
+  eliminarImagen = false;
+  imagenGuardadaUrl: string | null = null;
+  errorImagen = '';
+  avisoImagenParcial = '';
 
   constructor(
     private fb: FormBuilder,
@@ -63,6 +80,7 @@ export class ProductoComponent implements OnInit {
       precioVentaActual: [null, [Validators.required, Validators.min(0)]],
       costoActual: [null, [Validators.min(0)]],
       stockInicial: [0, [Validators.min(0)]],
+      codigoBarras: ['', [Validators.maxLength(50)]],
       descripcion: [''],
       imagenUrl: [''],
       activo: [true]
@@ -79,11 +97,33 @@ export class ProductoComponent implements OnInit {
     }
   }
 
+  ngOnDestroy(): void {
+    this.revocarPreviewLocal();
+  }
+
+  get previewVisible(): string | null {
+    if (this.eliminarImagen && !this.archivoImagen) {
+      return null;
+    }
+    if (this.previewLocalUrl) {
+      return this.previewLocalUrl;
+    }
+    const urlForm = this.textoOpcional(this.productoForm.get('imagenUrl')?.value);
+    if (urlForm) {
+      return resolverUrlMedia(urlForm);
+    }
+    return resolverUrlMedia(this.imagenGuardadaUrl);
+  }
+
+  get mensajeErrorPreview(): string {
+    return this.previewFallida ? MENSAJE_IMAGEN_EXTERNA_FALLA : '';
+  }
+
   cargarCategorias(): void {
     this.categoriaService.listar(true).subscribe({
       next: categorias => this.categorias = categorias,
       error: () => {
-        this.snackBar.open('No se pudieron cargar las categorías', 'Cerrar', { duration: 3000 });
+        showSolvixSnack(this.snackBar, 'No se pudieron cargar las categorías', 'error');
       }
     });
   }
@@ -92,23 +132,7 @@ export class ProductoComponent implements OnInit {
     this.loadState = 'loading';
     this.productoService.obtenerPorId(id).subscribe({
       next: producto => {
-        this.stockActual = producto.stockActual ?? 0;
-        this.costoVigente = producto.costoActual ?? null;
-        this.costoConocido = producto.costoConocido === true;
-        this.productoForm.patchValue({
-          nombre: producto.nombre,
-          marca: producto.marca,
-          categoriaId: producto.categoriaId,
-          precioVentaActual: producto.precioVentaActual,
-          costoActual: producto.costoActual ?? null,
-          descripcion: producto.descripcion ?? '',
-          imagenUrl: producto.imagenUrl ?? '',
-          activo: producto.activo
-        });
-        this.precioTexto = formatMontoEntrada(producto.precioVentaActual);
-        this.costoTexto = formatMontoEntrada(producto.costoActual ?? null);
-        this.productoForm.get('stockInicial')?.disable();
-        this.productoForm.get('costoActual')?.disable();
+        this.aplicarProductoCargado(producto);
         this.loadState = 'ready';
       },
       error: () => {
@@ -117,46 +141,83 @@ export class ProductoComponent implements OnInit {
     });
   }
 
+  onArchivoSeleccionado(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const archivo = input.files?.[0] ?? null;
+    this.errorImagen = '';
+    this.avisoImagenParcial = '';
+
+    if (!archivo) {
+      return;
+    }
+
+    const validacion = validarArchivoImagenProducto(archivo);
+    if (!validacion.ok) {
+      this.errorImagen = validacion.mensaje;
+      input.value = '';
+      return;
+    }
+
+    this.revocarPreviewLocal();
+    this.archivoImagen = archivo;
+    this.previewLocalUrl = URL.createObjectURL(archivo);
+    this.previewFallida = false;
+    this.eliminarImagen = false;
+    this.productoForm.get('imagenUrl')?.setValue('');
+  }
+
+  onImagenUrlChange(): void {
+    this.errorImagen = '';
+    this.previewFallida = false;
+    if (this.textoOpcional(this.productoForm.get('imagenUrl')?.value)) {
+      this.limpiarArchivoSeleccionado();
+      this.eliminarImagen = false;
+    }
+  }
+
+  onPreviewError(): void {
+    this.previewFallida = true;
+  }
+
+  quitarImagen(): void {
+    this.limpiarArchivoSeleccionado();
+    this.productoForm.get('imagenUrl')?.setValue('');
+    this.eliminarImagen = true;
+    this.previewFallida = false;
+    this.errorImagen = '';
+  }
+
   onSubmit(): void {
     if (this.productoForm.invalid) {
       this.productoForm.markAllAsTouched();
-      this.snackBar.open('Completa los campos obligatorios', 'Cerrar', { duration: 2500 });
+      showSolvixSnack(this.snackBar, 'Completa los campos obligatorios', 'warning', 2500);
       return;
+    }
+
+    if (this.archivoImagen) {
+      const validacion = validarArchivoImagenProducto(this.archivoImagen);
+      if (!validacion.ok) {
+        this.errorImagen = validacion.mensaje;
+        return;
+      }
     }
 
     const request = this.armarRequest();
     if (request == null) {
       this.productoForm.markAllAsTouched();
-      this.snackBar.open('Revisa el precio, el costo y la categoría.', 'Cerrar', { duration: 2500 });
+      showSolvixSnack(this.snackBar, 'Revisa el precio, el costo y la categoría.', 'warning', 2500);
       return;
     }
 
     this.guardando = true;
+    this.avisoImagenParcial = '';
 
     if (this.modoEdicion && this.productoId !== undefined) {
-      this.productoService.actualizar(this.productoId, request).subscribe({
-        next: () => {
-          this.snackBar.open('Producto actualizado', 'Cerrar', { duration: 3000 });
-          this.router.navigate(['/productos', this.productoId]);
-        },
-        error: error => {
-          this.guardando = false;
-          this.snackBar.open(this.mensajeError(error, 'No pudimos actualizar el producto.'), 'Cerrar', { duration: 5000 });
-        }
-      });
+      this.guardarEdicion(this.productoId, request);
       return;
     }
 
-    this.productoService.crear(request).subscribe({
-      next: creado => {
-        this.snackBar.open('Producto registrado', 'Cerrar', { duration: 3000 });
-        this.router.navigate(creado.id != null ? ['/productos', creado.id] : ['/productos']);
-      },
-      error: error => {
-        this.guardando = false;
-        this.snackBar.open(this.mensajeError(error, 'No pudimos registrar el producto.'), 'Cerrar', { duration: 5000 });
-      }
-    });
+    this.guardarCreacion(request);
   }
 
   ajustarCosto(): void {
@@ -189,6 +250,118 @@ export class ProductoComponent implements OnInit {
     this.router.navigate(['/productos']);
   }
 
+  reintentarCarga(): void {
+    if (this.productoId != null) {
+      this.cargarProducto(this.productoId);
+    }
+  }
+
+  reintentarImagen(): void {
+    if (this.productoId == null || !this.archivoImagen) {
+      return;
+    }
+    this.guardando = true;
+    this.avisoImagenParcial = '';
+    this.productoService.subirImagen(this.productoId, this.archivoImagen).subscribe({
+      next: producto => {
+        this.guardando = false;
+        showSolvixSnack(this.snackBar, 'Imagen guardada', 'success');
+        this.router.navigate(['/productos', producto.id]);
+      },
+      error: error => {
+        this.guardando = false;
+        this.avisoImagenParcial = 'Producto creado, pero no pudimos guardar la imagen.';
+        showSolvixSnack(this.snackBar, this.mensajeError(error, this.avisoImagenParcial), 'error', 5000);
+      }
+    });
+  }
+
+  private guardarCreacion(request: ProductoRequestDTO): void {
+    const archivo = this.archivoImagen;
+    this.productoService.crear(request).pipe(
+      switchMap(creado => {
+        if (!archivo || creado.id == null) {
+          return of({ producto: creado, imagenFallida: false });
+        }
+        return this.productoService.subirImagen(creado.id, archivo).pipe(
+          switchMap(conImagen => of({ producto: conImagen, imagenFallida: false })),
+          catchError(() => {
+            this.productoId = creado.id;
+            this.modoEdicion = true;
+            return of({ producto: creado, imagenFallida: true });
+          })
+        );
+      })
+    ).subscribe({
+      next: ({ producto, imagenFallida }) => {
+        this.guardando = false;
+        if (imagenFallida) {
+          this.avisoImagenParcial = 'Producto creado, pero no pudimos guardar la imagen.';
+          showSolvixSnack(this.snackBar, this.avisoImagenParcial, 'warning', 6000);
+          return;
+        }
+        showSolvixSnack(this.snackBar, 'Producto registrado', 'success');
+        this.router.navigate(producto.id != null ? ['/productos', producto.id] : ['/productos']);
+      },
+      error: error => {
+        this.guardando = false;
+        showSolvixSnack(this.snackBar, this.mensajeError(error, 'No pudimos registrar el producto.'), 'error', 5000);
+      }
+    });
+  }
+
+  private guardarEdicion(id: number, request: ProductoRequestDTO): void {
+    const archivo = this.archivoImagen;
+    const debeEliminar = this.eliminarImagen && !archivo;
+
+    this.productoService.actualizar(id, request).pipe(
+      switchMap(producto => {
+        if (archivo) {
+          return this.productoService.subirImagen(id, archivo);
+        }
+        if (debeEliminar) {
+          return this.productoService.eliminarImagen(id);
+        }
+        return of(producto);
+      })
+    ).subscribe({
+      next: () => {
+        this.guardando = false;
+        showSolvixSnack(this.snackBar, 'Producto actualizado', 'success');
+        this.router.navigate(['/productos', id]);
+      },
+      error: error => {
+        this.guardando = false;
+        showSolvixSnack(this.snackBar, this.mensajeError(error, 'No pudimos actualizar el producto.'), 'error', 5000);
+      }
+    });
+  }
+
+  private aplicarProductoCargado(producto: ProductoModel): void {
+    this.stockActual = producto.stockActual ?? 0;
+    this.costoVigente = producto.costoActual ?? null;
+    this.costoConocido = producto.costoConocido === true;
+    this.imagenGuardadaUrl = producto.imagenUrl ?? null;
+    this.eliminarImagen = false;
+    this.limpiarArchivoSeleccionado();
+    this.productoForm.patchValue({
+      nombre: producto.nombre,
+      marca: producto.marca,
+      categoriaId: producto.categoriaId,
+      precioVentaActual: producto.precioVentaActual,
+      costoActual: producto.costoActual ?? null,
+      codigoBarras: producto.codigoBarras ?? '',
+      descripcion: producto.descripcion ?? '',
+      imagenUrl: this.esUrlExterna(producto.imagenUrl) ? (producto.imagenUrl ?? '') : '',
+      activo: producto.activo
+    });
+    this.precioTexto = formatMontoEntrada(producto.precioVentaActual);
+    this.costoTexto = formatMontoEntrada(producto.costoActual ?? null);
+    this.productoForm.get('stockInicial')?.disable();
+    this.productoForm.get('costoActual')?.disable();
+    this.previewFallida = false;
+  }
+
   private armarRequest(): ProductoRequestDTO | null {
     const valores = this.productoForm.getRawValue();
     const categoriaId = Number(valores.categoriaId);
@@ -202,13 +375,30 @@ export class ProductoComponent implements OnInit {
       return null;
     }
 
+    let imagenUrl: string | null = null;
+    if (this.archivoImagen) {
+      imagenUrl = this.modoEdicion ? this.imagenGuardadaUrl : null;
+    } else if (this.eliminarImagen) {
+      imagenUrl = null;
+    } else {
+      const urlForm = this.textoOpcional(valores.imagenUrl);
+      if (urlForm) {
+        imagenUrl = urlForm;
+      } else if (this.modoEdicion && this.imagenGuardadaUrl && !this.esUrlExterna(this.imagenGuardadaUrl)) {
+        imagenUrl = this.imagenGuardadaUrl;
+      } else {
+        imagenUrl = null;
+      }
+    }
+
     const request: ProductoRequestDTO = {
       nombre: String(valores.nombre ?? '').trim(),
       marca: String(valores.marca ?? '').trim(),
       categoriaId,
       precioVentaActual,
+      codigoBarras: normalizarCodigoBarras(valores.codigoBarras),
       descripcion: this.textoOpcional(valores.descripcion) ?? null,
-      imagenUrl: this.textoOpcional(valores.imagenUrl) ?? null,
+      imagenUrl,
       activo: valores.activo !== false
     };
 
@@ -218,6 +408,29 @@ export class ProductoComponent implements OnInit {
     }
 
     return request;
+  }
+
+  private esUrlExterna(url?: string | null): boolean {
+    if (!url) {
+      return false;
+    }
+    const limpio = url.trim().toLowerCase();
+    return limpio.startsWith('http://') || limpio.startsWith('https://');
+  }
+
+  private limpiarArchivoSeleccionado(): void {
+    this.revocarPreviewLocal();
+    this.archivoImagen = null;
+    if (this.imagenInput?.nativeElement) {
+      this.imagenInput.nativeElement.value = '';
+    }
+  }
+
+  private revocarPreviewLocal(): void {
+    if (this.previewLocalUrl) {
+      URL.revokeObjectURL(this.previewLocalUrl);
+      this.previewLocalUrl = null;
+    }
   }
 
   private mensajeError(error: unknown, fallback: string): string {
@@ -250,12 +463,6 @@ export class ProductoComponent implements OnInit {
       this.precioTexto = formateado;
     } else {
       this.costoTexto = formateado;
-    }
-  }
-
-  reintentarCarga(): void {
-    if (this.productoId != null) {
-      this.cargarProducto(this.productoId);
     }
   }
 

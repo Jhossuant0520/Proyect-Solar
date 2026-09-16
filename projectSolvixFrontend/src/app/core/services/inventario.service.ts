@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 import {
   AjusteCostoRequestDTO,
   AjusteCostoResponseDTO,
+  AjusteInventarioRequestDTO,
+  MovimientoInventarioFiltros,
   MovimientoInventarioResponseDTO
 } from '../models/inventario.models';
 
@@ -19,13 +21,38 @@ export class InventarioService {
     return this.http.post<AjusteCostoResponseDTO>(`${this.apiUrl}/ajustes/costo`, request);
   }
 
-  listarAjustesCosto(productoId: number): Observable<AjusteCostoResponseDTO[]> {
-    const params = new HttpParams().set('productoId', String(productoId));
+  registrarAjuste(request: AjusteInventarioRequestDTO): Observable<MovimientoInventarioResponseDTO> {
+    return this.http.post<MovimientoInventarioResponseDTO>(`${this.apiUrl}/ajustes`, request);
+  }
+
+  /** Sin productoId el backend entrega todos los ajustes de costo. */
+  listarAjustesCosto(productoId?: number): Observable<AjusteCostoResponseDTO[]> {
+    let params = new HttpParams();
+    if (productoId != null) {
+      params = params.set('productoId', String(productoId));
+    }
     return this.http.get<AjusteCostoResponseDTO[]>(`${this.apiUrl}/ajustes/costo`, { params });
   }
 
-  listarMovimientos(productoId: number): Observable<MovimientoInventarioResponseDTO[]> {
-    const params = new HttpParams().set('productoId', String(productoId));
+  listarMovimientos(productoId: number): Observable<MovimientoInventarioResponseDTO[]>;
+  listarMovimientos(filtros?: MovimientoInventarioFiltros): Observable<MovimientoInventarioResponseDTO[]>;
+  listarMovimientos(
+    arg?: number | MovimientoInventarioFiltros
+  ): Observable<MovimientoInventarioResponseDTO[]> {
+    const filtros: MovimientoInventarioFiltros = typeof arg === 'number' ? { productoId: arg } : (arg ?? {});
+    let params = new HttpParams();
+    if (filtros.productoId != null) {
+      params = params.set('productoId', String(filtros.productoId));
+    }
+    if (filtros.tipo) {
+      params = params.set('tipo', filtros.tipo);
+    }
+    if (filtros.desde) {
+      params = params.set('desde', filtros.desde);
+    }
+    if (filtros.hasta) {
+      params = params.set('hasta', filtros.hasta);
+    }
     return this.http.get<MovimientoInventarioResponseDTO[]>(`${this.apiUrl}/movimientos`, { params });
   }
 }

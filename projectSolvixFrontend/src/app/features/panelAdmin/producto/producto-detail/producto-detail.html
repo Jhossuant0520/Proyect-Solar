@@ -19,6 +19,9 @@
         <h1>{{ producto.nombre }}</h1>
       </div>
       <div class="head-actions">
+        <solvix-button family="tech" rank="tertiary" icon="warehouse" (click)="irAInventario()">
+          Inventario
+        </solvix-button>
         <solvix-button family="tech" rank="tertiary" icon="history" (click)="irAHistorial()">
           Historial
         </solvix-button>
@@ -39,6 +42,10 @@
             <div>
               <dt>Marca</dt>
               <dd>{{ producto.marca }}</dd>
+            </div>
+            <div>
+              <dt>Código de barras</dt>
+              <dd class="solvix-mono">{{ labelCodigo(producto.codigoBarras) }}</dd>
             </div>
             <div>
               <dt>Categoría</dt>
@@ -113,11 +120,19 @@
       </div>
 
       <aside class="col">
-        @if (producto.imagenUrl) {
-          <section class="panel image-panel">
-            <img [src]="producto.imagenUrl" [alt]="producto.nombre" />
-          </section>
-        }
+        <section class="panel image-panel">
+          @if (urlImagen(producto) && !imagenFallida) {
+            <img
+              [src]="urlImagen(producto)"
+              [alt]="producto.nombre"
+              (error)="onImagenError()"
+            />
+          } @else if (imagenFallida) {
+            <p class="image-fallback">{{ mensajeImagenFalla }}</p>
+          } @else {
+            <p class="image-fallback">Sin imagen</p>
+          }
+        </section>
 
         <section class="panel">
           <solvix-section-header kicker="Bodega" title="Inventario" />
@@ -139,6 +154,8 @@
                     {{ signo(movimiento) }}{{ movimiento.cantidad }}
                   </span>
                   <span>{{ tipoMovimiento(movimiento.tipo) }}</span>
+                  <span class="solvix-mono">{{ movimiento.stockAnterior }} → {{ movimiento.stockNuevo }}</span>
+                  <span>{{ costoHistorico(movimiento.costoProductoResultante) }}</span>
                   <span class="solvix-mono">{{ fecha(movimiento.fecha) }}</span>
                 </li>
               }

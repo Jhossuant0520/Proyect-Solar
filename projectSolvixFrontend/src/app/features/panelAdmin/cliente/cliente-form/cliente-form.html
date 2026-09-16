@@ -1,0 +1,96 @@
+<section class="cliente-form-page">
+  <solvix-page-header
+    kicker="Comercial"
+    [title]="modoEdicion ? 'Editar cliente' : 'Nuevo cliente'"
+    [subtitle]="modoEdicion ? 'Actualiza los datos. El historial de ventas no cambia.' : 'Registra una persona o una empresa.'"
+  />
+
+  @if (loadState === 'loading') {
+    <solvix-loading-state label="Cargando cliente." />
+  } @else if (loadState === 'error') {
+    <solvix-error-state
+      title="No pudimos cargar este cliente."
+      message="Puede que no exista o que no tengas permiso."
+      (retry)="cargar()"
+    />
+  } @else if (loadState === 'reservado') {
+    <div class="aviso" role="status">
+      <h2>Registro reservado</h2>
+      <p>{{ mensajeReservado }}</p>
+      <solvix-button family="tech" rank="tertiary" icon="arrow_back" type="button" (click)="cancelar()">
+        Volver
+      </solvix-button>
+    </div>
+  } @else {
+    <form class="form-panel" [formGroup]="form" (ngSubmit)="guardar()">
+      <div class="form-grid">
+        <label class="full">
+          <span class="label-row">Nombre <span class="req">Obligatorio</span></span>
+          <input type="text" formControlName="nombre" maxlength="150" />
+        </label>
+        <label>
+          Tipo
+          <select formControlName="tipoCliente">
+            @for (tipo of tipos; track tipo.id) {
+              <option [value]="tipo.id">{{ tipo.label }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Documento
+          <select formControlName="tipoDocumento" (change)="onTipoDocumento()">
+            <option value="">Sin documento</option>
+            @for (doc of documentos; track doc.id) {
+              <option [value]="doc.id">{{ doc.label }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Número de documento
+          <input
+            type="text"
+            formControlName="numeroDocumento"
+            maxlength="40"
+            [disabled]="numeroBloqueado"
+            [placeholder]="numeroBloqueado ? 'No aplica' : 'Opcional'"
+          />
+        </label>
+        <label>
+          Teléfono
+          <input type="text" formControlName="telefono" maxlength="40" />
+        </label>
+        <label class="full">
+          Correo
+          <input type="email" formControlName="email" maxlength="150" />
+        </label>
+        <label class="full">
+          Notas
+          <textarea formControlName="notas" rows="3" maxlength="500"></textarea>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" formControlName="activo" />
+          Activo
+        </label>
+      </div>
+
+      @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
+        <p class="field-error">El nombre es obligatorio.</p>
+      }
+      @if (form.controls.email.touched && form.controls.email.invalid) {
+        <p class="field-error">El correo no es válido.</p>
+      }
+      @if (error) {
+        <p class="form-error" role="alert">{{ error }}</p>
+      }
+
+      <div class="form-actions">
+        <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
+          Cancelar
+        </solvix-button>
+        <solvix-button family="tech" rank="primary" type="submit" [disabled]="enviando">
+          {{ modoEdicion ? 'Guardar cambios' : 'Crear cliente' }}
+        </solvix-button>
+      </div>
+    </form>
+  }
+</section>

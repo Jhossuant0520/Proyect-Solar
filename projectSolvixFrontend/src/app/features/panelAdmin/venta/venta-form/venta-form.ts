@@ -13,7 +13,18 @@ import { VentaService } from '../../../../core/services/venta.service';
 import { ClienteResponseDTO } from '../../../../core/models/cliente.models';
 import { DetalleVentaRequestDTO, MetodoPago, VentaRequestDTO } from '../../../../core/models/venta.models';
 import { ProductoModel } from '../../producto/productoClase';
+import {
+  mensajeErrorLookupCodigoBarras,
+  resolverProductoPorCodigoBarras
+} from '../../producto/producto-barcode-lookup';
+import {
+  MENSAJE_PRODUCTO_YA_EN_VENTA,
+  idsProductosEnLineas,
+  labelCodigoBarras,
+  productoCoincideBusqueda
+} from '../../producto/producto-ui';
 import { formatImporte, mapHttpError, METODOS_PAGO } from '../venta-ui';
+import { clientesParaVenta } from '../../cliente/cliente-ui';
 
 type FormEstado = 'loading' | 'ready' | 'error';
 type SubmitEstado = 'idle' | 'processing' | 'error';
@@ -38,6 +49,7 @@ export class VentaFormComponent implements OnInit {
   clientes: ClienteResponseDTO[] = [];
   catalogo: ProductoModel[] = [];
   busquedaProducto = '';
+  buscandoCodigo = false;
   loadState: FormEstado = 'loading';
   submitState: SubmitEstado = 'idle';
   errorTitle = 'No pudimos cargar el formulario.';
@@ -46,6 +58,7 @@ export class VentaFormComponent implements OnInit {
 
   readonly metodos = METODOS_PAGO;
   readonly money = formatImporte;
+  readonly labelCodigo = labelCodigoBarras;
 
   constructor(
     private fb: FormBuilder,
@@ -72,23 +85,16 @@ export class VentaFormComponent implements OnInit {
     return this.form.get('detalles') as FormArray;
   }
 
+  get clientesSeleccionables(): ClienteResponseDTO[] {
+    return clientesParaVenta(this.clientes);
+  }
+
   get productosFiltrados(): ProductoModel[] {
-    const query = this.busquedaProducto.trim().toLowerCase();
-    const usados = new Set(
-      this.detalles.controls
-        .map(control => Number(control.get('productoId')?.value))
-        .filter(id => Number.isFinite(id))
-    );
+    const query = this.busquedaProducto.trim();
+    const usados = idsProductosEnLineas(this.detalles.controls);
     return this.catalogo
       .filter(producto => producto.id != null && !usados.has(producto.id))
-      .filter(producto => {
-        if (!query) {
-          return true;
-        }
-        return producto.nombre.toLowerCase().includes(query)
-          || producto.marca.toLowerCase().includes(query)
-          || String(producto.id).includes(query);
-      })
+      .filter(producto => productoCoincideBusqueda(producto, query))
       .slice(0, 8);
   }
 
@@ -111,13 +117,56 @@ export class VentaFormComponent implements OnInit {
     this.busquedaProducto = (event.target as HTMLInputElement).value;
   }
 
+  /** HID/teclado: Enter confirma el código sin enviar el formulario. */
+  onBusquedaEnter(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.resolverYAgregarPorCodigo();
+  }
+
+  resolverYAgregarPorCodigo(): void {
+    const query = this.busquedaProducto.trim();
+    if (!query || this.buscandoCodigo) {
+      return;
+    }
+
+    const unSoloResultado = this.productosFiltrados;
+    if (unSoloResultado.length === 1) {
+      this.agregarProducto(unSoloResultado[0]);
+      return;
+    }
+
+    this.buscandoCodigo = true;
+    resolverProductoPorCodigoBarras(this.productoService, this.catalogo, query).subscribe({
+      next: producto => {
+        this.buscandoCodigo = false;
+        this.integrarProductoResuelto(producto);
+      },
+      error: error => {
+        this.buscandoCodigo = false;
+        const mapped = mapHttpError(error, 'No pudimos buscar el producto.');
+        this.snackBar.open(
+          mensajeErrorLookupCodigoBarras(error, mapped.message),
+          'Cerrar',
+          { duration: 4000 }
+        );
+      }
+    });
+  }
+
   agregarProducto(producto: ProductoModel): void {
     if (producto.id == null) {
+      return;
+    }
+    if (idsProductosEnLineas(this.detalles.controls).has(producto.id)) {
+      this.snackBar.open(MENSAJE_PRODUCTO_YA_EN_VENTA, 'Cerrar', { duration: 3000 });
+      this.busquedaProducto = '';
       return;
     }
     this.detalles.push(this.fb.group({
       productoId: [producto.id, Validators.required],
       productoNombre: [producto.nombre],
+      productoCodigoBarras: [producto.codigoBarras ?? null],
       stockActual: [producto.stockActual ?? 0],
       precioCatalogo: [producto.precioVentaActual],
       cantidad: [1, [Validators.required, Validators.min(1)]],
@@ -180,6 +229,17 @@ export class VentaFormComponent implements OnInit {
 
   cancelar(): void {
     this.router.navigate(['/ventas']);
+  }
+
+  private integrarProductoResuelto(producto: ProductoModel): void {
+    if (producto.activo === false) {
+      this.snackBar.open('Ese producto está inactivo y no se puede vender.', 'Cerrar', { duration: 4000 });
+      return;
+    }
+    if (producto.id != null && !this.catalogo.some(item => item.id === producto.id)) {
+      this.catalogo = [producto, ...this.catalogo];
+    }
+    this.agregarProducto(producto);
   }
 
   private marcarErrorCarga(error: unknown): void {

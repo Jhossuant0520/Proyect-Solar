@@ -60,12 +60,19 @@
               type="search"
               [value]="busquedaProducto"
               (input)="onBuscarProducto($event)"
-              placeholder="Buscar producto activo por nombre, marca o ID"
+              (keydown.enter)="onBusquedaEnter($event)"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="Nombre, ID o código de barras"
+              aria-label="Buscar producto por nombre, ID o código de barras"
             />
           </label>
+          <span class="hint">Escribe el código o usa un lector de barras. Enter agrega el producto.</span>
 
-          @if (busquedaProducto.trim() && productosFiltrados.length === 0) {
-            <p class="empty-line">No hay productos activos que coincidan.</p>
+          @if (buscandoCodigo) {
+            <p class="empty-line">Buscando producto…</p>
+          } @else if (busquedaProducto.trim() && productosFiltrados.length === 0) {
+            <p class="empty-line">No hay productos activos que coincidan. Prueba Enter si es un código de barras.</p>
           } @else if (productosFiltrados.length > 0) {
             <ul class="catalogo">
               @for (producto of productosFiltrados; track producto.id) {
@@ -75,6 +82,9 @@
                     <span>
                       {{ producto.costoConocido ? money(producto.costoActual) : 'Sin costo' }}
                       · {{ producto.stockActual ?? 0 }} u.
+                      @if (producto.codigoBarras) {
+                        · {{ producto.codigoBarras }}
+                      }
                     </span>
                   </button>
                 </li>
@@ -95,6 +105,9 @@
                         Costo actual del catálogo
                         {{ linea.get('costoCatalogo')?.value == null ? 'desconocido' : money(linea.get('costoCatalogo')?.value) }}.
                         Stock actual {{ linea.get('stockActual')?.value }} u.
+                        @if (linea.get('productoCodigoBarras')?.value) {
+                          Código {{ linea.get('productoCodigoBarras')?.value }}.
+                        }
                       </span>
                     </div>
                     <button type="button" class="icon-btn" (click)="quitarLinea(i)" aria-label="Quitar producto">

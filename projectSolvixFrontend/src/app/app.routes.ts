@@ -9,6 +9,7 @@ import { MiCuenta } from './features/access/mi-cuenta/mi-cuenta';
 import { authGuard } from './core/guards/auth-guard';
 import { adminGuard } from './core/guards/admin-guard';
 import { Catalog } from './homepage/home-page/components/catalog/catalog';
+import { CatalogDetail } from './homepage/home-page/components/catalog/catalog-detail/catalog-detail';
 import { ProductoComponent } from './features/panelAdmin/producto/producto';
 import { ProductoList } from './features/panelAdmin/producto/producto-list/producto-list';
 import { ModulDemandaRecibo } from './features/business/modul-demanda-recibo/modul-demanda-recibo';
@@ -25,6 +26,10 @@ import { CompraFormComponent } from './features/panelAdmin/compra/compra-form/co
 import { CompraDetailComponent } from './features/panelAdmin/compra/compra-detail/compra-detail';
 import { CompraDevolucionFormComponent } from './features/panelAdmin/compra/compra-devolucion-form/compra-devolucion-form';
 import { CompraDevolucionDetailComponent } from './features/panelAdmin/compra/compra-devolucion-detail/compra-devolucion-detail';
+import { InventarioComponent } from './features/panelAdmin/inventario/inventario';
+import { ClienteListComponent } from './features/panelAdmin/cliente/cliente-list/cliente-list';
+import { ClienteFormComponent } from './features/panelAdmin/cliente/cliente-form/cliente-form';
+import { ClienteDetailComponent } from './features/panelAdmin/cliente/cliente-detail/cliente-detail';
 
 const comingSoon = (
   path: string,
@@ -44,6 +49,7 @@ const moduloPendiente =
 export const routes: Routes = [
   { path: '', component: HomePage },
   { path: 'Catalogo', component: Catalog },
+  { path: 'Catalogo/:id', component: CatalogDetail },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: Register },
   { path: 'verificar-email/:token', component: VerificarEmail },
@@ -76,15 +82,16 @@ export const routes: Routes = [
       { path: 'compras/:id/devoluciones/:devolucionId', component: CompraDevolucionDetailComponent, canActivate: [adminGuard] },
       { path: 'compras/:id', component: CompraDetailComponent, canActivate: [adminGuard] },
 
-      comingSoon('clientes', 'Clientes', moduloPendiente),
-      comingSoon('clientes/nuevo', 'Nuevo cliente', moduloPendiente),
-      comingSoon('clientes/:id', 'Detalle de cliente', moduloPendiente),
+      { path: 'clientes', component: ClienteListComponent, canActivate: [adminGuard] },
+      { path: 'clientes/nuevo', component: ClienteFormComponent, canActivate: [adminGuard] },
+      { path: 'clientes/:id/editar', component: ClienteFormComponent, canActivate: [adminGuard] },
+      { path: 'clientes/:id', component: ClienteDetailComponent, canActivate: [adminGuard] },
 
       comingSoon('proveedores', 'Proveedores', moduloPendiente),
       comingSoon('proveedores/nuevo', 'Nuevo proveedor', moduloPendiente),
       comingSoon('proveedores/:id', 'Detalle de proveedor', moduloPendiente),
 
-      comingSoon('inventario', 'Inventario', moduloPendiente),
+      { path: 'inventario', component: InventarioComponent, canActivate: [adminGuard] },
       comingSoon('reportes', 'Reportes', moduloPendiente),
 
       { path: 'producto', redirectTo: 'productos/nuevo', pathMatch: 'full' },

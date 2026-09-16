@@ -9,6 +9,8 @@ export interface ProductoModel {
   id?: number;
   nombre: string;
   marca: string;
+  /** Identificador opcional. null/undefined = no registrado. Se trata como string. */
+  codigoBarras?: string | null;
   categoriaId: number;
   categoriaCodigo?: string;
   categoriaNombre?: string;
@@ -34,6 +36,7 @@ export interface ProductoRequestDTO {
   precioVentaActual: number;
   costoActual?: number | null;
   stockInicial?: number | null;
+  codigoBarras?: string | null;
   descripcion?: string | null;
   imagenUrl?: string | null;
   activo?: boolean | null;

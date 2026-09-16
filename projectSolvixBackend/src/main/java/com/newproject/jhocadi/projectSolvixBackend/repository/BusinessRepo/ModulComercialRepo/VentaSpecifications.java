@@ -18,11 +18,12 @@ public final class VentaSpecifications {
             LocalDateTime desde,
             LocalDateTime hasta) {
 
-        return Specification
-            .where(clienteEs(clienteId))
-            .and(estadoEs(estado))
-            .and(fechaDesde(desde))
-            .and(fechaHasta(hasta));
+        return Specification.allOf(
+            clienteEs(clienteId),
+            estadoEs(estado),
+            fechaDesde(desde),
+            fechaHasta(hasta)
+        );
     }
 
     private static Specification<Venta> clienteEs(Long clienteId) {

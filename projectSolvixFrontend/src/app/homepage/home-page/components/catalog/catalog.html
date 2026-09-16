@@ -1,53 +1,121 @@
 <section class="catalog">
 
-  <!-- HEADER -->
+  <div class="catalog-top">
+    <a routerLink="/" class="catalog-back">← Inicio</a>
+  </div>
+
   <div class="catalog-header">
-    <h2>Equipos de Energía Solar</h2>
-    <p>Optimiza tu consumo con tecnología eficiente</p>
+    <h1>Catálogo SOLVIX</h1>
+    <p>Equipos y productos disponibles para tu proyecto</p>
   </div>
 
-  <!-- FILTROS -->
-  <div class="filters">
-    <button [class.active]="categoriaSeleccionada==='TODOS'" (click)="seleccionarCategoria('TODOS')">TODOS</button>
-    <button [class.active]="categoriaSeleccionada==='COMPUTO'" (click)="seleccionarCategoria('COMPUTO')">MPPT</button>
-    <button [class.active]="categoriaSeleccionada==='IMPRESION'" (click)="seleccionarCategoria('IMPRESION')">INVERSORES</button>
-    <button [class.active]="categoriaSeleccionada==='SOLAR'" (click)="seleccionarCategoria('SOLAR')">PANELES</button>
-  </div>
+  @if (viewState === 'LOADING') {
+    <div class="catalog-loading" aria-busy="true">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <div class="skeleton-card"></div>
+      }
+    </div>
+  }
 
-  <!-- GRID -->
-  <div class="catalog-grid">
+  @if (viewState === 'ERROR') {
+    <div class="catalog-state catalog-state--error">
+      <p>No pudimos cargar el catálogo.</p>
+      <button type="button" class="btn-cyber-primary" (click)="cargar()">Reintentar</button>
+    </div>
+  }
 
-    <div class="card" *ngFor="let equipo of equiposFiltrados">
+  @if (viewState === 'EMPTY') {
+    <div class="catalog-state">
+      <p>No hay productos disponibles en este momento.</p>
+    </div>
+  }
 
-      <!-- IMAGEN -->
-      <div class="image-box">
-        <img [src]="equipo.imagen" alt="">
-        <div class="glow"></div>
+  @if (viewState === 'SUCCESS') {
+    <div class="catalog-toolbar">
+      <div class="filters" role="tablist" aria-label="Categorías">
+        <button
+          type="button"
+          [class.active]="categoriaSeleccionadaId === null"
+          (click)="seleccionarCategoria(null)"
+        >
+          Todos
+        </button>
+        @for (cat of categorias; track cat.id) {
+          <button
+            type="button"
+            [class.active]="categoriaSeleccionadaId === cat.id"
+            (click)="seleccionarCategoria(cat.id)"
+          >
+            {{ cat.nombre }}
+          </button>
+        }
       </div>
 
-      <!-- INFO -->
-      <div class="info">
-
-        <h3>{{ equipo.nombre }}</h3>
-
-        <ul>
-          <li *ngFor="let c of equipo.caracteristicas">
-            ✔ {{ c }}
-          </li>
-        </ul>
-
-        <div class="bottom">
-          <span class="price">${{ equipo.precio }}</span>
-
-          <a [href]="getWhatsAppLink(equipo)" target="_blank">
-            <button>Ver detalles</button>
-          </a>
-        </div>
-
-      </div>
-
+      <label class="search">
+        <span class="visually-hidden">Buscar productos</span>
+        <input
+          type="search"
+          [(ngModel)]="busqueda"
+          placeholder="Buscar por nombre, marca o descripción"
+          autocomplete="off"
+        />
+      </label>
     </div>
 
-  </div>
+    @if (mostrarVacioFiltro) {
+      <div class="catalog-state catalog-state--filter">
+        <p>No hay productos con ese filtro.</p>
+      </div>
+    } @else {
+      <div class="catalog-grid">
+        @for (producto of productosFiltrados; track producto.id) {
+          <article class="card">
+            <div class="image-box">
+              @if (imagenDisponible(producto)) {
+                <img
+                  [src]="urlImagen(producto)"
+                  [alt]="producto.nombre"
+                  (error)="onImagenError(producto.id)"
+                />
+              } @else {
+                <div class="image-fallback" aria-hidden="true">
+                  <span>Sin imagen</span>
+                </div>
+              }
+              <div class="glow"></div>
+            </div>
+
+            <div class="info">
+              <div class="info-meta">
+                <solvix-badge [tone]="tonoDisponibilidad(producto.disponibilidad)">
+                  {{ labelDisponibilidad(producto.disponibilidad) }}
+                </solvix-badge>
+                @if (producto.categoriaNombre) {
+                  <span class="categoria">{{ producto.categoriaNombre }}</span>
+                }
+              </div>
+
+              <h2>{{ producto.nombre }}</h2>
+              <p class="marca">{{ producto.marca }}</p>
+
+              @if (producto.descripcion) {
+                <p class="descripcion">{{ producto.descripcion }}</p>
+              }
+
+              <div class="bottom">
+                <span class="price">{{ formatMoney(producto.precioVentaActual) }}</span>
+                <a
+                  class="btn-cyber-secondary card-cta"
+                  [routerLink]="['/Catalogo', producto.id]"
+                >
+                  Ver detalles
+                </a>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  }
 
 </section>

@@ -18,11 +18,12 @@ public final class MovimientoInventarioSpecifications {
             LocalDateTime desde,
             LocalDateTime hasta) {
 
-        return Specification
-            .where(productoEs(productoId))
-            .and(tipoEs(tipo))
-            .and(fechaDesde(desde))
-            .and(fechaHasta(hasta));
+        return Specification.allOf(
+            productoEs(productoId),
+            tipoEs(tipo),
+            fechaDesde(desde),
+            fechaHasta(hasta)
+        );
     }
 
     private static Specification<MovimientoInventario> productoEs(Long productoId) {

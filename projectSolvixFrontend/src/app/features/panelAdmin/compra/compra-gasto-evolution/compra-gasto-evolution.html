@@ -1,0 +1,45 @@
+<section class="dash-panel" aria-labelledby="compra-evolucion-title">
+  <solvix-section-header
+    kicker="Evolución"
+    title="Evolución del gasto"
+    subtitle="Cómo cambia tu gasto de compras en el período."
+  >
+    <div class="dash-chips" role="group" aria-label="Métrica">
+      @for (item of metricas; track item.id) {
+        <button
+          type="button"
+          class="dash-chip"
+          [class.is-active]="metrica === item.id"
+          [attr.aria-pressed]="metrica === item.id"
+          (click)="metricaChange.emit(item.id)"
+        >
+          {{ item.label }}
+        </button>
+      }
+    </div>
+    <div class="dash-chips" role="group" aria-label="Agrupación">
+      @for (item of agrupaciones; track item.id) {
+        <button
+          type="button"
+          class="dash-chip"
+          [class.is-active]="agrupacion === item.id"
+          [attr.aria-pressed]="agrupacion === item.id"
+          (click)="agrupacionChange.emit(item.id)"
+        >
+          {{ item.label }}
+        </button>
+      }
+    </div>
+  </solvix-section-header>
+
+  <solvix-section-state
+    [state]="state"
+    loadingLabel="Cargando evolución del gasto."
+    emptyMessage="No hay compras registradas en este período para graficar."
+    (retry)="retry.emit()"
+  >
+    <div class="chart-wrap">
+      <canvas #canvas aria-label="Gráfica de evolución del gasto en compras"></canvas>
+    </div>
+  </solvix-section-state>
+</section>

@@ -12,8 +12,12 @@ import { ProductoService } from '../../../../core/services/producto.service';
 import { AjusteCostoResponseDTO, MovimientoInventarioResponseDTO } from '../../../../core/models/inventario.models';
 import { ProductoModel } from '../productoClase';
 import { formatMoney } from '../../dashboard/utils/dashboard-format';
-import { formatFechaCorta, labelMotivoAjuste, labelTipoMovimiento } from '../producto-ui';
+import { formatFechaCorta, labelCodigoBarras, labelMotivoAjuste, labelTipoMovimiento } from '../producto-ui';
+import { labelCostoHistorico, ordenarPorFechaDesc } from '../../inventario/inventario-ui';
 import { AjusteCostoDialogComponent } from '../ajuste-costo-dialog/ajuste-costo-dialog';
+import { resolverUrlMedia } from '../../../../core/utils/media-url';
+import { MENSAJE_IMAGEN_EXTERNA_FALLA } from '../producto-imagen';
+import { showSolvixSnack } from '../../../../shared/utils/solvix-snack';
 
 @Component({
   selector: 'app-producto-detail',
@@ -37,11 +41,15 @@ export class ProductoDetailComponent implements OnInit {
   state: 'loading' | 'ready' | 'error' = 'loading';
   movimientosState: 'loading' | 'ready' | 'empty' | 'error' = 'loading';
   ajustesState: 'loading' | 'ready' | 'empty' | 'error' = 'loading';
+  imagenFallida = false;
 
   readonly money = formatMoney;
   readonly fecha = formatFechaCorta;
   readonly motivo = labelMotivoAjuste;
   readonly tipoMovimiento = labelTipoMovimiento;
+  readonly labelCodigo = labelCodigoBarras;
+  readonly costoHistorico = labelCostoHistorico;
+  readonly mensajeImagenFalla = MENSAJE_IMAGEN_EXTERNA_FALLA;
 
   constructor(
     private route: ActivatedRoute,
@@ -71,6 +79,7 @@ export class ProductoDetailComponent implements OnInit {
     this.productoService.obtenerPorId(id).subscribe({
       next: producto => {
         this.producto = producto;
+        this.imagenFallida = false;
         this.state = 'ready';
         this.cargarMovimientos(id);
         this.cargarAjustes(id);
@@ -81,6 +90,14 @@ export class ProductoDetailComponent implements OnInit {
     });
   }
 
+  urlImagen(producto: ProductoModel): string | null {
+    return resolverUrlMedia(producto.imagenUrl);
+  }
+
+  onImagenError(): void {
+    this.imagenFallida = true;
+  }
+
   editar(): void {
     if (this.producto?.id != null) {
       this.router.navigate(['/productos', this.producto.id, 'editar']);
@@ -89,6 +106,13 @@ export class ProductoDetailComponent implements OnInit {
 
   irAHistorial(): void {
     document.getElementById('historial-costo')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  irAInventario(): void {
+    if (this.producto?.id == null) {
+      return;
+    }
+    this.router.navigate(['/inventario'], { queryParams: { productoId: this.producto.id } });
   }
 
   ajustarCosto(): void {
@@ -116,7 +140,7 @@ export class ProductoDetailComponent implements OnInit {
         costoConocido: resultado.costoProductoResultante != null,
         stockActual: resultado.stockAlAjustar
       };
-      this.snackBar.open('Costo actualizado. El stock no cambió.', 'Cerrar', { duration: 3500 });
+      showSolvixSnack(this.snackBar, 'Costo actualizado. El stock no cambió.', 'success');
       if (this.producto.id != null) {
         this.cargarAjustes(this.producto.id);
         this.productoService.obtenerPorId(this.producto.id).subscribe({
@@ -134,7 +158,7 @@ export class ProductoDetailComponent implements OnInit {
     this.movimientosState = 'loading';
     this.inventario.listarMovimientos(id).subscribe({
       next: items => {
-        this.movimientos = items.slice(0, 8);
+        this.movimientos = ordenarPorFechaDesc(items).slice(0, 8);
         this.movimientosState = items.length === 0 ? 'empty' : 'ready';
       },
       error: () => {
@@ -147,7 +171,7 @@ export class ProductoDetailComponent implements OnInit {
     this.ajustesState = 'loading';
     this.inventario.listarAjustesCosto(id).subscribe({
       next: items => {
-        this.ajustes = items;
+        this.ajustes = ordenarPorFechaDesc(items);
         this.ajustesState = items.length === 0 ? 'empty' : 'ready';
       },
       error: () => {

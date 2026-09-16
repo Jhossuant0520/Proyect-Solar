@@ -1,6 +1,13 @@
-import { CompraAnalyticsDTO } from '../../../core/models/analytics.models';
+import {
+  CompraAnalyticsDTO,
+  ProveedorGastoDTO,
+  VentasSerieDTO
+} from '../../../core/models/analytics.models';
 import { CompraResponseDTO, DetalleCompraResponseDTO } from '../../../core/models/compra.models';
 import { labelEstadoMetrica } from '../dashboard/utils/dashboard-format';
+import { toNumber } from '../dashboard/utils/dashboard-mapper';
+
+export type CompraSerieMetrica = 'compras' | 'devoluciones' | 'comprasNetas';
 
 export interface CompraKpiVista {
   id: string;
@@ -11,6 +18,27 @@ export interface CompraKpiVista {
   formato: 'money' | 'quantity';
   icon: string;
   estado: CompraAnalyticsDTO['estado'];
+}
+
+/** Punto de serie ya calculado por Analytics. Campos reutilizan VentasSerieDTO. */
+export interface CompraSeriePunto {
+  fecha: string;
+  etiqueta: string;
+  compras: number;
+  devoluciones: number;
+  comprasNetas: number;
+  ordenes: number;
+}
+
+/** Fila de gasto por proveedor tal como la entrega el backend (orden preservado). */
+export interface ProveedorGastoVista {
+  proveedorId: number;
+  nombre: string;
+  comprasBrutas: number | null;
+  devoluciones: number | null;
+  comprasNetas: number | null;
+  ordenes: number;
+  participacion: number | null;
 }
 
 /** Presenta campos ya calculados por Analytics. No recalcula ni cuenta proveedores. */
@@ -83,4 +111,46 @@ export function cantidadPendienteDevolucion(detalle: DetalleCompraResponseDTO): 
 
 export function labelEstadoAnalytics(estado: CompraAnalyticsDTO['estado']): string {
   return labelEstadoMetrica(estado);
+}
+
+/**
+ * Mapea la serie de compras.
+ * Backend reutiliza VentasSerieDTO: ventas=compras brutas, ventasNetas=compras netas, pedidos=órdenes.
+ * No recalcula ni reagrupa.
+ */
+export function mapSerieCompras(serie: VentasSerieDTO[] | null | undefined): CompraSeriePunto[] {
+  return (serie ?? []).map(punto => ({
+    fecha: asIsoDate(punto.fecha),
+    etiqueta: punto.etiqueta || asIsoDate(punto.fecha),
+    compras: toNumber(punto.ventas) ?? 0,
+    devoluciones: toNumber(punto.devoluciones) ?? 0,
+    comprasNetas: toNumber(punto.ventasNetas) ?? 0,
+    ordenes: punto.pedidos ?? 0
+  }));
+}
+
+/** Preserva el orden del backend (compras netas descendente). */
+export function mapGastoPorProveedor(
+  items: ProveedorGastoDTO[] | null | undefined
+): ProveedorGastoVista[] {
+  return (items ?? []).map(item => ({
+    proveedorId: item.proveedorId,
+    nombre: item.nombre || 'Sin proveedor',
+    comprasBrutas: toNumber(item.comprasBrutas),
+    devoluciones: toNumber(item.devoluciones),
+    comprasNetas: toNumber(item.comprasNetas),
+    ordenes: item.ordenes ?? 0,
+    participacion: toNumber(item.participacion)
+  }));
+}
+
+function asIsoDate(value: unknown): string {
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (Array.isArray(value) && value.length >= 3) {
+    const [year, month, day] = value;
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  }
+  return '';
 }

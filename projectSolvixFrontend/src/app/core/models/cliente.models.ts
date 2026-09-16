@@ -19,3 +19,15 @@ export interface ClienteResponseDTO {
   activo: boolean;
   fechaRegistro: string | number[] | null;
 }
+
+/** Body de POST/PUT /api/v1/clientes. Nombres iguales al DTO Java. */
+export interface ClienteRequestDTO {
+  nombre: string;
+  tipoCliente?: TipoCliente | null;
+  tipoDocumento?: TipoDocumento | null;
+  numeroDocumento?: string | null;
+  email?: string | null;
+  telefono?: string | null;
+  notas?: string | null;
+  activo?: boolean | null;
+}

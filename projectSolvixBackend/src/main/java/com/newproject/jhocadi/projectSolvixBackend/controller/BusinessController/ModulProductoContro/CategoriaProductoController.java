@@ -27,11 +27,12 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/categorias-producto")
 @CrossOrigin(origins = "http://localhost:4200")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class CategoriaProductoController {
 
     private final CategoriaProductoService categoriaService;
 
-    /** Lectura pública: el catálogo del cliente necesita las categorías. */
+    /** Listado administrativo. El catálogo público usa {@code GET /api/v1/catalogo/categorias}. */
     @GetMapping
     public ResponseEntity<List<CategoriaProductoResponseDTO>> listar(
             @RequestParam(required = false, defaultValue = "true") Boolean soloActivas) {
@@ -44,14 +45,12 @@ public class CategoriaProductoController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoriaProductoResponseDTO> crear(
             @Valid @RequestBody CategoriaProductoRequestDTO request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(categoriaService.crear(request));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoriaProductoResponseDTO> actualizar(
             @PathVariable Long id,
             @Valid @RequestBody CategoriaProductoRequestDTO request) {
@@ -59,7 +58,6 @@ public class CategoriaProductoController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoriaProductoResponseDTO> desactivar(@PathVariable Long id) {
         return ResponseEntity.ok(categoriaService.desactivar(id));
     }

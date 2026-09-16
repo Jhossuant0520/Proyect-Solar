@@ -1,0 +1,103 @@
+// SOLVIX snackbars — toasts tipo card para éxito / aviso / error
+
+.mat-mdc-snack-bar-container.solvix-snack {
+  --mdc-snackbar-container-color: transparent;
+  --mdc-snackbar-supporting-text-color: var(--solvix-text);
+  --mat-snack-bar-button-color: var(--solvix-primary);
+  margin: 0.75rem !important;
+  max-width: min(26rem, calc(100vw - 1.5rem)) !important;
+}
+
+.mat-mdc-snack-bar-container.solvix-snack .mdc-snackbar__surface {
+  background: linear-gradient(
+    145deg,
+    rgba(15, 23, 42, 0.98) 0%,
+    rgba(2, 6, 23, 0.96) 100%
+  ) !important;
+  border: 1px solid rgba(79, 209, 255, 0.28) !important;
+  border-radius: 0.75rem !important;
+  box-shadow:
+    0 12px 40px rgba(2, 6, 23, 0.65),
+    0 0 0 1px rgba(0, 229, 255, 0.06),
+    0 0 24px rgba(79, 209, 255, 0.12) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  min-width: 0 !important;
+  padding: 0.15rem 0.25rem !important;
+}
+
+.mat-mdc-snack-bar-container.solvix-snack .mdc-snackbar__label,
+.mat-mdc-snack-bar-container.solvix-snack .mat-mdc-snack-bar-label {
+  color: var(--solvix-text-secondary) !important;
+  font-family: var(--solvix-font) !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em !important;
+  line-height: 1.4 !important;
+  padding: 0.85rem 0.5rem 0.85rem 1rem !important;
+}
+
+.mat-mdc-snack-bar-container.solvix-snack .mat-mdc-button,
+.mat-mdc-snack-bar-container.solvix-snack .mat-mdc-snack-bar-action {
+  color: var(--solvix-primary) !important;
+  font-family: var(--solvix-font-mono) !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+.mat-mdc-snack-bar-container.solvix-snack .mat-mdc-button:hover {
+  background: rgba(79, 209, 255, 0.1) !important;
+}
+
+/* Éxito */
+.mat-mdc-snack-bar-container.solvix-snack--success .mdc-snackbar__surface {
+  border-color: rgba(16, 185, 129, 0.45) !important;
+  box-shadow:
+    0 12px 40px rgba(2, 6, 23, 0.65),
+    0 0 20px rgba(16, 185, 129, 0.15) !important;
+}
+
+.mat-mdc-snack-bar-container.solvix-snack--success .mdc-snackbar__label,
+.mat-mdc-snack-bar-container.solvix-snack--success .mat-mdc-snack-bar-label {
+  color: #ecfdf5 !important;
+}
+
+.mat-mdc-snack-bar-container.solvix-snack--success .mat-mdc-button {
+  color: var(--solvix-success) !important;
+}
+
+/* Aviso */
+.mat-mdc-snack-bar-container.solvix-snack--warning .mdc-snackbar__surface {
+  border-color: rgba(245, 158, 11, 0.45) !important;
+  box-shadow:
+    0 12px 40px rgba(2, 6, 23, 0.65),
+    0 0 20px rgba(245, 158, 11, 0.12) !important;
+}
+
+.mat-mdc-snack-bar-container.solvix-snack--warning .mdc-snackbar__label,
+.mat-mdc-snack-bar-container.solvix-snack--warning .mat-mdc-snack-bar-label {
+  color: #fffbeb !important;
+}
+
+.mat-mdc-snack-bar-container.solvix-snack--warning .mat-mdc-button {
+  color: var(--solvix-warning) !important;
+}
+
+/* Error */
+.mat-mdc-snack-bar-container.solvix-snack--error .mdc-snackbar__surface {
+  border-color: rgba(255, 180, 171, 0.4) !important;
+  box-shadow:
+    0 12px 40px rgba(2, 6, 23, 0.65),
+    0 0 20px rgba(147, 0, 10, 0.25) !important;
+}
+
+.mat-mdc-snack-bar-container.solvix-snack--error .mdc-snackbar__label,
+.mat-mdc-snack-bar-container.solvix-snack--error .mat-mdc-snack-bar-label {
+  color: #ffedea !important;
+}
+
+.mat-mdc-snack-bar-container.solvix-snack--error .mat-mdc-button {
+  color: var(--solvix-error) !important;
+}
