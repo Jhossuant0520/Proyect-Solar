@@ -2,15 +2,23 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { OrdenServicioResponseDTO } from '../../../core/models/orden-servicio.models';
 import { aOrdenServicioRequest, aRequestActualizacionTextos } from './servicio-mapper';
 import {
+  accionNuevaFalla,
+  accionPrincipalDesde,
   campoTecnicoDestacado,
+  contarRepuestosPendientes,
   equipoResumen,
   esEstadoTerminal,
   esResumenTecnicoCompleto,
   filtrarOrdenesLocal,
   labelEstadoOrden,
   mensajeErrorServicio,
+  pasosWorkflow,
   puedeEditarTextos,
+  puedePlanificarRepuestos,
+  textoCostoHistoricoRepuesto,
+  textoProximaAccion,
   textosTecnicosSinCambios,
+  tipoAccionWorkflow,
   toneEstadoOrden,
   transicionesDesde
 } from './servicio-ui';
@@ -43,14 +51,53 @@ describe('servicio-ui', () => {
   it('muestra nombres humanos sin renombrar el enum interno', () => {
     expect(labelEstadoOrden('RECEPCIONADO')).toBe('Recepcionado');
     expect(labelEstadoOrden('EN_DIAGNOSTICO')).toBe('En diagnóstico');
+    expect(labelEstadoOrden('DIAGNOSTICADO')).toBe('Diagnosticado');
     expect(labelEstadoOrden('ESPERA_REPUESTO')).toBe('Espera repuesto');
+    expect(labelEstadoOrden('REQUIERE_APROBACION_ADICIONAL')).toBe(
+      'Requiere aprobación adicional'
+    );
   });
 
-  it('expone solo transiciones conocidas por el backend', () => {
+  it('expone solo transiciones conocidas por el backend 3.15.5.2', () => {
     expect(transicionesDesde('RECEPCIONADO')).toEqual(['EN_DIAGNOSTICO', 'CANCELADO']);
-    expect(transicionesDesde('EN_REPARACION')).toEqual(['ESPERA_REPUESTO', 'LISTO', 'CANCELADO']);
+    expect(transicionesDesde('EN_DIAGNOSTICO')).toEqual(['DIAGNOSTICADO', 'CANCELADO']);
+    expect(transicionesDesde('DIAGNOSTICADO')).toEqual(['COTIZADO', 'CANCELADO']);
+    expect(transicionesDesde('EN_REPARACION')).toEqual([
+      'ESPERA_REPUESTO',
+      'REQUIERE_APROBACION_ADICIONAL',
+      'LISTO'
+    ]);
+    expect(transicionesDesde('REQUIERE_APROBACION_ADICIONAL')).toEqual([]);
     expect(transicionesDesde('CERRADO')).toEqual([]);
     expect(transicionesDesde('CANCELADO')).toEqual([]);
+  });
+
+  it('clasifica el tipo de acción por destino', () => {
+    expect(tipoAccionWorkflow('EN_DIAGNOSTICO')).toBe('directa');
+    expect(tipoAccionWorkflow('DIAGNOSTICADO')).toBe('completarDiagnostico');
+    expect(tipoAccionWorkflow('LISTO')).toBe('completarReparacion');
+    expect(tipoAccionWorkflow('ESPERA_REPUESTO')).toBe('esperaRepuesto');
+    expect(tipoAccionWorkflow('REQUIERE_APROBACION_ADICIONAL')).toBe('nuevaFalla');
+    expect(tipoAccionWorkflow('CANCELADO')).toBe('motivoCancelacion');
+    expect(tipoAccionWorkflow('APROBADO')).toBe('confirmacion');
+  });
+
+  it('expone acción de nueva falla solo en reparación', () => {
+    expect(accionNuevaFalla('EN_REPARACION')?.destino).toBe('REQUIERE_APROBACION_ADICIONAL');
+    expect(accionNuevaFalla('ESPERA_REPUESTO')).toBeNull();
+    expect(accionPrincipalDesde('EN_DIAGNOSTICO')?.destino).toBe('DIAGNOSTICADO');
+    expect(accionPrincipalDesde('EN_DIAGNOSTICO')?.boton).toBe('Ir al diagnóstico');
+    expect(accionPrincipalDesde('EN_REPARACION')?.destino).toBe('LISTO');
+  });
+
+  it('marca ESPERA y REQUIERE como paso especial sobre reparación', () => {
+    const espera = pasosWorkflow('ESPERA_REPUESTO');
+    const requiere = pasosWorkflow('REQUIERE_APROBACION_ADICIONAL');
+    const reparacion = espera.find(p => p.estado === 'EN_REPARACION');
+    const reparacionReq = requiere.find(p => p.estado === 'EN_REPARACION');
+    expect(reparacion?.fase).toBe('especial');
+    expect(reparacionReq?.fase).toBe('especial');
+    expect(espera.some(p => p.estado === 'DIAGNOSTICADO')).toBeTrue();
   });
 
   it('bloquea edición de textos en estados terminales', () => {
@@ -62,7 +109,9 @@ describe('servicio-ui', () => {
   it('destaca campos técnicos por estado sin ocultar el resto', () => {
     expect(campoTecnicoDestacado('RECEPCIONADO')).toBe('problemaReportado');
     expect(campoTecnicoDestacado('EN_DIAGNOSTICO')).toBe('diagnostico');
+    expect(campoTecnicoDestacado('DIAGNOSTICADO')).toBe('diagnostico');
     expect(campoTecnicoDestacado('EN_REPARACION')).toBe('trabajoRealizado');
+    expect(campoTecnicoDestacado('REQUIERE_APROBACION_ADICIONAL')).toBeNull();
     expect(campoTecnicoDestacado('LISTO')).toBeNull();
     expect(esResumenTecnicoCompleto('ENTREGADO')).toBeTrue();
   });
@@ -87,9 +136,54 @@ describe('servicio-ui', () => {
     ).toBeFalse();
   });
 
+  it('personaliza próxima acción con repuestos pendientes', () => {
+    expect(textoProximaAccion('RECEPCIONADO')).toBe('Iniciar diagnóstico');
+    expect(textoProximaAccion('EN_DIAGNOSTICO')).toBe('Completar ficha técnica');
+    expect(textoProximaAccion('DIAGNOSTICADO')).toBe('Preparar cotización inicial');
+    expect(textoProximaAccion('EN_REPARACION')).toBe('Continuar reparación');
+    expect(textoProximaAccion('EN_REPARACION', { pendingRepuestos: 2 })).toContain(
+      '2 repuestos pendientes'
+    );
+    expect(textoProximaAccion('ESPERA_REPUESTO')).toBe('Resolver repuestos pendientes');
+    expect(textoProximaAccion('ESPERA_REPUESTO', { pendingRepuestos: 1 })).toContain(
+      'Queda 1 pendiente'
+    );
+    expect(textoProximaAccion('REQUIERE_APROBACION_ADICIONAL')).toContain(
+      'aprobación adicional'
+    );
+  });
+
+  it('conoce estados de planificación de repuestos', () => {
+    expect(puedePlanificarRepuestos('RECEPCIONADO')).toBeTrue();
+    expect(puedePlanificarRepuestos('DIAGNOSTICADO')).toBeTrue();
+    expect(puedePlanificarRepuestos('EN_REPARACION')).toBeTrue();
+    expect(puedePlanificarRepuestos('REQUIERE_APROBACION_ADICIONAL')).toBeFalse();
+    expect(puedePlanificarRepuestos('LISTO')).toBeFalse();
+    expect(puedePlanificarRepuestos('CERRADO')).toBeFalse();
+  });
+
+  it('no inventa costo 0 cuando el histórico es desconocido', () => {
+    expect(textoCostoHistoricoRepuesto({ costoConocido: false, costoHistorico: null })).toBe(
+      'Costo histórico no disponible'
+    );
+    expect(textoCostoHistoricoRepuesto({ costoConocido: true, costoHistorico: 12000 })).toBeNull();
+  });
+
+  it('cuenta pendientes excluyendo anulados', () => {
+    expect(
+      contarRepuestosPendientes([
+        { cantidadPendiente: 2 },
+        { cantidadPendiente: 3, anulado: true },
+        { cantidadPendiente: 1 }
+      ])
+    ).toBe(3);
+  });
+
   it('asigna tonos de badge coherentes', () => {
     expect(toneEstadoOrden('LISTO')).toBe('success');
     expect(toneEstadoOrden('ESPERA_REPUESTO')).toBe('warning');
+    expect(toneEstadoOrden('REQUIERE_APROBACION_ADICIONAL')).toBe('warning');
+    expect(toneEstadoOrden('DIAGNOSTICADO')).toBe('neutral');
     expect(toneEstadoOrden('CANCELADO')).toBe('error');
     expect(toneEstadoOrden('RECEPCIONADO')).toBe('neutral');
   });

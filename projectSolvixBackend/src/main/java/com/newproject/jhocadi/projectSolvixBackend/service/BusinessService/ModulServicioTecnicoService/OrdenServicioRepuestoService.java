@@ -43,19 +43,12 @@ public class OrdenServicioRepuestoService {
         EstadoOrdenServicio.EN_REPARACION,
         EstadoOrdenServicio.ESPERA_REPUESTO);
 
+    /** Consumo físico solo con uso confirmado en reparación. */
     private static final Set<EstadoOrdenServicio> ESTADOS_CONSUMIR = EnumSet.of(
-        EstadoOrdenServicio.RECEPCIONADO,
-        EstadoOrdenServicio.EN_DIAGNOSTICO,
-        EstadoOrdenServicio.COTIZADO,
-        EstadoOrdenServicio.APROBADO,
         EstadoOrdenServicio.EN_REPARACION,
         EstadoOrdenServicio.ESPERA_REPUESTO);
 
     private static final Set<EstadoOrdenServicio> ESTADOS_DEVOLVER = EnumSet.of(
-        EstadoOrdenServicio.RECEPCIONADO,
-        EstadoOrdenServicio.EN_DIAGNOSTICO,
-        EstadoOrdenServicio.COTIZADO,
-        EstadoOrdenServicio.APROBADO,
         EstadoOrdenServicio.EN_REPARACION,
         EstadoOrdenServicio.ESPERA_REPUESTO,
         EstadoOrdenServicio.LISTO,
@@ -119,10 +112,11 @@ public class OrdenServicioRepuestoService {
         }
 
         int nuevaPlanificada = request.getCantidadPlanificada();
-        if (nuevaPlanificada < linea.getCantidadConsumida()) {
+        int neta = linea.cantidadNetaConsumida();
+        if (nuevaPlanificada < neta) {
             throw new BusinessException(
-                "La cantidad planificada no puede ser menor que la ya consumida ("
-                    + linea.getCantidadConsumida() + ").");
+                "La cantidad planificada no puede ser menor que el consumo neto ("
+                    + neta + ").");
         }
 
         linea.setCantidadPlanificada(nuevaPlanificada);
@@ -162,10 +156,10 @@ public class OrdenServicioRepuestoService {
         validarPuedeConsumir(orden, linea);
 
         int cantidad = request.getCantidad();
-        int restante = linea.getCantidadPlanificada() - linea.getCantidadConsumida();
-        if (cantidad > restante) {
+        int pendiente = linea.getCantidadPlanificada() - linea.cantidadNetaConsumida();
+        if (cantidad > pendiente) {
             throw new BusinessException(
-                "No se puede consumir más de lo planificado pendiente. Disponible: " + restante + ".");
+                "La cantidad consumida supera la cantidad planificada. Disponible: " + pendiente + ".");
         }
 
         if (linea.getCantidadConsumida() == 0) {
@@ -291,7 +285,7 @@ public class OrdenServicioRepuestoService {
         boolean puedeEditar = puedePlanificarEstado && !anulado;
         boolean puedeEliminar = puedePlanificarEstado && !anulado && linea.cantidadNetaConsumida() == 0;
         boolean puedeConsumir = puedeConsumirEstado && !anulado
-            && linea.getCantidadConsumida() < linea.getCantidadPlanificada();
+            && linea.cantidadNetaConsumida() < linea.getCantidadPlanificada();
         boolean puedeDevolver = puedeDevolverEstado && !anulado && linea.cantidadNetaConsumida() > 0;
 
         return RepuestoOrdenServicioResponseDTO.fromEntity(

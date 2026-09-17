@@ -1,7 +1,9 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { SolvixBadgeComponent } from '../../../../shared/components/solvix-badge/solvix-badge';
 import { SolvixButtonComponent } from '../../../../shared/components/solvix-button/solvix-button';
 import { SolvixEmptyStateComponent } from '../../../../shared/components/solvix-empty-state/solvix-empty-state';
@@ -26,6 +28,7 @@ type FormMode = 'hidden' | 'crear' | 'editar';
     ReactiveFormsModule,
     MatDialogModule,
     MatSnackBarModule,
+    MatTooltipModule,
     SolvixSectionHeaderComponent,
     SolvixButtonComponent,
     SolvixBadgeComponent,
@@ -56,7 +59,8 @@ export class ClienteEquiposPanelComponent implements OnChanges {
     private fb: FormBuilder,
     private equipoService: EquipoService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private router: Router
   ) {
     this.form = this.fb.group({
       tipoEquipo: ['COMPUTADOR' as TipoEquipo, Validators.required],
@@ -77,6 +81,16 @@ export class ClienteEquiposPanelComponent implements OnChanges {
 
   get puedeGestionar(): boolean {
     return this.clienteActivo && !this.bloqueado;
+  }
+
+  nuevaOrdenCliente(): void {
+    this.router.navigate(['/servicios/nueva'], { queryParams: { clienteId: this.clienteId } });
+  }
+
+  nuevaOrdenEquipo(equipoId: number): void {
+    this.router.navigate(['/servicios/nueva'], {
+      queryParams: { clienteId: this.clienteId, equipoId }
+    });
   }
 
   cargar(): void {

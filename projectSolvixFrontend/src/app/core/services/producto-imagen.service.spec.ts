@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ProductoService } from './producto.service';
+import { environment } from '../../../environments/environment';
 
 describe('ProductoService imagen', () => {
   let service: ProductoService;
@@ -25,7 +26,7 @@ describe('ProductoService imagen', () => {
       expect(producto.imagenUrl).toContain('/api/v1/productos/imagenes/');
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/v1/productos/7/imagen');
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/v1/productos/7/imagen`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body instanceof FormData).toBeTrue();
     req.flush({
@@ -41,7 +42,7 @@ describe('ProductoService imagen', () => {
       expect(producto.imagenUrl).toBeUndefined();
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/v1/productos/7/imagen');
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/v1/productos/7/imagen`);
     expect(req.request.method).toBe('DELETE');
     req.flush({ id: 7, nombre: 'Cámara', marca: 'H9C' });
   });

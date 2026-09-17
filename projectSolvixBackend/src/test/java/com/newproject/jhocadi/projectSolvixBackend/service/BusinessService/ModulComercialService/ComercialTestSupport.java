@@ -24,6 +24,7 @@ import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.Modul
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulProductoRepo.CategoriaProductoRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulProductoRepo.ProductoRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.EquipoRepository;
+import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.HistorialEstadoOrdenServicioRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.OrdenServicioRepuestoRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.OrdenServicioRepository;
 
@@ -79,6 +80,9 @@ public abstract class ComercialTestSupport {
     @Autowired
     protected OrdenServicioRepuestoRepository ordenServicioRepuestoRepository;
 
+    @Autowired
+    protected HistorialEstadoOrdenServicioRepository historialEstadoOrdenServicioRepository;
+
     @BeforeEach
     protected void limpiarDatos() {
         movimientoRepository.deleteAll();
@@ -90,6 +94,7 @@ public abstract class ComercialTestSupport {
         compraRepository.deleteAll();
         ajusteCostoRepository.deleteAll();
         ordenServicioRepuestoRepository.deleteAll();
+        historialEstadoOrdenServicioRepository.deleteAll();
         ordenServicioRepository.deleteAll();
         equipoRepository.deleteAll();
         productoRepository.deleteAll();

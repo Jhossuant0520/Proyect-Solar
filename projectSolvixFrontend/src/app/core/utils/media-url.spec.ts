@@ -1,4 +1,5 @@
-import { API_ORIGIN, resolverUrlMedia } from './media-url';
+import { resolverUrlMedia } from './media-url';
+import { environment } from '../../../environments/environment';
 
 describe('resolverUrlMedia', () => {
   it('retorna null si no hay URL', () => {
@@ -14,6 +15,6 @@ describe('resolverUrlMedia', () => {
 
   it('resuelve rutas relativas de SOLVIX con el origen del API', () => {
     expect(resolverUrlMedia('/api/v1/productos/imagenes/uuid.jpg'))
-      .toBe(`${API_ORIGIN}/api/v1/productos/imagenes/uuid.jpg`);
+      .toBe(`${environment.apiOrigin}/api/v1/productos/imagenes/uuid.jpg`);
   });
 });

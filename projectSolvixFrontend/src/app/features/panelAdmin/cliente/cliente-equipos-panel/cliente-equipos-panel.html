@@ -6,9 +6,20 @@
       subtitle="Equipos asociados a este cliente para órdenes de servicio."
     />
     @if (puedeGestionar && formMode === 'hidden') {
-      <solvix-button family="tech" rank="primary" icon="add" (click)="abrirCrear()">
-        Registrar equipo
-      </solvix-button>
+      <div class="head-actions">
+        <solvix-button
+          family="tech"
+          rank="secondary"
+          icon="assignment_add"
+          matTooltip="Crear orden de servicio para este cliente"
+          (click)="nuevaOrdenCliente()"
+        >
+          Nueva orden
+        </solvix-button>
+        <solvix-button family="tech" rank="primary" icon="add" matTooltip="Registrar equipo" (click)="abrirCrear()">
+          Registrar equipo
+        </solvix-button>
+      </div>
     }
   </div>
 
@@ -109,14 +120,39 @@
             @if (puedeGestionar) {
               <div class="equipo-actions">
                 @if (equipo.activo) {
-                  <solvix-button family="tech" rank="secondary" icon="edit" (click)="abrirEditar(equipo)">
+                  <solvix-button
+                    family="tech"
+                    rank="secondary"
+                    icon="assignment_add"
+                    matTooltip="Nueva orden de servicio con este equipo"
+                    (click)="nuevaOrdenEquipo(equipo.id)"
+                  >
+                    Nueva orden
+                  </solvix-button>
+                  <solvix-button
+                    family="tech"
+                    rank="secondary"
+                    icon="edit"
+                    matTooltip="Editar equipo"
+                    (click)="abrirEditar(equipo)"
+                  >
                     Editar
                   </solvix-button>
-                  <solvix-button family="tech" rank="danger" (click)="desactivar(equipo)">
+                  <solvix-button
+                    family="tech"
+                    rank="danger"
+                    matTooltip="Desactivar equipo"
+                    (click)="desactivar(equipo)"
+                  >
                     Desactivar equipo
                   </solvix-button>
                 } @else {
-                  <solvix-button family="tech" rank="secondary" (click)="activar(equipo)">
+                  <solvix-button
+                    family="tech"
+                    rank="secondary"
+                    matTooltip="Activar equipo"
+                    (click)="activar(equipo)"
+                  >
                     Activar equipo
                   </solvix-button>
                 }

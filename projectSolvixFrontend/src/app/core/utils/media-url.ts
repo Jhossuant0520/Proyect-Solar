@@ -1,8 +1,9 @@
+import { environment } from '../../../environments/environment';
+
 /**
- * Origen del API Spring Boot. Las URLs relativas de imagen se resuelven aquí;
- * el modelo de producto guarda solo la ruta relativa o una URL externa.
+ * Resuelve URLs de imagen (externas o relativas de SOLVIX) contra environment.apiOrigin.
+ * El modelo de producto guarda solo la ruta relativa o una URL externa.
  */
-export const API_ORIGIN = 'http://localhost:8080';
 
 /**
  * Convierte imagenUrl (externa o relativa de SOLVIX) en URL usable por &lt;img&gt;.
@@ -24,5 +25,5 @@ export function resolverUrlMedia(url?: string | null): string | null {
   ) {
     return limpio;
   }
-  return `${API_ORIGIN}${limpio.startsWith('/') ? limpio : `/${limpio}`}`;
+  return `${environment.apiOrigin}${limpio.startsWith('/') ? limpio : `/${limpio}`}`;
 }

@@ -23,4 +23,14 @@ public interface OrdenServicioRepuestoRepository extends JpaRepository<OrdenServ
           AND (r.cantidadConsumida - r.cantidadDevuelta) > 0
         """)
     boolean existeConsumoNetoPendiente(@Param("ordenId") Long ordenId);
+
+    /** Hay al menos una línea no anulada con cantidad pendiente de uso. */
+    @Query("""
+        SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END
+        FROM OrdenServicioRepuesto r
+        WHERE r.ordenServicio.id = :ordenId
+          AND r.anulado = false
+          AND (r.cantidadPlanificada - (r.cantidadConsumida - r.cantidadDevuelta)) > 0
+        """)
+    boolean existeRepuestoPendiente(@Param("ordenId") Long ordenId);
 }

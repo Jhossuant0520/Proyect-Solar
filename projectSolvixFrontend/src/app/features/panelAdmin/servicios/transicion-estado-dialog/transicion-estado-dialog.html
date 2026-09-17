@@ -1,0 +1,91 @@
+<div
+  class="transicion-dialog"
+  [class.is-danger]="esCancelacion"
+  [class.is-attention]="esNuevaFalla || esEspera"
+>
+  <header class="dlg-head">
+    <h2>{{ data.accion.titulo }}</h2>
+    <p>
+      @if (esConfirmacion && data.mensajeConfirmacion) {
+        {{ data.mensajeConfirmacion }}
+      } @else if (esEspera) {
+        Esta orden quedará en espera mientras existan repuestos pendientes.
+      } @else if (esNuevaFalla) {
+        Se detectó una nueva situación durante la reparación.
+      } @else {
+        {{ data.accion.descripcion }}
+      }
+    </p>
+  </header>
+
+  @if (esEspera && data.pendientesResumen?.length) {
+    <ul class="pendientes-list">
+      @for (linea of data.pendientesResumen; track linea) {
+        <li>{{ linea }}</li>
+      }
+    </ul>
+  }
+
+  <form class="dlg-form" [formGroup]="form" (ngSubmit)="confirmar()">
+    @if (esCancelacion) {
+      <label>
+        <span class="label-row">Motivo de cancelación <span class="req">requerido</span></span>
+        <textarea
+          formControlName="motivo"
+          rows="3"
+          maxlength="500"
+          placeholder="Indica por qué se cancela la orden"
+        ></textarea>
+      </label>
+    }
+
+    @if (esNuevaFalla) {
+      <label>
+        <span class="label-row">Nueva falla / situación detectada <span class="req">requerido</span></span>
+        <textarea
+          formControlName="nuevaFalla"
+          rows="3"
+          maxlength="500"
+          placeholder="Describe la situación detectada"
+        ></textarea>
+      </label>
+    }
+
+    @if (esCancelacion || esNuevaFalla || esEspera) {
+      <label>
+        Observación
+        <textarea
+          formControlName="observacion"
+          rows="2"
+          maxlength="1000"
+          placeholder="Opcional"
+        ></textarea>
+      </label>
+    }
+
+    @if (error) {
+      <p class="form-error">{{ error }}</p>
+    }
+
+    <div class="dlg-actions">
+      <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
+        Cancelar
+      </solvix-button>
+      <solvix-button
+        family="tech"
+        [rank]="esCancelacion ? 'danger' : 'primary'"
+        type="submit"
+      >
+        @if (esConfirmacion && data.accion.destino === 'APROBADO') {
+          Confirmar aprobación
+        } @else if (esEspera) {
+          Poner en espera
+        } @else if (esNuevaFalla) {
+          Registrar y solicitar aprobación
+        } @else {
+          {{ data.accion.boton }}
+        }
+      </solvix-button>
+    </div>
+  </form>
+</div>

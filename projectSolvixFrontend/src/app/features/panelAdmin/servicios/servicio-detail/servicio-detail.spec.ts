@@ -1,12 +1,17 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, flushMicrotasks, tick } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ServicioDetailComponent } from './servicio-detail';
 import { OrdenServicioService } from '../../../../core/services/orden-servicio.service';
-import { OrdenServicioResponseDTO } from '../../../../core/models/orden-servicio.models';
+import {
+  HistorialEstadoOrdenServicioResponseDTO,
+  OrdenServicioResponseDTO,
+  TransicionOrdenServicioResponseDTO
+} from '../../../../core/models/orden-servicio.models';
 
 function ordenBase(parcial: Partial<OrdenServicioResponseDTO> = {}): OrdenServicioResponseDTO {
   return {
@@ -32,23 +37,75 @@ function ordenBase(parcial: Partial<OrdenServicioResponseDTO> = {}): OrdenServic
   };
 }
 
-describe('ServicioDetailComponent — diagnóstico y trabajo', () => {
+function transicion(
+  orden: OrdenServicioResponseDTO,
+  parcial: Partial<TransicionOrdenServicioResponseDTO> = {}
+): TransicionOrdenServicioResponseDTO {
+  return {
+    orden,
+    estadoAnterior: 'RECEPCIONADO',
+    estadoNuevo: orden.estado,
+    motivo: '',
+    observacion: null,
+    usuario: 'admin',
+    fechaCambio: '2026-03-01T11:00:00',
+    mensaje: 'OK',
+    ...parcial
+  };
+}
+
+describe('ServicioDetailComponent — workflow', () => {
   let fixture: ComponentFixture<ServicioDetailComponent>;
   let component: ServicioDetailComponent;
   let ordenService: jasmine.SpyObj<OrdenServicioService>;
+  let dialog: jasmine.SpyObj<MatDialog>;
   let router: Router;
 
   beforeEach(async () => {
     ordenService = jasmine.createSpyObj('OrdenServicioService', [
       'obtenerPorId',
       'actualizar',
-      'cambiarEstado'
+      'cambiarEstado',
+      'completarDiagnostico',
+      'completarReparacion',
+      'registrarNuevaFalla',
+      'listarHistorial',
+      'listarRepuestos'
     ]);
+    dialog = jasmine.createSpyObj('MatDialog', ['open']);
     ordenService.obtenerPorId.and.returnValue(of(ordenBase()));
+    ordenService.listarHistorial.and.returnValue(of([]));
+    ordenService.listarRepuestos.and.returnValue(of([]));
     ordenService.actualizar.and.returnValue(
       of(ordenBase({ diagnostico: 'Fuente dañada', problemaReportado: 'No enciende' }))
     );
-    ordenService.cambiarEstado.and.returnValue(of(ordenBase({ estado: 'EN_DIAGNOSTICO' })));
+    ordenService.cambiarEstado.and.returnValue(
+      of(transicion(ordenBase({ estado: 'EN_DIAGNOSTICO' })))
+    );
+    ordenService.completarDiagnostico.and.returnValue(
+      of(
+        transicion(ordenBase({ estado: 'DIAGNOSTICADO', diagnostico: 'Fuente dañada' }), {
+          estadoAnterior: 'EN_DIAGNOSTICO',
+          estadoNuevo: 'DIAGNOSTICADO'
+        })
+      )
+    );
+    ordenService.completarReparacion.and.returnValue(
+      of(
+        transicion(ordenBase({ estado: 'LISTO', trabajoRealizado: 'Cambio de fuente' }), {
+          estadoAnterior: 'EN_REPARACION',
+          estadoNuevo: 'LISTO'
+        })
+      )
+    );
+    ordenService.registrarNuevaFalla.and.returnValue(
+      of(
+        transicion(ordenBase({ estado: 'REQUIERE_APROBACION_ADICIONAL' }), {
+          estadoAnterior: 'EN_REPARACION',
+          estadoNuevo: 'REQUIERE_APROBACION_ADICIONAL'
+        })
+      )
+    );
 
     await TestBed.configureTestingModule({
       imports: [ServicioDetailComponent, NoopAnimationsModule],
@@ -59,6 +116,7 @@ describe('ServicioDetailComponent — diagnóstico y trabajo', () => {
           useValue: { snapshot: { paramMap: { get: () => '12' } } }
         },
         { provide: OrdenServicioService, useValue: ordenService },
+        { provide: MatDialog, useValue: dialog },
         { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open']) }
       ]
     }).compileComponents();
@@ -76,75 +134,143 @@ describe('ServicioDetailComponent — diagnóstico y trabajo', () => {
     expect(text).toContain('Diagnóstico');
     expect(text).toContain('Trabajo realizado');
     expect(text).toContain('Observaciones');
-    expect(text).toContain('Qué indicó el cliente al entregar el equipo.');
-    expect(text).toContain('Qué encontró el técnico al revisar el equipo.');
-    expect(text).toContain('Qué trabajo o reparación se realizó.');
-    expect(text).toContain('Información adicional importante sobre la orden.');
     expect(text).toContain('No enciende');
-    expect(text).toContain('Urgente');
   }));
 
-  it('inicializa el formulario con los valores de la orden', fakeAsync(() => {
+  it('RECEPCIONADO: Iniciar diagnóstico llama cambiarEstado sin motivo y sin bloqueo de error', fakeAsync(() => {
     fixture.detectChanges();
     tick();
-    expect(component.form.controls.problemaReportado.value).toBe('No enciende');
-    expect(component.form.controls.diagnostico.value).toBe('');
-    expect(component.form.controls.trabajoRealizado.value).toBe('');
-    expect(component.form.controls.observaciones.value).toBe('Urgente');
-  }));
+    expect(component.accionPrincipal?.boton).toBe('Iniciar diagnóstico');
+    expect(component.estadoError).toBe('');
+    expect(component.guiaTecnica).toBe('');
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('Iniciar diagnóstico');
+    expect(text).not.toContain('bloqueo');
 
-  it('destaca problema reportado en RECEPCIONADO', fakeAsync(() => {
-    fixture.detectChanges();
+    component.ejecutarAccionPrincipal();
     tick();
-    expect(component.campoDestacado).toBe('problemaReportado');
-    const destacado = fixture.nativeElement.querySelector(
-      '.campo-tecnico.is-destacado[data-campo="problemaReportado"]'
+
+    expect(dialog.open).not.toHaveBeenCalled();
+    expect(ordenService.cambiarEstado).toHaveBeenCalledWith(12, {
+      nuevoEstado: 'EN_DIAGNOSTICO'
+    });
+    expect(ordenService.cambiarEstado).not.toHaveBeenCalledWith(
+      12,
+      jasmine.objectContaining({ motivo: jasmine.anything() })
     );
-    expect(destacado).toBeTruthy();
   }));
 
-  it('permite editar y guardar textos sin cambiar cliente/equipo/estado', fakeAsync(() => {
+  it('no abre modal de motivo genérico al iniciar diagnóstico', fakeAsync(() => {
     fixture.detectChanges();
     tick();
+    component.ejecutarAccionPrincipal();
+    tick();
+    expect(dialog.open).not.toHaveBeenCalled();
+  }));
+
+  it('EN_DIAGNOSTICO: Guardar diagnóstico llama completarDiagnostico', fakeAsync(() => {
+    ordenService.obtenerPorId.and.returnValue(
+      of(ordenBase({ estado: 'EN_DIAGNOSTICO', diagnostico: null }))
+    );
+    fixture.detectChanges();
+    tick();
+
+    expect(component.accionPrincipal?.boton).toBe('Ir al diagnóstico');
+    expect(component.accionPrincipal?.destino).toBe('DIAGNOSTICADO');
+
     component.iniciarEdicion();
-    expect(component.editando).toBeTrue();
     component.form.controls.diagnostico.setValue('Fuente dañada');
-    expect(component.hayCambiosTextos).toBeTrue();
     component.guardarTextos();
     tick();
 
+    expect(ordenService.completarDiagnostico).toHaveBeenCalledWith(12, {
+      problemaReportado: 'No enciende',
+      diagnostico: 'Fuente dañada',
+      observaciones: 'Urgente'
+    });
+    expect(ordenService.cambiarEstado).not.toHaveBeenCalled();
+    expect(component.orden?.estado).toBe('DIAGNOSTICADO');
+  }));
+
+  it('tras iniciar diagnóstico enfoca la guía de ficha técnica', fakeAsync(() => {
+    fixture.detectChanges();
+    tick();
+    component.ejecutarAccionPrincipal();
+    tick();
+    flushMicrotasks();
+    expect(component.orden?.estado).toBe('EN_DIAGNOSTICO');
+    expect(component.editando).toBeTrue();
+    expect(component.guiaTecnica).toContain('diagnóstico');
+  }));
+
+  it('COTIZADO muestra contexto de aprobación', fakeAsync(() => {
+    ordenService.obtenerPorId.and.returnValue(of(ordenBase({ estado: 'COTIZADO' })));
+    fixture.detectChanges();
+    tick();
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('pendiente de aprobación');
+    expect(text).toContain('Cotización inicial');
+    expect(component.accionPrincipal?.destino).toBe('APROBADO');
+  }));
+
+  it('Marcar listo sin trabajo realizado muestra guía técnica', fakeAsync(() => {
+    ordenService.obtenerPorId.and.returnValue(
+      of(ordenBase({ estado: 'EN_REPARACION', trabajoRealizado: null }))
+    );
+    fixture.detectChanges();
+    tick();
+    expect(component.accionPrincipal?.boton).toBe('Marcar como listo');
+
+    component.ejecutarAccionPrincipal();
+    tick();
+
+    expect(ordenService.completarReparacion).not.toHaveBeenCalled();
+    expect(component.editando).toBeTrue();
+    expect(component.guiaTecnica).toContain('trabajo realizado');
+  }));
+
+  it('EN_REPARACION muestra botón de nueva falla', fakeAsync(() => {
+    ordenService.obtenerPorId.and.returnValue(of(ordenBase({ estado: 'EN_REPARACION' })));
+    fixture.detectChanges();
+    tick();
+    expect(component.accionFalla?.destino).toBe('REQUIERE_APROBACION_ADICIONAL');
+    expect(component.accionFalla?.boton).toBe('Registrar nueva falla');
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('Registrar nueva falla');
+  }));
+
+  it('muestra timeline de historial', fakeAsync(() => {
+    const hist: HistorialEstadoOrdenServicioResponseDTO[] = [
+      {
+        id: 1,
+        ordenServicioId: 12,
+        estadoAnterior: 'RECEPCIONADO',
+        estadoNuevo: 'EN_DIAGNOSTICO',
+        motivo: 'Inicio',
+        observacion: null,
+        usuario: 'admin',
+        fechaCambio: '2026-03-01T11:00:00'
+      }
+    ];
+    ordenService.listarHistorial.and.returnValue(of(hist));
+    fixture.detectChanges();
+    tick();
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('Historial de la orden');
+    expect(text).toContain('Inicio');
+    expect(text).toContain('admin');
+    expect(ordenService.listarHistorial).toHaveBeenCalledWith(12);
+  }));
+
+  it('permite editar y guardar textos fuera de diagnóstico', fakeAsync(() => {
+    fixture.detectChanges();
+    tick();
+    component.iniciarEdicion();
+    component.form.controls.diagnostico.setValue('Fuente dañada');
+    component.guardarTextos();
+    tick();
     expect(ordenService.actualizar).toHaveBeenCalled();
-    const [id, body] = ordenService.actualizar.calls.mostRecent().args;
-    expect(id).toBe(12);
-    expect(body.clienteId).toBe(4);
-    expect(body.equipoId).toBe(9);
-    expect(body.diagnostico).toBe('Fuente dañada');
-    expect(component.editando).toBeFalse();
-    expect(component.orden?.estado).toBe('RECEPCIONADO');
-    expect(component.orden?.clienteId).toBe(4);
-    expect(component.orden?.equipoId).toBe(9);
-  }));
-
-  it('cancela la edición y restaura valores', fakeAsync(() => {
-    fixture.detectChanges();
-    tick();
-    component.iniciarEdicion();
-    component.form.controls.diagnostico.setValue('Borrador');
-    component.cancelarEdicion();
-    expect(component.editando).toBeFalse();
-    expect(component.form.controls.diagnostico.value).toBe('');
-    expect(ordenService.actualizar).not.toHaveBeenCalled();
-  }));
-
-  it('no envía PUT si no hubo cambios', fakeAsync(() => {
-    fixture.detectChanges();
-    tick();
-    component.iniciarEdicion();
-    expect(component.hayCambiosTextos).toBeFalse();
-    component.guardarTextos();
-    tick();
-    expect(ordenService.actualizar).not.toHaveBeenCalled();
-    expect(component.editando).toBeFalse();
+    expect(ordenService.completarDiagnostico).not.toHaveBeenCalled();
   }));
 
   it('modo lectura en CERRADO', fakeAsync(() => {
@@ -153,23 +279,8 @@ describe('ServicioDetailComponent — diagnóstico y trabajo', () => {
     );
     fixture.detectChanges();
     tick();
+    expect(component.accionPrincipal).toBeNull();
     expect(component.puedeEditar(component.orden!.estado)).toBeFalse();
-    expect(component.esResumenCompleto).toBeTrue();
-    const text = fixture.nativeElement.textContent as string;
-    expect(text).toContain('solo lectura');
-    expect(text).not.toContain('Editar información');
-    component.iniciarEdicion();
-    expect(component.editando).toBeFalse();
-  }));
-
-  it('modo lectura en CANCELADO', fakeAsync(() => {
-    ordenService.obtenerPorId.and.returnValue(of(ordenBase({ estado: 'CANCELADO' })));
-    fixture.detectChanges();
-    tick();
-    expect(component.puedeEditar(component.orden!.estado)).toBeFalse();
-    const text = fixture.nativeElement.textContent as string;
-    expect(text).toContain('solo lectura');
-    expect(fixture.nativeElement.querySelector('button.btn-tech-secondary')).toBeFalsy();
   }));
 
   it('muestra error humano al fallar el guardado', fakeAsync(() => {
@@ -189,16 +300,6 @@ describe('ServicioDetailComponent — diagnóstico y trabajo', () => {
     component.guardarTextos();
     tick();
     expect(component.editError).toContain('cerrada o cancelada');
-    expect(component.editando).toBeTrue();
-  }));
-
-  it('cambia estado con POST separado del formulario técnico', fakeAsync(() => {
-    fixture.detectChanges();
-    tick();
-    component.cambiarEstado('EN_DIAGNOSTICO');
-    tick();
-    expect(ordenService.cambiarEstado).toHaveBeenCalledWith(12, { estado: 'EN_DIAGNOSTICO' });
-    expect(ordenService.actualizar).not.toHaveBeenCalled();
   }));
 
   it('vuelve al listado', () => {

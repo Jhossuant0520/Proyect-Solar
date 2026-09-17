@@ -18,12 +18,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.CambiarEstadoOrdenServicioRequestDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.CompletarDiagnosticoRequestDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.CompletarReparacionRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.ConsumirRepuestoRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.DevolverRepuestoRequestDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.HistorialEstadoOrdenServicioResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.OrdenServicioRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.OrdenServicioResponseDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RegistrarNuevaFallaRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RepuestoOrdenServicioRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RepuestoOrdenServicioResponseDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.TransicionOrdenServicioResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.EstadoOrdenServicio;
 import com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.ModulServicioTecnicoService.OrdenServicioRepuestoService;
 import com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.ModulServicioTecnicoService.OrdenServicioService;
@@ -70,10 +75,44 @@ public class OrdenServicioController {
     }
 
     @PostMapping("/{id}/estado")
-    public ResponseEntity<OrdenServicioResponseDTO> cambiarEstado(
+    public ResponseEntity<TransicionOrdenServicioResponseDTO> cambiarEstado(
             @PathVariable Long id,
-            @Valid @RequestBody CambiarEstadoOrdenServicioRequestDTO request) {
-        return ResponseEntity.ok(ordenServicioService.cambiarEstado(id, request));
+            @Valid @RequestBody CambiarEstadoOrdenServicioRequestDTO request,
+            Principal principal) {
+        String usuario = principal != null ? principal.getName() : null;
+        return ResponseEntity.ok(ordenServicioService.cambiarEstado(id, request, usuario));
+    }
+
+    @PostMapping("/{id}/diagnostico/completar")
+    public ResponseEntity<TransicionOrdenServicioResponseDTO> completarDiagnostico(
+            @PathVariable Long id,
+            @Valid @RequestBody CompletarDiagnosticoRequestDTO request,
+            Principal principal) {
+        String usuario = principal != null ? principal.getName() : null;
+        return ResponseEntity.ok(ordenServicioService.completarDiagnostico(id, request, usuario));
+    }
+
+    @PostMapping("/{id}/reparacion/completar")
+    public ResponseEntity<TransicionOrdenServicioResponseDTO> completarReparacion(
+            @PathVariable Long id,
+            @Valid @RequestBody CompletarReparacionRequestDTO request,
+            Principal principal) {
+        String usuario = principal != null ? principal.getName() : null;
+        return ResponseEntity.ok(ordenServicioService.completarReparacion(id, request, usuario));
+    }
+
+    @PostMapping("/{id}/nueva-falla")
+    public ResponseEntity<TransicionOrdenServicioResponseDTO> registrarNuevaFalla(
+            @PathVariable Long id,
+            @Valid @RequestBody RegistrarNuevaFallaRequestDTO request,
+            Principal principal) {
+        String usuario = principal != null ? principal.getName() : null;
+        return ResponseEntity.ok(ordenServicioService.registrarNuevaFalla(id, request, usuario));
+    }
+
+    @GetMapping("/{id}/historial")
+    public ResponseEntity<List<HistorialEstadoOrdenServicioResponseDTO>> listarHistorial(@PathVariable Long id) {
+        return ResponseEntity.ok(ordenServicioService.listarHistorial(id));
     }
 
     @GetMapping("/{id}/repuestos")

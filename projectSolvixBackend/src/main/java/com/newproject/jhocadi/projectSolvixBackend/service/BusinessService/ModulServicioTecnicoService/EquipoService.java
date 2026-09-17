@@ -1,5 +1,6 @@
 package com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.ModulServicioTecnicoService;
 
+import java.util.EnumSet;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServic
 import com.newproject.jhocadi.projectSolvixBackend.exception.BusinessException;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.Cliente;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.Equipo;
+import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.EstadoOrdenServicio;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulComercialRepo.ClienteRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.EquipoRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.OrdenServicioRepository;
@@ -64,6 +66,9 @@ public class EquipoService {
             throw new BusinessException(
                 "No se puede cambiar el cliente de un equipo que ya tiene órdenes de servicio.");
         }
+        if (request.getActivo() != null && !request.getActivo() && equipo.isActivo()) {
+            validarSinOrdenesActivas(equipo.getId());
+        }
         aplicarDatos(equipo, request, cliente);
         if (request.getActivo() != null) {
             equipo.setActivo(request.getActivo());
@@ -74,8 +79,21 @@ public class EquipoService {
     @Transactional
     public EquipoResponseDTO desactivar(Long id) {
         Equipo equipo = buscarOFallar(id);
+        if (!equipo.isActivo()) {
+            return EquipoResponseDTO.fromEntity(equipo);
+        }
+        validarSinOrdenesActivas(equipo.getId());
         equipo.setActivo(false);
         return EquipoResponseDTO.fromEntity(equipoRepository.save(equipo));
+    }
+
+    private void validarSinOrdenesActivas(Long equipoId) {
+        if (ordenServicioRepository.existsByEquipoIdAndEstadoNotIn(
+                equipoId,
+                EnumSet.of(EstadoOrdenServicio.CERRADO, EstadoOrdenServicio.CANCELADO))) {
+            throw new BusinessException(
+                "No se puede desactivar el equipo porque tiene una orden de servicio activa.");
+        }
     }
 
     @Transactional(readOnly = true)

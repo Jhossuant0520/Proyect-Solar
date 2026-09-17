@@ -1,0 +1,34 @@
+<div class="cantidad-dialog">
+  <header class="dlg-head">
+    <p class="kicker solvix-mono">Repuestos</p>
+    <h2>{{ titulo }}</h2>
+    <p>{{ descripcion }}</p>
+    <p class="producto"><strong>{{ data.linea.productoNombre }}</strong></p>
+  </header>
+
+  <form class="dlg-form" [formGroup]="form" (ngSubmit)="confirmar()">
+    <label>
+      <span class="label-row">{{ labelCantidad }} <span class="req">requerido</span></span>
+      <input type="number" formControlName="cantidad" [attr.min]="minCantidad" [attr.max]="maxCantidad" step="1" />
+      <span class="hint">Entre {{ minCantidad }} y {{ maxCantidad }}</span>
+    </label>
+
+    @if (error) {
+      <p class="form-error" role="alert">{{ error }}</p>
+    }
+
+    <div class="dlg-actions">
+      <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
+        Cancelar
+      </solvix-button>
+      <solvix-button
+        family="tech"
+        [rank]="data.modo === 'devolver' ? 'secondary' : 'primary'"
+        type="submit"
+        [disabled]="enviando || form.invalid"
+      >
+        {{ enviando ? 'Procesando…' : boton }}
+      </solvix-button>
+    </div>
+  </form>
+</div>

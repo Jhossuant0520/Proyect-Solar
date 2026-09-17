@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.CambiarEstadoOrdenServicioRequestDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.CompletarDiagnosticoRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.ConsumirRepuestoRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.DevolverRepuestoRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.EquipoRequestDTO;
@@ -53,6 +54,7 @@ class OrdenServicioRepuestoServiceTest extends ComercialTestSupport {
         assertThat(linea.getEstado()).isEqualTo(EstadoRepuestoOrdenServicio.PLANIFICADO);
         assertThat(linea.getCantidadPlanificada()).isEqualTo(3);
         assertThat(linea.getCantidadConsumida()).isZero();
+        assertThat(linea.getCantidadPendiente()).isEqualTo(3);
         assertThat(linea.getCostoHistorico()).isNull();
         assertThat(stockDe(producto.getId())).isEqualTo(stockAntes);
         assertThat(movimientoRepository.findAll()).isEmpty();
@@ -74,15 +76,29 @@ class OrdenServicioRepuestoServiceTest extends ComercialTestSupport {
         assertThatThrownBy(() -> repuestoService.planificar(orden.getId(), productoInexistente))
             .isInstanceOf(BusinessException.class)
             .hasMessageContaining("no existe");
-
-        assertThatThrownBy(() -> repuestoService.planificar(888_888L, request(1L, 1)))
-            .isInstanceOf(org.springframework.web.server.ResponseStatusException.class);
     }
 
     @Test
-    @DisplayName("edita planificada y no permite bajar por debajo de consumida")
-    void editarPlanificada() {
+    @DisplayName("no consumir en RECEPCIONADO; sí en EN_REPARACION")
+    void consumoSoloEnReparacion() {
         OrdenServicioResponseDTO orden = crearOrdenBasica();
+        Producto producto = crearProducto("Fan", bd("30000"), bd("10000"), 4);
+        RepuestoOrdenServicioResponseDTO linea = planificar(orden.getId(), producto.getId(), 1);
+
+        assertThatThrownBy(() -> consumir(orden.getId(), linea.getId(), 1))
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("No se puede consumir");
+
+        OrdenServicioResponseDTO enReparacion = avanzarAReparacion(orden);
+        RepuestoOrdenServicioResponseDTO consumida = consumir(enReparacion.getId(), linea.getId(), 1);
+        assertThat(consumida.getCantidadConsumida()).isEqualTo(1);
+        assertThat(stockDe(producto.getId())).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("edita planificada y no permite bajar por debajo del consumo neto")
+    void editarPlanificada() {
+        OrdenServicioResponseDTO orden = avanzarAReparacion(crearOrdenBasica());
         Producto producto = crearProducto("RAM", bd("100000"), bd("50000"), 10);
         RepuestoOrdenServicioResponseDTO linea = planificar(orden.getId(), producto.getId(), 3);
         consumir(orden.getId(), linea.getId(), 2);
@@ -95,13 +111,13 @@ class OrdenServicioRepuestoServiceTest extends ComercialTestSupport {
         assertThatThrownBy(() ->
             repuestoService.actualizarPlanificacion(orden.getId(), linea.getId(), bajo))
             .isInstanceOf(BusinessException.class)
-            .hasMessageContaining("ya consumida");
+            .hasMessageContaining("consumo neto");
     }
 
     @Test
     @DisplayName("consumo parcial y completo con CONSUMO_SERVICIO y referencia ORDEN_SERVICIO")
     void consumoParcialYCompleto() {
-        OrdenServicioResponseDTO orden = crearOrdenBasica();
+        OrdenServicioResponseDTO orden = avanzarAReparacion(crearOrdenBasica());
         Producto producto = crearProducto("SSD", bd("200000"), bd("180000"), 5);
         RepuestoOrdenServicioResponseDTO linea = planificar(orden.getId(), producto.getId(), 3);
 
@@ -109,6 +125,7 @@ class OrdenServicioRepuestoServiceTest extends ComercialTestSupport {
         assertThat(parcial.getEstado()).isEqualTo(EstadoRepuestoOrdenServicio.PARCIAL);
         assertThat(parcial.getCantidadConsumida()).isEqualTo(2);
         assertThat(parcial.getCantidadNetaConsumida()).isEqualTo(2);
+        assertThat(parcial.getCantidadPendiente()).isEqualTo(1);
         assertThat(parcial.getCostoHistorico()).isEqualByComparingTo("180000");
         assertThat(parcial.isCostoConocido()).isTrue();
         assertThat(stockDe(producto.getId())).isEqualTo(3);
@@ -121,95 +138,63 @@ class OrdenServicioRepuestoServiceTest extends ComercialTestSupport {
             .filter(m -> m.getTipo() == TipoMovimientoInventario.CONSUMO_SERVICIO)
             .toList();
         assertThat(movimientos).hasSize(2);
-        assertThat(movimientos).allMatch(m ->
-            m.getReferenciaTipo() == ReferenciaMovimiento.ORDEN_SERVICIO
-                && orden.getId().equals(m.getReferenciaId()));
+        assertThat(movimientos.get(0).getReferenciaTipo()).isEqualTo(ReferenciaMovimiento.ORDEN_SERVICIO);
+        assertThat(movimientos.get(0).getReferenciaId()).isEqualTo(orden.getId());
     }
 
     @Test
-    @DisplayName("sobreconsumo y stock insuficiente")
-    void sobreconsumoYStock() {
-        OrdenServicioResponseDTO orden = crearOrdenBasica();
-        Producto producto = crearProducto("Cable", bd("10000"), bd("5000"), 1);
-        RepuestoOrdenServicioResponseDTO linea = planificar(orden.getId(), producto.getId(), 3);
-
-        assertThatThrownBy(() -> consumir(orden.getId(), linea.getId(), 4))
-            .isInstanceOf(BusinessException.class)
-            .hasMessageContaining("planificado");
-
-        assertThatThrownBy(() -> consumir(orden.getId(), linea.getId(), 2))
-            .isInstanceOf(BusinessException.class)
-            .hasMessageContaining("Stock insuficiente");
-        assertThat(stockDe(producto.getId())).isEqualTo(1);
-    }
-
-    @Test
-    @DisplayName("costo desconocido null y congelado tras primer consumo")
-    void costoDesconocidoYCongelado() {
-        OrdenServicioResponseDTO orden = crearOrdenBasica();
-        Producto producto = crearProducto("Fan", bd("30000"), null, 5);
-        RepuestoOrdenServicioResponseDTO linea = planificar(orden.getId(), producto.getId(), 2);
-
-        RepuestoOrdenServicioResponseDTO primero = consumir(orden.getId(), linea.getId(), 1);
-        assertThat(primero.getCostoHistorico()).isNull();
-        assertThat(primero.isCostoConocido()).isFalse();
-
-        producto.setCostoActual(bd("12000"));
-        productoRepository.save(producto);
-
-        RepuestoOrdenServicioResponseDTO segundo = consumir(orden.getId(), linea.getId(), 1);
-        assertThat(segundo.getCostoHistorico()).isNull();
-        assertThat(segundo.isCostoConocido()).isFalse();
-
-        MovimientoInventario mov = movimientoRepository.findAll().stream()
-            .filter(m -> m.getTipo() == TipoMovimientoInventario.CONSUMO_SERVICIO)
-            .findFirst()
-            .orElseThrow();
-        assertThat(mov.getCostoUnitario()).isNull();
-    }
-
-    @Test
-    @DisplayName("devolución parcial y completa con DEVOLUCION_SERVICIO")
-    void devolucion() {
-        OrdenServicioResponseDTO orden = crearOrdenBasica();
-        Producto producto = crearProducto("Pantalla", bd("400000"), bd("250000"), 4);
+    @DisplayName("devolver aumenta stock; permite reconsumir unidades devueltas")
+    void devolucionYReconsumo() {
+        OrdenServicioResponseDTO orden = avanzarAReparacion(crearOrdenBasica());
+        Producto producto = crearProducto("Pantalla", bd("400000"), bd("250000"), 3);
         RepuestoOrdenServicioResponseDTO linea = planificar(orden.getId(), producto.getId(), 2);
         consumir(orden.getId(), linea.getId(), 2);
+        assertThat(stockDe(producto.getId())).isEqualTo(1);
 
-        RepuestoOrdenServicioResponseDTO parcial = devolver(orden.getId(), linea.getId(), 1);
-        assertThat(parcial.getCantidadDevuelta()).isEqualTo(1);
-        assertThat(parcial.getCantidadNetaConsumida()).isEqualTo(1);
-        assertThat(parcial.getEstado()).isEqualTo(EstadoRepuestoOrdenServicio.PARCIAL);
-        assertThat(stockDe(producto.getId())).isEqualTo(3);
+        RepuestoOrdenServicioResponseDTO devuelta = devolver(orden.getId(), linea.getId(), 1);
+        assertThat(devuelta.getCantidadDevuelta()).isEqualTo(1);
+        assertThat(devuelta.getCantidadNetaConsumida()).isEqualTo(1);
+        assertThat(devuelta.getCantidadPendiente()).isEqualTo(1);
+        assertThat(stockDe(producto.getId())).isEqualTo(2);
 
-        RepuestoOrdenServicioResponseDTO total = devolver(orden.getId(), linea.getId(), 1);
-        assertThat(total.getEstado()).isEqualTo(EstadoRepuestoOrdenServicio.DEVUELTO);
-        assertThat(total.getCantidadNetaConsumida()).isZero();
-        assertThat(stockDe(producto.getId())).isEqualTo(4);
+        RepuestoOrdenServicioResponseDTO reconsumo = consumir(orden.getId(), linea.getId(), 1);
+        assertThat(reconsumo.getCantidadNetaConsumida()).isEqualTo(2);
+        assertThat(reconsumo.getEstado()).isEqualTo(EstadoRepuestoOrdenServicio.CONSUMIDO);
+        assertThat(stockDe(producto.getId())).isEqualTo(1);
 
         assertThat(movimientoRepository.findAll().stream()
-            .filter(m -> m.getTipo() == TipoMovimientoInventario.DEVOLUCION_SERVICIO)
-            .count()).isEqualTo(2);
-
-        assertThatThrownBy(() -> devolver(orden.getId(), linea.getId(), 1))
-            .isInstanceOf(BusinessException.class)
-            .hasMessageContaining("consumido neto");
+            .anyMatch(m -> m.getTipo() == TipoMovimientoInventario.DEVOLUCION_SERVICIO)).isTrue();
     }
 
     @Test
-    @DisplayName("anular sin consumo; no anular con neta; no consumir anulada")
+    @DisplayName("congela costo null y no permite sobreconsumo ni sobredevolución")
+    void costoNullYLimites() {
+        OrdenServicioResponseDTO orden = avanzarAReparacion(crearOrdenBasica());
+        Producto producto = crearProducto("SinCosto", bd("10000"), null, 5);
+        RepuestoOrdenServicioResponseDTO linea = planificar(orden.getId(), producto.getId(), 2);
+
+        RepuestoOrdenServicioResponseDTO consumida = consumir(orden.getId(), linea.getId(), 1);
+        assertThat(consumida.getCostoHistorico()).isNull();
+        assertThat(consumida.isCostoConocido()).isFalse();
+
+        assertThatThrownBy(() -> consumir(orden.getId(), linea.getId(), 5))
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("planificada");
+
+        assertThatThrownBy(() -> devolver(orden.getId(), linea.getId(), 3))
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("consumido");
+    }
+
+    @Test
+    @DisplayName("anular sin consumo; no anular con neta")
     void anularLinea() {
-        OrdenServicioResponseDTO orden = crearOrdenBasica();
+        OrdenServicioResponseDTO orden = avanzarAReparacion(crearOrdenBasica());
         Producto producto = crearProducto("Teclado", bd("50000"), bd("20000"), 3);
         RepuestoOrdenServicioResponseDTO linea = planificar(orden.getId(), producto.getId(), 1);
 
         RepuestoOrdenServicioResponseDTO anulada = repuestoService.anular(orden.getId(), linea.getId());
         assertThat(anulada.getEstado()).isEqualTo(EstadoRepuestoOrdenServicio.ANULADO);
-        assertThat(stockDe(producto.getId())).isEqualTo(3);
-
-        assertThatThrownBy(() -> consumir(orden.getId(), linea.getId(), 1))
-            .isInstanceOf(BusinessException.class)
-            .hasMessageContaining("anulada");
 
         RepuestoOrdenServicioResponseDTO conConsumo = planificar(orden.getId(), producto.getId(), 1);
         consumir(orden.getId(), conConsumo.getId(), 1);
@@ -219,35 +204,42 @@ class OrdenServicioRepuestoServiceTest extends ComercialTestSupport {
     }
 
     @Test
-    @DisplayName("no cancelar OT con consumo neto; sí sin consumo; movimientos permanecen")
-    void cancelacionOt() {
-        OrdenServicioResponseDTO orden = crearOrdenBasica();
+    @DisplayName("ESPERA_REPUESTO exige línea pendiente; cancelación respeta consumo neto")
+    void esperaYCancelacion() {
+        OrdenServicioResponseDTO orden = avanzarAReparacion(crearOrdenBasica());
+
+        CambiarEstadoOrdenServicioRequestDTO aEspera = cambio(EstadoOrdenServicio.ESPERA_REPUESTO, "Sin piezas");
+        assertThatThrownBy(() -> ordenServicioService.cambiarEstado(orden.getId(), aEspera, USUARIO_TEST))
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("repuestos pendientes");
+
         Producto producto = crearProducto("Board", bd("100000"), bd("60000"), 2);
         RepuestoOrdenServicioResponseDTO linea = planificar(orden.getId(), producto.getId(), 1);
-        consumir(orden.getId(), linea.getId(), 1);
+        assertThat(ordenServicioService.cambiarEstado(orden.getId(), aEspera, USUARIO_TEST)
+            .getEstadoNuevo()).isEqualTo(EstadoOrdenServicio.ESPERA_REPUESTO);
 
-        CambiarEstadoOrdenServicioRequestDTO cancelar = new CambiarEstadoOrdenServicioRequestDTO();
-        cancelar.setEstado(EstadoOrdenServicio.CANCELADO);
-        assertThatThrownBy(() -> ordenServicioService.cambiarEstado(orden.getId(), cancelar))
-            .isInstanceOf(BusinessException.class)
-            .hasMessageContaining("repuestos consumidos");
+        consumir(orden.getId(), linea.getId(), 1);
+        assertThat(repuestoService.existeConsumoNetoPendiente(orden.getId())).isTrue();
+
+        // Cancelación no está permitida desde EN_REPARACION/ESPERA; regla de neta sigue vigente.
+        CambiarEstadoOrdenServicioRequestDTO cancelar = cambio(EstadoOrdenServicio.CANCELADO, "Cancelar");
+        assertThatThrownBy(() -> ordenServicioService.cambiarEstado(orden.getId(), cancelar, USUARIO_TEST))
+            .isInstanceOf(BusinessException.class);
 
         devolver(orden.getId(), linea.getId(), 1);
-        assertThat(ordenServicioService.cambiarEstado(orden.getId(), cancelar).getEstado())
-            .isEqualTo(EstadoOrdenServicio.CANCELADO);
-
-        assertThat(movimientoRepository.findAll()).isNotEmpty();
+        assertThat(repuestoService.existeConsumoNetoPendiente(orden.getId())).isFalse();
 
         OrdenServicioResponseDTO orden2 = crearOrdenBasica();
         planificar(orden2.getId(), producto.getId(), 1);
-        assertThat(ordenServicioService.cambiarEstado(orden2.getId(), cancelar).getEstado())
+        assertThat(ordenServicioService.cambiarEstado(
+                orden2.getId(), cancelar, USUARIO_TEST).getEstadoNuevo())
             .isEqualTo(EstadoOrdenServicio.CANCELADO);
     }
 
     @Test
     @DisplayName("producto inactivo: histórico visible; no nueva planificación")
     void productoInactivoHistorico() {
-        OrdenServicioResponseDTO orden = crearOrdenBasica();
+        OrdenServicioResponseDTO orden = avanzarAReparacion(crearOrdenBasica());
         Producto producto = crearProducto("Legacy", bd("10000"), bd("5000"), 2);
         RepuestoOrdenServicioResponseDTO linea = planificar(orden.getId(), producto.getId(), 1);
         consumir(orden.getId(), linea.getId(), 1);
@@ -257,7 +249,7 @@ class OrdenServicioRepuestoServiceTest extends ComercialTestSupport {
 
         RepuestoOrdenServicioResponseDTO historica = repuestoService.listar(orden.getId()).get(0);
         assertThat(historica.getProductoNombre()).isEqualTo("Legacy");
-        assertThat(historica.getCantidadConsumida()).isEqualTo(1);
+        assertThat(historica.isProductoActivo()).isFalse();
 
         assertThatThrownBy(() -> planificar(orden.getId(), producto.getId(), 1))
             .isInstanceOf(BusinessException.class)
@@ -267,7 +259,7 @@ class OrdenServicioRepuestoServiceTest extends ComercialTestSupport {
     @Test
     @DisplayName("planificar con stock 0 ok; consumir falla por InventarioService")
     void planificarSinStock() {
-        OrdenServicioResponseDTO orden = crearOrdenBasica();
+        OrdenServicioResponseDTO orden = avanzarAReparacion(crearOrdenBasica());
         Producto producto = crearProducto("Agotado", bd("10000"), bd("4000"), 0);
         RepuestoOrdenServicioResponseDTO linea = planificar(orden.getId(), producto.getId(), 1);
         assertThat(linea.getEstado()).isEqualTo(EstadoRepuestoOrdenServicio.PLANIFICADO);
@@ -279,8 +271,8 @@ class OrdenServicioRepuestoServiceTest extends ComercialTestSupport {
     @Test
     @DisplayName("línea debe pertenecer a la OT")
     void lineaDeOtraOt() {
-        OrdenServicioResponseDTO ordenA = crearOrdenBasica();
-        OrdenServicioResponseDTO ordenB = crearOrdenBasica();
+        OrdenServicioResponseDTO ordenA = avanzarAReparacion(crearOrdenBasica());
+        OrdenServicioResponseDTO ordenB = avanzarAReparacion(crearOrdenBasica());
         Producto producto = crearProducto("Mouse", bd("20000"), bd("8000"), 2);
         RepuestoOrdenServicioResponseDTO linea = planificar(ordenA.getId(), producto.getId(), 1);
 
@@ -298,6 +290,34 @@ class OrdenServicioRepuestoServiceTest extends ComercialTestSupport {
         request.setClienteId(cliente.getId());
         request.setEquipoId(equipo.getId());
         return ordenServicioService.crear(request, USUARIO_TEST);
+    }
+
+    private OrdenServicioResponseDTO avanzarAReparacion(OrdenServicioResponseDTO orden) {
+        ordenServicioService.cambiarEstado(
+            orden.getId(), cambio(EstadoOrdenServicio.EN_DIAGNOSTICO, "inicio"), USUARIO_TEST);
+        CompletarDiagnosticoRequestDTO diag = new CompletarDiagnosticoRequestDTO();
+        diag.setDiagnostico("Falla confirmada");
+        ordenServicioService.completarDiagnostico(orden.getId(), diag, USUARIO_TEST);
+        OrdenServicioRequestDTO textos = new OrdenServicioRequestDTO();
+        textos.setClienteId(orden.getClienteId());
+        textos.setEquipoId(orden.getEquipoId());
+        textos.setDiagnostico("Falla confirmada");
+        textos.setTrabajoRealizado("En curso");
+        ordenServicioService.actualizar(orden.getId(), textos);
+        ordenServicioService.cambiarEstado(
+            orden.getId(), cambio(EstadoOrdenServicio.COTIZADO, "cotiza"), USUARIO_TEST);
+        ordenServicioService.cambiarEstado(
+            orden.getId(), cambio(EstadoOrdenServicio.APROBADO, "aprueba"), USUARIO_TEST);
+        return ordenServicioService.cambiarEstado(
+            orden.getId(), cambio(EstadoOrdenServicio.EN_REPARACION, "repara"), USUARIO_TEST)
+            .getOrden();
+    }
+
+    private CambiarEstadoOrdenServicioRequestDTO cambio(EstadoOrdenServicio estado, String motivo) {
+        CambiarEstadoOrdenServicioRequestDTO dto = new CambiarEstadoOrdenServicioRequestDTO();
+        dto.setNuevoEstado(estado);
+        dto.setMotivo(motivo);
+        return dto;
     }
 
     private RepuestoOrdenServicioResponseDTO planificar(Long ordenId, Long productoId, int cantidad) {

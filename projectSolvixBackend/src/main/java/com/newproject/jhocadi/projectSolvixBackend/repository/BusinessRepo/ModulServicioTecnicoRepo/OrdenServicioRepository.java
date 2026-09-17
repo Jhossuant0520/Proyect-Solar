@@ -1,5 +1,6 @@
 package com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,4 +22,6 @@ public interface OrdenServicioRepository extends JpaRepository<OrdenServicio, Lo
     List<OrdenServicio> findAllByOrderByFechaRecepcionDesc();
 
     boolean existsByEquipoId(Long equipoId);
+
+    boolean existsByEquipoIdAndEstadoNotIn(Long equipoId, Collection<EstadoOrdenServicio> estados);
 }

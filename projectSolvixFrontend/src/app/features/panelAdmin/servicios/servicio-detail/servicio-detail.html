@@ -25,12 +25,126 @@
       </div>
     </header>
 
+    <section class="panel workflow-panel">
+      <solvix-section-header
+        kicker="Proceso"
+        title="Progreso de la orden"
+        subtitle="Solo informativo. No cambia el estado al tocar los pasos."
+      />
+      <ol class="workflow-track" aria-label="Progreso del workflow">
+        @for (paso of workflowPasos; track paso.estado) {
+          <li [class]="'wf-step is-' + paso.fase">
+            <span class="wf-dot"></span>
+            <span class="wf-label">{{ paso.label }}</span>
+          </li>
+        }
+      </ol>
+      @if (orden.estado === 'ESPERA_REPUESTO') {
+        <p class="hint especial-hint">
+          Estado intermedio: espera de repuesto.
+          @if (pendingRepuestos > 0) {
+            Pendientes de consumir: {{ pendingRepuestos }}.
+          }
+        </p>
+      }
+      @if (orden.estado === 'REQUIERE_APROBACION_ADICIONAL') {
+        <p class="hint especial-hint">
+          Se requiere aprobación adicional. La ampliación de cotización estará disponible en la próxima fase.
+        </p>
+      }
+      @if (orden.estado === 'CANCELADO') {
+        <p class="hint cancel-hint">La orden terminó por cancelación.</p>
+      }
+    </section>
+
+    <section
+      class="panel proxima-panel"
+      [class.is-attention]="orden.estado === 'ESPERA_REPUESTO' || orden.estado === 'REQUIERE_APROBACION_ADICIONAL'"
+    >
+      <solvix-section-header kicker="Operación" title="Próxima acción" />
+      <p class="proxima-estado">
+        Estado actual: <strong>{{ estadoLabel(orden.estado) }}</strong>
+      </p>
+      <p class="proxima-texto">{{ proximaAccionTexto }}</p>
+
+      @if (orden.estado === 'COTIZADO') {
+        <p class="hint cotizacion-hint">
+          Cotización inicial · Estado: pendiente de aprobación.
+          El detalle económico formal llegará en una fase posterior.
+        </p>
+      }
+
+      @if (requiereAprobacionAdicional) {
+        <p class="hint especial-hint">
+          Durante la reparación se detectó una situación no contemplada en la aprobación anterior.
+          Ampliación de cotización disponible en próxima fase.
+        </p>
+      }
+
+      <div class="proxima-actions">
+        @if (accionPrincipal) {
+          <solvix-button
+            family="tech"
+            rank="primary"
+            [disabled]="cambiandoEstado || editando"
+            [matTooltip]="accionPrincipal.descripcion"
+            (click)="ejecutarAccionPrincipal()"
+          >
+            {{ accionPrincipal.boton }}
+          </solvix-button>
+        }
+        @if (accionEspera) {
+          <solvix-button
+            family="tech"
+            rank="secondary"
+            [disabled]="cambiandoEstado || editando || pendingRepuestos <= 0"
+            matTooltip="Poner en espera por repuestos pendientes"
+            (click)="ejecutarAccionEspera()"
+          >
+            {{ accionEspera.boton }}
+          </solvix-button>
+        }
+        @if (accionFalla) {
+          <solvix-button
+            family="tech"
+            rank="secondary"
+            [disabled]="cambiandoEstado || editando"
+            matTooltip="Registrar una nueva falla durante la reparación"
+            (click)="ejecutarAccionFalla()"
+          >
+            {{ accionFalla.boton }}
+          </solvix-button>
+        }
+        @if (accionCancelar) {
+          <solvix-button
+            family="tech"
+            rank="danger"
+            [disabled]="cambiandoEstado || editando"
+            matTooltip="Cancelar la orden"
+            (click)="ejecutarAccionCancelar()"
+          >
+            {{ accionCancelar.boton }}
+          </solvix-button>
+        }
+      </div>
+      @if (guiaTecnica) {
+        <p class="hint guia-hint">{{ guiaTecnica }}</p>
+      }
+      @if (estadoError) {
+        <p class="form-error">{{ estadoError }}</p>
+      }
+    </section>
+
     <section class="panel">
       <solvix-section-header kicker="Relación" title="Cliente" />
       <dl class="facts">
         <div>
           <dt>Nombre</dt>
-          <dd>{{ orden.clienteNombre }}</dd>
+          <dd>
+            <a [routerLink]="['/clientes', orden.clienteId]" matTooltip="Ver ficha del cliente">
+              {{ orden.clienteNombre }}
+            </a>
+          </dd>
         </div>
       </dl>
     </section>
@@ -61,7 +175,7 @@
       </dl>
     </section>
 
-    <section class="panel tecnico-panel" [class.is-resumen]="esResumenCompleto">
+    <section #panelTecnico class="panel tecnico-panel" [class.is-resumen]="esResumenCompleto">
       <div class="tecnico-head">
         <solvix-section-header
           kicker="Taller"
@@ -69,15 +183,29 @@
           [subtitle]="
             esResumenCompleto
               ? 'Resumen completo de la información técnica de esta orden.'
-              : 'Registra el problema, el diagnóstico y el trabajo realizado.'
+              : enDiagnostico
+                ? 'Completa el diagnóstico técnico y guárdalo para continuar.'
+                : 'Registra el problema, el diagnóstico y el trabajo realizado.'
           "
         />
         @if (puedeEditar(orden.estado) && !editando) {
-          <solvix-button family="tech" rank="secondary" icon="edit" (click)="iniciarEdicion()">
+          <solvix-button
+            family="tech"
+            rank="secondary"
+            icon="edit"
+            matTooltip="Editar información técnica"
+            (click)="iniciarEdicion()"
+          >
             Editar información
           </solvix-button>
         }
       </div>
+
+      @if (enDiagnostico && diagnosticoYaDiligenciado && !editando) {
+        <p class="hint guia-hint">
+          El diagnóstico ya está diligenciado. Guarda la ficha para continuar.
+        </p>
+      }
 
       @if (!puedeEditar(orden.estado)) {
         <p class="hint lectura-hint">
@@ -106,10 +234,27 @@
             </article>
           }
         </div>
+        @if (enDiagnostico) {
+          <div class="inline-actions">
+            <solvix-button
+              family="tech"
+              rank="primary"
+              icon="save"
+              [disabled]="cambiandoEstado"
+              (click)="guardarDiagnosticoCompleto()"
+            >
+              Guardar diagnóstico
+            </solvix-button>
+          </div>
+        }
       } @else {
         <form class="edit-panel" [formGroup]="form" (ngSubmit)="guardarTextos()">
           <p class="hint">
-            Solo se guardan estos textos. Cliente, equipo y estado no cambian aquí.
+            @if (enDiagnostico) {
+              Al guardar un diagnóstico válido, la orden pasa a Diagnosticado.
+            } @else {
+              Solo se guardan estos textos. Cliente, equipo y estado no cambian aquí.
+            }
           </p>
 
           @for (campo of campos; track campo.id) {
@@ -120,6 +265,9 @@
             >
               <span class="label-row">
                 {{ campo.label }}
+                @if (campo.id === 'diagnostico' && enDiagnostico) {
+                  <span class="req">requerido</span>
+                }
                 @if (esCampoDestacado(campo.id)) {
                   <span class="foco-tag">En foco</span>
                 }
@@ -134,6 +282,9 @@
             </label>
           }
 
+          @if (guiaTecnica) {
+            <p class="hint guia-hint">{{ guiaTecnica }}</p>
+          }
           @if (editError) {
             <p class="form-error">{{ editError }}</p>
           }
@@ -147,13 +298,28 @@
               rank="primary"
               type="submit"
               icon="save"
-              [disabled]="guardando || form.invalid || !hayCambiosTextos"
+              [disabled]="guardando || form.invalid || (enDiagnostico ? false : !hayCambiosTextos)"
             >
-              {{ guardando ? 'Guardando…' : 'Guardar' }}
+              @if (guardando) {
+                Guardando…
+              } @else if (enDiagnostico) {
+                Guardar diagnóstico
+              } @else {
+                Guardar
+              }
             </solvix-button>
           </div>
         </form>
       }
+    </section>
+
+    <section #panelReparacion class="panel">
+      <app-servicio-repuestos-panel
+        [ordenId]="orden.id"
+        [estado]="orden.estado"
+        [canManage]="puedeGestionarRepuestos"
+        (repuestosChange)="onRepuestosChange($event)"
+      />
     </section>
 
     <section class="panel">
@@ -180,31 +346,37 @@
       </dl>
     </section>
 
-    <section class="panel actions-panel">
+    <section class="panel historial-panel">
       <solvix-section-header
-        kicker="Acciones"
-        title="Cambiar estado"
-        subtitle="Usa solo las transiciones que el sistema permite. No modifica los textos técnicos."
+        kicker="Trazabilidad"
+        title="Historial de la orden"
+        subtitle="Cambios de estado más recientes primero."
       />
-
-      @if (siguientesEstados.length === 0) {
-        <p class="hint">No hay más cambios de estado disponibles.</p>
+      @if (historialState === 'loading') {
+        <solvix-loading-state label="Cargando historial." />
+      } @else if (historialState === 'error') {
+        <p class="form-error">{{ historialError }}</p>
+      } @else if (historialState === 'empty') {
+        <p class="hint">Todavía no hay cambios de estado registrados.</p>
       } @else {
-        <div class="estado-actions">
-          @for (destino of siguientesEstados; track destino) {
-            <solvix-button
-              family="tech"
-              [rank]="destino === 'CANCELADO' ? 'danger' : 'secondary'"
-              [disabled]="cambiandoEstado || editando"
-              (click)="cambiarEstado(destino)"
-            >
-              {{ estadoLabel(destino) }}
-            </solvix-button>
+        <ol class="timeline">
+          @for (item of historial; track item.id; let i = $index) {
+            <li [class.is-actual]="i === 0" [class.is-cancel]="item.estadoNuevo === 'CANCELADO'">
+              <div class="tl-marker"></div>
+              <div class="tl-body">
+                <p class="tl-fecha solvix-mono">{{ fecha(item.fechaCambio) }}</p>
+                <p class="tl-estados">
+                  {{ estadoLabel(item.estadoAnterior) }} → {{ estadoLabel(item.estadoNuevo) }}
+                </p>
+                <p class="tl-motivo"><span>Motivo:</span> {{ item.motivo }}</p>
+                @if (item.observacion) {
+                  <p class="tl-obs"><span>Observación:</span> {{ item.observacion }}</p>
+                }
+                <p class="tl-user"><span>Realizado por:</span> {{ item.usuario }}</p>
+              </div>
+            </li>
           }
-        </div>
-      }
-      @if (estadoError) {
-        <p class="form-error">{{ estadoError }}</p>
+        </ol>
       }
     </section>
   }

@@ -22,9 +22,12 @@ public class RepuestoOrdenServicioResponseDTO {
     private int cantidadConsumida;
     private int cantidadDevuelta;
     private int cantidadNetaConsumida;
+    /** Planificada − neta; nunca negativa. */
+    private int cantidadPendiente;
     /** Snapshot de costo al primer consumo; null = desconocido. */
     private BigDecimal costoHistorico;
     private boolean costoConocido;
+    private boolean productoActivo;
     private EstadoRepuestoOrdenServicio estado;
     private boolean anulado;
     private LocalDateTime fechaRegistro;
@@ -51,8 +54,10 @@ public class RepuestoOrdenServicioResponseDTO {
             .cantidadConsumida(linea.getCantidadConsumida())
             .cantidadDevuelta(linea.getCantidadDevuelta())
             .cantidadNetaConsumida(linea.cantidadNetaConsumida())
+            .cantidadPendiente(Math.max(0, linea.getCantidadPlanificada() - linea.cantidadNetaConsumida()))
             .costoHistorico(linea.getCostoUnitario())
             .costoConocido(linea.isCostoConocido())
+            .productoActivo(linea.getProducto() == null || linea.getProducto().isActivo())
             .estado(linea.estadoDerivado())
             .anulado(linea.isAnulado())
             .fechaRegistro(linea.getFechaRegistro())

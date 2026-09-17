@@ -1,0 +1,139 @@
+<section class="repuestos-panel">
+  <div class="repuestos-head">
+    <solvix-section-header
+      kicker="Taller"
+      title="Repuestos"
+      [subtitle]="
+        enEsperaRepuesto
+          ? 'La orden espera repuesto. Planifica y consume cuando esté disponible.'
+          : 'Planifica productos para la orden. El inventario solo se mueve al consumir o devolver.'
+      "
+    />
+    @if (puedeAgregar) {
+      <solvix-button
+        family="tech"
+        rank="primary"
+        icon="add"
+        matTooltip="Planificar repuesto"
+        (click)="abrirAgregar()"
+      >
+        Agregar
+      </solvix-button>
+    }
+  </div>
+
+  @if (enEsperaRepuesto) {
+    <p class="hint espera-hint">
+      Estado en espera de repuesto.
+      @if (pendingCount > 0) {
+        Pendientes de consumir: {{ pendingCount }}.
+      }
+    </p>
+  }
+
+  @if (state === 'loading') {
+    <solvix-loading-state label="Cargando repuestos." />
+  } @else if (state === 'error') {
+    <solvix-error-state
+      title="No pudimos cargar los repuestos."
+      [message]="errorMessage"
+      (retry)="cargar()"
+    />
+  } @else if (state === 'empty') {
+    <solvix-empty-state
+      icon="build"
+      title="Todavía no hay repuestos en esta orden."
+      message="Agrega productos cuando necesites planificar el material de la reparación."
+    />
+  } @else {
+    <ul class="lineas">
+      @for (linea of lineas; track linea.id) {
+        <li class="linea" [class.is-anulado]="linea.anulado">
+          <div class="linea-main">
+            <div class="linea-title">
+              <strong>{{ linea.productoNombre }}</strong>
+              <solvix-badge [tone]="toneEstado(linea.estado)">
+                {{ labelEstado(linea.estado) }}
+              </solvix-badge>
+              @if (!linea.productoActivo) {
+                <solvix-badge tone="warning">Producto inactivo</solvix-badge>
+              }
+            </div>
+            @if (linea.codigoBarras) {
+              <p class="codigo solvix-mono">{{ linea.codigoBarras }}</p>
+            }
+            <dl class="qty">
+              <div>
+                <dt>Planificado</dt>
+                <dd class="solvix-mono">{{ linea.cantidadPlanificada }}</dd>
+              </div>
+              <div>
+                <dt>Consumido</dt>
+                <dd class="solvix-mono">{{ linea.cantidadConsumida }}</dd>
+              </div>
+              <div>
+                <dt>Devuelto</dt>
+                <dd class="solvix-mono">{{ linea.cantidadDevuelta }}</dd>
+              </div>
+              <div>
+                <dt>Pendiente</dt>
+                <dd class="solvix-mono">{{ linea.cantidadPendiente }}</dd>
+              </div>
+            </dl>
+            <p class="costo" [class.is-missing]="!costoDisponible(linea)">
+              {{ textoCosto(linea) }}
+            </p>
+          </div>
+          @if (canManage && !linea.anulado) {
+            <div class="linea-actions">
+              @if (linea.puedeEditar) {
+                <solvix-button
+                  family="tech"
+                  rank="tertiary"
+                  icon="edit"
+                  matTooltip="Editar cantidad planificada"
+                  (click)="abrirEditar(linea)"
+                >
+                  Editar
+                </solvix-button>
+              }
+              @if (linea.puedeConsumir) {
+                <solvix-button
+                  family="tech"
+                  rank="secondary"
+                  icon="inventory_2"
+                  matTooltip="Consumir del inventario"
+                  (click)="abrirConsumir(linea)"
+                >
+                  Consumir
+                </solvix-button>
+              }
+              @if (linea.puedeDevolver) {
+                <solvix-button
+                  family="tech"
+                  rank="secondary"
+                  icon="undo"
+                  matTooltip="Devolver al inventario"
+                  (click)="abrirDevolver(linea)"
+                >
+                  Devolver
+                </solvix-button>
+              }
+              @if (linea.puedeEliminar) {
+                <solvix-button
+                  family="tech"
+                  rank="danger"
+                  icon="delete"
+                  matTooltip="Anular línea"
+                  (click)="confirmarAnular(linea)"
+                >
+                  Anular
+                </solvix-button>
+              }
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  }
+</section>

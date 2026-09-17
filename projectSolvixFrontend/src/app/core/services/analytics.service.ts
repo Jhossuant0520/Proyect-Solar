@@ -13,13 +13,14 @@ import {
   ProductoRankingDTO,
   SerieTemporalDTO
 } from '../models/analytics.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AnalyticsService {
-  private readonly dashboardUrl = 'http://localhost:8080/api/v1/dashboard';
-  private readonly analyticsUrl = 'http://localhost:8080/api/v1/analytics';
+  private readonly dashboardUrl = `${environment.apiBaseUrl}/v1/dashboard`;
+  private readonly analyticsUrl = `${environment.apiBaseUrl}/v1/analytics`;
 
   constructor(private http: HttpClient) {}
 

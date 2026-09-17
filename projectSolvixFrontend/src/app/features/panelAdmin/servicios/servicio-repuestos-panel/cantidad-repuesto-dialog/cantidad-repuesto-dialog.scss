@@ -1,0 +1,82 @@
+.cantidad-dialog {
+  min-width: min(400px, 92vw);
+  padding: 1.25rem 1.35rem 1.1rem;
+  color: var(--solvix-text, #fff);
+}
+
+.dlg-head .kicker {
+  margin: 0 0 0.25rem;
+  color: var(--solvix-text-muted, #94a3b8);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dlg-head h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+  color: var(--solvix-primary, #4fd1ff);
+}
+
+.dlg-head p {
+  margin: 0;
+  color: var(--solvix-text-secondary, #cfe9ff);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.producto {
+  margin-top: 0.55rem !important;
+  color: var(--solvix-text, #fff) !important;
+}
+
+.dlg-form {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.dlg-form label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--solvix-text-muted, #94a3b8);
+}
+
+.label-row {
+  display: flex;
+  gap: 0.35rem;
+  align-items: baseline;
+}
+
+.req {
+  color: var(--solvix-primary, #4fd1ff);
+  font-size: 0.75rem;
+}
+
+.hint {
+  font-size: 0.78rem;
+  color: var(--solvix-text-muted, #94a3b8);
+}
+
+input[type='number'] {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid rgba(79, 209, 255, 0.25);
+  background: rgba(15, 23, 42, 0.85);
+  color: var(--solvix-text, #fff);
+  padding: 0.55rem 0.65rem;
+  font: inherit;
+}
+
+.form-error {
+  margin: 0;
+  color: #f87171;
+  font-size: 0.85rem;
+}
+
+.dlg-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}

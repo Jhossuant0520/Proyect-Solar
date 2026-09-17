@@ -9,13 +9,14 @@ import {
   DevolucionCompraRequestDTO,
   DevolucionCompraResponseDTO
 } from '../models/compra.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CompraService {
-  private readonly comprasUrl = 'http://localhost:8080/api/v1/compras';
-  private readonly devolucionesUrl = 'http://localhost:8080/api/v1/devoluciones-compra';
+  private readonly comprasUrl = `${environment.apiBaseUrl}/v1/compras`;
+  private readonly devolucionesUrl = `${environment.apiBaseUrl}/v1/devoluciones-compra`;
 
   constructor(private http: HttpClient) {}
 

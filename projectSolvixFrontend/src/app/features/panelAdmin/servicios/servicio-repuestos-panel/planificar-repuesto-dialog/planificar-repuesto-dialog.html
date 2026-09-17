@@ -1,0 +1,88 @@
+<div class="planificar-dialog">
+  <header class="dlg-head">
+    <p class="kicker solvix-mono">Repuestos</p>
+    <h2>Agregar repuesto</h2>
+    <p>Busca por nombre o código de barras. La planificación no mueve inventario.</p>
+  </header>
+
+  @if (cargandoCatalogo) {
+    <p class="hint">Cargando productos activos…</p>
+  } @else {
+    <label class="search">
+      <span class="material-symbols-outlined" aria-hidden="true">search</span>
+      <input
+        type="search"
+        [value]="busqueda"
+        (input)="onBusqueda($event)"
+        (keydown.enter)="onBusquedaEnter($event)"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="Nombre o código de barras"
+        aria-label="Buscar producto"
+      />
+    </label>
+    <p class="hint">Enter confirma un código de barras.</p>
+
+    @if (buscandoCodigo) {
+      <p class="hint">Buscando producto…</p>
+    } @else if (busqueda.trim() && productosFiltrados.length === 0 && !seleccionado) {
+      <p class="hint">No hay productos activos que coincidan.</p>
+    } @else if (productosFiltrados.length > 0 && !seleccionado) {
+      <ul class="catalogo">
+        @for (producto of productosFiltrados; track producto.id) {
+          <li>
+            <button type="button" (click)="seleccionar(producto)">
+              <strong>{{ producto.nombre }}</strong>
+              <span>
+                Stock {{ producto.stockActual ?? 0 }} u.
+                @if (producto.codigoBarras) {
+                  · {{ producto.codigoBarras }}
+                }
+              </span>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+
+    @if (seleccionado) {
+      <div class="seleccion">
+        <p><strong>{{ seleccionado.nombre }}</strong></p>
+        <p class="hint">
+          Stock {{ seleccionado.stockActual ?? 0 }} u.
+          @if (seleccionado.codigoBarras) {
+            · {{ seleccionado.codigoBarras }}
+          }
+        </p>
+        <button type="button" class="link-btn" (click)="limpiarSeleccion()">
+          Cambiar producto
+        </button>
+      </div>
+    }
+  }
+
+  <form class="dlg-form" [formGroup]="form" (ngSubmit)="confirmar()">
+    <label>
+      <span class="label-row">Cantidad planificada <span class="req">requerido</span></span>
+      <input type="number" formControlName="cantidadPlanificada" min="1" step="1" />
+    </label>
+
+    @if (error) {
+      <p class="form-error" role="alert">{{ error }}</p>
+    }
+
+    <div class="dlg-actions">
+      <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
+        Cancelar
+      </solvix-button>
+      <solvix-button
+        family="tech"
+        rank="primary"
+        type="submit"
+        [disabled]="enviando || cargandoCatalogo || !seleccionado || form.invalid"
+      >
+        {{ enviando ? 'Guardando…' : 'Agregar' }}
+      </solvix-button>
+    </div>
+  </form>
+</div>

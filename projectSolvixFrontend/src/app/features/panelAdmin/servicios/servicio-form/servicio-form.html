@@ -1,9 +1,12 @@
-<section class="servicio-form-page">
+<section class="wizard-page">
   <solvix-page-header
-    kicker="Taller"
     title="Nueva orden de servicio"
-    subtitle="Elige el cliente, su equipo y describe el problema."
-  />
+    subtitle="Cliente → Equipo → Recepción. El estado inicial siempre es Recepcionado."
+  >
+    <solvix-button family="tech" rank="tertiary" icon="arrow_back" (click)="cancelar()">
+      Cancelar
+    </solvix-button>
+  </solvix-page-header>
 
   @if (loadState === 'loading') {
     <solvix-loading-state label="Cargando clientes." />
@@ -14,121 +17,243 @@
       (retry)="cargarClientes()"
     />
   } @else {
-    <form class="form-panel" [formGroup]="form" (ngSubmit)="guardar()">
-      <solvix-section-header
-        kicker="Paso 1"
-        title="Cliente y equipo"
-        subtitle="Primero el cliente. Luego solo sus equipos activos."
-      />
+    <nav class="pasos" aria-label="Progreso del asistente">
+      <span [class.is-active]="paso === 1" [class.is-done]="paso > 1">Paso 1/3 · Cliente</span>
+      <span [class.is-active]="paso === 2" [class.is-done]="paso > 2">Paso 2/3 · Equipo</span>
+      <span [class.is-active]="paso === 3">Paso 3/3 · Recepción</span>
+    </nav>
 
-      <div class="form-grid">
-        <label>
-          <span class="label-row">Cliente <span class="req">requerido</span></span>
-          <select formControlName="clienteId" (change)="onClienteChange()">
-            <option [ngValue]="null">Selecciona un cliente</option>
-            @for (cliente of clientesSeleccionables; track cliente.id) {
-              <option [ngValue]="cliente.id">{{ cliente.nombre }}</option>
-            }
-          </select>
-        </label>
+    @if (clienteSeleccionado || equipoSeleccionado) {
+      <aside class="contexto">
+        @if (clienteSeleccionado) {
+          <div>
+            <span class="ctx-label">Cliente</span>
+            <strong>{{ clienteSeleccionado.nombre }}</strong>
+          </div>
+        }
+        @if (equipoSeleccionado) {
+          <div>
+            <span class="ctx-label">Equipo</span>
+            <strong>{{ labelEquipo(equipoSeleccionado) }}</strong>
+          </div>
+        }
+      </aside>
+    }
 
-        <label>
-          <span class="label-row">Equipo <span class="req">requerido</span></span>
-          <select formControlName="equipoId">
-            <option [ngValue]="null">
-              @if (!form.controls.clienteId.value) {
-                Primero elige un cliente
-              } @else if (equiposState === 'loading') {
-                Cargando equipos…
-              } @else if (equiposState === 'empty') {
-                Este cliente no tiene equipos activos
-              } @else {
-                Selecciona un equipo
-              }
-            </option>
-            @for (equipo of equipos; track equipo.id) {
-              <option [ngValue]="equipo.id">{{ labelEquipo(equipo) }}</option>
-            }
-          </select>
-        </label>
-      </div>
+    @if (paso === 1) {
+      <section class="panel">
+        <solvix-section-header
+          kicker="Paso 1"
+          title="Selecciona el cliente"
+          subtitle="Solo clientes activos del taller. El consumidor final no aparece."
+        />
 
-      @if (equiposState === 'error') {
-        <p class="field-error">{{ equiposError }}</p>
-      }
-      @if (equiposState === 'empty') {
-        <p class="hint">
-          Este cliente no tiene equipos activos.
-          @if (clienteSeleccionadoId; as id) {
-            <a [routerLink]="['/clientes', id]">Registra un equipo en su ficha</a>
-            antes de crear la orden.
+        <ul class="opcion-list">
+          @for (cliente of clientesSeleccionables; track cliente.id) {
+            <li>
+              <button
+                type="button"
+                class="opcion-card"
+                [class.is-selected]="form.controls.clienteId.value === cliente.id"
+                (click)="seleccionarCliente(cliente.id)"
+              >
+                <strong>{{ cliente.nombre }}</strong>
+                <span class="meta">
+                  {{ cliente.numeroDocumento || 'Sin documento' }}
+                  @if (cliente.telefono) {
+                    · {{ cliente.telefono }}
+                  }
+                </span>
+              </button>
+            </li>
           }
-        </p>
-      }
+        </ul>
 
-      <solvix-section-header
-        kicker="Paso 2"
-        title="Detalle del servicio"
-        subtitle="El número de orden lo genera el sistema al guardar."
-      />
+        @if (!mostrarCrearCliente) {
+          <solvix-button
+            family="tech"
+            rank="secondary"
+            icon="person_add"
+            matTooltip="Registrar un cliente nuevo sin salir del flujo"
+            (click)="abrirCrearCliente()"
+          >
+            Crear cliente
+          </solvix-button>
+        } @else {
+          <form class="inline-form" [formGroup]="clienteInline" (ngSubmit)="guardarClienteInline()">
+            <p class="inline-title">Nuevo cliente</p>
+            <label>
+              Nombre <span class="req">requerido</span>
+              <input formControlName="nombre" maxlength="150" />
+            </label>
+            <label>
+              Documento
+              <input formControlName="numeroDocumento" maxlength="40" />
+            </label>
+            <label>
+              Teléfono
+              <input formControlName="telefono" maxlength="40" />
+            </label>
+            @if (inlineError) {
+              <p class="form-error">{{ inlineError }}</p>
+            }
+            <div class="inline-actions">
+              <solvix-button family="tech" rank="tertiary" type="button" (click)="mostrarCrearCliente = false">
+                Cancelar
+              </solvix-button>
+              <solvix-button family="tech" rank="primary" type="submit" [disabled]="creandoCliente">
+                {{ creandoCliente ? 'Guardando…' : 'Guardar cliente' }}
+              </solvix-button>
+            </div>
+          </form>
+        }
 
-      <div class="form-grid">
-        <label class="full">
-          Problema reportado
-          <textarea
-            formControlName="problemaReportado"
-            rows="3"
-            maxlength="2000"
-            placeholder="Qué reporta el cliente"
-          ></textarea>
-        </label>
-        <label class="full">
-          Diagnóstico
-          <textarea
-            formControlName="diagnostico"
-            rows="3"
-            maxlength="2000"
-            placeholder="Opcional al crear"
-          ></textarea>
-        </label>
-        <label class="full">
-          Trabajo realizado
-          <textarea
-            formControlName="trabajoRealizado"
-            rows="3"
-            maxlength="2000"
-            placeholder="Opcional al crear"
-          ></textarea>
-        </label>
-        <label class="full">
-          Observaciones
-          <textarea
-            formControlName="observaciones"
-            rows="2"
-            maxlength="1000"
-            placeholder="Notas internas"
-          ></textarea>
-        </label>
-      </div>
+        @if (submitError) {
+          <p class="form-error">{{ submitError }}</p>
+        }
+        <div class="wizard-actions">
+          <solvix-button family="tech" rank="primary" icon="arrow_forward" (click)="continuarDesdeCliente()">
+            Continuar
+          </solvix-button>
+        </div>
+      </section>
+    }
 
-      @if (submitError) {
-        <p class="form-error">{{ submitError }}</p>
-      }
+    @if (paso === 2) {
+      <section class="panel">
+        <solvix-section-header
+          kicker="Paso 2"
+          title="Selecciona el equipo"
+          subtitle="Solo equipos activos de este cliente."
+        />
 
-      <div class="form-actions">
-        <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
-          Cancelar
-        </solvix-button>
-        <solvix-button
-          family="tech"
-          rank="primary"
-          type="submit"
-          icon="save"
-          [disabled]="enviando || equiposState === 'loading' || form.invalid"
-        >
-          {{ enviando ? 'Creando…' : 'Crear orden' }}
-        </solvix-button>
-      </div>
-    </form>
+        @if (equiposState === 'loading') {
+          <solvix-loading-state label="Cargando equipos." />
+        } @else if (equiposState === 'error') {
+          <p class="form-error">{{ equiposError }}</p>
+        } @else if (equiposState === 'empty') {
+          <p class="hint">Este cliente no tiene equipos activos.</p>
+        } @else {
+          <ul class="opcion-list">
+            @for (equipo of equipos; track equipo.id) {
+              <li>
+                <button
+                  type="button"
+                  class="opcion-card"
+                  [class.is-selected]="form.controls.equipoId.value === equipo.id"
+                  (click)="seleccionarEquipo(equipo.id)"
+                >
+                  <strong>{{ labelEquipo(equipo) }}</strong>
+                  @if (equipo.numeroSerie) {
+                    <span class="meta">Serial: {{ equipo.numeroSerie }}</span>
+                  }
+                </button>
+              </li>
+            }
+          </ul>
+        }
+
+        @if (!mostrarCrearEquipo) {
+          <solvix-button
+            family="tech"
+            rank="secondary"
+            icon="devices"
+            matTooltip="Registrar un equipo para este cliente"
+            (click)="abrirCrearEquipo()"
+          >
+            Registrar equipo
+          </solvix-button>
+        } @else {
+          <form class="inline-form" [formGroup]="equipoInline" (ngSubmit)="guardarEquipoInline()">
+            <p class="inline-title">Nuevo equipo</p>
+            <label>
+              Tipo <span class="req">requerido</span>
+              <select formControlName="tipoEquipo">
+                @for (tipo of tipos; track tipo.id) {
+                  <option [value]="tipo.id">{{ tipo.label }}</option>
+                }
+              </select>
+            </label>
+            <label>
+              Marca
+              <input formControlName="marca" maxlength="80" />
+            </label>
+            <label>
+              Modelo
+              <input formControlName="modelo" maxlength="80" />
+            </label>
+            <label>
+              Número de serie
+              <input formControlName="numeroSerie" maxlength="100" />
+            </label>
+            <label>
+              Nombre
+              <input formControlName="nombre" maxlength="120" />
+            </label>
+            @if (inlineError) {
+              <p class="form-error">{{ inlineError }}</p>
+            }
+            <div class="inline-actions">
+              <solvix-button family="tech" rank="tertiary" type="button" (click)="mostrarCrearEquipo = false">
+                Cancelar
+              </solvix-button>
+              <solvix-button family="tech" rank="primary" type="submit" [disabled]="creandoEquipo">
+                {{ creandoEquipo ? 'Guardando…' : 'Guardar equipo' }}
+              </solvix-button>
+            </div>
+          </form>
+        }
+
+        @if (submitError) {
+          <p class="form-error">{{ submitError }}</p>
+        }
+        <div class="wizard-actions">
+          <solvix-button family="tech" rank="tertiary" (click)="atras()">Atrás</solvix-button>
+          <solvix-button family="tech" rank="primary" icon="arrow_forward" (click)="continuarDesdeEquipo()">
+            Continuar
+          </solvix-button>
+        </div>
+      </section>
+    }
+
+    @if (paso === 3) {
+      <section class="panel">
+        <solvix-section-header
+          kicker="Paso 3"
+          title="Recepción"
+          subtitle="Describe el problema. La orden se crea en estado Recepcionado."
+        />
+
+        <form class="recepcion-form" [formGroup]="form" (ngSubmit)="guardar()">
+          <label>
+            Problema reportado <span class="req">requerido</span>
+            <textarea formControlName="problemaReportado" rows="3" maxlength="2000"></textarea>
+          </label>
+          <label>
+            Observaciones
+            <textarea formControlName="observaciones" rows="2" maxlength="1000"></textarea>
+          </label>
+
+          @if (submitError) {
+            <p class="form-error">{{ submitError }}</p>
+          }
+
+          <div class="wizard-actions">
+            <solvix-button family="tech" rank="tertiary" type="button" (click)="atras()">
+              Atrás
+            </solvix-button>
+            <solvix-button
+              family="tech"
+              rank="primary"
+              type="submit"
+              icon="assignment_add"
+              [disabled]="enviando || form.invalid"
+            >
+              {{ enviando ? 'Creando…' : 'Crear orden de servicio' }}
+            </solvix-button>
+          </div>
+        </form>
+      </section>
+    }
   }
 </section>

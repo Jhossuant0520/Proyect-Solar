@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { CatalogoService } from './catalogo.service';
+import { environment } from '../../../environments/environment';
 
 describe('CatalogoService', () => {
   let service: CatalogoService;
@@ -25,7 +26,7 @@ describe('CatalogoService', () => {
       expect(productos[0].precioVentaActual).toBe(780000);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/v1/catalogo/productos');
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/v1/catalogo/productos`);
     expect(req.request.method).toBe('GET');
     req.flush([{
       id: 1,
@@ -45,7 +46,7 @@ describe('CatalogoService', () => {
       expect(categorias).toEqual([{ id: 1, codigo: 'INV', nombre: 'Inversores' }]);
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/v1/catalogo/categorias');
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/v1/catalogo/categorias`);
     expect(req.request.method).toBe('GET');
     req.flush([{ id: 1, codigo: 'INV', nombre: 'Inversores' }]);
   });
@@ -56,7 +57,7 @@ describe('CatalogoService', () => {
       expect(producto.disponibilidad).toBe('AGOTADO');
     });
 
-    const req = httpMock.expectOne('http://localhost:8080/api/v1/catalogo/productos/9');
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/v1/catalogo/productos/9`);
     expect(req.request.method).toBe('GET');
     req.flush({
       id: 9,

@@ -8,12 +8,13 @@ import {
   MovimientoInventarioFiltros,
   MovimientoInventarioResponseDTO
 } from '../models/inventario.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class InventarioService {
-  private readonly apiUrl = 'http://localhost:8080/api/v1/inventario';
+  private readonly apiUrl = `${environment.apiBaseUrl}/v1/inventario`;
 
   constructor(private http: HttpClient) {}
 

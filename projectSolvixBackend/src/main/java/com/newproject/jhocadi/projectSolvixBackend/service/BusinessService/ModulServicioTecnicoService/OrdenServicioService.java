@@ -1,6 +1,7 @@
 package com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.ModulServicioTecnicoService;
 
 import java.time.LocalDateTime;
+import java.util.EnumSet;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -9,15 +10,22 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.CambiarEstadoOrdenServicioRequestDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.CompletarDiagnosticoRequestDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.CompletarReparacionRequestDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.HistorialEstadoOrdenServicioResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.OrdenServicioRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.OrdenServicioResponseDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RegistrarNuevaFallaRequestDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.TransicionOrdenServicioResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.exception.BusinessException;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.Cliente;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.TipoSecuencia;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.Equipo;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.EstadoOrdenServicio;
+import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.HistorialEstadoOrdenServicio;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.OrdenServicio;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulComercialRepo.ClienteRepository;
+import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.HistorialEstadoOrdenServicioRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.OrdenServicioRepuestoRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.OrdenServicioRepository;
 import com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.ModulComercialService.SecuenciaDocumentoService;
@@ -28,8 +36,14 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class OrdenServicioService {
 
+    private static final EnumSet<EstadoOrdenServicio> ESTADOS_TERMINALES = EnumSet.of(
+        EstadoOrdenServicio.CERRADO,
+        EstadoOrdenServicio.CANCELADO
+    );
+
     private final OrdenServicioRepository ordenServicioRepository;
     private final OrdenServicioRepuestoRepository ordenServicioRepuestoRepository;
+    private final HistorialEstadoOrdenServicioRepository historialRepository;
     private final ClienteRepository clienteRepository;
     private final EquipoService equipoService;
     private final SecuenciaDocumentoService secuenciaDocumentoService;
@@ -89,6 +103,14 @@ public class OrdenServicioService {
         return OrdenServicioResponseDTO.fromEntity(buscarOFallar(id));
     }
 
+    @Transactional(readOnly = true)
+    public List<HistorialEstadoOrdenServicioResponseDTO> listarHistorial(Long ordenId) {
+        buscarOFallar(ordenId);
+        return historialRepository.findByOrdenServicioIdOrderByFechaCambioDesc(ordenId).stream()
+            .map(HistorialEstadoOrdenServicioResponseDTO::fromEntity)
+            .toList();
+    }
+
     /**
      * Actualiza campos de taller sin cambiar estado.
      * No permite editar órdenes CERRADAS o CANCELADAS.
@@ -113,32 +135,243 @@ public class OrdenServicioService {
         return OrdenServicioResponseDTO.fromEntity(ordenServicioRepository.save(orden));
     }
 
+    /**
+     * Transición de negocio atómica: valida matriz + requisitos, cambia estado y escribe historial.
+     * Motivos automáticos para acciones normales; motivo manual solo para excepciones.
+     */
     @Transactional
-    public OrdenServicioResponseDTO cambiarEstado(Long id, CambiarEstadoOrdenServicioRequestDTO request) {
+    public TransicionOrdenServicioResponseDTO cambiarEstado(
+            Long id,
+            CambiarEstadoOrdenServicioRequestDTO request,
+            String usuario) {
+        if (usuario == null || usuario.isBlank()) {
+            throw new BusinessException("Se requiere un usuario autenticado para cambiar el estado.");
+        }
+
         OrdenServicio orden = buscarOFallar(id);
-        EstadoOrdenServicio destino = request.getEstado();
-        if (!orden.getEstado().puedeTransicionarA(destino)) {
+        EstadoOrdenServicio anterior = orden.getEstado();
+        EstadoOrdenServicio destino = request.getNuevoEstado() != null
+            ? request.getNuevoEstado()
+            : request.getEstado();
+
+        if (destino == null) {
+            throw new BusinessException("El estado destino es obligatorio.");
+        }
+
+        String motivo;
+        String observacion = textoOpcional(request.getObservacion());
+        if (EstadoOrdenServicio.requiereMotivoManual(destino)) {
+            String etiqueta = destino == EstadoOrdenServicio.CANCELADO
+                ? "El motivo de cancelación es obligatorio."
+                : "Describe la nueva falla o situación detectada.";
+            motivo = textoRequerido(request.getMotivo(), etiqueta);
+        } else {
+            motivo = EstadoOrdenServicio.motivoAutomatico(anterior, destino);
+            if (textoVacio(motivo)) {
+                motivo = "Cambio de estado: " + anterior + " → " + destino + ".";
+            }
+        }
+
+        return aplicarTransicion(orden, destino, motivo, observacion, usuario.trim());
+    }
+
+    /**
+     * Guarda ficha técnica y avanza EN_DIAGNOSTICO → DIAGNOSTICADO en una sola transacción.
+     */
+    @Transactional
+    public TransicionOrdenServicioResponseDTO completarDiagnostico(
+            Long id,
+            CompletarDiagnosticoRequestDTO request,
+            String usuario) {
+        validarUsuario(usuario);
+        OrdenServicio orden = buscarOFallar(id);
+        if (orden.getEstado() != EstadoOrdenServicio.EN_DIAGNOSTICO) {
             throw new BusinessException(
-                "Transición no permitida: " + orden.getEstado() + " → " + destino + ".");
+                "Solo se puede completar el diagnóstico desde EN_DIAGNOSTICO.");
         }
-        if (destino == EstadoOrdenServicio.CANCELADO
-                && ordenServicioRepuestoRepository.existeConsumoNetoPendiente(orden.getId())) {
+
+        String diagnostico = textoRequerido(
+            request.getDiagnostico(),
+            "Completa el diagnóstico técnico para continuar.");
+        if (request.getProblemaReportado() != null) {
+            orden.setProblemaReportado(textoOpcional(request.getProblemaReportado()));
+        }
+        orden.setDiagnostico(diagnostico);
+        if (request.getObservaciones() != null) {
+            orden.setObservaciones(textoOpcional(request.getObservaciones()));
+        }
+        ordenServicioRepository.save(orden);
+
+        String motivo = EstadoOrdenServicio.motivoAutomatico(
+            EstadoOrdenServicio.EN_DIAGNOSTICO, EstadoOrdenServicio.DIAGNOSTICADO);
+        return aplicarTransicion(
+            orden, EstadoOrdenServicio.DIAGNOSTICADO, motivo, null, usuario.trim());
+    }
+
+    /**
+     * Guarda trabajo realizado y avanza EN_REPARACION → LISTO en una sola transacción.
+     */
+    @Transactional
+    public TransicionOrdenServicioResponseDTO completarReparacion(
+            Long id,
+            CompletarReparacionRequestDTO request,
+            String usuario) {
+        validarUsuario(usuario);
+        OrdenServicio orden = buscarOFallar(id);
+        if (orden.getEstado() != EstadoOrdenServicio.EN_REPARACION) {
             throw new BusinessException(
-                "No se puede cancelar la orden mientras existan repuestos consumidos sin devolver.");
+                "Solo se puede marcar como lista desde EN_REPARACION.");
         }
-        orden.setEstado(destino);
-        if (destino == EstadoOrdenServicio.ENTREGADO
-                || destino == EstadoOrdenServicio.CERRADO
-                || destino == EstadoOrdenServicio.CANCELADO) {
-            orden.setFechaCierre(LocalDateTime.now());
+
+        String trabajo = textoRequerido(
+            request.getTrabajoRealizado(),
+            "Completa el trabajo realizado antes de marcar la orden como lista.");
+        orden.setTrabajoRealizado(trabajo);
+        if (request.getObservaciones() != null) {
+            orden.setObservaciones(textoOpcional(request.getObservaciones()));
         }
-        return OrdenServicioResponseDTO.fromEntity(ordenServicioRepository.save(orden));
+        ordenServicioRepository.save(orden);
+
+        String motivo = EstadoOrdenServicio.motivoAutomatico(
+            EstadoOrdenServicio.EN_REPARACION, EstadoOrdenServicio.LISTO);
+        return aplicarTransicion(orden, EstadoOrdenServicio.LISTO, motivo, null, usuario.trim());
+    }
+
+    /**
+     * Registra nueva falla: EN_REPARACION → REQUIERE_APROBACION_ADICIONAL.
+     * Cotización formal de ampliación: fase 3.15.7.
+     */
+    @Transactional
+    public TransicionOrdenServicioResponseDTO registrarNuevaFalla(
+            Long id,
+            RegistrarNuevaFallaRequestDTO request,
+            String usuario) {
+        validarUsuario(usuario);
+        OrdenServicio orden = buscarOFallar(id);
+        if (orden.getEstado() != EstadoOrdenServicio.EN_REPARACION) {
+            throw new BusinessException(
+                "Solo se puede registrar una nueva falla desde EN_REPARACION.");
+        }
+
+        String nuevaFalla = textoRequerido(
+            request.getNuevaFalla(),
+            "Describe la nueva falla o situación detectada.");
+        String observacion = textoOpcional(request.getObservacion());
+        String motivo = "Se detectó una nueva situación durante la reparación: " + nuevaFalla;
+        if (motivo.length() > 500) {
+            motivo = motivo.substring(0, 500);
+        }
+
+        return aplicarTransicion(
+            orden,
+            EstadoOrdenServicio.REQUIERE_APROBACION_ADICIONAL,
+            motivo,
+            observacion,
+            usuario.trim());
     }
 
     @Transactional(readOnly = true)
     public OrdenServicio buscarOFallar(Long id) {
         return ordenServicioRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden de servicio no encontrada."));
+    }
+
+    /** True si el equipo tiene al menos una OT no terminal. */
+    @Transactional(readOnly = true)
+    public boolean tieneOrdenActiva(Long equipoId) {
+        return ordenServicioRepository.existsByEquipoIdAndEstadoNotIn(equipoId, ESTADOS_TERMINALES);
+    }
+
+    private TransicionOrdenServicioResponseDTO aplicarTransicion(
+            OrdenServicio orden,
+            EstadoOrdenServicio destino,
+            String motivo,
+            String observacion,
+            String usuario) {
+        EstadoOrdenServicio anterior = orden.getEstado();
+        if (anterior.esTerminal()) {
+            throw new BusinessException(
+                "No se puede cambiar el estado de una orden " + anterior + ".");
+        }
+        if (!anterior.puedeTransicionarA(destino)) {
+            throw new BusinessException(
+                "La transición " + anterior + " → " + destino + " no está permitida.");
+        }
+
+        validarRequisitosTransicion(orden, anterior, destino);
+
+        if (destino == EstadoOrdenServicio.CANCELADO
+                && ordenServicioRepuestoRepository.existeConsumoNetoPendiente(orden.getId())) {
+            throw new BusinessException(
+                "No se puede cancelar la orden porque existen repuestos consumidos pendientes de devolución.");
+        }
+
+        LocalDateTime ahora = LocalDateTime.now();
+        orden.setEstado(destino);
+        if (destino == EstadoOrdenServicio.ENTREGADO
+                || destino == EstadoOrdenServicio.CERRADO
+                || destino == EstadoOrdenServicio.CANCELADO) {
+            orden.setFechaCierre(ahora);
+        }
+        OrdenServicio guardada = ordenServicioRepository.save(orden);
+
+        HistorialEstadoOrdenServicio historial = HistorialEstadoOrdenServicio.builder()
+            .ordenServicio(guardada)
+            .estadoAnterior(anterior)
+            .estadoNuevo(destino)
+            .motivo(motivo)
+            .observacion(observacion)
+            .usuario(usuario)
+            .fechaCambio(ahora)
+            .build();
+        historialRepository.save(historial);
+
+        return TransicionOrdenServicioResponseDTO.builder()
+            .orden(OrdenServicioResponseDTO.fromEntity(guardada))
+            .estadoAnterior(anterior)
+            .estadoNuevo(destino)
+            .motivo(motivo)
+            .observacion(observacion)
+            .usuario(usuario)
+            .fechaCambio(ahora)
+            .mensaje(mensajeAmigable(anterior, destino))
+            .build();
+    }
+
+    private void validarRequisitosTransicion(
+            OrdenServicio orden,
+            EstadoOrdenServicio origen,
+            EstadoOrdenServicio destino) {
+        if (origen == EstadoOrdenServicio.EN_DIAGNOSTICO
+                && destino == EstadoOrdenServicio.DIAGNOSTICADO) {
+            if (textoVacio(orden.getDiagnostico())) {
+                throw new BusinessException(
+                    "Completa el diagnóstico técnico para continuar.");
+            }
+        }
+        if (origen == EstadoOrdenServicio.EN_REPARACION && destino == EstadoOrdenServicio.LISTO) {
+            if (textoVacio(orden.getTrabajoRealizado())) {
+                throw new BusinessException(
+                    "Completa el trabajo realizado antes de marcar la orden como lista.");
+            }
+        }
+        if (origen == EstadoOrdenServicio.EN_REPARACION
+                && destino == EstadoOrdenServicio.ESPERA_REPUESTO) {
+            if (!ordenServicioRepuestoRepository.existeRepuestoPendiente(orden.getId())) {
+                throw new BusinessException(
+                    "No existen repuestos pendientes que justifiquen poner la orden en espera.");
+            }
+        }
+    }
+
+    private String mensajeAmigable(EstadoOrdenServicio anterior, EstadoOrdenServicio destino) {
+        return "Estado actualizado: " + anterior + " → " + destino + ".";
+    }
+
+    private void validarUsuario(String usuario) {
+        if (usuario == null || usuario.isBlank()) {
+            throw new BusinessException("Se requiere un usuario autenticado para cambiar el estado.");
+        }
     }
 
     private void validarEquipoDelCliente(Cliente cliente, Equipo equipo) {
@@ -162,6 +395,18 @@ public class OrdenServicioService {
                 "El consumidor final del sistema no se usa como cliente de taller. Registra un cliente real.");
         }
         return cliente;
+    }
+
+    private String textoRequerido(String valor, String mensaje) {
+        String limpio = textoOpcional(valor);
+        if (limpio == null) {
+            throw new BusinessException(mensaje);
+        }
+        return limpio;
+    }
+
+    private boolean textoVacio(String valor) {
+        return textoOpcional(valor) == null;
     }
 
     private String textoOpcional(String valor) {

@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ProductoService } from './producto.service';
+import { environment } from '../../../environments/environment';
 
 describe('ProductoService código de barras', () => {
   let service: ProductoService;
@@ -22,7 +23,7 @@ describe('ProductoService código de barras', () => {
       expect(producto.nombre).toBe('Cámara H9C');
     });
 
-    const req = http.expectOne('http://localhost:8080/api/v1/productos/codigo-barras/7701234567890');
+    const req = http.expectOne(`${environment.apiBaseUrl}/v1/productos/codigo-barras/7701234567890`);
     expect(req.request.method).toBe('GET');
     req.flush({
       id: 1,

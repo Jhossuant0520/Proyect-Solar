@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
+import { provideRouter } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -42,6 +43,7 @@ describe('ClienteEquiposPanelComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ClienteEquiposPanelComponent, NoopAnimationsModule],
       providers: [
+        provideRouter([]),
         { provide: EquipoService, useValue: equipoService },
         { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open']) }
       ]

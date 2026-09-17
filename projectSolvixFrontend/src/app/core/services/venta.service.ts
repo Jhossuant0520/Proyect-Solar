@@ -9,13 +9,14 @@ import {
   VentaRequestDTO,
   VentaResponseDTO
 } from '../models/venta.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class VentaService {
-  private readonly ventasUrl = 'http://localhost:8080/api/v1/ventas';
-  private readonly devolucionesUrl = 'http://localhost:8080/api/v1/devoluciones-venta';
+  private readonly ventasUrl = `${environment.apiBaseUrl}/v1/ventas`;
+  private readonly devolucionesUrl = `${environment.apiBaseUrl}/v1/devoluciones-venta`;
 
   constructor(private http: HttpClient) {}
 

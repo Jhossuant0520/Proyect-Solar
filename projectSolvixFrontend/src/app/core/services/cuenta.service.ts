@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface MisDatos {
   nombreUsuario: string;
@@ -20,8 +21,8 @@ export interface CambiarPassword {
   providedIn: 'root'
 })
 export class CuentaService {
-  private readonly baseUrl = 'http://localhost:8080/api/cuenta';
-  private readonly origenApi = 'http://localhost:8080';
+  private readonly baseUrl = `${environment.apiBaseUrl}/cuenta`;
+  private readonly origenApi = environment.apiOrigin;
 
   readonly fotoUrl = signal<string | null>(null);
 
