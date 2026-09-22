@@ -11,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/componenteEnergetico")
-@CrossOrigin(origins = "http://localhost:4200")
 public class ComponenteEnergeticoController {
 
     private final ComponenteEnergeticoService componenteEnergeticoService;

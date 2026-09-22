@@ -43,7 +43,6 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/ordenes-servicio")
-@CrossOrigin(origins = "http://localhost:4200")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 public class OrdenServicioController {

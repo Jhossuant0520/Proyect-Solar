@@ -11,7 +11,6 @@ import com.newproject.jhocadi.projectSolvixBackend.repository.AccesRepo.reposito
 
 @RestController
 @RequestMapping("/api/roles")
-@CrossOrigin(origins = "http://localhost:4200")
 public class controllerRolUsuario {
 
     private final repositoryRolUsuario rolRepo;

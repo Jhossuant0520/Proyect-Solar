@@ -9,7 +9,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/demandaEnergetica")
-@CrossOrigin(origins = "http://localhost:4200")
 public class DemandaEnergeticaController {
 
     private final DemandaEnergeticaService demandaService;

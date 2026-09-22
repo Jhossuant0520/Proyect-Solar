@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
  */
 @RestController
 @RequestMapping("/api/v1/consulta")
-@CrossOrigin(origins = "http://localhost:4200")
 @RequiredArgsConstructor
 public class ConsultaPublicaController {
 

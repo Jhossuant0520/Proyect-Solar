@@ -25,7 +25,6 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/equipos")
-@CrossOrigin(origins = "http://localhost:4200")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 public class EquipoController {

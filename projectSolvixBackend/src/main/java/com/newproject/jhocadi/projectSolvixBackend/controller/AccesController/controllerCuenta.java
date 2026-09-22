@@ -23,7 +23,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/cuenta")
-@CrossOrigin("http://localhost:4200")
 @RequiredArgsConstructor
 public class controllerCuenta {
 
