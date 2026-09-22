@@ -49,7 +49,7 @@
       }
       @if (orden.estado === 'REQUIERE_APROBACION_ADICIONAL') {
         <p class="hint especial-hint">
-          Se requiere aprobación adicional. La ampliación de cotización estará disponible en la próxima fase.
+          Se requiere una ampliación de cotización antes de continuar la reparación.
         </p>
       }
       @if (orden.estado === 'CANCELADO') {
@@ -69,15 +69,20 @@
 
       @if (orden.estado === 'COTIZADO') {
         <p class="hint cotizacion-hint">
-          Cotización inicial · Estado: pendiente de aprobación.
-          El detalle económico formal llegará en una fase posterior.
+          Hay una cotización lista. Preséntala al cliente para continuar.
+        </p>
+      }
+
+      @if (orden.estado === 'PENDIENTE_APROBACION') {
+        <p class="hint cotizacion-hint">
+          Cotización presentada. Esperando la decisión del cliente.
         </p>
       }
 
       @if (requiereAprobacionAdicional) {
         <p class="hint especial-hint">
           Durante la reparación se detectó una situación no contemplada en la aprobación anterior.
-          Ampliación de cotización disponible en próxima fase.
+          Prepara una cotización adicional.
         </p>
       }
 
@@ -127,6 +132,14 @@
           </solvix-button>
         }
       </div>
+      @if (orden.estado === 'LISTO') {
+        <p class="hint guia-hint">El equipo está listo para entrega.</p>
+      }
+      @if (orden.estado === 'CERRADO') {
+        <p class="hint guia-hint">
+          Orden cerrada. El equipo fue entregado y la constancia quedó registrada.
+        </p>
+      }
       @if (guiaTecnica) {
         <p class="hint guia-hint">{{ guiaTecnica }}</p>
       }
@@ -313,6 +326,16 @@
       }
     </section>
 
+    <section #panelCotizaciones class="panel">
+      <app-servicio-cotizaciones-panel
+        [ordenId]="orden.id"
+        [estado]="orden.estado"
+        [canManage]="puedeGestionarRepuestos"
+        (ordenActualizada)="onCotizacionOrdenActualizada()"
+        (documentoEsperado)="onDocumentoCotizacionEsperado($event)"
+      />
+    </section>
+
     <section #panelReparacion class="panel">
       <app-servicio-repuestos-panel
         [ordenId]="orden.id"
@@ -344,6 +367,15 @@
           </div>
         }
       </dl>
+    </section>
+
+    <section class="panel">
+      <app-servicio-documentos-panel
+        [ordenId]="orden.id"
+        [estado]="orden.estado"
+        [canManage]="true"
+        [esperarComprobante]="esperarComprobante"
+      />
     </section>
 
     <section class="panel historial-panel">

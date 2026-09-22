@@ -304,10 +304,12 @@ class OrdenServicioRepuestoServiceTest extends ComercialTestSupport {
         textos.setDiagnostico("Falla confirmada");
         textos.setTrabajoRealizado("En curso");
         ordenServicioService.actualizar(orden.getId(), textos);
-        ordenServicioService.cambiarEstado(
-            orden.getId(), cambio(EstadoOrdenServicio.COTIZADO, "cotiza"), USUARIO_TEST);
-        ordenServicioService.cambiarEstado(
-            orden.getId(), cambio(EstadoOrdenServicio.APROBADO, "aprueba"), USUARIO_TEST);
+        ordenServicioService.transicionarPorDominio(
+            orden.getId(), EstadoOrdenServicio.COTIZADO, null, null, USUARIO_TEST);
+        ordenServicioService.transicionarPorDominio(
+            orden.getId(), EstadoOrdenServicio.PENDIENTE_APROBACION, null, null, USUARIO_TEST);
+        ordenServicioService.transicionarPorDominio(
+            orden.getId(), EstadoOrdenServicio.APROBADO, null, null, USUARIO_TEST);
         return ordenServicioService.cambiarEstado(
             orden.getId(), cambio(EstadoOrdenServicio.EN_REPARACION, "repara"), USUARIO_TEST)
             .getOrden();

@@ -16,7 +16,7 @@ const equipoActivo: EquipoResponseDTO = {
   marca: 'HP',
   modelo: 'LaserJet',
   numeroSerie: 'ABC123',
-  nombre: 'Impresora oficina',
+  referenciaInterna: 'Impresora oficina',
   observaciones: null,
   activo: true,
   fechaRegistro: '2026-01-01T10:00:00'
@@ -129,7 +129,7 @@ describe('ClienteEquiposPanelComponent', () => {
       marca: 'HP',
       modelo: 'M404',
       numeroSerie: 'ABC123',
-      nombre: 'Impresora oficina'
+      referenciaInterna: 'Impresora oficina'
     });
     component.guardar();
     tick();
@@ -139,6 +139,7 @@ describe('ClienteEquiposPanelComponent', () => {
     expect(body.clienteId).toBe(4);
     expect(body.tipoEquipo).toBe('IMPRESORA');
     expect(body.numeroSerie).toBe('ABC123');
+    expect(body.referenciaInterna).toBe('Impresora oficina');
   }));
 
   it('edita equipo sin cambiar cliente', fakeAsync(() => {
@@ -152,13 +153,13 @@ describe('ClienteEquiposPanelComponent', () => {
     });
     tick();
     component.abrirEditar(equipoActivo);
-    component.form.controls.nombre.setValue('Alias nuevo');
+    component.form.controls.referenciaInterna.setValue('Alias nuevo');
     component.guardar();
     tick();
 
     expect(equipoService.actualizar).toHaveBeenCalledWith(
       9,
-      jasmine.objectContaining({ clienteId: 4, nombre: 'Alias nuevo' })
+      jasmine.objectContaining({ clienteId: 4, referenciaInterna: 'Alias nuevo' })
     );
   }));
 

@@ -108,7 +108,7 @@ public class EquipoService {
         equipo.setMarca(textoOpcional(request.getMarca()));
         equipo.setModelo(textoOpcional(request.getModelo()));
         equipo.setNumeroSerie(textoOpcional(request.getNumeroSerie()));
-        equipo.setNombre(textoOpcional(request.getNombre()));
+        equipo.setReferenciaInterna(textoOpcional(request.getReferenciaInterna()));
         equipo.setObservaciones(textoOpcional(request.getObservaciones()));
     }
 

@@ -7,6 +7,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ServicioDetailComponent } from './servicio-detail';
 import { OrdenServicioService } from '../../../../core/services/orden-servicio.service';
+import { CotizacionServicioService } from '../../../../core/services/cotizacion-servicio.service';
+import { DocumentoOrdenServicioService } from '../../../../core/services/documento-orden-servicio.service';
 import {
   HistorialEstadoOrdenServicioResponseDTO,
   OrdenServicioResponseDTO,
@@ -58,6 +60,8 @@ describe('ServicioDetailComponent — workflow', () => {
   let fixture: ComponentFixture<ServicioDetailComponent>;
   let component: ServicioDetailComponent;
   let ordenService: jasmine.SpyObj<OrdenServicioService>;
+  let cotizacionService: jasmine.SpyObj<CotizacionServicioService>;
+  let documentoService: jasmine.SpyObj<DocumentoOrdenServicioService>;
   let dialog: jasmine.SpyObj<MatDialog>;
   let router: Router;
 
@@ -72,10 +76,42 @@ describe('ServicioDetailComponent — workflow', () => {
       'listarHistorial',
       'listarRepuestos'
     ]);
+    cotizacionService = jasmine.createSpyObj('CotizacionServicioService', [
+      'listar',
+      'resumenEconomico',
+      'crearInicial',
+      'crearAdicional',
+      'actualizar',
+      'presentar',
+      'aprobar',
+      'rechazar',
+      'eliminarBorrador'
+    ]);
+    documentoService = jasmine.createSpyObj('DocumentoOrdenServicioService', [
+      'listar',
+      'descargarPdf',
+      'regenerar',
+      'asegurarComprobanteRecepcion',
+      'generarCotizacionPdf',
+      'generarActaEntrega',
+      'abrirPdfEnNuevaPestana',
+      'descargarBlobComoArchivo'
+    ]);
     dialog = jasmine.createSpyObj('MatDialog', ['open']);
     ordenService.obtenerPorId.and.returnValue(of(ordenBase()));
     ordenService.listarHistorial.and.returnValue(of([]));
     ordenService.listarRepuestos.and.returnValue(of([]));
+    cotizacionService.listar.and.returnValue(of([]));
+    cotizacionService.resumenEconomico.and.returnValue(
+      of({
+        ordenServicioId: 12,
+        totalAutorizado: 0,
+        subtotalRepuestosAprobados: 0,
+        subtotalManoObraAprobados: 0,
+        subtotalOtrosAprobados: 0
+      })
+    );
+    documentoService.listar.and.returnValue(of([]));
     ordenService.actualizar.and.returnValue(
       of(ordenBase({ diagnostico: 'Fuente dañada', problemaReportado: 'No enciende' }))
     );
@@ -113,9 +149,16 @@ describe('ServicioDetailComponent — workflow', () => {
         provideRouter([]),
         {
           provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: { get: () => '12' } } }
+          useValue: {
+            snapshot: {
+              paramMap: { get: () => '12' },
+              queryParamMap: { get: () => null }
+            }
+          }
         },
         { provide: OrdenServicioService, useValue: ordenService },
+        { provide: CotizacionServicioService, useValue: cotizacionService },
+        { provide: DocumentoOrdenServicioService, useValue: documentoService },
         { provide: MatDialog, useValue: dialog },
         { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open']) }
       ]
@@ -203,14 +246,44 @@ describe('ServicioDetailComponent — workflow', () => {
     expect(component.guiaTecnica).toContain('diagnóstico');
   }));
 
-  it('COTIZADO muestra contexto de aprobación', fakeAsync(() => {
+  it('COTIZADO muestra CTA de presentar cotización (no aprobación directa)', fakeAsync(() => {
     ordenService.obtenerPorId.and.returnValue(of(ordenBase({ estado: 'COTIZADO' })));
     fixture.detectChanges();
     tick();
     const text = fixture.nativeElement.textContent as string;
-    expect(text).toContain('pendiente de aprobación');
-    expect(text).toContain('Cotización inicial');
-    expect(component.accionPrincipal?.destino).toBe('APROBADO');
+    expect(text).toContain('Presentar cotización');
+    expect(text).toContain('Cotizaciones');
+    expect(component.accionPrincipal?.destino).toBe('PENDIENTE_APROBACION');
+    expect(component.accionPrincipal?.boton).toBe('Presentar cotización');
+  }));
+
+  it('DIAGNOSTICADO muestra preparar cotización y sección económica', fakeAsync(() => {
+    ordenService.obtenerPorId.and.returnValue(of(ordenBase({ estado: 'DIAGNOSTICADO' })));
+    fixture.detectChanges();
+    tick();
+    expect(component.accionPrincipal?.boton).toBe('Preparar cotización');
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('Cotizaciones');
+    expect(text).toContain('Preparar cotización inicial');
+    expect(cotizacionService.listar).toHaveBeenCalledWith(12);
+  }));
+
+  it('muestra sección Documentos e invoca listado', fakeAsync(() => {
+    fixture.detectChanges();
+    tick();
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('Documentos');
+    expect(documentoService.listar).toHaveBeenCalledWith(12);
+  }));
+
+  it('PENDIENTE_APROBACION muestra aprobar cotización', fakeAsync(() => {
+    ordenService.obtenerPorId.and.returnValue(
+      of(ordenBase({ estado: 'PENDIENTE_APROBACION' }))
+    );
+    fixture.detectChanges();
+    tick();
+    expect(component.accionPrincipal?.boton).toBe('Aprobar cotización');
+    expect(component.proximaAccionTexto).toBe('Esperando aprobación del cliente.');
   }));
 
   it('Marcar listo sin trabajo realizado muestra guía técnica', fakeAsync(() => {

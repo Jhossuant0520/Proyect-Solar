@@ -19,10 +19,13 @@ export interface EquipoResponseDTO {
   marca: string | null;
   modelo: string | null;
   numeroSerie: string | null;
-  nombre: string | null;
+  /** Alias interno del equipo. Algunos payloads antiguos pueden traer `nombre`. */
+  referenciaInterna: string | null;
   observaciones: string | null;
   activo: boolean;
   fechaRegistro: string | number[] | null;
+  /** @deprecated Preferir `referenciaInterna`. Solo lectura de payloads legacy. */
+  nombre?: string | null;
 }
 
 /** Body de POST/PUT /api/v1/equipos. */
@@ -32,7 +35,7 @@ export interface EquipoRequestDTO {
   marca?: string | null;
   modelo?: string | null;
   numeroSerie?: string | null;
-  nombre?: string | null;
+  referenciaInterna?: string | null;
   observaciones?: string | null;
   activo?: boolean | null;
 }

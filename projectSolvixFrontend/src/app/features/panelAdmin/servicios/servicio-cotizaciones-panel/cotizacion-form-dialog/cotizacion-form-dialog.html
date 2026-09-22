@@ -1,0 +1,153 @@
+<div class="cotizacion-form-dialog">
+  <header class="dlg-head">
+    <p class="kicker">Cotización de servicio</p>
+    <h2>{{ titulo }}</h2>
+    <p>
+      @if (esAdicional) {
+        Amplía el alcance autorizado. El total oficial lo confirma el servidor al guardar.
+      } @else {
+        Define el alcance económico. El total oficial lo confirma el servidor al guardar.
+      }
+    </p>
+    <div class="tipo-pill" aria-label="Tipo de cotización">
+      <span class="pill-label">Tipo</span>
+      <span class="pill-value">{{ esAdicional ? 'Adicional' : data.modo === 'editar' ? (data.cotizacion?.tipo === 'ADICIONAL' ? 'Adicional' : 'Inicial') : 'Inicial' }}</span>
+    </div>
+  </header>
+
+  <form class="dlg-form" [formGroup]="form" (ngSubmit)="guardar()">
+    @if (esAdicional) {
+      <section class="sec">
+        <h3>Motivo de ampliación</h3>
+        <label>
+          <span class="label-row">Descripción <span class="req">requerido</span></span>
+          <textarea
+            formControlName="motivoAmpliacion"
+            rows="2"
+            maxlength="500"
+            placeholder="Qué situación nueva justifica la ampliación"
+          ></textarea>
+        </label>
+      </section>
+    }
+
+    <section class="sec">
+      <div class="sec-head">
+        <h3>Líneas de cotización</h3>
+        <div class="lineas-actions">
+          <solvix-button family="tech" rank="tertiary" type="button" (click)="agregarLinea('MANO_OBRA')">
+            Mano de obra
+          </solvix-button>
+          <solvix-button family="tech" rank="tertiary" type="button" (click)="agregarLinea('OTRO')">
+            Otro concepto
+          </solvix-button>
+        </div>
+      </div>
+
+      @if (!cargandoRepuestos && repuestos.length) {
+        <div class="repuestos-box">
+          <p class="hint-inline">Repuestos planificados de la orden</p>
+          <ul>
+            @for (r of repuestos; track r.id) {
+              <li>
+                <span>{{ r.productoNombre }} · planif. {{ r.cantidadPlanificada }}</span>
+                <solvix-button
+                  family="tech"
+                  rank="tertiary"
+                  type="button"
+                  (click)="agregarDesdeRepuesto(r)"
+                >
+                  Agregar
+                </solvix-button>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
+      <div formArrayName="detalles" class="lineas">
+        @for (linea of detalles.controls; track $index; let i = $index) {
+          <div class="linea" [formGroupName]="i">
+            <div class="linea-top">
+              <span class="tipo-tag" [attr.data-tipo]="linea.get('tipo')?.value">
+                {{ labelTipo(linea.get('tipo')?.value) }}
+              </span>
+              <div class="linea-subtotal solvix-mono">
+                {{ money(subtotalLinea(i)) }}
+              </div>
+              <solvix-button family="tech" rank="danger" type="button" (click)="quitarLinea(i)">
+                Quitar
+              </solvix-button>
+            </div>
+            <label class="concepto">
+              Concepto
+              <input
+                formControlName="descripcion"
+                maxlength="255"
+                [placeholder]="placeholderConcepto(linea.get('tipo')?.value)"
+              />
+            </label>
+            <div class="linea-nums">
+              <label>
+                Cantidad
+                <input type="number" formControlName="cantidad" min="0.01" step="0.01" />
+              </label>
+              <label>
+                Precio unitario
+                <input type="number" formControlName="precioUnitario" min="0" step="0.01" />
+              </label>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="sec">
+      <h3>Observaciones <span class="opt">opcional</span></h3>
+      <label>
+        <textarea
+          formControlName="observaciones"
+          rows="2"
+          maxlength="1000"
+          placeholder="Notas visibles en la cotización"
+        ></textarea>
+      </label>
+    </section>
+
+    <section class="sec resumen" aria-label="Resumen económico">
+      <h3>Resumen económico</h3>
+      <dl class="preview">
+        <div>
+          <dt>Repuestos</dt>
+          <dd class="solvix-mono">{{ money(previewRepuestos) }}</dd>
+        </div>
+        <div>
+          <dt>Mano de obra</dt>
+          <dd class="solvix-mono">{{ money(previewManoObra) }}</dd>
+        </div>
+        <div>
+          <dt>Otros</dt>
+          <dd class="solvix-mono">{{ money(previewOtros) }}</dd>
+        </div>
+        <div class="total">
+          <dt>Total estimado</dt>
+          <dd class="solvix-mono">{{ money(previewTotal) }}</dd>
+        </div>
+      </dl>
+      <p class="hint-inline">El total definitivo lo confirma el servidor después de guardar.</p>
+    </section>
+
+    @if (error) {
+      <p class="form-error" role="alert">{{ error }}</p>
+    }
+
+    <div class="dlg-actions">
+      <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
+        Cancelar
+      </solvix-button>
+      <solvix-button family="tech" rank="primary" type="submit" [disabled]="enviando">
+        {{ enviando ? 'Guardando…' : 'Guardar cotización' }}
+      </solvix-button>
+    </div>
+  </form>
+</div>

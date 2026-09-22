@@ -1,0 +1,226 @@
+<section class="documentos-panel">
+  <div class="documentos-head">
+    <solvix-section-header
+      kicker="Documentación"
+      title="Documentos"
+      subtitle="PDFs generados para esta orden. Puedes verlos, descargarlos o regenerar una versión nueva."
+    />
+  </div>
+
+  @if (state === 'loading') {
+    <solvix-loading-state label="Cargando documentos..." />
+  } @else if (state === 'error') {
+    <solvix-error-state
+      title="No pudimos cargar los documentos."
+      [message]="errorMessage"
+      (retry)="cargar()"
+    />
+  } @else if (state === 'esperando_comprobante') {
+    <div class="espera-card" role="status" aria-live="polite">
+      <h3 class="espera-titulo">Comprobante de recepción</h3>
+      <solvix-loading-state label="Generando comprobante de recepción..." />
+      <p class="espera-hint">Esto puede tardar unos segundos.</p>
+    </div>
+  } @else if (state === 'comprobante_timeout') {
+    <div class="timeout-card" role="alert">
+      <solvix-empty-state
+        icon="description"
+        title="El comprobante no pudo generarse automáticamente."
+        message="La orden quedó creada. Puedes reintentar la generación ahora."
+      />
+      @if (canManage) {
+        <div class="timeout-actions">
+          <solvix-button
+            family="tech"
+            rank="primary"
+            type="button"
+            icon="refresh"
+            [disabled]="accionEnCurso"
+            matTooltip="Reintentar generación del comprobante"
+            (click)="reintentarGeneracion()"
+          >
+            Reintentar generación
+          </solvix-button>
+        </div>
+      }
+    </div>
+  } @else if (state === 'comprobante_pendiente') {
+    <div class="timeout-card" role="status">
+      <solvix-empty-state
+        icon="description"
+        title="Comprobante de recepción pendiente"
+        message="Esta orden aún no tiene comprobante de recepción."
+      />
+      @if (canManage) {
+        <div class="timeout-actions">
+          <solvix-button
+            family="tech"
+            rank="secondary"
+            type="button"
+            icon="picture_as_pdf"
+            [disabled]="accionEnCurso"
+            matTooltip="Generar comprobante de recepción"
+            (click)="reintentarGeneracion()"
+          >
+            Generar comprobante
+          </solvix-button>
+        </div>
+      }
+    </div>
+  } @else if (state === 'empty') {
+    <solvix-empty-state
+      icon="description"
+      title="No hay documentos adicionales para esta orden."
+      message="Los PDFs aparecen aquí cuando se generan (cotización o entrega)."
+    />
+    @if (esperandoDoc) {
+      <div class="espera-card" role="status" aria-live="polite">
+        <h3 class="espera-titulo">{{ labelEsperando }}</h3>
+        @if (!esperandoDocTimeout) {
+          <solvix-loading-state [label]="'Generando ' + labelEsperando.toLowerCase() + '...'" />
+          <p class="espera-hint">Esto puede tardar unos segundos.</p>
+        } @else {
+          <p class="espera-hint">No apareció todavía. Puedes reintentar la generación.</p>
+          @if (canManage) {
+            <div class="timeout-actions">
+              <solvix-button
+                family="tech"
+                rank="primary"
+                type="button"
+                icon="refresh"
+                [disabled]="accionEnCurso"
+                (click)="generarDocumentoEsperadoManual()"
+              >
+                Generar documento
+              </solvix-button>
+            </div>
+          }
+        }
+      </div>
+    }
+  } @else {
+    @if (esperandoDoc) {
+      <div class="espera-card" role="status" aria-live="polite">
+        <h3 class="espera-titulo">{{ labelEsperando }}</h3>
+        @if (!esperandoDocTimeout) {
+          <solvix-loading-state [label]="'Generando ' + labelEsperando.toLowerCase() + '...'" />
+          <p class="espera-hint">Esto puede tardar unos segundos.</p>
+        } @else {
+          <p class="espera-hint">No apareció todavía. Puedes reintentar la generación.</p>
+          @if (canManage) {
+            <div class="timeout-actions">
+              <solvix-button
+                family="tech"
+                rank="primary"
+                type="button"
+                icon="refresh"
+                [disabled]="accionEnCurso"
+                (click)="generarDocumentoEsperadoManual()"
+              >
+                Generar documento
+              </solvix-button>
+            </div>
+          }
+        }
+      </div>
+    }
+
+    @for (grupo of grupos; track grupo.tipo) {
+      <section
+        class="grupo"
+        [class]="'grupo tipo-' + claseTipo(grupo.tipo)"
+        [attr.aria-label]="labelTipo(grupo.tipo)"
+      >
+        <h3 class="grupo-title">
+          <span class="grupo-dot" aria-hidden="true"></span>
+          {{ labelTipo(grupo.tipo) }}
+        </h3>
+        <ul class="lista">
+          @for (doc of grupo.items; track doc.id) {
+            <li
+              class="card-doc"
+              [class]="'card-doc tipo-' + claseTipo(doc.tipoDocumento)"
+              [class.is-nuevo]="esRecienGenerado(doc)"
+              [attr.data-doc-id]="doc.id"
+            >
+              <div class="card-main">
+                <div class="card-title">
+                  <span class="tipo-chip">{{ chipTipo(doc.tipoDocumento) }}</span>
+                  <strong>{{ labelTipo(doc.tipoDocumento, doc.tipoDocumentoEtiqueta) }}</strong>
+                  @if (esRecienGenerado(doc)) {
+                    <solvix-badge tone="success">NUEVO</solvix-badge>
+                  }
+                  <solvix-badge tone="neutral">v{{ doc.version }}</solvix-badge>
+                  @if (doc.cotizacionNumero) {
+                    <solvix-badge tone="neutral">{{ doc.cotizacionNumero }}</solvix-badge>
+                  } @else if (doc.cotizacionId) {
+                    <solvix-badge tone="neutral">Cot. #{{ doc.cotizacionId }}</solvix-badge>
+                  }
+                </div>
+                <p class="meta">
+                  Generado {{ fecha(doc.fechaGeneracion) }}
+                  @if (doc.usuarioGeneracion) {
+                    · {{ doc.usuarioGeneracion }}
+                  }
+                </p>
+                @if (doc.nombreArchivo) {
+                  <p class="archivo solvix-mono">{{ doc.nombreArchivo }}</p>
+                }
+              </div>
+
+              <div class="card-actions">
+                <solvix-button
+                  family="tech"
+                  rank="secondary"
+                  type="button"
+                  icon="visibility"
+                  [disabled]="accionEnCurso"
+                  matTooltip="Abrir PDF en una pestaña nueva"
+                  (click)="ver(doc)"
+                >
+                  Ver
+                </solvix-button>
+                <solvix-button
+                  family="tech"
+                  rank="tertiary"
+                  type="button"
+                  icon="download"
+                  [disabled]="accionEnCurso"
+                  matTooltip="Descargar PDF"
+                  (click)="descargar(doc)"
+                >
+                  Descargar
+                </solvix-button>
+                @if (canManage) {
+                  <solvix-button
+                    family="tech"
+                    rank="tertiary"
+                    type="button"
+                    icon="refresh"
+                    class="accion-admin"
+                    [disabled]="accionEnCurso"
+                    matTooltip="Crear una versión nueva del PDF (administrativo)"
+                    (click)="regenerar(doc)"
+                  >
+                    Regenerar
+                  </solvix-button>
+                }
+                <solvix-button
+                  family="tech"
+                  rank="tertiary"
+                  type="button"
+                  icon="chat"
+                  [disabled]="true"
+                  title="Próximamente"
+                  matTooltip="Próximamente"
+                >
+                  WhatsApp
+                </solvix-button>
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  }
+</section>

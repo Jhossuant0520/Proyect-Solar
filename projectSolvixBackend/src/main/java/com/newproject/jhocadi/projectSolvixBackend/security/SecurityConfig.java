@@ -1,7 +1,10 @@
 package com.newproject.jhocadi.projectSolvixBackend.security;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -29,6 +32,14 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
+    /**
+     * Orígenes del frontend (coma-separados). Incluye el host público del QR/consulta
+     * y localhost para desarrollo. Se configura en application.properties:
+     * solvix.cors.allowed-origin-patterns
+     */
+    @Value("${solvix.cors.allowed-origin-patterns:https://test.computerelectroniccentersas.com,http://localhost:4200}")
+    private String corsAllowedOriginPatterns;
+
     public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
     }
@@ -48,6 +59,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/catalogo", "/api/v1/catalogo/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/cuenta/avatares/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/productos/imagenes/**").permitAll()
+                // Consulta pública por QR (sin auth)
+                .requestMatchers(HttpMethod.GET, "/api/v1/consulta", "/api/v1/consulta/**").permitAll()
                 // Documentación OpenAPI / Swagger (si se habilita a futuro)
                 .requestMatchers(
                     "/v3/api-docs/**",
@@ -87,8 +100,19 @@ public class SecurityConfig {
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
+        List<String> patterns = Arrays.stream(corsAllowedOriginPatterns.split(","))
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .collect(Collectors.toList());
+        if (patterns.isEmpty()) {
+            patterns = List.of(
+                "https://test.computerelectroniccentersas.com",
+                "http://localhost:4200"
+            );
+        }
+
         CorsConfiguration cfg = new CorsConfiguration();
-        cfg.setAllowedOriginPatterns(List.of("http://localhost:4200"));
+        cfg.setAllowedOriginPatterns(patterns);
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
         cfg.setExposedHeaders(List.of("Authorization"));

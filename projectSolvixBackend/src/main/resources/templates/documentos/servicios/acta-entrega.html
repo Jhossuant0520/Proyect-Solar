@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Acta de entrega — ${EMPRESA_NOMBRE}</title>
+  <link rel="stylesheet" type="text/css" href="styles/documentos-servicios.css"/>
+  <link rel="stylesheet" type="text/css" href="styles/acta-entrega.css"/>
+</head>
+<body class="ae-body">
+<div class="ae-wrap">
+
+  <table class="ae-top">
+    <tr>
+      <td style="width:58%;vertical-align:middle;">
+        <table>
+          <tr>
+            <td class="ae-logo-cell">${LOGO_HTML}</td>
+            <td style="vertical-align:middle;padding-left:10px;">
+              <p class="ae-brand-name">${EMPRESA_NOMBRE}</p>
+              <p class="ae-brand-sub">${EMPRESA_SUBTITULO}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+      <td class="ae-contact" style="width:42%;vertical-align:middle;">
+        <strong>${EMPRESA_IDENTIFICACION}</strong><br/>
+        ${EMPRESA_TELEFONO}<br/>
+        ${EMPRESA_CORREO}<br/>
+        ${EMPRESA_DIRECCION}
+      </td>
+    </tr>
+  </table>
+
+  <table class="ae-hero">
+    <tr>
+      <td style="width:62%;">
+        <p class="ae-kicker">Servicio técnico</p>
+        <p class="ae-title">Acta de entrega</p>
+        <span class="ae-ot-chip">${NUMERO_OT}</span>
+      </td>
+      <td class="ae-hero-meta" style="width:38%;">
+        <p class="label">Fecha de entrega</p>
+        <p class="value">${FECHA_ENTREGA}</p>
+      </td>
+    </tr>
+  </table>
+
+  <table class="ae-section">
+    <tr class="ae-grid-2">
+      <td>
+        <p class="ae-section-head">Cliente y equipo</p>
+        <div class="ae-card">
+          <div class="ae-field-gap">
+            <p class="ae-field-label">Cliente</p>
+            <p class="ae-field-value">${CLIENTE_NOMBRE}</p>
+          </div>
+          <div class="ae-field-gap">
+            <p class="ae-field-label">Equipo</p>
+            <p class="ae-field-value">${EQUIPO_RESUMEN}</p>
+          </div>
+          <div class="ae-field-gap">
+            <p class="ae-field-label">Responsable taller</p>
+            <p class="ae-field-value">${USUARIO_RESPONSABLE}</p>
+          </div>
+        </div>
+      </td>
+      <td>
+        <p class="ae-section-head">Confirmación</p>
+        <div class="ae-card">
+          <div class="ae-field-gap">
+            <p class="ae-field-label">Firmante</p>
+            <p class="ae-field-value">${NOMBRE_FIRMANTE}</p>
+          </div>
+          <div class="ae-field-gap">
+            <p class="ae-field-label">Documento</p>
+            <p class="ae-field-value">${DOCUMENTO_FIRMANTE}</p>
+          </div>
+          <div class="ae-field-gap">
+            <p class="ae-field-label">Confirmó recepción</p>
+            <p class="ae-field-value"><span class="ae-badge-ok">${CLIENTE_CONFIRMO}</span></p>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <table class="ae-section">
+    <tr>
+      <td style="width:66%;padding-right:10px;">
+        <p class="ae-section-head">Trabajo realizado</p>
+        <div class="ae-note">${TRABAJO_REALIZADO}</div>
+        <p class="ae-note-label">Observaciones de entrega</p>
+        <div class="ae-note ae-note-muted">${OBSERVACIONES_ENTREGA}</div>
+        <p class="ae-section-head" style="margin-top:12px;">Firma del cliente</p>
+        <div class="ae-firma-box">
+          ${FIRMA_HTML}
+          <p class="ae-firma-caption">${NOMBRE_FIRMANTE}</p>
+        </div>
+      </td>
+      <td style="width:34%;vertical-align:top;">
+        <p class="ae-section-head">Consulta</p>
+        <div class="ae-qr-panel">
+          <img src="${QR_DATA_URI}" alt="QR consulta"/>
+          <p class="ae-qr-title">Escanea el código</p>
+          <p class="ae-qr-hint">Consulta pública de la orden de forma segura.</p>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <table class="ae-footer">
+    <tr>
+      <td style="width:55%;">
+        <strong>${EMPRESA_NOMBRE}</strong> · ${EMPRESA_CONTACTO}<br/>
+        ${FOOTER_TEXTO}<br/>
+        <span class="ae-autoria">${SOFTWARE_AUTORIA}</span>
+      </td>
+      <td class="ae-footer-right" style="width:45%;">
+        <span class="ae-pill">SOLVIX</span><br/>
+        ${NUMERO_OT}
+      </td>
+    </tr>
+  </table>
+
+</div>
+</body>
+</html>

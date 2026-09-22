@@ -146,6 +146,7 @@ export class ServicioRepuestosPanelComponent implements OnChanges {
     const ref = this.dialog.open(PlanificarRepuestoDialogComponent, {
       width: '480px',
       panelClass: 'solvix-dialog-panel',
+      backdropClass: 'solvix-dialog-backdrop',
       data: { ordenId: this.ordenId } satisfies PlanificarRepuestoDialogData
     });
     ref.afterClosed().subscribe((result?: RepuestoOrdenServicioResponseDTO) => {
@@ -187,6 +188,7 @@ export class ServicioRepuestosPanelComponent implements OnChanges {
     const ref = this.dialog.open(DialogoConfirmacionDelete, {
       width: '420px',
       panelClass: 'solvix-dialog-panel',
+      backdropClass: 'solvix-dialog-backdrop',
       data: {
         mensaje: `¿Anular el repuesto «${linea.productoNombre}»? La línea quedará anulada.`
       }
@@ -223,6 +225,7 @@ export class ServicioRepuestosPanelComponent implements OnChanges {
     const ref = this.dialog.open(CantidadRepuestoDialogComponent, {
       width: '420px',
       panelClass: 'solvix-dialog-panel',
+      backdropClass: 'solvix-dialog-backdrop',
       data: {
         ordenId: this.ordenId,
         linea,

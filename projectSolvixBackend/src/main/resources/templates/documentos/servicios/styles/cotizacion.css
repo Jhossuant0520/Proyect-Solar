@@ -1,0 +1,335 @@
+/* =====================================================================
+   Cotización de servicio — SOLVIX Tech-Minimal (impresión LETTER)
+   Misma línea visual que el comprobante de recepción.
+   ===================================================================== */
+
+@page {
+  size: letter portrait;
+  margin: 14mm 16mm 16mm 16mm;
+}
+
+body.cot-body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 9.5pt;
+  color: #1e293b;
+  line-height: 1.4;
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+}
+
+.cot-wrap { width: 100%; }
+.cot-wrap table { width: 100%; border-collapse: collapse; }
+.cot-wrap td { vertical-align: top; }
+
+.cot-top {
+  border-bottom: 2px solid #0f172a;
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+}
+
+.cot-brand-name {
+  font-size: 15pt;
+  font-weight: bold;
+  color: #0f172a;
+  margin: 0 0 2px 0;
+  letter-spacing: -0.02em;
+}
+
+.cot-brand-sub {
+  font-size: 8.5pt;
+  color: #64748b;
+  margin: 0;
+}
+
+.cot-logo-cell {
+  width: 56px;
+  vertical-align: middle;
+}
+
+.cot-logo-cell .doc-logo {
+  max-height: 80px;
+  max-width: 80px;
+  display: block;
+}
+
+.cot-contact {
+  text-align: right;
+  font-size: 8pt;
+  color: #475569;
+  line-height: 1.45;
+}
+
+.cot-contact strong {
+  color: #0f172a;
+  font-size: 8.5pt;
+}
+
+.cot-hero { margin-bottom: 16px; }
+
+.cot-kicker {
+  font-size: 7.5pt;
+  font-weight: bold;
+  color: #0284c7;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 0 0 4px 0;
+}
+
+.cot-title {
+  font-size: 16pt;
+  font-weight: bold;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.02em;
+}
+
+.cot-chip {
+  display: inline-block;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  color: #0369a1;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 10pt;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.04em;
+  margin-right: 6px;
+}
+
+.cot-chip-muted {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #475569;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 8pt;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.cot-hero-meta {
+  text-align: right;
+  vertical-align: middle;
+}
+
+.cot-hero-meta .label {
+  font-size: 7.5pt;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 2px 0;
+}
+
+.cot-hero-meta .value {
+  font-size: 10pt;
+  font-weight: bold;
+  color: #0f172a;
+  margin: 0;
+}
+
+.cot-section { margin-bottom: 12px; }
+
+.cot-section-head {
+  font-size: 8pt;
+  font-weight: bold;
+  color: #0284c7;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 4px;
+  margin: 0 0 8px 0;
+}
+
+.cot-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.cot-grid-2 td {
+  width: 50%;
+  padding: 0 4px;
+}
+
+.cot-grid-2 td:first-child { padding-left: 0; }
+.cot-grid-2 td:last-child { padding-right: 0; }
+
+.cot-field-label {
+  font-size: 7pt;
+  font-weight: bold;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 2px 0;
+}
+
+.cot-field-value {
+  font-size: 9.5pt;
+  font-weight: bold;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.cot-field-gap { margin-bottom: 8px; }
+.cot-field-gap:last-child { margin-bottom: 0; }
+
+/* Tabla de detalle */
+.cot-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 8.5pt;
+  margin-bottom: 10px;
+}
+
+.cot-table th {
+  background: #0f172a;
+  color: #ffffff;
+  text-align: left;
+  padding: 7px 8px;
+  font-size: 7.5pt;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cot-table th.num,
+.cot-table td.num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cot-table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #334155;
+  vertical-align: top;
+}
+
+.cot-table tr:nth-child(even) td {
+  background: #f8fafc;
+}
+
+.cot-totales {
+  width: 42%;
+  margin-left: auto;
+  border-collapse: collapse;
+}
+
+.cot-totales td {
+  padding: 5px 8px;
+  font-size: 9pt;
+}
+
+.cot-totales .label {
+  color: #64748b;
+  font-weight: bold;
+}
+
+.cot-totales .value {
+  text-align: right;
+  font-weight: bold;
+  color: #0f172a;
+}
+
+.cot-totales .total-row td {
+  border-top: 2px solid #0f172a;
+  padding-top: 8px;
+  font-size: 11pt;
+  color: #0f172a;
+}
+
+.cot-totales .total-row .value {
+  color: #0284c7;
+}
+
+.cot-note {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid #94a3b8;
+  border-radius: 0 8px 8px 0;
+  padding: 9px 12px;
+  font-size: 9pt;
+  color: #475569;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  min-height: 24px;
+}
+
+.cot-note-label {
+  font-size: 7pt;
+  font-weight: bold;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 4px 0;
+}
+
+.cot-qr-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 10px;
+  text-align: center;
+}
+
+.cot-qr-panel img {
+  width: 88px;
+  height: 88px;
+  display: block;
+  margin: 0 auto 8px auto;
+}
+
+.cot-qr-title {
+  font-size: 8pt;
+  font-weight: bold;
+  color: #0f172a;
+  margin: 0 0 2px 0;
+}
+
+.cot-qr-hint {
+  font-size: 7.5pt;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.cot-footer {
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 1px solid #e2e8f0;
+  font-size: 7.5pt;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.cot-footer strong { color: #475569; }
+
+.cot-autoria {
+  display: inline-block;
+  margin-top: 2px;
+  font-size: 8pt;
+  color: #94a3b8;
+}
+
+.cot-footer-right { text-align: right; }
+
+.cot-pill {
+  display: inline-block;
+  font-size: 6.5pt;
+  font-weight: bold;
+  color: #0284c7;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  padding: 2px 7px;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.muted {
+  color: #64748b;
+  font-size: 8.5pt;
+}

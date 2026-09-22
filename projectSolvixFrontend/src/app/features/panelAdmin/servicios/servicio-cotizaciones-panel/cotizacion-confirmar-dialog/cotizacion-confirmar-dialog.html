@@ -1,0 +1,19 @@
+<div class="cotizacion-confirm-dialog">
+  <header class="dlg-head">
+    <h2>{{ titulo }}</h2>
+    <p>{{ mensaje }}</p>
+    <p class="numero solvix-mono">{{ data.numero }}</p>
+  </header>
+  <div class="dlg-actions">
+    <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
+      Cancelar
+    </solvix-button>
+    <solvix-button family="tech" rank="primary" type="button" (click)="confirmar()">
+      @if (data.modo === 'aprobar') {
+        Confirmar aprobación
+      } @else {
+        Presentar
+      }
+    </solvix-button>
+  </div>
+</div>

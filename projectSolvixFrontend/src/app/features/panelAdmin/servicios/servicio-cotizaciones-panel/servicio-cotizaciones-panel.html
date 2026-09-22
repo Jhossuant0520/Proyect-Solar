@@ -1,0 +1,262 @@
+<section class="cotizaciones-panel">
+  <div class="cotizaciones-head">
+    <solvix-section-header
+      kicker="Economía"
+      title="Cotizaciones"
+      subtitle="Documenta y gestiona las cotizaciones de esta orden. El total oficial lo calcula el servidor."
+    />
+    <div class="head-actions">
+      @if (puedeCrearInicial) {
+        <solvix-button
+          family="tech"
+          rank="primary"
+          icon="add"
+          matTooltip="Crear cotización inicial"
+          (click)="abrirFormulario('inicial')"
+        >
+          Crear cotización
+        </solvix-button>
+      }
+      @if (puedeCrearAdicional) {
+        <solvix-button
+          family="tech"
+          rank="primary"
+          icon="add"
+          matTooltip="Crear cotización adicional"
+          (click)="abrirFormulario('adicional')"
+        >
+          Ampliar cotización
+        </solvix-button>
+      }
+    </div>
+  </div>
+
+  @if (resumenState === 'ready' && resumen) {
+    <section class="resumen-economico" aria-label="Resumen económico">
+      <h3>Resumen económico</h3>
+      <dl class="resumen-grid">
+        <div class="metric highlight">
+          <dt>Total autorizado</dt>
+          <dd class="solvix-mono">{{ money(resumen.totalAutorizado) }}</dd>
+        </div>
+        <div>
+          <dt>Repuestos aprobados</dt>
+          <dd class="solvix-mono">{{ money(resumen.subtotalRepuestosAprobados) }}</dd>
+        </div>
+        <div>
+          <dt>Mano de obra aprobada</dt>
+          <dd class="solvix-mono">{{ money(resumen.subtotalManoObraAprobados) }}</dd>
+        </div>
+        <div>
+          <dt>Otros aprobados</dt>
+          <dd class="solvix-mono">{{ money(resumen.subtotalOtrosAprobados) }}</dd>
+        </div>
+      </dl>
+    </section>
+  }
+
+  @if (state === 'loading') {
+    <solvix-loading-state label="Cargando cotizaciones." />
+  } @else if (state === 'error') {
+    <solvix-error-state
+      title="No pudimos cargar las cotizaciones."
+      [message]="errorMessage"
+      (retry)="cargar()"
+    />
+  } @else if (state === 'empty') {
+    <solvix-empty-state
+      icon="request_quote"
+      title="Todavía no hay cotizaciones."
+      [message]="
+        puedeCrearInicial
+          ? 'Crea la cotización inicial a partir del diagnóstico.'
+          : puedeCrearAdicional
+            ? 'Crea una cotización adicional por la nueva situación.'
+            : 'Las cotizaciones aparecerán aquí cuando se creen.'
+      "
+    />
+  } @else {
+    <ul class="lista">
+      @for (cot of cotizaciones; track cot.id) {
+        <li class="card-cot">
+          <div class="card-main">
+            <div class="card-title">
+              <strong class="solvix-mono">{{ cot.numero }}</strong>
+              <solvix-badge [tone]="toneEstado(cot.estado)">
+                {{ labelEstado(cot.estado) }}
+              </solvix-badge>
+              <solvix-badge tone="neutral">{{ labelTipo(cot.tipo) }}</solvix-badge>
+            </div>
+            <dl class="totales">
+              <div>
+                <dt>Total</dt>
+                <dd class="solvix-mono total">{{ money(cot.total) }}</dd>
+              </div>
+              <div>
+                <dt>Repuestos</dt>
+                <dd class="solvix-mono">{{ money(cot.subtotalRepuestos) }}</dd>
+              </div>
+              <div>
+                <dt>Mano de obra</dt>
+                <dd class="solvix-mono">{{ money(cot.subtotalManoObra) }}</dd>
+              </div>
+              <div>
+                <dt>Otros</dt>
+                <dd class="solvix-mono">{{ money(cot.subtotalOtros) }}</dd>
+              </div>
+            </dl>
+            @if (cot.motivoAmpliacion) {
+              <p class="motivo"><span>Motivo:</span> {{ cot.motivoAmpliacion }}</p>
+            }
+            @if (cot.observaciones) {
+              <p class="obs"><span>Observaciones:</span> {{ cot.observaciones }}</p>
+            }
+            <p class="meta">
+              Creada {{ fecha(cot.fechaCreacion) }}
+              @if (cot.usuarioCreacion) {
+                · {{ cot.usuarioCreacion }}
+              }
+            </p>
+          </div>
+
+          <div class="card-actions">
+            <solvix-button
+              family="tech"
+              rank="tertiary"
+              type="button"
+              (click)="toggleDetalles(cot.id)"
+            >
+              {{ expandidaId === cot.id ? 'Ocultar detalles' : 'Ver detalles técnicos' }}
+            </solvix-button>
+            @if (puedePdf(cot) && docDe(cot)) {
+              <solvix-button
+                family="tech"
+                rank="secondary"
+                type="button"
+                icon="visibility"
+                [disabled]="accionEnCurso"
+                matTooltip="Abrir PDF de cotización"
+                (click)="verPdf(cot)"
+              >
+                Ver PDF
+              </solvix-button>
+              <solvix-button
+                family="tech"
+                rank="tertiary"
+                type="button"
+                icon="download"
+                [disabled]="accionEnCurso"
+                matTooltip="Descargar PDF"
+                (click)="descargarPdf(cot)"
+              >
+                Descargar
+              </solvix-button>
+            } @else if (puedePdf(cot) && canManage) {
+              <solvix-button
+                family="tech"
+                rank="secondary"
+                type="button"
+                icon="picture_as_pdf"
+                [disabled]="accionEnCurso"
+                matTooltip="Generar PDF de cotización"
+                (click)="generarPdf(cot)"
+              >
+                Generar PDF
+              </solvix-button>
+            }
+            <solvix-button
+              family="tech"
+              rank="tertiary"
+              type="button"
+              icon="chat"
+              [disabled]="true"
+              title="Envío al cliente: próximamente"
+              matTooltip="Envío al cliente: próximamente"
+            >
+              WhatsApp
+            </solvix-button>
+            @if (cot.puedeEditar && canManage) {
+              <solvix-button
+                family="tech"
+                rank="secondary"
+                type="button"
+                [disabled]="accionEnCurso"
+                (click)="editar(cot)"
+              >
+                Editar
+              </solvix-button>
+            }
+            @if (cot.puedePresentar && canManage) {
+              <solvix-button
+                family="tech"
+                rank="primary"
+                type="button"
+                [disabled]="accionEnCurso"
+                (click)="presentar(cot)"
+              >
+                Presentar
+              </solvix-button>
+            }
+            @if (cot.puedeAprobar && canManage) {
+              <solvix-button
+                family="tech"
+                rank="primary"
+                type="button"
+                [disabled]="accionEnCurso"
+                (click)="aprobar(cot)"
+              >
+                Aprobar
+              </solvix-button>
+            }
+            @if (cot.puedeRechazar && canManage) {
+              <solvix-button
+                family="tech"
+                rank="danger"
+                type="button"
+                [disabled]="accionEnCurso"
+                (click)="rechazar(cot)"
+              >
+                Rechazar
+              </solvix-button>
+            }
+            @if (cot.estado === 'BORRADOR' && canManage) {
+              <solvix-button
+                family="tech"
+                rank="danger"
+                type="button"
+                [disabled]="accionEnCurso"
+                (click)="eliminar(cot)"
+              >
+                Eliminar
+              </solvix-button>
+            }
+          </div>
+
+          @if (expandidaId === cot.id) {
+            <div class="detalles-tecnicos">
+              <h4>Detalles técnicos</h4>
+              @if (!cot.detalles.length) {
+                <p class="hint">Sin líneas.</p>
+              } @else {
+                <ul>
+                  @for (d of cot.detalles; track d.id) {
+                    <li>
+                      <span class="tipo">{{ labelDetalle(d.tipo) }}</span>
+                      <span class="desc">
+                        {{ d.descripcion || d.productoNombreSnapshot || '—' }}
+                      </span>
+                      <span class="solvix-mono qty">
+                        {{ d.cantidad }} × {{ money(d.precioUnitario) }} =
+                        {{ money(d.subtotal) }}
+                      </span>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  }
+</section>

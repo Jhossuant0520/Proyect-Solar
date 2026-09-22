@@ -8,17 +8,24 @@ import {
 } from '../../../core/models/orden-servicio.models';
 import { formatFechaVenta, mapHttpError as mapVentaHttpError, ApiUiError } from '../venta/venta-ui';
 
-/** Espejo de transiciones FE 3.15.5.2. La autoridad sigue siendo el backend. */
+/** Espejo de transiciones FE 3.15.7. La autoridad sigue siendo el backend. */
 const TRANSICIONES: Record<EstadoOrdenServicio, EstadoOrdenServicio[]> = {
   RECEPCIONADO: ['EN_DIAGNOSTICO', 'CANCELADO'],
   EN_DIAGNOSTICO: ['DIAGNOSTICADO', 'CANCELADO'],
   DIAGNOSTICADO: ['COTIZADO', 'CANCELADO'],
-  COTIZADO: ['APROBADO', 'CANCELADO'],
+  COTIZADO: ['PENDIENTE_APROBACION', 'CANCELADO'],
+  PENDIENTE_APROBACION: [
+    'APROBADO',
+    'EN_REPARACION',
+    'COTIZADO',
+    'REQUIERE_APROBACION_ADICIONAL',
+    'CANCELADO'
+  ],
   APROBADO: ['EN_REPARACION', 'CANCELADO'],
   EN_REPARACION: ['ESPERA_REPUESTO', 'REQUIERE_APROBACION_ADICIONAL', 'LISTO'],
   ESPERA_REPUESTO: ['EN_REPARACION'],
-  // Salida preparada para 3.15.7; el FE no expone reanudación todavía.
-  REQUIERE_APROBACION_ADICIONAL: [],
+  // Ampliación vía cotización (3.15.7); no EN_REPARACION directo desde FE.
+  REQUIERE_APROBACION_ADICIONAL: ['PENDIENTE_APROBACION'],
   LISTO: ['ENTREGADO'],
   ENTREGADO: ['CERRADO'],
   CERRADO: [],
@@ -31,6 +38,7 @@ export const WORKFLOW_PRINCIPAL: EstadoOrdenServicio[] = [
   'EN_DIAGNOSTICO',
   'DIAGNOSTICADO',
   'COTIZADO',
+  'PENDIENTE_APROBACION',
   'APROBADO',
   'EN_REPARACION',
   'LISTO',
@@ -45,8 +53,12 @@ export type TipoAccionWorkflow =
   | 'esperaRepuesto'
   | 'nuevaFalla'
   | 'completarDiagnostico'
-  | 'completarReparacion';
-
+  | 'completarReparacion'
+  | 'gestionarEntrega'
+  | 'crearCotizacion'
+  | 'presentarCotizacion'
+  | 'aprobarCotizacion'
+  | 'cotizacionAdicional';
 export interface AccionWorkflowUi {
   destino: EstadoOrdenServicio;
   titulo: string;
@@ -76,15 +88,22 @@ const ACCION_POR_DESTINO: Partial<
   },
   COTIZADO: {
     titulo: 'Preparar cotización',
-    descripcion: 'Se prepara la cotización inicial a partir del diagnóstico.',
+    descripcion: 'Crea la cotización inicial a partir del diagnóstico.',
     boton: 'Preparar cotización',
     requiereDiagnostico: false,
     requiereTrabajo: false
   },
+  PENDIENTE_APROBACION: {
+    titulo: 'Presentar cotización',
+    descripcion: 'Presenta la cotización al cliente para su aprobación.',
+    boton: 'Presentar cotización',
+    requiereDiagnostico: false,
+    requiereTrabajo: false
+  },
   APROBADO: {
-    titulo: 'Registrar aprobación',
-    descripcion: 'Se registra la aprobación del cliente para continuar.',
-    boton: 'Registrar aprobación',
+    titulo: 'Aprobar cotización',
+    descripcion: 'Confirma que el cliente aprobó la cotización vigente.',
+    boton: 'Aprobar cotización',
     requiereDiagnostico: false,
     requiereTrabajo: false
   },
@@ -117,9 +136,9 @@ const ACCION_POR_DESTINO: Partial<
     requiereTrabajo: true
   },
   ENTREGADO: {
-    titulo: 'Registrar entrega',
-    descripcion: 'Se registra la entrega del equipo al cliente.',
-    boton: 'Registrar entrega',
+    titulo: 'Gestionar entrega',
+    descripcion: 'Gestiona la entrega del equipo al cliente.',
+    boton: 'Gestionar entrega',
     requiereDiagnostico: false,
     requiereTrabajo: false
   },
@@ -139,7 +158,10 @@ const ACCION_POR_DESTINO: Partial<
   }
 };
 
-/** Cómo debe tratarse la UI al avanzar hacia un destino (3.15.5.2). */
+/**
+ * Cómo debe tratarse la UI al avanzar hacia un destino (3.15.7).
+ * Cotización: no usar transición de estado directa; abrir CTAs de cotización.
+ */
 export function tipoAccionWorkflow(destino: EstadoOrdenServicio | string): TipoAccionWorkflow {
   switch (destino) {
     case 'CANCELADO':
@@ -152,8 +174,15 @@ export function tipoAccionWorkflow(destino: EstadoOrdenServicio | string): TipoA
       return 'completarDiagnostico';
     case 'LISTO':
       return 'completarReparacion';
-    case 'APROBADO':
     case 'ENTREGADO':
+      // Destino desde LISTO: UI hook para el diálogo de entrega (3.15.5.3).
+      return 'gestionarEntrega';
+    case 'COTIZADO':
+      return 'crearCotizacion';
+    case 'PENDIENTE_APROBACION':
+      return 'presentarCotizacion';
+    case 'APROBADO':
+      return 'aprobarCotizacion';
     case 'CERRADO':
       return 'confirmacion';
     default:
@@ -184,11 +213,41 @@ export function accionPrincipalDesde(estado: EstadoOrdenServicio | string): Acci
       boton: 'Ir al diagnóstico'
     };
   }
+  // Cotización: CTAs de dominio (no transición directa COTIZADO→APROBADO).
+  if (estado === 'DIAGNOSTICADO') {
+    return accionParaDestino('COTIZADO');
+  }
+  if (estado === 'COTIZADO') {
+    return accionParaDestino('PENDIENTE_APROBACION');
+  }
+  if (estado === 'PENDIENTE_APROBACION') {
+    return accionParaDestino('APROBADO');
+  }
   if (estado === 'REQUIERE_APROBACION_ADICIONAL') {
+    return {
+      destino: 'PENDIENTE_APROBACION',
+      titulo: 'Ampliar cotización',
+      descripcion: 'Prepara una cotización adicional por la nueva situación.',
+      boton: 'Ampliar cotización',
+      esCancelacion: false,
+      requiereDiagnostico: false,
+      requiereTrabajo: false
+    };
+  }
+  if (estado === 'LISTO') {
+    return accionParaDestino('ENTREGADO');
+  }
+  if (estado === 'ENTREGADO' || estado === 'CERRADO') {
     return null;
   }
   const destinos = transicionesDesde(estado).filter(
-    d => d !== 'CANCELADO' && d !== 'REQUIERE_APROBACION_ADICIONAL' && d !== 'ESPERA_REPUESTO'
+    d =>
+      d !== 'CANCELADO' &&
+      d !== 'REQUIERE_APROBACION_ADICIONAL' &&
+      d !== 'ESPERA_REPUESTO' &&
+      d !== 'PENDIENTE_APROBACION' &&
+      d !== 'APROBADO' &&
+      d !== 'COTIZADO'
   );
   if (destinos.length === 0) {
     if (estado === 'ESPERA_REPUESTO' && transicionesDesde(estado).includes('EN_REPARACION')) {
@@ -249,11 +308,13 @@ export function textoProximaAccion(
     case 'EN_DIAGNOSTICO':
       return 'Completar ficha técnica';
     case 'DIAGNOSTICADO':
-      return 'Preparar cotización inicial';
+      return 'Preparar cotización inicial.';
     case 'COTIZADO':
-      return 'Esperando aprobación del cliente';
+      return 'Presentar cotización al cliente.';
+    case 'PENDIENTE_APROBACION':
+      return 'Esperando aprobación del cliente.';
     case 'APROBADO':
-      return 'Reparación autorizada';
+      return 'Reparación autorizada.';
     case 'EN_REPARACION':
       if (pending > 0) {
         return pending === 1
@@ -269,11 +330,11 @@ export function textoProximaAccion(
       }
       return 'Resolver repuestos pendientes';
     case 'REQUIERE_APROBACION_ADICIONAL':
-      return 'Se requiere una aprobación adicional antes de continuar.';
+      return 'Existe una nueva situación que requiere una ampliación de cotización.';
     case 'LISTO':
-      return 'Registrar entrega';
+      return 'El equipo está listo para entrega.';
     case 'ENTREGADO':
-      return 'Cerrar orden';
+      return 'Orden entregada.';
     case 'CERRADO':
       return 'Orden completada';
     case 'CANCELADO':
@@ -343,6 +404,8 @@ function labelCortoWorkflow(estado: EstadoOrdenServicio): string {
       return 'Diagnosticado';
     case 'COTIZADO':
       return 'Cotizado';
+    case 'PENDIENTE_APROBACION':
+      return 'Aprobación';
     case 'APROBADO':
       return 'Aprobado';
     case 'EN_REPARACION':
@@ -363,6 +426,7 @@ const LABEL_ESTADO: Record<EstadoOrdenServicio, string> = {
   EN_DIAGNOSTICO: 'En diagnóstico',
   DIAGNOSTICADO: 'Diagnosticado',
   COTIZADO: 'Cotizado',
+  PENDIENTE_APROBACION: 'Pendiente de aprobación',
   APROBADO: 'Aprobado',
   EN_REPARACION: 'En reparación',
   ESPERA_REPUESTO: 'Espera repuesto',
@@ -411,6 +475,7 @@ export function toneEstadoOrden(estado: EstadoOrdenServicio | string): SolvixBad
     case 'ESPERA_REPUESTO':
     case 'REQUIERE_APROBACION_ADICIONAL':
     case 'COTIZADO':
+    case 'PENDIENTE_APROBACION':
     case 'APROBADO':
       return 'warning';
     case 'DIAGNOSTICADO':
@@ -490,6 +555,7 @@ export function campoTecnicoDestacado(
     case 'EN_DIAGNOSTICO':
     case 'DIAGNOSTICADO':
     case 'COTIZADO':
+    case 'PENDIENTE_APROBACION':
     case 'APROBADO':
       return 'diagnostico';
     case 'EN_REPARACION':
@@ -540,6 +606,8 @@ export function equipoResumen(equipo: {
   tipoEquipo?: string | null;
   marca?: string | null;
   modelo?: string | null;
+  referenciaInterna?: string | null;
+  /** Fallback legacy si el payload aún trae `nombre`. */
   nombre?: string | null;
   equipoTipo?: string | null;
   equipoMarca?: string | null;
@@ -549,10 +617,10 @@ export function equipoResumen(equipo: {
   const tipo = labelTipoEquipo(equipo.equipoTipo ?? equipo.tipoEquipo);
   const marca = equipo.equipoMarca ?? equipo.marca;
   const modelo = equipo.equipoModelo ?? equipo.modelo;
-  const nombre = equipo.equipoNombre ?? equipo.nombre;
+  const alias = equipo.equipoNombre ?? equipo.referenciaInterna ?? equipo.nombre;
   const piezas = [tipo, marca, modelo].filter(Boolean);
   const base = piezas.length ? piezas.join(' · ') : 'Equipo';
-  return nombre ? `${base} (${nombre})` : base;
+  return alias ? `${base} (${alias})` : base;
 }
 
 export function equipoOpcionLabel(equipo: EquipoResponseDTO): string {
@@ -640,6 +708,10 @@ function mensajeHumanoServicio(error: unknown): string | null {
   if (!raw || esSql(raw)) {
     return null;
   }
+  // No mostrar stacktraces / FQCN Java crudos (p. ej. com/google/zxing/EncodeHintType).
+  if (esMensajeTecnicoJava(raw)) {
+    return null;
+  }
   if (/no pertenece al cliente/i.test(raw)) {
     return 'El equipo seleccionado no pertenece al cliente indicado.';
   }
@@ -659,6 +731,23 @@ function esSql(texto: string): boolean {
   return /sql|constraint|duplicate entry|jdbc|hibernate/i.test(texto);
 }
 
+/** Mensajes de enlace/classpath o FQCN que no deben verse en la UI. */
+function esMensajeTecnicoJava(texto: string): boolean {
+  const t = texto.trim();
+  if (/NoClassDefFoundError|ClassNotFoundException|NoSuchMethodError|LinkageError/i.test(t)) {
+    return true;
+  }
+  // Formato típico de NoClassDefFoundError: com/google/zxing/EncodeHintType
+  if (/^[a-z][a-z0-9_]*(\/[A-Za-z0-9_$]+)+$/.test(t)) {
+    return true;
+  }
+  // FQCN con puntos: com.google.zxing.EncodeHintType
+  if (/^[a-z][a-z0-9_]*(\.[A-Za-z0-9_$]+){2,}$/.test(t) && !/\s/.test(t)) {
+    return true;
+  }
+  return false;
+}
+
 /** Estados OT donde se puede planificar / editar / anular líneas. */
 export function puedePlanificarRepuestos(estado: EstadoOrdenServicio | string): boolean {
   return (
@@ -666,10 +755,58 @@ export function puedePlanificarRepuestos(estado: EstadoOrdenServicio | string): 
     estado === 'EN_DIAGNOSTICO' ||
     estado === 'DIAGNOSTICADO' ||
     estado === 'COTIZADO' ||
+    estado === 'PENDIENTE_APROBACION' ||
     estado === 'APROBADO' ||
     estado === 'EN_REPARACION' ||
     estado === 'ESPERA_REPUESTO'
   );
+}
+
+/** Labels de estado de cotización (capa visible). */
+const LABEL_ESTADO_COTIZACION: Record<string, string> = {
+  BORRADOR: 'Borrador',
+  PENDIENTE_APROBACION: 'Pendiente de aprobación',
+  APROBADA: 'Aprobada',
+  RECHAZADA: 'Rechazada',
+  ANULADA: 'Anulada'
+};
+
+const LABEL_TIPO_COTIZACION: Record<string, string> = {
+  INICIAL: 'Inicial',
+  ADICIONAL: 'Adicional'
+};
+
+const LABEL_TIPO_DETALLE_COTIZACION: Record<string, string> = {
+  REPUESTO: 'Repuesto',
+  MANO_OBRA: 'Mano de obra',
+  OTRO: 'Otro'
+};
+
+export function labelEstadoCotizacion(estado: string): string {
+  return LABEL_ESTADO_COTIZACION[estado] ?? String(estado);
+}
+
+export function labelTipoCotizacion(tipo: string): string {
+  return LABEL_TIPO_COTIZACION[tipo] ?? String(tipo);
+}
+
+export function labelTipoDetalleCotizacion(tipo: string): string {
+  return LABEL_TIPO_DETALLE_COTIZACION[tipo] ?? String(tipo);
+}
+
+export function toneEstadoCotizacion(estado: string): SolvixBadgeTone {
+  switch (estado) {
+    case 'APROBADA':
+      return 'success';
+    case 'PENDIENTE_APROBACION':
+    case 'BORRADOR':
+      return 'warning';
+    case 'RECHAZADA':
+    case 'ANULADA':
+      return 'error';
+    default:
+      return 'neutral';
+  }
 }
 
 /** Consumo físico solo en reparación o espera. */

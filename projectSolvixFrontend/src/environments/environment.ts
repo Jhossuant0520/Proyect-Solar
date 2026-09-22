@@ -1,11 +1,11 @@
 /**
- * Configuración de entorno — PRODUCCIÓN (default de `ng build`).
- * Production API URL pending configuration.
+ * Configuración de entorno — PRODUCCIÓN / TEST alojado.
+ * Frontend: https://test.computerelectroniccentersas.com/
  */
 export const environment = {
   production: true,
   /** Host del backend sin sufijo /api (medios relativos, fotos). */
-  apiOrigin: '',
+  apiOrigin: 'https://api-test.computerelectroniccentersas.com',
   /** Prefijo REST: {origin}/api */
-  apiBaseUrl: ''
+  apiBaseUrl: 'https://api-test.computerelectroniccentersas.com/api'
 };

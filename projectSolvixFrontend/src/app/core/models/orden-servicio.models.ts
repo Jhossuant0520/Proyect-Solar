@@ -10,6 +10,7 @@ export type EstadoOrdenServicio =
   | 'EN_DIAGNOSTICO'
   | 'DIAGNOSTICADO'
   | 'COTIZADO'
+  | 'PENDIENTE_APROBACION'
   | 'APROBADO'
   | 'EN_REPARACION'
   | 'ESPERA_REPUESTO'
@@ -159,4 +160,31 @@ export interface ConsumirRepuestoRequestDTO {
 /** Body de POST /repuestos/{id}/devolver. */
 export interface DevolverRepuestoRequestDTO {
   cantidad: number;
+}
+
+/** Body de POST /{id}/entrega. */
+export interface RegistrarEntregaRequestDTO {
+  clienteConfirmo: boolean;
+  nombreCliente?: string | null;
+  documentoCliente?: string | null;
+  firmaBase64: string;
+  observaciones?: string | null;
+}
+
+export interface EntregaOrdenServicioResponseDTO {
+  id: number;
+  ordenServicioId: number;
+  fechaEntrega: string | number[] | null;
+  usuarioResponsable: string;
+  clienteConfirmo: boolean;
+  nombreCliente: string | null;
+  documentoCliente: string | null;
+  firmaUrl: string | null;
+  observaciones: string | null;
+}
+
+export interface RegistrarEntregaResponseDTO {
+  orden: OrdenServicioResponseDTO;
+  entrega: EntregaOrdenServicioResponseDTO;
+  mensaje: string;
 }

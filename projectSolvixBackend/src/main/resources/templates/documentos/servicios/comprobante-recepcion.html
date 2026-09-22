@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Comprobante de recepción — ${EMPRESA_NOMBRE}</title>
+  <link rel="stylesheet" type="text/css" href="styles/documentos-servicios.css"/>
+  <link rel="stylesheet" type="text/css" href="styles/comprobante-recepcion.css"/>
+</head>
+<body class="cr-body">
+<div class="cr-wrap">
+
+  <!-- Encabezado -->
+  <table class="cr-top">
+    <tr>
+      <td style="width:58%;vertical-align:middle;">
+        <table>
+          <tr>
+            <td class="cr-logo-cell">${LOGO_HTML}</td>
+            <td style="vertical-align:middle;padding-left:10px;">
+              <p class="cr-brand-name">${EMPRESA_NOMBRE}</p>
+              <p class="cr-brand-sub">${EMPRESA_SUBTITULO}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+      <td class="cr-contact" style="width:42%;vertical-align:middle;">
+        <strong>${EMPRESA_IDENTIFICACION}</strong><br/>
+        ${EMPRESA_TELEFONO}<br/>
+        ${EMPRESA_CORREO}<br/>
+        ${EMPRESA_DIRECCION}
+      </td>
+    </tr>
+  </table>
+
+  <!-- Título + OT -->
+  <table class="cr-hero">
+    <tr>
+      <td style="width:62%;">
+        <p class="cr-kicker">Servicio técnico</p>
+        <p class="cr-title">Comprobante de recepción</p>
+        <span class="cr-ot-chip">${NUMERO_OT}</span>
+      </td>
+      <td class="cr-hero-meta" style="width:38%;">
+        <p class="label">Fecha de recepción</p>
+        <p class="value">${FECHA_RECEPCION}</p>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Cliente + Equipo -->
+  <table class="cr-section">
+    <tr class="cr-grid-2">
+      <td>
+        <p class="cr-section-head">Cliente</p>
+        <div class="cr-card">
+          <div class="cr-field-gap">
+            <p class="cr-field-label">Nombre</p>
+            <p class="cr-field-value">${CLIENTE_NOMBRE}</p>
+          </div>
+          <div class="cr-field-gap">
+            <p class="cr-field-label">Documento</p>
+            <p class="cr-field-value">${CLIENTE_DOCUMENTO}</p>
+          </div>
+          <div class="cr-field-gap">
+            <p class="cr-field-label">Teléfono</p>
+            <p class="cr-field-value">${CLIENTE_TELEFONO}</p>
+          </div>
+        </div>
+      </td>
+      <td>
+        <p class="cr-section-head">Equipo</p>
+        <div class="cr-card">
+          <div class="cr-field-gap">
+            <p class="cr-field-label">Tipo</p>
+            <p class="cr-field-value">${EQUIPO_TIPO}</p>
+          </div>
+          <div class="cr-field-gap">
+            <p class="cr-field-label">Marca / modelo</p>
+            <p class="cr-field-value">${EQUIPO_MARCA_MODELO}</p>
+          </div>
+          <div class="cr-field-gap">
+            <p class="cr-field-label">Referencia</p>
+            <p class="cr-field-value">${EQUIPO_REFERENCIA}</p>
+          </div>
+          <div class="cr-field-gap">
+            <p class="cr-field-label">Serie</p>
+            <p class="cr-field-value">${EQUIPO_SERIE}</p>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Detalle de recepción + QR -->
+  <table class="cr-section">
+    <tr>
+      <td style="width:66%;padding-right:10px;">
+        <p class="cr-section-head">Detalle de recepción</p>
+        <p class="cr-note-label">Problema reportado</p>
+        <div class="cr-note">${PROBLEMA_REPORTADO}</div>
+        <p class="cr-note-label">Observaciones</p>
+        <div class="cr-note cr-note-muted">${OBSERVACIONES}</div>
+      </td>
+      <td style="width:34%;vertical-align:top;">
+        <p class="cr-section-head">Consulta</p>
+        <div class="cr-qr-panel">
+          <img src="${QR_DATA_URI}" alt="QR consulta"/>
+          <p class="cr-qr-title">Escanea el código</p>
+          <p class="cr-qr-hint">Consulta el estado de tu orden en línea de forma segura.</p>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Firmas -->
+  <table class="cr-sign">
+    <tr class="cr-grid-2">
+      <td>
+        <div class="cr-sign-box">
+          <div class="cr-sign-line"></div>
+          <p class="cr-sign-role">Recibido por el taller</p>
+          <p class="cr-sign-who">${EMPRESA_NOMBRE}</p>
+        </div>
+      </td>
+      <td>
+        <div class="cr-sign-box">
+          <div class="cr-sign-line"></div>
+          <p class="cr-sign-role">Entregado por el cliente</p>
+          <p class="cr-sign-who">${CLIENTE_NOMBRE}</p>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Footer -->
+  <table class="cr-footer">
+    <tr>
+      <td style="width:55%;">
+        <strong>${EMPRESA_NOMBRE}</strong> · ${EMPRESA_CONTACTO}<br/>
+        ${FOOTER_TEXTO}<br/>
+        <span class="cr-autoria">${SOFTWARE_AUTORIA}</span>
+      </td>
+      <td class="cr-footer-right" style="width:45%;">
+        <span class="cr-pill">SOLVIX</span><br/>
+        ${NUMERO_OT}
+      </td>
+    </tr>
+  </table>
+
+</div>
+</body>
+</html>

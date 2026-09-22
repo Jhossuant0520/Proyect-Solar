@@ -2,6 +2,7 @@ package com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServi
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.Equipo;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.TipoEquipo;
 
@@ -19,10 +20,16 @@ public class EquipoResponseDTO {
     private String marca;
     private String modelo;
     private String numeroSerie;
-    private String nombre;
+    private String referenciaInterna;
     private String observaciones;
     private boolean activo;
     private LocalDateTime fechaRegistro;
+
+    /** Compatibilidad con clientes que aún leen {@code nombre}. */
+    @JsonProperty("nombre")
+    public String getNombre() {
+        return referenciaInterna;
+    }
 
     public static EquipoResponseDTO fromEntity(Equipo equipo) {
         return EquipoResponseDTO.builder()
@@ -33,7 +40,7 @@ public class EquipoResponseDTO {
             .marca(equipo.getMarca())
             .modelo(equipo.getModelo())
             .numeroSerie(equipo.getNumeroSerie())
-            .nombre(equipo.getNombre())
+            .referenciaInterna(equipo.getReferenciaInterna())
             .observaciones(equipo.getObservaciones())
             .activo(equipo.isActivo())
             .fechaRegistro(equipo.getFechaRegistro())

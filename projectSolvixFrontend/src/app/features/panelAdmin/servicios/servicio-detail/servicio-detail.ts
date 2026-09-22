@@ -13,6 +13,7 @@ import { OrdenServicioService } from '../../../../core/services/orden-servicio.s
 import {
   HistorialEstadoOrdenServicioResponseDTO,
   OrdenServicioResponseDTO,
+  RepuestoOrdenServicioResponseDTO,
   TransicionOrdenServicioResponseDTO
 } from '../../../../core/models/orden-servicio.models';
 import { aRequestActualizacionTextos, valoresDesdeOrden } from '../servicio-mapper';
@@ -48,9 +49,22 @@ import {
   modoDialogoDesdeTipo
 } from '../transicion-estado-dialog/transicion-estado-dialog';
 import {
+  ServicioEntregaDialogComponent,
+  ServicioEntregaDialogData
+} from '../servicio-entrega-dialog/servicio-entrega-dialog';
+import {
   RepuestosPanelChange,
   ServicioRepuestosPanelComponent
 } from '../servicio-repuestos-panel/servicio-repuestos-panel';
+import {
+  CotizacionPanelIntent,
+  DocumentoCotizacionEsperado,
+  ServicioCotizacionesPanelComponent
+} from '../servicio-cotizaciones-panel/servicio-cotizaciones-panel';
+import {
+  EsperarDocumentoOpts,
+  ServicioDocumentosPanelComponent
+} from '../servicio-documentos-panel/servicio-documentos-panel';
 
 @Component({
   selector: 'app-servicio-detail',
@@ -68,12 +82,19 @@ import {
     SolvixSectionHeaderComponent,
     SolvixLoadingStateComponent,
     SolvixErrorStateComponent,
-    ServicioRepuestosPanelComponent
+    ServicioRepuestosPanelComponent,
+    ServicioCotizacionesPanelComponent,
+    ServicioDocumentosPanelComponent
   ]
 })
 export class ServicioDetailComponent implements OnInit {
   @ViewChild('panelTecnico') panelTecnico?: ElementRef<HTMLElement>;
   @ViewChild('panelReparacion') panelReparacion?: ElementRef<HTMLElement>;
+  @ViewChild('panelCotizaciones') panelCotizaciones?: ElementRef<HTMLElement>;
+  @ViewChild(ServicioCotizacionesPanelComponent)
+  cotizacionesPanel?: ServicioCotizacionesPanelComponent;
+  @ViewChild(ServicioDocumentosPanelComponent)
+  documentosPanel?: ServicioDocumentosPanelComponent;
 
   orden: OrdenServicioResponseDTO | null = null;
   historial: HistorialEstadoOrdenServicioResponseDTO[] = [];
@@ -82,6 +103,8 @@ export class ServicioDetailComponent implements OnInit {
   editando = false;
   guardando = false;
   cambiandoEstado = false;
+  /** Tras crear OT: el panel de documentos espera el comprobante afterCommit. */
+  esperarComprobante = false;
   errorTitle = 'No pudimos cargar esta orden.';
   errorMessage = 'La orden no existe o no está disponible.';
   editError = '';
@@ -90,6 +113,7 @@ export class ServicioDetailComponent implements OnInit {
   guiaTecnica = '';
   pendingRepuestos = 0;
   pendientesResumen: string[] = [];
+  repuestosItems: RepuestoOrdenServicioResponseDTO[] = [];
 
   readonly form;
   readonly campos = CAMPOS_TECNICOS;
@@ -118,6 +142,16 @@ export class ServicioDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.esperarComprobante =
+      this.route.snapshot.queryParamMap.get('esperarComprobante') === '1';
+    if (this.esperarComprobante) {
+      void this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { esperarComprobante: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true
+      });
+    }
     this.cargar();
   }
 
@@ -236,6 +270,7 @@ export class ServicioDetailComponent implements OnInit {
 
   onRepuestosChange(change: RepuestosPanelChange): void {
     this.pendingRepuestos = change.pending;
+    this.repuestosItems = change.items ?? [];
     this.pendientesResumen = (change.items ?? [])
       .filter(l => !l.anulado && (l.cantidadPendiente ?? 0) > 0)
       .map(l => {
@@ -344,12 +379,45 @@ export class ServicioDetailComponent implements OnInit {
       return;
     }
 
+    // Cotización (3.15.7): CTAs de dominio, no transición directa de estado.
+    if (estado === 'DIAGNOSTICADO') {
+      this.irACotizaciones('crear-inicial');
+      return;
+    }
+    if (estado === 'COTIZADO') {
+      this.irACotizaciones('presentar');
+      return;
+    }
+    if (estado === 'PENDIENTE_APROBACION') {
+      this.irACotizaciones('aprobar');
+      return;
+    }
+    if (estado === 'REQUIERE_APROBACION_ADICIONAL') {
+      this.irACotizaciones('crear-adicional');
+      return;
+    }
+
     if (accion.destino === 'LISTO') {
       this.intentarMarcarListo();
       return;
     }
 
     const tipo = tipoAccionWorkflow(accion.destino);
+    if (tipo === 'gestionarEntrega' || (estado === 'LISTO' && accion.destino === 'ENTREGADO')) {
+      this.abrirEntrega();
+      return;
+    }
+
+    if (
+      tipo === 'crearCotizacion' ||
+      tipo === 'presentarCotizacion' ||
+      tipo === 'aprobarCotizacion' ||
+      tipo === 'cotizacionAdicional'
+    ) {
+      this.irACotizaciones('scroll');
+      return;
+    }
+
     if (tipo === 'directa') {
       this.ejecutarCambioDirecto(accion.destino);
       return;
@@ -366,6 +434,70 @@ export class ServicioDetailComponent implements OnInit {
     } else {
       this.ejecutarCambioDirecto(accion.destino);
     }
+  }
+
+  irACotizaciones(intent: CotizacionPanelIntent = 'scroll'): void {
+    this.panelCotizaciones?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    queueMicrotask(() => this.cotizacionesPanel?.ejecutarIntent(intent));
+  }
+
+  onCotizacionOrdenActualizada(): void {
+    this.cargar();
+  }
+
+  onDocumentoCotizacionEsperado(ev: DocumentoCotizacionEsperado): void {
+    const opts: EsperarDocumentoOpts = {
+      tipo: ev.tipo,
+      cotizacionId: ev.cotizacionId
+    };
+    queueMicrotask(() => {
+      this.documentosPanel?.esperarDocumento(opts);
+      this.panelDocumentosScroll();
+    });
+  }
+
+  refrescarDocumentos(): void {
+    this.documentosPanel?.cargar();
+  }
+
+  private panelDocumentosScroll(): void {
+    // Scroll suave al panel de documentos si está en el DOM
+    const el = document.querySelector('app-servicio-documentos-panel');
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  abrirEntrega(): void {
+    if (!this.orden || this.orden.estado !== 'LISTO' || this.cambiandoEstado) {
+      return;
+    }
+    const ref = this.dialog.open(ServicioEntregaDialogComponent, {
+      width: '680px',
+      maxWidth: '96vw',
+      panelClass: 'solvix-dialog-panel',
+      backdropClass: 'solvix-dialog-backdrop',
+      data: {
+        orden: this.orden,
+        repuestos: this.repuestosItems
+      } satisfies ServicioEntregaDialogData
+    });
+    ref.afterClosed().subscribe(result => {
+      if (!result?.orden) {
+        return;
+      }
+      this.orden = result.orden;
+      this.patchForm(result.orden);
+      this.editando = false;
+      showSolvixSnack(
+        this.snackBar,
+        result.mensaje || 'Entrega registrada. Orden cerrada.',
+        'success'
+      );
+      this.cargarHistorial(result.orden.id);
+      queueMicrotask(() => {
+        this.documentosPanel?.esperarDocumento({ tipo: 'ACTA_ENTREGA' });
+        this.panelDocumentosScroll();
+      });
+    });
   }
 
   ejecutarAccionEspera(): void {
@@ -463,6 +595,7 @@ export class ServicioDetailComponent implements OnInit {
     const ref = this.dialog.open(TransicionEstadoDialogComponent, {
       width: '460px',
       panelClass: 'solvix-dialog-panel',
+      backdropClass: 'solvix-dialog-backdrop',
       data: {
         accion,
         modo,
@@ -535,9 +668,6 @@ export class ServicioDetailComponent implements OnInit {
   }
 
   private mensajeConfirmacion(accion: AccionWorkflowUi): string {
-    if (accion.destino === 'APROBADO') {
-      return '¿Confirmas que el cliente aprobó la cotización vigente?';
-    }
     if (accion.destino === 'ENTREGADO') {
       return '¿Confirmas que el equipo fue entregado al cliente?';
     }

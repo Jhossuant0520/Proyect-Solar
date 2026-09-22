@@ -104,6 +104,25 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- FASE 3.15.8: HTML/CSS → PDF -->
+		<dependency>
+			<groupId>com.openhtmltopdf</groupId>
+			<artifactId>openhtmltopdf-pdfbox</artifactId>
+			<version>1.0.10</version>
+		</dependency>
+		<!-- FASE 3.15.8: QR — core + javase en compile (runtime) explícito -->
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>core</artifactId>
+			<version>3.5.3</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>javase</artifactId>
+			<version>3.5.3</version>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 
 		   <!-- Las dependencias de validación ya están incluidas con spring-boot-starter-validation -->

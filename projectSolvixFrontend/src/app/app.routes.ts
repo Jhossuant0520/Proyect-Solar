@@ -60,6 +60,22 @@ export const routes: Routes = [
   { path: 'demanda-recibo', component: ModulDemandaRecibo },
   { path: 'hsp', component: ModulHsp },
 
+  // Consulta pública OT / documento (QR) — sin auth
+  {
+    path: 'consulta/ot/:token',
+    loadComponent: () =>
+      import('./features/consulta/consulta-ot-publica/consulta-ot-publica').then(
+        m => m.ConsultaOtPublicaComponent
+      )
+  },
+  {
+    path: 'consulta/documento/:token',
+    loadComponent: () =>
+      import('./features/consulta/consulta-documento-publica/consulta-documento-publica').then(
+        m => m.ConsultaDocumentoPublicaComponent
+      )
+  },
+
   {
     path: '',
     component: AdminLayoutComponent,

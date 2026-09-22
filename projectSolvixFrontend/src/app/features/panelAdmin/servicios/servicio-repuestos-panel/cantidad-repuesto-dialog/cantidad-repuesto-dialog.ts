@@ -69,7 +69,7 @@ export class CantidadRepuestoDialogComponent {
       case 'editar':
         return 'Actualiza la cantidad planificada. No mueve inventario.';
       case 'consumir':
-        return 'Confirma el uso del repuesto. Esto descuenta inventario.';
+        return 'Confirma cuántas unidades usarás ahora. Esto descuenta inventario.';
       case 'devolver':
         return 'Devuelve unidades al inventario. Usa el costo histórico de la línea.';
     }

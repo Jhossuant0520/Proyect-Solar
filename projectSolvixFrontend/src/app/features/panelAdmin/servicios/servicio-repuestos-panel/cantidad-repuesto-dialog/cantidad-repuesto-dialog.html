@@ -1,16 +1,52 @@
-<div class="cantidad-dialog">
+<div class="cantidad-dialog" [class.is-consumir]="data.modo === 'consumir'">
   <header class="dlg-head">
     <p class="kicker solvix-mono">Repuestos</p>
     <h2>{{ titulo }}</h2>
     <p>{{ descripcion }}</p>
-    <p class="producto"><strong>{{ data.linea.productoNombre }}</strong></p>
   </header>
+
+  @if (data.modo === 'consumir') {
+    <section class="contexto" aria-label="Contexto del consumo">
+      <p class="producto-nombre">{{ data.linea.productoNombre }}</p>
+      <dl class="metrics">
+        <div>
+          <dt>Planificada</dt>
+          <dd class="solvix-mono">{{ data.linea.cantidadPlanificada }}</dd>
+        </div>
+        <div>
+          <dt>Ya consumida</dt>
+          <dd class="solvix-mono">{{ data.linea.cantidadNetaConsumida }}</dd>
+        </div>
+        <div class="disponible">
+          <dt>Disponible</dt>
+          <dd class="solvix-mono">{{ maxCantidad }}</dd>
+        </div>
+      </dl>
+      <p class="operacion">
+        Vas a consumir unidades de este repuesto para la orden de servicio.
+      </p>
+    </section>
+  } @else {
+    <p class="producto"><strong>{{ data.linea.productoNombre }}</strong></p>
+  }
 
   <form class="dlg-form" [formGroup]="form" (ngSubmit)="confirmar()">
     <label>
       <span class="label-row">{{ labelCantidad }} <span class="req">requerido</span></span>
-      <input type="number" formControlName="cantidad" [attr.min]="minCantidad" [attr.max]="maxCantidad" step="1" />
-      <span class="hint">Entre {{ minCantidad }} y {{ maxCantidad }}</span>
+      <input
+        type="number"
+        formControlName="cantidad"
+        [attr.min]="minCantidad"
+        [attr.max]="maxCantidad"
+        step="1"
+      />
+      <span class="hint">
+        @if (data.modo === 'consumir') {
+          Máximo {{ maxCantidad }} (planificada − ya consumida).
+        } @else {
+          Entre {{ minCantidad }} y {{ maxCantidad }}.
+        }
+      </span>
     </label>
 
     @if (error) {

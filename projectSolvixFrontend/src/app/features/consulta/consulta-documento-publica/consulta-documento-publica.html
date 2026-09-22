@@ -1,0 +1,38 @@
+<section class="consulta-page">
+  <div class="consulta-glow consulta-glow--a" aria-hidden="true"></div>
+  <div class="consulta-glow consulta-glow--b" aria-hidden="true"></div>
+  <div class="consulta-grid" aria-hidden="true"></div>
+
+  <a routerLink="/" class="consulta-home" aria-label="Ir al inicio">
+    <img src="LogoSolvix3.1.png" alt="SOLVIX" class="consulta-logo" />
+  </a>
+
+  <article class="consulta-card fade-up">
+    @if (state === 'loading') {
+      <solvix-loading-state label="Consultando el documento." />
+    } @else if (state === 'error' || state === 'sin-token') {
+      <solvix-error-state
+        title="No pudimos mostrar el documento."
+        [message]="errorMessage"
+      />
+    } @else if (data) {
+      <p class="kicker">Consulta de documento</p>
+      <h1>{{ labelTipo(data.tipoDocumento, data.tipoDocumentoEtiqueta) }}</h1>
+
+      <dl class="facts">
+        <div>
+          <dt>Orden</dt>
+          <dd class="solvix-mono">{{ data.numeroOt }}</dd>
+        </div>
+        <div>
+          <dt>Generado</dt>
+          <dd class="solvix-mono">{{ fecha(data.fechaGeneracion) }}</dd>
+        </div>
+      </dl>
+
+      @if (data.mensaje) {
+        <p class="mensaje">{{ data.mensaje }}</p>
+      }
+    }
+  </article>
+</section>

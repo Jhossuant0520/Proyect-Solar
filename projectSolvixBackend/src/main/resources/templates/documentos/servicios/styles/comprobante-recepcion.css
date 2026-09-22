@@ -1,0 +1,324 @@
+/* =====================================================================
+   Comprobante de recepción — SOLVIX Tech-Minimal (impresión LETTER)
+   Elegante, limpio, aireado. Compatible OpenHTMLToPDF (tablas).
+   ===================================================================== */
+
+@page {
+  size: letter portrait;
+  margin: 14mm 16mm 16mm 16mm;
+}
+
+body.cr-body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 9.5pt;
+  color: #1e293b;
+  line-height: 1.4;
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+}
+
+.cr-wrap {
+  width: 100%;
+}
+
+.cr-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cr-wrap td {
+  vertical-align: top;
+}
+
+/* ——— Header ——— */
+.cr-top {
+  border-bottom: 2px solid #0f172a;
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+}
+
+.cr-brand-name {
+  font-size: 15pt;
+  font-weight: bold;
+  color: #0f172a;
+  margin: 0 0 2px 0;
+  letter-spacing: -0.02em;
+}
+
+.cr-brand-sub {
+  font-size: 8.5pt;
+  color: #64748b;
+  margin: 0;
+}
+
+.cr-logo-cell {
+  width: 56px;
+  vertical-align: middle;
+}
+
+.cr-logo-cell .doc-logo {
+  max-height: 80px;
+  max-width: 80px;
+  display: block;
+}
+
+.cr-contact {
+  text-align: right;
+  font-size: 8pt;
+  color: #475569;
+  line-height: 1.45;
+}
+
+.cr-contact strong {
+  color: #0f172a;
+  font-size: 8.5pt;
+}
+
+/* ——— Title strip ——— */
+.cr-hero {
+  margin-bottom: 16px;
+}
+
+.cr-kicker {
+  font-size: 7.5pt;
+  font-weight: bold;
+  color: #0284c7;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 0 0 4px 0;
+}
+
+.cr-title {
+  font-size: 16pt;
+  font-weight: bold;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.02em;
+}
+
+.cr-ot-chip {
+  display: inline-block;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  color: #0369a1;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 10.5pt;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.04em;
+}
+
+.cr-hero-meta {
+  text-align: right;
+  vertical-align: middle;
+}
+
+.cr-hero-meta .label {
+  font-size: 7.5pt;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 2px 0;
+}
+
+.cr-hero-meta .value {
+  font-size: 10pt;
+  font-weight: bold;
+  color: #0f172a;
+  margin: 0;
+}
+
+/* ——— Sections ——— */
+.cr-section {
+  margin-bottom: 12px;
+}
+
+.cr-section-head {
+  font-size: 8pt;
+  font-weight: bold;
+  color: #0284c7;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 4px;
+  margin: 0 0 8px 0;
+}
+
+.cr-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.cr-grid-2 td {
+  width: 50%;
+  padding: 0 4px;
+}
+
+.cr-grid-2 td:first-child {
+  padding-left: 0;
+}
+
+.cr-grid-2 td:last-child {
+  padding-right: 0;
+}
+
+.cr-field-label {
+  font-size: 7pt;
+  font-weight: bold;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 2px 0;
+}
+
+.cr-field-value {
+  font-size: 9.5pt;
+  font-weight: bold;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.cr-field-gap {
+  margin-bottom: 8px;
+}
+
+.cr-field-gap:last-child {
+  margin-bottom: 0;
+}
+
+/* ——— Problem / notes ——— */
+.cr-note {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid #0284c7;
+  border-radius: 0 8px 8px 0;
+  padding: 9px 12px;
+  margin-bottom: 8px;
+  font-size: 9pt;
+  color: #334155;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  min-height: 24px;
+}
+
+.cr-note-muted {
+  border-left-color: #94a3b8;
+  background: #f8fafc;
+  color: #475569;
+}
+
+.cr-note-label {
+  font-size: 7pt;
+  font-weight: bold;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 4px 0;
+}
+
+/* ——— QR block ——— */
+.cr-qr-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 10px;
+  text-align: center;
+}
+
+.cr-qr-panel img {
+  width: 96px;
+  height: 96px;
+  display: block;
+  margin: 0 auto 8px auto;
+}
+
+.cr-qr-title {
+  font-size: 8pt;
+  font-weight: bold;
+  color: #0f172a;
+  margin: 0 0 2px 0;
+}
+
+.cr-qr-hint {
+  font-size: 7.5pt;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.35;
+}
+
+/* ——— Signatures ——— */
+.cr-sign {
+  margin-top: 18px;
+  margin-bottom: 10px;
+}
+
+.cr-sign-box {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 14px 10px 14px;
+  text-align: center;
+}
+
+.cr-sign-line {
+  border-bottom: 1px solid #0f172a;
+  height: 28px;
+  margin: 0 8px 8px 8px;
+}
+
+.cr-sign-role {
+  font-size: 7.5pt;
+  font-weight: bold;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+.cr-sign-who {
+  font-size: 7.5pt;
+  color: #64748b;
+  margin: 3px 0 0 0;
+}
+
+/* ——— Footer ——— */
+.cr-footer {
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 1px solid #e2e8f0;
+  font-size: 7.5pt;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.cr-footer strong {
+  color: #475569;
+}
+
+.cr-autoria {
+  display: inline-block;
+  margin-top: 2px;
+  font-size: 8pt;
+  color: #94a3b8;
+}
+
+.cr-footer-right {
+  text-align: right;
+}
+
+.cr-pill {
+  display: inline-block;
+  font-size: 6.5pt;
+  font-weight: bold;
+  color: #0284c7;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  padding: 2px 7px;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}

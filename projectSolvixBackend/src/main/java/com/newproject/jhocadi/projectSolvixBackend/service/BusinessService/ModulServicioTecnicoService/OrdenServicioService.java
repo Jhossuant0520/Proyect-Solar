@@ -4,36 +4,46 @@ import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.List;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.CambiarEstadoOrdenServicioRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.CompletarDiagnosticoRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.CompletarReparacionRequestDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.EntregaOrdenServicioResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.HistorialEstadoOrdenServicioResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.OrdenServicioRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.OrdenServicioResponseDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RegistrarEntregaRequestDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RegistrarEntregaResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RegistrarNuevaFallaRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.TransicionOrdenServicioResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.exception.BusinessException;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.Cliente;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.TipoSecuencia;
+import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.EntregaOrdenServicio;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.Equipo;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.EstadoOrdenServicio;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.HistorialEstadoOrdenServicio;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.OrdenServicio;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulComercialRepo.ClienteRepository;
+import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.EntregaOrdenServicioRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.HistorialEstadoOrdenServicioRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.OrdenServicioRepuestoRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.OrdenServicioRepository;
 import com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.ModulComercialService.SecuenciaDocumentoService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrdenServicioService {
 
     private static final EnumSet<EstadoOrdenServicio> ESTADOS_TERMINALES = EnumSet.of(
@@ -44,9 +54,12 @@ public class OrdenServicioService {
     private final OrdenServicioRepository ordenServicioRepository;
     private final OrdenServicioRepuestoRepository ordenServicioRepuestoRepository;
     private final HistorialEstadoOrdenServicioRepository historialRepository;
+    private final EntregaOrdenServicioRepository entregaRepository;
     private final ClienteRepository clienteRepository;
     private final EquipoService equipoService;
+    private final EntregaFirmaService entregaFirmaService;
     private final SecuenciaDocumentoService secuenciaDocumentoService;
+    private final ObjectProvider<DocumentoOrdenServicioService> documentoOrdenServicioService;
 
     @Transactional
     public OrdenServicioResponseDTO crear(OrdenServicioRequestDTO request, String usuario) {
@@ -70,7 +83,11 @@ public class OrdenServicioService {
             .createdBy(usuario)
             .build();
 
-        return OrdenServicioResponseDTO.fromEntity(ordenServicioRepository.save(orden));
+        OrdenServicio guardada = ordenServicioRepository.save(orden);
+        Long ordenId = guardada.getId();
+        String usuarioDoc = usuario;
+        registrarGeneracionTrasCommit(() -> tryGenerarComprobanteRecepcion(ordenId, usuarioDoc));
+        return OrdenServicioResponseDTO.fromEntity(guardada);
     }
 
     @Transactional(readOnly = true)
@@ -158,6 +175,11 @@ public class OrdenServicioService {
             throw new BusinessException("El estado destino es obligatorio.");
         }
 
+        if (EstadoOrdenServicio.requiereDominioCotizacion(anterior, destino)) {
+            throw new BusinessException(
+                "Esta transición se gestiona desde los endpoints de cotización de la orden.");
+        }
+
         String motivo;
         String observacion = textoOpcional(request.getObservacion());
         if (EstadoOrdenServicio.requiereMotivoManual(destino)) {
@@ -173,6 +195,30 @@ public class OrdenServicioService {
         }
 
         return aplicarTransicion(orden, destino, motivo, observacion, usuario.trim());
+    }
+
+    /**
+     * Transición de OT invocada desde dominios satélite (p. ej. cotizaciones).
+     * No aplica el bloqueo de {@link EstadoOrdenServicio#requiereDominioCotizacion}.
+     */
+    @Transactional
+    public TransicionOrdenServicioResponseDTO transicionarPorDominio(
+            Long id,
+            EstadoOrdenServicio destino,
+            String motivo,
+            String observacion,
+            String usuario) {
+        validarUsuario(usuario);
+        OrdenServicio orden = buscarOFallar(id);
+        String motivoFinal = textoOpcional(motivo);
+        if (motivoFinal == null) {
+            motivoFinal = EstadoOrdenServicio.motivoAutomatico(orden.getEstado(), destino);
+        }
+        if (textoVacio(motivoFinal)) {
+            motivoFinal = "Cambio de estado: " + orden.getEstado() + " → " + destino + ".";
+        }
+        return aplicarTransicion(
+            orden, destino, motivoFinal, textoOpcional(observacion), usuario.trim());
     }
 
     /**
@@ -270,6 +316,84 @@ public class OrdenServicioService {
             usuario.trim());
     }
 
+    /**
+     * Entrega digital atómica (FASE 3.15.5.3):
+     * guarda firma + entrega y avanza LISTO → ENTREGADO → CERRADO.
+     */
+    @Transactional
+    public RegistrarEntregaResponseDTO registrarEntrega(
+            Long id,
+            RegistrarEntregaRequestDTO request,
+            String usuario) {
+        validarUsuario(usuario);
+        OrdenServicio orden = buscarOFallar(id);
+
+        if (orden.getEstado() != EstadoOrdenServicio.LISTO) {
+            throw new BusinessException(
+                "Solo se puede registrar la entrega desde LISTO.");
+        }
+        if (entregaRepository.existsByOrdenServicioId(id)) {
+            throw new BusinessException(
+                "Ya existe un registro de entrega para esta orden.");
+        }
+        if (!request.isClienteConfirmo()) {
+            throw new BusinessException(
+                "El cliente debe confirmar la recepción del equipo.");
+        }
+        if (textoVacio(request.getFirmaBase64())) {
+            throw new BusinessException("La firma del cliente es obligatoria.");
+        }
+
+        String firmaUrl = entregaFirmaService.guardarDesdeBase64(request.getFirmaBase64());
+        LocalDateTime ahora = LocalDateTime.now();
+        String responsable = usuario.trim();
+
+        EntregaOrdenServicio entrega = EntregaOrdenServicio.builder()
+            .ordenServicio(orden)
+            .fechaEntrega(ahora)
+            .usuarioResponsable(responsable)
+            .clienteConfirmo(true)
+            .nombreCliente(textoOpcional(request.getNombreCliente()))
+            .documentoCliente(textoOpcional(request.getDocumentoCliente()))
+            .firmaUrl(firmaUrl)
+            .observaciones(textoOpcional(request.getObservaciones()))
+            .createdAt(ahora)
+            .build();
+        EntregaOrdenServicio entregaGuardada = entregaRepository.save(entrega);
+
+        aplicarTransicion(
+            orden,
+            EstadoOrdenServicio.ENTREGADO,
+            "Se registró la entrega del equipo.",
+            null,
+            responsable);
+        TransicionOrdenServicioResponseDTO cierre = aplicarTransicion(
+            orden,
+            EstadoOrdenServicio.CERRADO,
+            "Se cerró la orden después de registrar la entrega.",
+            null,
+            responsable);
+
+        Long ordenId = id;
+        String usuarioActa = responsable;
+        registrarGeneracionTrasCommit(() -> tryGenerarActaEntrega(ordenId, usuarioActa));
+
+        return RegistrarEntregaResponseDTO.builder()
+            .orden(cierre.getOrden())
+            .entrega(EntregaOrdenServicioResponseDTO.fromEntity(entregaGuardada))
+            .mensaje("Entrega registrada y orden cerrada.")
+            .build();
+    }
+
+    @Transactional(readOnly = true)
+    public EntregaOrdenServicioResponseDTO obtenerEntrega(Long ordenId) {
+        buscarOFallar(ordenId);
+        return entregaRepository.findByOrdenServicioId(ordenId)
+            .map(EntregaOrdenServicioResponseDTO::fromEntity)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "No hay entrega registrada para esta orden."));
+    }
+
     @Transactional(readOnly = true)
     public OrdenServicio buscarOFallar(Long id) {
         return ordenServicioRepository.findById(id)
@@ -361,6 +485,46 @@ public class OrdenServicioService {
                 throw new BusinessException(
                     "No existen repuestos pendientes que justifiquen poner la orden en espera.");
             }
+        }
+    }
+
+    private void registrarGeneracionTrasCommit(Runnable accion) {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    // Errores de enlace (p. ej. NoClassDefFoundError) no deben afectar la respuesta HTTP.
+                    try {
+                        accion.run();
+                    } catch (Throwable t) {
+                        log.warn("Generación documental post-commit falló: {}", t.toString());
+                    }
+                }
+            });
+        } else {
+            try {
+                accion.run();
+            } catch (Throwable t) {
+                log.warn("Generación documental fuera de transacción falló: {}", t.toString());
+            }
+        }
+    }
+
+    private void tryGenerarComprobanteRecepcion(Long ordenId, String usuario) {
+        try {
+            documentoOrdenServicioService.getObject().asegurarComprobanteRecepcion(ordenId, usuario);
+        } catch (Throwable t) {
+            log.warn("No se pudo generar comprobante de recepción para OT {}: {}",
+                ordenId, t.toString());
+        }
+    }
+
+    private void tryGenerarActaEntrega(Long ordenId, String usuario) {
+        try {
+            documentoOrdenServicioService.getObject().generarActaEntrega(ordenId, usuario);
+        } catch (Throwable t) {
+            log.warn("No se pudo generar acta de entrega para OT {}: {}",
+                ordenId, t.toString());
         }
     }
 

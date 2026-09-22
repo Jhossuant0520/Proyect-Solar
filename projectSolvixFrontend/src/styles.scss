@@ -76,13 +76,21 @@ html {
 
 .solvix-dialog-panel .mat-mdc-dialog-container,
 .solvix-dialog-panel .mat-mdc-dialog-surface {
-  background: transparent !important;
-  box-shadow: none !important;
+  /* Superficie sólida SOLVIX: legible sobre el overlay (no transparente). */
+  background: var(--solvix-surface, #0f172a) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(79, 209, 255, 0.22) !important;
   padding: 0 !important;
-  overflow: visible !important;
+  overflow: hidden !important;
+  border-radius: 14px !important;
+  color: var(--solvix-text, #ffffff);
+}
+
+.solvix-dialog-panel .mat-mdc-dialog-surface {
+  max-height: min(90vh, 900px);
+  overflow: auto !important;
 }
 
 .solvix-dialog-backdrop {
-  background: rgba(2, 6, 23, 0.8);
+  background: rgba(2, 6, 23, 0.82) !important;
 }
 

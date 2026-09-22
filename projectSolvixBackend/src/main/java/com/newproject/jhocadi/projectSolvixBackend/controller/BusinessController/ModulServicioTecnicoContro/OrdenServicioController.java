@@ -3,6 +3,7 @@ package com.newproject.jhocadi.projectSolvixBackend.controller.BusinessControlle
 import java.security.Principal;
 import java.util.List;
 
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,14 +23,18 @@ import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServic
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.CompletarReparacionRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.ConsumirRepuestoRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.DevolverRepuestoRequestDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.EntregaOrdenServicioResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.HistorialEstadoOrdenServicioResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.OrdenServicioRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.OrdenServicioResponseDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RegistrarEntregaRequestDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RegistrarEntregaResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RegistrarNuevaFallaRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RepuestoOrdenServicioRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RepuestoOrdenServicioResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.TransicionOrdenServicioResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.EstadoOrdenServicio;
+import com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.ModulServicioTecnicoService.EntregaFirmaService;
 import com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.ModulServicioTecnicoService.OrdenServicioRepuestoService;
 import com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.ModulServicioTecnicoService.OrdenServicioService;
 
@@ -45,6 +50,7 @@ public class OrdenServicioController {
 
     private final OrdenServicioService ordenServicioService;
     private final OrdenServicioRepuestoService ordenServicioRepuestoService;
+    private final EntregaFirmaService entregaFirmaService;
 
     @PostMapping
     public ResponseEntity<OrdenServicioResponseDTO> crear(
@@ -108,6 +114,30 @@ public class OrdenServicioController {
             Principal principal) {
         String usuario = principal != null ? principal.getName() : null;
         return ResponseEntity.ok(ordenServicioService.registrarNuevaFalla(id, request, usuario));
+    }
+
+    @PostMapping("/{id}/entrega")
+    public ResponseEntity<RegistrarEntregaResponseDTO> registrarEntrega(
+            @PathVariable Long id,
+            @Valid @RequestBody RegistrarEntregaRequestDTO request,
+            Principal principal) {
+        String usuario = principal != null ? principal.getName() : null;
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ordenServicioService.registrarEntrega(id, request, usuario));
+    }
+
+    @GetMapping("/{id}/entrega")
+    public ResponseEntity<EntregaOrdenServicioResponseDTO> obtenerEntrega(@PathVariable Long id) {
+        return ResponseEntity.ok(ordenServicioService.obtenerEntrega(id));
+    }
+
+    @GetMapping("/entregas/firmas/{nombreArchivo:.+}")
+    public ResponseEntity<Resource> verFirma(@PathVariable String nombreArchivo) {
+        Resource archivo = entregaFirmaService.cargar(nombreArchivo);
+        return ResponseEntity.ok()
+            .contentType(entregaFirmaService.mediaTypeDe(nombreArchivo))
+            .header("Cache-Control", "private, max-age=3600")
+            .body(archivo);
     }
 
     @GetMapping("/{id}/historial")

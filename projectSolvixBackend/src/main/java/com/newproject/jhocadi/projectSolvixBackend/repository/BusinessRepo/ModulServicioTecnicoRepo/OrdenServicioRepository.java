@@ -24,4 +24,6 @@ public interface OrdenServicioRepository extends JpaRepository<OrdenServicio, Lo
     boolean existsByEquipoId(Long equipoId);
 
     boolean existsByEquipoIdAndEstadoNotIn(Long equipoId, Collection<EstadoOrdenServicio> estados);
+
+    Optional<OrdenServicio> findByTokenConsulta(String tokenConsulta);
 }

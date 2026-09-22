@@ -46,8 +46,16 @@
             </select>
           </label>
           <label>
-            Nombre
-            <input formControlName="nombre" maxlength="120" placeholder="Alias interno" />
+            Referencia / alias
+            <input
+              formControlName="referenciaInterna"
+              maxlength="120"
+              placeholder="PC Recepción, Laptop Contabilidad, Impresora Caja"
+            />
+            <span class="field-hint">
+              Identificador utilizado para reconocer rápidamente el equipo dentro de la empresa,
+              sede u organización del cliente.
+            </span>
           </label>
           <label>
             Marca

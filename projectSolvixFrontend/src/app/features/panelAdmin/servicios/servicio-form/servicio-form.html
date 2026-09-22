@@ -187,8 +187,16 @@
               <input formControlName="numeroSerie" maxlength="100" />
             </label>
             <label>
-              Nombre
-              <input formControlName="nombre" maxlength="120" />
+              Referencia / alias
+              <input
+                formControlName="referenciaInterna"
+                maxlength="120"
+                placeholder="PC Recepción, Laptop Contabilidad…"
+              />
+              <span class="field-hint">
+                Identificador utilizado para reconocer rápidamente el equipo dentro de la empresa,
+                sede u organización del cliente.
+              </span>
             </label>
             @if (inlineError) {
               <p class="form-error">{{ inlineError }}</p>
@@ -207,12 +215,14 @@
         @if (submitError) {
           <p class="form-error">{{ submitError }}</p>
         }
-        <div class="wizard-actions">
-          <solvix-button family="tech" rank="tertiary" (click)="atras()">Atrás</solvix-button>
-          <solvix-button family="tech" rank="primary" icon="arrow_forward" (click)="continuarDesdeEquipo()">
-            Continuar
-          </solvix-button>
-        </div>
+        @if (!mostrarCrearEquipo) {
+          <div class="wizard-actions">
+            <solvix-button family="tech" rank="tertiary" (click)="atras()">Atrás</solvix-button>
+            <solvix-button family="tech" rank="primary" icon="arrow_forward" (click)="continuarDesdeEquipo()">
+              Continuar
+            </solvix-button>
+          </div>
+        }
       </section>
     }
 

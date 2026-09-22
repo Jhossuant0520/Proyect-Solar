@@ -1,12 +1,14 @@
 .cantidad-dialog {
-  min-width: min(400px, 92vw);
+  min-width: min(420px, 94vw);
+  max-width: 480px;
   padding: 1.25rem 1.35rem 1.1rem;
-  color: var(--solvix-text, #fff);
+  color: #f8fafc;
+  background: #0f172a;
 }
 
 .dlg-head .kicker {
   margin: 0 0 0.25rem;
-  color: var(--solvix-text-muted, #94a3b8);
+  color: #94a3b8;
   font-size: 0.68rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -15,19 +17,72 @@
 .dlg-head h2 {
   margin: 0 0 0.35rem;
   font-size: 1.15rem;
-  color: var(--solvix-primary, #4fd1ff);
+  color: #4fd1ff;
 }
 
 .dlg-head p {
   margin: 0;
-  color: var(--solvix-text-secondary, #cfe9ff);
-  font-size: 0.9rem;
+  color: #94a3b8;
+  font-size: 0.88rem;
   line-height: 1.4;
 }
 
 .producto {
-  margin-top: 0.55rem !important;
-  color: var(--solvix-text, #fff) !important;
+  margin: 0.75rem 0 0;
+  color: #f8fafc;
+  font-size: 0.95rem;
+}
+
+.contexto {
+  margin-top: 0.95rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid rgba(79, 209, 255, 0.22);
+  background: rgba(2, 6, 23, 0.55);
+}
+
+.producto-nombre {
+  margin: 0 0 0.65rem;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin: 0 0 0.65rem;
+}
+
+.metrics div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.metrics dt {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+}
+
+.metrics dd {
+  margin: 0;
+  font-size: 1rem;
+  color: #e2e8f0;
+}
+
+.metrics .disponible dd {
+  color: #4fd1ff;
+}
+
+.operacion {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #94a3b8;
+  line-height: 1.4;
 }
 
 .dlg-form {
@@ -40,7 +95,7 @@
   display: grid;
   gap: 0.35rem;
   font-size: 0.85rem;
-  color: var(--solvix-text-muted, #94a3b8);
+  color: #94a3b8;
 }
 
 .label-row {
@@ -50,21 +105,21 @@
 }
 
 .req {
-  color: var(--solvix-primary, #4fd1ff);
+  color: #4fd1ff;
   font-size: 0.75rem;
 }
 
 .hint {
   font-size: 0.78rem;
-  color: var(--solvix-text-muted, #94a3b8);
+  color: #64748b;
 }
 
 input[type='number'] {
   width: 100%;
   border-radius: 8px;
-  border: 1px solid rgba(79, 209, 255, 0.25);
-  background: rgba(15, 23, 42, 0.85);
-  color: var(--solvix-text, #fff);
+  border: 1px solid rgba(79, 209, 255, 0.28);
+  background: #020617;
+  color: #f8fafc;
   padding: 0.55rem 0.65rem;
   font: inherit;
 }
@@ -79,4 +134,16 @@ input[type='number'] {
   display: flex;
   justify-content: flex-end;
   gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .dlg-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
 }

@@ -85,24 +85,24 @@ dd {
   justify-content: space-between;
   align-items: flex-start;
   gap: 1rem;
-  margin-bottom: 0.85rem;
+  margin-bottom: 1.15rem;
 }
 
 .lectura-hint {
-  margin: 0 0 0.85rem;
+  margin: 0 0 1rem;
 }
 
 .campos-tecnicos {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 1rem;
 }
 
 .campo-tecnico,
 .campo-edit {
   border: 1px solid var(--solvix-border-subtle);
   border-radius: var(--solvix-radius);
-  padding: 0.9rem 1rem;
+  padding: 1.05rem 1.15rem;
   background: rgba(2, 6, 23, 0.35);
 }
 
@@ -141,23 +141,34 @@ dd {
 }
 
 .campo-hint {
-  margin: 0.3rem 0 0;
+  margin: 0.45rem 0 0;
   color: var(--solvix-text-muted);
   font-size: 0.78rem;
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
 .body-text {
-  margin: 0.55rem 0 0;
+  margin: 0.75rem 0 0;
   color: var(--solvix-text-secondary);
   font-size: 0.95rem;
-  line-height: 1.5;
+  line-height: 1.55;
   white-space: pre-wrap;
 }
 
 .body-text.is-empty {
   color: var(--solvix-text-muted);
   font-style: italic;
+}
+
+.tecnico-panel {
+  .tecnico-head ::ng-deep .section-head {
+    margin-bottom: 0;
+  }
+
+  .guia-hint,
+  .lectura-hint {
+    margin-bottom: 1rem;
+  }
 }
 
 .tecnico-panel.is-resumen .campo-tecnico {

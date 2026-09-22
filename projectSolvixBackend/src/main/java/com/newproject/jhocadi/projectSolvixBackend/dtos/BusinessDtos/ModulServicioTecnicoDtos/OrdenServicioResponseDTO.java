@@ -42,7 +42,7 @@ public class OrdenServicioResponseDTO {
             .equipoTipo(orden.getEquipo() != null ? orden.getEquipo().getTipoEquipo() : null)
             .equipoMarca(orden.getEquipo() != null ? orden.getEquipo().getMarca() : null)
             .equipoModelo(orden.getEquipo() != null ? orden.getEquipo().getModelo() : null)
-            .equipoNombre(orden.getEquipo() != null ? orden.getEquipo().getNombre() : null)
+            .equipoNombre(orden.getEquipo() != null ? orden.getEquipo().getReferenciaInterna() : null)
             .estado(orden.getEstado())
             .problemaReportado(orden.getProblemaReportado())
             .diagnostico(orden.getDiagnostico())

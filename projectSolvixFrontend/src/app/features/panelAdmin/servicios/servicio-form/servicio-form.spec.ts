@@ -40,7 +40,7 @@ const equipo: EquipoResponseDTO = {
   marca: 'Dell',
   modelo: 'XPS',
   numeroSerie: 'SN',
-  nombre: 'Notebook',
+  referenciaInterna: 'Notebook',
   observaciones: null,
   activo: true,
   fechaRegistro: null
@@ -168,7 +168,9 @@ describe('ServicioFormComponent — wizard', () => {
     component.guardar();
     tick();
     expect(ordenService.crear).toHaveBeenCalled();
-    expect(navigate).toHaveBeenCalledWith(['/servicios', 22]);
+    expect(navigate).toHaveBeenCalledWith(['/servicios', 22], {
+      queryParams: { esperarComprobante: '1' }
+    });
   }));
 
   it('preselecciona cliente por query param', fakeAsync(() => {

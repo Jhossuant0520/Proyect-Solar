@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Comprobante de Recepción Técnica - ${EMPRESA_NOMBRE}</title>
+<style>
+    /* Configuración para impresión y renderizadores PDF (OpenHTMLToPDF compatible) */
+    @page {
+      size: letter portrait;
+      margin: 8mm 9mm 8mm 9mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #0F172A;
+      background-color: #E2E8F0;
+      line-height: 1.3;
+      font-size: 8.8pt;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      justify-content: center;
+      padding: 16px 0;
+    }
+
+    /* Hoja física Letter */
+    .sheet {
+      background: #FFFFFF;
+      width: 215.9mm;
+      min-height: 279.4mm;
+      padding: 10mm 11mm;
+      box-shadow: 0 12px 35px rgba(15, 23, 42, 0.12);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    @media print {
+      body {
+        background: #FFFFFF;
+        padding: 0;
+      }
+      .sheet {
+        width: 100%;
+        min-height: 100%;
+        padding: 4mm 5mm;
+        box-shadow: none;
+      }
+    }
+
+    /* MARCO TÉCNICO DE SEGURIDAD Y PRECISIÓN PERIMETRAL */
+    .border-security-frame {
+      position: absolute;
+      top: 5mm;
+      bottom: 5mm;
+      left: 5mm;
+      right: 5mm;
+      border: 1px solid #CBD5E1;
+      pointer-events: none;
+    }
+
+    .border-inner-frame {
+      position: absolute;
+      top: 6mm;
+      bottom: 6mm;
+      left: 6mm;
+      right: 6mm;
+      border: 0.5px dashed #94A3B8;
+      pointer-events: none;
+    }
+
+    /* Marcas de corte / registro en esquinas */
+    .crosshair-corner {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      pointer-events: none;
+    }
+    .crosshair-corner::before, .crosshair-corner::after {
+      content: '';
+      position: absolute;
+      background: #0284C7;
+    }
+    .crosshair-tl { top: 4mm; left: 4mm; }
+    .crosshair-tl::before { top: 0; left: 0; width: 10px; height: 1.5px; }
+    .crosshair-tl::after { top: 0; left: 0; width: 1.5px; height: 10px; }
+
+    .crosshair-tr { top: 4mm; right: 4mm; }
+    .crosshair-tr::before { top: 0; right: 0; width: 10px; height: 1.5px; }
+    .crosshair-tr::after { top: 0; right: 0; width: 1.5px; height: 10px; }
+
+    .crosshair-bl { bottom: 4mm; left: 4mm; }
+    .crosshair-bl::before { bottom: 0; left: 0; width: 10px; height: 1.5px; }
+    .crosshair-bl::after { bottom: 0; left: 0; width: 1.5px; height: 10px; }
+
+    .crosshair-br { bottom: 4mm; right: 4mm; }
+    .crosshair-br::before { bottom: 0; right: 0; width: 10px; height: 1.5px; }
+    .crosshair-br::after { bottom: 0; right: 0; width: 1.5px; height: 10px; }
+
+    .perimeter-microtext {
+      position: absolute;
+      top: 2.2mm;
+      left: 10mm;
+      font-size: 5pt;
+      font-family: monospace;
+      color: #94A3B8;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+    }
+
+    /* WATERMARK SUTIL DE FONDO (FONDO BLANCO RESPETADO) */
+    .watermark-bg {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-25deg);
+      opacity: 0.018;
+      pointer-events: none;
+      z-index: 0;
+      width: 480px;
+      height: 480px;
+    }
+
+    .doc-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      justify-content: space-between;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    td, th {
+      vertical-align: top;
+    }
+
+    /* HEADER DE PRECISIÓN */
+    .header-table {
+      margin-bottom: 8px;
+    }
+
+    .brand-cell {
+      width: 58%;
+      vertical-align: middle;
+    }
+
+    .brand-flex {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .blueprint-logo-box {
+      width: 46px;
+      height: 46px;
+      background: #0B132B;
+      border: 1.5px solid #00A6E0;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #38BDF8;
+      box-shadow: 0 0 0 2px #E2E8F0;
+      flex-shrink: 0;
+    }
+
+    .company-title {
+      font-size: 15.5pt;
+      font-weight: 900;
+      color: #0F172A;
+      letter-spacing: 0.8px;
+      line-height: 1.05;
+      text-transform: uppercase;
+      font-feature-settings: "tnum";
+    }
+
+    .company-sub {
+      font-size: 7.2pt;
+      font-weight: 700;
+      color: #0284C7;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+
+    .meta-fiscal-card {
+      width: 42%;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-left: 3px solid #0284C7;
+      padding: 6px 10px;
+      border-radius: 2px;
+      font-size: 7.5pt;
+      color: #334155;
+    }
+
+    .meta-fiscal-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 2px;
+      line-height: 1.25;
+    }
+
+    .meta-fiscal-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .meta-label {
+      font-weight: 700;
+      color: #64748B;
+      text-transform: uppercase;
+      font-size: 6.8pt;
+      letter-spacing: 0.4px;
+    }
+
+    .meta-val {
+      font-weight: 700;
+      color: #0F172A;
+      text-align: right;
+    }
+
+    /* REGLA MILIMÉTRICA TÉCNICA */
+    .ruler-divider {
+      height: 6px;
+      width: 100%;
+      background: repeating-linear-gradient(90deg, #0284C7 0px, #0284C7 1px, transparent 1px, transparent 6px);
+      position: relative;
+      margin: 4px 0 10px 0;
+      opacity: 0.45;
+    }
+    .ruler-divider::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 0;
+      right: 0;
+      height: 1.5px;
+      background: linear-gradient(90deg, #0284C7 0%, #0369A1 50%, #0F172A 100%);
+    }
+
+    /* BANNER TITULAR / ORDEN DE SERVICIO */
+    .order-banner {
+      background: #0F172A;
+      border: 1px solid #1E293B;
+      border-radius: 3px;
+      color: #FFFFFF;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .order-banner table {
+      width: 100%;
+    }
+
+    .banner-title-cell {
+      padding: 8px 14px;
+      vertical-align: middle;
+      width: 58%;
+    }
+
+    .banner-doc-title {
+      font-size: 13pt;
+      font-weight: 900;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .banner-tag-badge {
+      display: inline-block;
+      font-size: 6.2pt;
+      font-weight: 800;
+      letter-spacing: 0.9px;
+      color: #38BDF8;
+      background: rgba(56, 189, 248, 0.15);
+      border: 0.8px solid #0284C7;
+      padding: 1.5px 6px;
+      border-radius: 2px;
+      margin-top: 2px;
+      text-transform: uppercase;
+    }
+
+    .banner-ot-cell {
+      padding: 7px 14px;
+      text-align: right;
+      vertical-align: middle;
+      width: 42%;
+      border-left: 1px dashed rgba(255, 255, 255, 0.2);
+      background: rgba(2, 132, 199, 0.12);
+    }
+
+    .ot-header-tag {
+      font-size: 6.5pt;
+      font-weight: 700;
+      color: #94A3B8;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+
+    .ot-main-num {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 17pt;
+      font-weight: 900;
+      color: #38BDF8;
+      letter-spacing: 1.5px;
+      line-height: 1.1;
+    }
+    .ot-main-num span {
+      color: #FFFFFF;
+    }
+
+    /* BARRA DE SECCIÓN TIPO PROTOCOLO DE LABORATORIO */
+    .protocol-header {
+      background: #F1F5F9;
+      border: 1px solid #CBD5E1;
+      border-left: 4px solid #0284C7;
+      padding: 3.5px 8px;
+      font-size: 7.2pt;
+      font-weight: 800;
+      color: #0F172A;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      border-radius: 1px;
+    }
+
+    .protocol-step-num {
+      display: inline-block;
+      background: #0284C7;
+      color: #FFFFFF;
+      font-size: 6.5pt;
+      font-weight: 900;
+      padding: 0 4px;
+      border-radius: 2px;
+      margin-right: 5px;
+      letter-spacing: 0.2px;
+    }
+
+    .protocol-subtag {
+      font-size: 6pt;
+      color: #64748B;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* CAJAS TÉCNICAS DE DATOS */
+    .tech-card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-top: 2px solid #94A3B8;
+      padding: 5px 8px;
+      border-radius: 1px;
+      height: 100%;
+    }
+
+    .tech-card.cyan-accent {
+      border-top-color: #0284C7;
+      background: #F8FAFC;
+    }
+
+    .field-micro-label {
+      font-size: 6.2pt;
+      font-weight: 800;
+      color: #64748B;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .field-main-val {
+      font-size: 8.8pt;
+      font-weight: 700;
+      color: #0F172A;
+      line-height: 1.25;
+    }
+
+    .field-main-val.client-highlight {
+      font-size: 9.6pt;
+      font-weight: 800;
+      color: #0284C7;
+    }
+
+    /* TABLA CLIENTE */
+    .client-matrix {
+      margin-bottom: 9px;
+    }
+    .client-matrix td {
+      padding: 0 3px;
+    }
+    .client-matrix td:first-child { padding-left: 0; }
+    .client-matrix td:last-child { padding-right: 0; }
+
+    /* SECCIÓN 2: HARDWARE & CONTROL DIGITAL */
+    .hardware-qr-matrix {
+      margin-bottom: 9px;
+    }
+
+    .hardware-col {
+      width: 70%;
+      padding-right: 6px;
+    }
+
+    .qr-col {
+      width: 30%;
+      padding-left: 3px;
+    }
+
+    .hardware-subtable td {
+      padding: 2.5px 3px;
+    }
+    .hardware-subtable td:first-child { padding-left: 0; }
+    .hardware-subtable td:last-child { padding-right: 0; }
+
+    .serial-spec-box {
+      background: #F0F9FF;
+      border: 1px solid #BAE6FD;
+      border-left: 3px solid #0284C7;
+      padding: 5px 8px;
+      border-radius: 2px;
+    }
+
+    .serial-spec-val {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 9.6pt;
+      font-weight: 900;
+      color: #0369A1;
+      letter-spacing: 1px;
+    }
+
+    /* TARJETA QR DE CRIPTOGRAFÍA Y TRAZABILIDAD */
+    .qr-audit-card {
+      border: 1px solid #CBD5E1;
+      background: #FFFFFF;
+      border-radius: 2px;
+      padding: 7px 6px;
+      text-align: center;
+      position: relative;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Retículas decorativas de calibración en las 4 esquinas de la tarjeta QR */
+    .qr-audit-card::before {
+      content: '+';
+      position: absolute;
+      top: 1px;
+      left: 3px;
+      font-size: 7pt;
+      color: #0284C7;
+      font-family: monospace;
+      font-weight: bold;
+    }
+    .qr-audit-card::after {
+      content: '+';
+      position: absolute;
+      bottom: 1px;
+      right: 3px;
+      font-size: 7pt;
+      color: #0284C7;
+      font-family: monospace;
+      font-weight: bold;
+    }
+
+    .qr-view-container {
+      width: 82px;
+      height: 82px;
+      margin: 0 auto;
+      background: #FFFFFF;
+      padding: 3px;
+      border: 1px solid #E2E8F0;
+      box-shadow: inset 0 0 0 1px #F1F5F9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qr-view-container svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .qr-caption-box {
+      margin-top: 4px;
+      padding-top: 4px;
+      border-top: 0.5px dashed #CBD5E1;
+      width: 100%;
+    }
+
+    .qr-ot-tag {
+      font-family: monospace;
+      font-size: 6.5pt;
+      font-weight: 800;
+      color: #0F172A;
+      background: #F1F5F9;
+      padding: 1px 4px;
+      border-radius: 2px;
+      display: inline-block;
+      margin-bottom: 2px;
+    }
+
+    .qr-legend {
+      font-size: 5.9pt;
+      color: #475569;
+      line-height: 1.25;
+      font-weight: 600;
+    }
+
+    .qr-legend strong {
+      color: #0284C7;
+      display: block;
+      font-size: 6.3pt;
+      letter-spacing: 0.3px;
+    }
+
+    /* SECCIÓN 3: DIAGNÓSTICO & BITÁCORA */
+    .reception-meta-strip {
+      margin-bottom: 6px;
+    }
+
+    .date-timestamp-card {
+      background: #F8FAFC;
+      border: 1px solid #CBD5E1;
+      border-left: 3px solid #0EA5E9;
+      padding: 5px 8px;
+      border-radius: 2px;
+    }
+
+    .status-active-badge {
+      display: inline-block;
+      font-size: 5.8pt;
+      font-weight: 800;
+      background: #ECFDF5;
+      color: #059669;
+      border: 0.8px solid #A7F3D0;
+      padding: 1px 5px;
+      border-radius: 2px;
+      letter-spacing: 0.5px;
+      margin-left: 6px;
+      text-transform: uppercase;
+    }
+
+    /* BLOQUES DE DIAGNÓSTICO */
+    .log-box {
+      margin-bottom: 7px;
+    }
+
+    .log-label {
+      font-size: 6.5pt;
+      font-weight: 800;
+      color: #334155;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .log-content-area {
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      padding: 7px 9px;
+      min-height: 42px;
+      font-size: 8.4pt;
+      line-height: 1.4;
+      color: #1E293B;
+      border-radius: 2px;
+      font-family: inherit;
+    }
+
+    .problem-theme {
+      background: #FFFDFD;
+      border-left: 3.5px solid #EF4444;
+      color: #7F1D1D;
+    }
+
+    .observation-theme {
+      background: #FAFAFA;
+      border: 1px dashed #94A3B8;
+      border-left: 3.5px solid #64748B;
+      color: #334155;
+    }
+
+    /* TÉRMINOS LEGALES SINTETIZADOS */
+    .terms-card {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      padding: 5px 7px;
+      margin-bottom: 8px;
+      border-radius: 2px;
+    }
+
+    .terms-header-line {
+      font-size: 6pt;
+      font-weight: 800;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .terms-grid {
+      font-size: 5.7pt;
+      color: #64748B;
+      line-height: 1.35;
+    }
+
+    /* ZONA DE FIRMAS / CONFORMIDAD FORMAL */
+    .sign-table {
+      margin-top: 4px;
+      margin-bottom: 6px;
+    }
+
+    .sign-card {
+      width: 47%;
+      border: 1px solid #CBD5E1;
+      background: #FFFFFF;
+      padding: 7px 10px;
+      border-radius: 2px;
+      text-align: center;
+      position: relative;
+    }
+
+    .sign-line-placeholder {
+      border-bottom: 1.2px solid #0F172A;
+      height: 24px;
+      margin-bottom: 4px;
+    }
+
+    .sign-title {
+      font-size: 6.8pt;
+      font-weight: 800;
+      color: #0F172A;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .sign-meta-desc {
+      font-size: 6.1pt;
+      color: #64748B;
+      font-weight: 600;
+    }
+
+    .stamp-badge {
+      position: absolute;
+      top: 4px;
+      right: 6px;
+      font-size: 5.5pt;
+      color: #0284C7;
+      border: 0.5px solid #BAE6FD;
+      background: #F0F9FF;
+      padding: 1px 3px;
+      border-radius: 1px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    /* FOOTER CORPORATIVO DE AUDITORÍA */
+    .document-footer {
+      border-top: 1.5px solid #0F172A;
+      padding-top: 5px;
+      margin-top: 4px;
+    }
+
+    .scale-bar {
+      height: 3px;
+      width: 100%;
+      background: repeating-linear-gradient(90deg, #0F172A 0px, #0F172A 2px, transparent 2px, transparent 8px);
+      margin-bottom: 4px;
+      opacity: 0.35;
+    }
+
+    .footer-table {
+      font-size: 6.5pt;
+      color: #64748B;
+      line-height: 1.35;
+    }
+
+    .footer-left {
+      width: 48%;
+    }
+
+    .footer-left strong {
+      color: #0F172A;
+    }
+
+    .footer-center {
+      width: 24%;
+      text-align: center;
+      color: #94A3B8;
+      font-style: italic;
+    }
+
+    .footer-right {
+      width: 28%;
+      text-align: right;
+    }
+
+    .solvix-cert-badge {
+      display: inline-block;
+      font-size: 5.8pt;
+      font-weight: 800;
+      color: #0284C7;
+      letter-spacing: 0.6px;
+      background: #F0F9FF;
+      border: 1px solid #BAE6FD;
+      padding: 1px 5px;
+      border-radius: 2px;
+      text-transform: uppercase;
+    }
+
+    .page-index {
+      font-weight: 800;
+      color: #0F172A;
+      margin-top: 2px;
+      font-size: 6.2pt;
+    }
+  </style>
+</head>
+<body>
+<!-- CONTENEDOR LETTER OFICIAL -->
+<div class="sheet">
+<!-- MARCO PERIMETRAL DE PRECISIÓN Y SEGURIDAD -->
+<div class="border-security-frame"></div>
+<div class="border-inner-frame"></div>
+<div class="perimeter-microtext">COMPUTER &amp; ELECTRONIC TECHNICAL SPECIFICATION — OFFICIAL CUSTODY PROTOCOL — SECURE LAB VERIFIED</div>
+<div class="crosshair-corner crosshair-tl"></div>
+<div class="crosshair-corner crosshair-tr"></div>
+<div class="crosshair-corner crosshair-bl"></div>
+<div class="crosshair-corner crosshair-br"></div>
+<!-- MARCA DE AGUA GEOMÉTRICA DE ALTA SEGURIDAD / GUILLOCHE EN FONDO (OPACIDAD ULTRA BAJA) -->
+<svg class="watermark-bg" fill="none" stroke="#0284C7" stroke-width="0.75" viewbox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<circle cx="100" cy="100" r="90" stroke-dasharray="2 3"></circle>
+<circle cx="100" cy="100" r="75"></circle>
+<circle cx="100" cy="100" r="60" stroke-dasharray="4 2"></circle>
+<polygon points="100,10 178,55 178,145 100,190 22,145 22,55"></polygon>
+<polygon points="100,25 165,62 165,138 100,175 35,138 35,62" stroke-dasharray="3 3"></polygon>
+<line x1="10" x2="190" y1="100" y2="100"></line>
+<line x1="100" x2="100" y1="10" y2="190"></line>
+</svg>
+<!-- CUERPO PRINCIPAL DEL DOCUMENTO -->
+<div class="doc-content">
+<div>
+<!-- 1. HEADER INSTITUCIONAL / BLUEPRINT TECNOLÓGICO -->
+<table class="header-table">
+<tbody><tr>
+<td class="brand-cell">
+<div class="brand-flex">
+<!-- Logotipo institucional con soporte para ${LOGO_HTML} o icono blueprint SVG -->
+<div class="blueprint-logo-box">
+<svg fill="none" height="28" viewbox="0 0 24 24" width="28" xmlns="http://www.w3.org/2000/svg">
+<polygon points="12,2 21,7 21,17 12,22 3,17 3,7" stroke="#38BDF8" stroke-linejoin="round" stroke-width="1.8"></polygon>
+<circle cx="12" cy="12" fill="#00A6E0" r="3"></circle>
+<path d="M12 2V6M12 18V22M3 7L6.5 9M17.5 15L21 17M21 7L17.5 9M6.5 15L3 17" stroke="#38BDF8" stroke-width="1.2"></path>
+</svg>
+</div>
+<div>
+<div class="company-title">${EMPRESA_NOMBRE}</div>
+<div class="company-sub">${EMPRESA_SUBTITULO}</div>
+</div>
+</div>
+</td>
+<!-- DATOS FISCALES Y DE CONTACTO -->
+<td style="width: 42%; vertical-align: middle;">
+<div class="meta-fiscal-card">
+<div class="meta-fiscal-row">
+<span class="meta-label">IDENTIFICACIÓN / NIT:</span>
+<span class="meta-val">${EMPRESA_IDENTIFICACION}</span>
+</div>
+<div class="meta-fiscal-row">
+<span class="meta-label">TELÉFONO DE ATENCIÓN:</span>
+<span class="meta-val">${EMPRESA_TELEFONO}</span>
+</div>
+<div class="meta-fiscal-row">
+<span class="meta-label">CORREO INSTITUCIONAL:</span>
+<span class="meta-val">${EMPRESA_CORREO}</span>
+</div>
+<div class="meta-fiscal-row">
+<span class="meta-label">LABORATORIO &amp; PLANTA:</span>
+<span class="meta-val">${EMPRESA_DIRECCION}</span>
+</div>
+</div>
+</td>
+</tr>
+</tbody></table>
+<!-- ESCALA MÉTRICA DECORATIVA -->
+<div class="ruler-divider"></div>
+<!-- 2. BANNER PRINCIPAL DE ORDEN DE SERVICIO -->
+<div class="order-banner">
+<table>
+<tbody><tr>
+<td class="banner-title-cell">
+<div class="banner-doc-title">
+                  COMPROBANTE DE RECEPCIÓN
+                </div>
+<div>
+<span class="banner-tag-badge">CUSTODIA TÉCNICA OFICIAL / PROTOCOLO DE INGRESO</span>
+</div>
+</td>
+<td class="banner-ot-cell">
+<div class="ot-header-tag">ORDEN DE SERVICIO TÉCNICA</div>
+<div class="ot-main-num"><span>OT-</span>${NUMERO_OT}</div>
+</td>
+</tr>
+</tbody></table>
+</div>
+<!-- 3. SECCIÓN 01: MATRIZ DE IDENTIFICACIÓN DEL CLIENTE -->
+<div class="protocol-header">
+<div><span class="protocol-step-num">[01]</span> CLIENTE / TITULAR REGISTRADO</div>
+<div class="protocol-subtag">REGISTRO DE AFILIACIÓN &amp; VERIFICACIÓN</div>
+</div>
+<table class="client-matrix">
+<tbody><tr>
+<td style="width: 44%;">
+<div class="tech-card cyan-accent">
+<div class="field-micro-label">
+<svg fill="none" height="10" stroke="#0284C7" stroke-width="2.5" viewbox="0 0 24 24" width="10"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                  CLIENTE / TITULAR REGISTRADO
+                </div>
+<div class="field-main-val client-highlight">${CLIENTE_NOMBRE}</div>
+</div>
+</td>
+<td style="width: 28%;">
+<div class="tech-card">
+<div class="field-micro-label">
+<svg fill="none" height="10" stroke="#64748B" stroke-width="2.5" viewbox="0 0 24 24" width="10"><rect height="16" rx="2" width="18" x="3" y="4"></rect><line x1="7" x2="17" y1="8" y2="8"></line><line x1="7" x2="13" y1="12" y2="12"></line></svg>
+                  DOCUMENTO DE IDENTIDAD
+                </div>
+<div class="field-main-val">${CLIENTE_DOCUMENTO}</div>
+</div>
+</td>
+<td style="width: 28%;">
+<div class="tech-card">
+<div class="field-micro-label">
+<svg fill="none" height="10" stroke="#64748B" stroke-width="2.5" viewbox="0 0 24 24" width="10"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                  TELÉFONO DE CONTACTO
+                </div>
+<div class="field-main-val">${CLIENTE_TELEFONO}</div>
+</div>
+</td>
+</tr>
+</tbody></table>
+<!-- 4. SECCIÓN 02: HARDWARE RECIBIDO & CONTROL DIGITAL QR -->
+<table class="hardware-qr-matrix">
+<tbody><tr>
+<!-- COLUMNA HARDWARE (70%) -->
+<td class="hardware-col">
+<div class="protocol-header">
+<div><span class="protocol-step-num">[02]</span> ESPECIFICACIÓN DEL HARDWARE RECIBIDO &amp; VERIFICACIÓN</div>
+<div class="protocol-subtag">AUDITORÍA FÍSICA</div>
+</div>
+<table class="hardware-subtable" style="margin-bottom: 5px;">
+<tbody><tr>
+<td style="width: 50%;">
+<div class="tech-card">
+<div class="field-micro-label">TIPO DE DISPOSITIVO</div>
+<div class="field-main-val" style="font-weight: 800; color: #0284C7;">${EQUIPO_TIPO}</div>
+</div>
+</td>
+<td style="width: 50%;">
+<div class="tech-card">
+<div class="field-micro-label">MARCA / MODELO</div>
+<div class="field-main-val">${EQUIPO_MARCA_MODELO}</div>
+</div>
+</td>
+</tr>
+</tbody></table>
+<table class="hardware-subtable">
+<tbody><tr>
+<td style="width: 50%;">
+<div class="tech-card">
+<div class="field-micro-label">REFERENCIA / ALIAS TÉCNICO</div>
+<div class="field-main-val">${EQUIPO_REFERENCIA}</div>
+</div>
+</td>
+<td style="width: 50%;">
+<div class="serial-spec-box">
+<div class="field-micro-label" style="color: #0284C7;">
+<svg fill="none" height="9" stroke="#0284C7" stroke-width="2.5" viewbox="0 0 24 24" width="9"><rect height="16" rx="2" width="16" x="4" y="4"></rect><rect height="6" width="6" x="9" y="9"></rect><line x1="9" x2="9" y1="1" y2="4"></line><line x1="15" x2="15" y1="1" y2="4"></line><line x1="9" x2="9" y1="20" y2="23"></line><line x1="15" x2="15" y1="20" y2="23"></line><line x1="20" x2="23" y1="9" y2="9"></line><line x1="20" x2="23" y1="14" y2="14"></line><line x1="1" x2="4" y1="9" y2="9"></line><line x1="1" x2="4" y1="14" y2="14"></line></svg>
+                        NÚMERO DE SERIE (S/N)
+                      </div>
+<div class="serial-spec-val">${EQUIPO_SERIE}</div>
+</div>
+</td>
+</tr>
+</tbody></table>
+</td>
+<!-- COLUMNA QR / VALIDACIÓN CRIPTOGRÁFICA (30%) -->
+<td class="qr-col">
+<div class="protocol-header" style="background: #0F172A; color: #FFFFFF; border-left-color: #38BDF8;">
+<div><span class="protocol-step-num" style="background: #38BDF8; color: #0F172A;">QR</span> TRAZABILIDAD</div>
+<div class="protocol-subtag" style="color: #94A3B8;">EN LÍNEA</div>
+</div>
+<div class="qr-audit-card">
+<div class="qr-view-container">
+<!-- QR ${QR_DATA_URI} con SVG nítido vectorial de alta precisión -->
+<svg fill="#0F172A" viewbox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#0F172A" height="28" rx="1.5" width="28" x="5" y="5"></rect>
+<rect fill="#FFFFFF" height="20" width="20" x="9" y="9"></rect>
+<rect fill="#0284C7" height="12" width="12" x="13" y="13"></rect>
+<rect fill="#0F172A" height="28" rx="1.5" width="28" x="67" y="5"></rect>
+<rect fill="#FFFFFF" height="20" width="20" x="71" y="9"></rect>
+<rect fill="#0284C7" height="12" width="12" x="75" y="13"></rect>
+<rect fill="#0F172A" height="28" rx="1.5" width="28" x="5" y="67"></rect>
+<rect fill="#FFFFFF" height="20" width="20" x="9" y="71"></rect>
+<rect fill="#0284C7" height="12" width="12" x="13" y="75"></rect>
+<rect height="7" width="7" x="39" y="7"></rect>
+<rect height="7" width="9" x="51" y="7"></rect>
+<rect height="7" width="9" x="39" y="21"></rect>
+<rect height="7" width="7" x="53" y="23"></rect>
+<rect height="7" width="9" x="7" y="39"></rect>
+<rect height="9" width="7" x="23" y="39"></rect>
+<rect height="7" width="11" x="11" y="53"></rect>
+<rect fill="#0284C7" height="9" width="9" x="39" y="37"></rect>
+<rect height="7" width="9" x="53" y="37"></rect>
+<rect height="9" width="7" x="39" y="51"></rect>
+<rect height="7" width="13" x="51" y="53"></rect>
+<rect height="9" width="7" x="69" y="39"></rect>
+<rect height="7" width="15" x="79" y="41"></rect>
+<rect height="7" width="9" x="69" y="53"></rect>
+<rect height="9" width="13" x="81" y="53"></rect>
+<rect height="7" width="9" x="39" y="69"></rect>
+<rect height="9" width="7" x="53" y="71"></rect>
+<rect height="7" width="19" x="39" y="81"></rect>
+<rect height="7" width="11" x="69" y="69"></rect>
+<rect height="9" width="11" x="83" y="71"></rect>
+<rect height="9" width="9" x="71" y="81"></rect>
+<rect height="7" width="11" x="83" y="83"></rect>
+</svg>
+</div>
+<div class="qr-caption-box">
+<div class="qr-ot-tag">OT-${NUMERO_OT}</div>
+<div class="qr-legend">
+<strong>CONSULTA DIGITAL EN TIEMPO REAL</strong>
+                    Escanea para rastrear el diagnóstico y avance técnico de tu orden.
+                  </div>
+</div>
+</div>
+</td>
+</tr>
+</tbody></table>
+<!-- 5. SECCIÓN 03: PROTOCOLO DE RECEPCIÓN Y DIAGNÓSTICO -->
+<div class="protocol-header">
+<div><span class="protocol-step-num">[03]</span> REGISTRO DE INGRESO Y DIAGNÓSTICO PRELIMINAR</div>
+<div class="protocol-subtag">PARÁMETROS DE RECEPCIÓN TÉCNICA</div>
+</div>
+<div class="reception-meta-strip">
+<table>
+<tbody><tr>
+<td style="width: 44%;">
+<div class="date-timestamp-card">
+<div class="field-micro-label" style="color: #0369A1;">
+<svg fill="none" height="10" stroke="#0284C7" stroke-width="2.5" viewbox="0 0 24 24" width="10"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    FECHA Y HORA DE INGRESO
+                  </div>
+<div class="field-main-val" style="font-weight: 800; color: #0F172A;">
+                    ${FECHA_RECEPCION}
+                    <span class="status-active-badge">INGRESADO A LABORATORIO</span>
+</div>
+</div>
+</td>
+<td style="width: 56%; padding-left: 6px; vertical-align: middle;">
+<div style="font-size: 6.8pt; color: #475569; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 5px 8px; border-radius: 2px; line-height: 1.35;">
+                  Certificación de custodia provisional para evaluación, diagnóstico por instrumental de banco y presupuesto técnico bajo normativa de servicio.
+                </div>
+</td>
+</tr>
+</tbody></table>
+</div>
+<!-- REPORTE DE PROBLEMA REPORTADO -->
+<div class="log-box">
+<div class="log-label" style="color: #B91C1C;">
+<svg fill="none" height="9" stroke="#B91C1C" stroke-width="2.5" viewbox="0 0 24 24" width="9"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
+            PROBLEMA REPORTADO POR EL CLIENTE:
+          </div>
+<div class="log-content-area problem-theme">
+            ${PROBLEMA_REPORTADO}
+          </div>
+</div>
+<!-- OBSERVACIONES DE ESTADO FÍSICO Y ACCESORIOS -->
+<div class="log-box">
+<div class="log-label">
+<svg fill="none" height="9" stroke="#475569" stroke-width="2.5" viewbox="0 0 24 24" width="9"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" x2="8" y1="13" y2="13"></line><line x1="16" x2="8" y1="17" y2="17"></line></svg>
+            OBSERVACIONES DE ESTADO FÍSICO Y ACCESORIOS ENTREGADOS:
+          </div>
+<div class="log-content-area observation-theme">
+            ${OBSERVACIONES}
+          </div>
+</div>
+<!-- 6. CONDICIONES TÉCNICAS Y LEGALES -->
+<div class="terms-card">
+<div class="terms-header-line">
+<svg fill="none" height="8" stroke="#475569" stroke-width="2" viewbox="0 0 24 24" width="8"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="16" y2="12"></line><line x1="12" x2="12.01" y1="8" y2="8"></line></svg>
+            CLÁUSULAS TÉCNICAS Y CONDICIONES GENERALES DE CUSTODIA:
+          </div>
+<div class="terms-grid">
+            ● <strong>1. Custodia e integridad de datos:</strong> El laboratorio no se responsabiliza por la pérdida o alteración de software, firmas de booteo o datos almacenados; es deber del cliente mantener respaldo.
+            ● <strong>2. Plazo de almacenamiento:</strong> Dispositivos terminados no retirados transcurridos 90 días calendario causarán cargo diario por depósito o abandono conforme a ley.
+            ● <strong>3. Diagnóstico y garantía:</strong> Todo trabajo se sujeta a previa confirmación de presupuesto. El comprobante original o token QR es requisito estricto para la devolución.
+          </div>
+</div>
+<!-- 7. ZONA DE FIRMAS / CONFORMIDAD FORMAL -->
+<table class="sign-table">
+<tbody><tr>
+<td class="sign-card">
+<span class="stamp-badge">SELLO RECEPCIÓN</span>
+<div class="sign-line-placeholder"></div>
+<div class="sign-title">FIRMA RECIBIDO (LABORATORIO / TALLER)</div>
+<div class="sign-meta-desc">${EMPRESA_NOMBRE} — Personal Certificado</div>
+</td>
+<td style="width: 6%;"></td>
+<td class="sign-card">
+<span class="stamp-badge" style="color: #475569; border-color: #E2E8F0; background: #F8FAFC;">TITULAR</span>
+<div class="sign-line-placeholder"></div>
+<div class="sign-title">FIRMA Y ACEPTACIÓN DEL CLIENTE</div>
+<div class="sign-meta-desc">${CLIENTE_NOMBRE} (Doc: ${CLIENTE_DOCUMENTO})</div>
+</td>
+</tr>
+</tbody></table>
+</div>
+<!-- 8. FOOTER CORPORATIVO DE AUDITORÍA Y TRAZABILIDAD -->
+<div class="document-footer">
+<div class="scale-bar"></div>
+<table class="footer-table">
+<tbody><tr>
+<td class="footer-left">
+<div><strong>${EMPRESA_NOMBRE}</strong> — ${EMPRESA_SUBTITULO}</div>
+<div>Contacto Oficial: ${EMPRESA_CONTACTO}</div>
+</td>
+<td class="footer-center">
+<div>${FOOTER_TEXTO}</div>
+</td>
+<td class="footer-right">
+<div><span class="solvix-cert-badge">DOCUMENTO DE CONTROL GENERADO POR SOLVIX PLATFORM</span></div>
+<div class="page-index">Folio OT-${NUMERO_OT}  |  Página 1 de 1</div>
+</td>
+</tr>
+</tbody></table>
+</div>
+</div>
+</div>
+</body></html>

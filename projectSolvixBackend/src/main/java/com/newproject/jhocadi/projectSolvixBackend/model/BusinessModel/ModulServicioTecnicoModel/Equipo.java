@@ -56,9 +56,9 @@ public class Equipo {
     @Column(name = "numero_serie", length = 100)
     private String numeroSerie;
 
-    /** Alias interno opcional (ej. "Laptop contabilidad"). */
-    @Column(length = 120)
-    private String nombre;
+    /** Referencia / alias interno opcional (ej. "Laptop contabilidad"). Columna física: nombre. */
+    @Column(name = "nombre", length = 120)
+    private String referenciaInterna;
 
     @Column(length = 1000)
     private String observaciones;

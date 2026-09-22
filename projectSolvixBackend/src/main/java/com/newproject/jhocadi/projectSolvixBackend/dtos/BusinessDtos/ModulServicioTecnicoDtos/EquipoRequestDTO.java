@@ -1,5 +1,7 @@
 package com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.TipoEquipo;
 
 import jakarta.validation.constraints.NotNull;
@@ -24,8 +26,14 @@ public class EquipoRequestDTO {
     @Size(max = 100)
     private String numeroSerie;
 
+    /**
+     * Referencia / alias del equipo en el contexto del cliente.
+     * Acepta también {@code nombre} por compatibilidad.
+     */
+    @JsonProperty("referenciaInterna")
+    @JsonAlias("nombre")
     @Size(max = 120)
-    private String nombre;
+    private String referenciaInterna;
 
     @Size(max = 1000)
     private String observaciones;

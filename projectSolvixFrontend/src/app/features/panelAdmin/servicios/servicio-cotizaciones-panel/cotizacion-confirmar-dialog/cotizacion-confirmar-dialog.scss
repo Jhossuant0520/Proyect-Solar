@@ -1,0 +1,32 @@
+.cotizacion-confirm-dialog {
+  min-width: min(420px, 92vw);
+  padding: 1.25rem 1.35rem 1.1rem;
+  color: var(--solvix-text, #fff);
+  background: var(--solvix-surface, #0f172a);
+}
+
+.dlg-head h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+  color: var(--solvix-primary, #4fd1ff);
+}
+
+.dlg-head p {
+  margin: 0;
+  color: var(--solvix-text-secondary, #cfe9ff);
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.numero {
+  margin: 0.55rem 0 0;
+  color: var(--solvix-neon, #00e5ff);
+  font-size: 0.88rem;
+}
+
+.dlg-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 1.1rem;
+}

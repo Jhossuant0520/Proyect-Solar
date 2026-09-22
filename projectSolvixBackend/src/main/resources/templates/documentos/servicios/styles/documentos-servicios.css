@@ -1,0 +1,195 @@
+/* Estilos compartidos — documentos de servicio técnico (impresión LETTER) */
+@page {
+  size: letter;
+  margin: 1.4cm 1.5cm 1.8cm 1.5cm;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 10pt;
+  color: #1e293b;
+  line-height: 1.35;
+  margin: 0;
+  padding: 0;
+}
+
+.doc-header {
+  border-bottom: 2px solid #003366;
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+}
+
+.doc-header table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.doc-logo {
+  max-height: 52px;
+  max-width: 140px;
+}
+
+.doc-empresa-nombre {
+  font-size: 14pt;
+  font-weight: bold;
+  color: #003366;
+  margin: 0;
+}
+
+.doc-empresa-sub {
+  font-size: 9pt;
+  color: #64748b;
+  margin: 2px 0 0 0;
+}
+
+.doc-meta {
+  text-align: right;
+  font-size: 9pt;
+  color: #475569;
+}
+
+.doc-titulo {
+  font-size: 13pt;
+  font-weight: bold;
+  color: #0f172a;
+  margin: 12px 0 8px 0;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.doc-section {
+  margin: 12px 0;
+}
+
+.doc-section h3 {
+  font-size: 10pt;
+  color: #003366;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 3px;
+  margin: 0 0 6px 0;
+}
+
+.doc-kv {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 6px;
+}
+
+.doc-kv td {
+  padding: 3px 4px;
+  vertical-align: top;
+}
+
+.doc-kv .label {
+  width: 32%;
+  color: #64748b;
+  font-size: 9pt;
+}
+
+.doc-kv .value {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6px;
+  font-size: 9pt;
+}
+
+.doc-table th {
+  background: #e2e8f0;
+  color: #003366;
+  text-align: left;
+  padding: 5px 6px;
+  border: 1px solid #cbd5e1;
+  font-weight: bold;
+}
+
+.doc-table td {
+  padding: 5px 6px;
+  border: 1px solid #e2e8f0;
+  vertical-align: top;
+}
+
+.doc-table .num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.doc-totales {
+  width: 45%;
+  margin-left: auto;
+  margin-top: 8px;
+  border-collapse: collapse;
+}
+
+.doc-totales td {
+  padding: 4px 6px;
+}
+
+.doc-totales .total-label {
+  font-weight: bold;
+  color: #003366;
+}
+
+.doc-totales .total-value {
+  text-align: right;
+  font-weight: bold;
+  font-size: 11pt;
+}
+
+.doc-qr {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.doc-qr img {
+  width: 110px;
+  height: 110px;
+}
+
+.doc-qr .hint {
+  font-size: 8pt;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.doc-firma {
+  margin-top: 18px;
+  border-top: 1px dashed #94a3b8;
+  padding-top: 10px;
+}
+
+.doc-firma img {
+  max-height: 70px;
+  max-width: 220px;
+}
+
+.doc-footer {
+  margin-top: 22px;
+  padding-top: 8px;
+  border-top: 1px solid #cbd5e1;
+  font-size: 8pt;
+  color: #64748b;
+  text-align: center;
+}
+
+.muted {
+  color: #64748b;
+  font-size: 9pt;
+}
+
+.obs-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 8px;
+  min-height: 28px;
+  white-space: pre-wrap;
+}

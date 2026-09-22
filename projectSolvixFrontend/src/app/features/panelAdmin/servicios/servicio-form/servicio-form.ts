@@ -90,7 +90,7 @@ export class ServicioFormComponent implements OnInit {
       marca: ['', Validators.maxLength(80)],
       modelo: ['', Validators.maxLength(80)],
       numeroSerie: ['', Validators.maxLength(100)],
-      nombre: ['', Validators.maxLength(120)]
+      referenciaInterna: ['', Validators.maxLength(120)]
     });
   }
 
@@ -236,7 +236,7 @@ export class ServicioFormComponent implements OnInit {
       marca: '',
       modelo: '',
       numeroSerie: '',
-      nombre: ''
+      referenciaInterna: ''
     });
   }
 
@@ -287,7 +287,7 @@ export class ServicioFormComponent implements OnInit {
         marca: (v.marca ?? '').trim() || null,
         modelo: (v.modelo ?? '').trim() || null,
         numeroSerie: (v.numeroSerie ?? '').trim() || null,
-        nombre: (v.nombre ?? '').trim() || null,
+        referenciaInterna: (v.referenciaInterna ?? '').trim() || null,
         activo: true
       })
       .subscribe({
@@ -334,7 +334,9 @@ export class ServicioFormComponent implements OnInit {
       next: orden => {
         this.enviando = false;
         showSolvixSnack(this.snackBar, `Orden ${orden.numero} creada.`);
-        this.router.navigate(['/servicios', orden.id]);
+        this.router.navigate(['/servicios', orden.id], {
+          queryParams: { esperarComprobante: '1' }
+        });
       },
       error: error => {
         this.enviando = false;

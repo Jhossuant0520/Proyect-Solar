@@ -1,0 +1,23 @@
+<div class="cotizacion-rechazar-dialog">
+  <header class="dlg-head">
+    <h2>Rechazar cotización</h2>
+    <p>Registra el rechazo de la cotización {{ data.numero }}.</p>
+  </header>
+  <form class="dlg-form" [formGroup]="form" (ngSubmit)="confirmar()">
+    <label>
+      Observación
+      <textarea
+        formControlName="observacion"
+        rows="3"
+        maxlength="1000"
+        placeholder="Opcional"
+      ></textarea>
+    </label>
+    <div class="dlg-actions">
+      <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
+        Cancelar
+      </solvix-button>
+      <solvix-button family="tech" rank="danger" type="submit">Rechazar</solvix-button>
+    </div>
+  </form>
+</div>

@@ -23,6 +23,7 @@ import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.Modul
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulComercialRepo.VentaRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulProductoRepo.CategoriaProductoRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulProductoRepo.ProductoRepository;
+import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.EntregaOrdenServicioRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.EquipoRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.HistorialEstadoOrdenServicioRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.OrdenServicioRepuestoRepository;
@@ -83,6 +84,15 @@ public abstract class ComercialTestSupport {
     @Autowired
     protected HistorialEstadoOrdenServicioRepository historialEstadoOrdenServicioRepository;
 
+    @Autowired
+    protected EntregaOrdenServicioRepository entregaOrdenServicioRepository;
+
+    @Autowired
+    protected com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.CotizacionServicioRepository cotizacionServicioRepository;
+
+    @Autowired
+    protected com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.DocumentoOrdenServicioRepository documentoOrdenServicioRepository;
+
     @BeforeEach
     protected void limpiarDatos() {
         movimientoRepository.deleteAll();
@@ -93,8 +103,11 @@ public abstract class ComercialTestSupport {
         devolucionCompraRepository.deleteAll();
         compraRepository.deleteAll();
         ajusteCostoRepository.deleteAll();
+        documentoOrdenServicioRepository.deleteAll();
+        cotizacionServicioRepository.deleteAll();
         ordenServicioRepuestoRepository.deleteAll();
         historialEstadoOrdenServicioRepository.deleteAll();
+        entregaOrdenServicioRepository.deleteAll();
         ordenServicioRepository.deleteAll();
         equipoRepository.deleteAll();
         productoRepository.deleteAll();

@@ -153,6 +153,16 @@ textarea {
   font-size: 0.85rem;
 }
 
+.field-hint {
+  margin: 0;
+  color: var(--solvix-text-muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  text-transform: none;
+  letter-spacing: normal;
+  font-family: var(--solvix-font-mono);
+}
+
 @media (max-width: 640px) {
   .wizard-actions,
   .inline-actions {

@@ -81,6 +81,10 @@ public class OrdenServicio {
     @Column(name = "created_by", length = 100)
     private String createdBy;
 
+    /** Token opaco para consulta pública / QR (UUID sin guiones). */
+    @Column(name = "token_consulta", nullable = false, unique = true, length = 64)
+    private String tokenConsulta;
+
     @PrePersist
     protected void onCreate() {
         LocalDateTime ahora = LocalDateTime.now();
@@ -88,6 +92,9 @@ public class OrdenServicio {
         this.fechaActualizacion = ahora;
         if (this.estado == null) {
             this.estado = EstadoOrdenServicio.RECEPCIONADO;
+        }
+        if (this.tokenConsulta == null || this.tokenConsulta.isBlank()) {
+            this.tokenConsulta = java.util.UUID.randomUUID().toString().replace("-", "");
         }
     }
 

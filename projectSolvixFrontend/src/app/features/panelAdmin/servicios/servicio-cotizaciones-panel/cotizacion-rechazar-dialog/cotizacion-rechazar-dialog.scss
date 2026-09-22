@@ -1,0 +1,50 @@
+.cotizacion-rechazar-dialog {
+  min-width: min(420px, 92vw);
+  padding: 1.25rem 1.35rem 1.1rem;
+  color: var(--solvix-text, #fff);
+  background: var(--solvix-surface, #0f172a);
+  border-top: 3px solid #ef4444;
+}
+
+.dlg-head h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+  color: var(--solvix-primary, #4fd1ff);
+}
+
+.dlg-head p {
+  margin: 0;
+  color: var(--solvix-text-secondary, #cfe9ff);
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.dlg-form {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.dlg-form label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--solvix-text-muted, #94a3b8);
+}
+
+textarea {
+  width: 100%;
+  resize: vertical;
+  border-radius: 8px;
+  border: 1px solid rgba(79, 209, 255, 0.25);
+  background: rgba(2, 6, 23, 0.65);
+  color: var(--solvix-text, #fff);
+  padding: 0.55rem 0.65rem;
+  font: inherit;
+}
+
+.dlg-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}

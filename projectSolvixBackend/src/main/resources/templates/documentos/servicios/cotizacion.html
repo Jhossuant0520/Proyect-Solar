@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Cotización — ${NUMERO_COTIZACION}</title>
+  <link rel="stylesheet" type="text/css" href="styles/documentos-servicios.css"/>
+  <link rel="stylesheet" type="text/css" href="styles/cotizacion.css"/>
+</head>
+<body class="cot-body">
+<div class="cot-wrap">
+
+  <table class="cot-top">
+    <tr>
+      <td style="width:58%;vertical-align:middle;">
+        <table>
+          <tr>
+            <td class="cot-logo-cell">${LOGO_HTML}</td>
+            <td style="vertical-align:middle;padding-left:10px;">
+              <p class="cot-brand-name">${EMPRESA_NOMBRE}</p>
+              <p class="cot-brand-sub">${EMPRESA_SUBTITULO}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+      <td class="cot-contact" style="width:42%;vertical-align:middle;">
+        <strong>${EMPRESA_IDENTIFICACION}</strong><br/>
+        ${EMPRESA_TELEFONO}<br/>
+        ${EMPRESA_CORREO}<br/>
+        ${EMPRESA_DIRECCION}
+      </td>
+    </tr>
+  </table>
+
+  <table class="cot-hero">
+    <tr>
+      <td style="width:62%;">
+        <p class="cot-kicker">Servicio técnico</p>
+        <p class="cot-title">Cotización de servicio</p>
+        <span class="cot-chip">${NUMERO_COTIZACION}</span>
+        <span class="cot-chip cot-chip-muted">${TIPO_COTIZACION}</span>
+      </td>
+      <td class="cot-hero-meta" style="width:38%;">
+        <p class="label">Orden de servicio</p>
+        <p class="value">${NUMERO_OT}</p>
+        <p class="label" style="margin-top:8px;">Fecha de presentación</p>
+        <p class="value">${FECHA_PRESENTACION}</p>
+      </td>
+    </tr>
+  </table>
+
+  <table class="cot-section">
+    <tr class="cot-grid-2">
+      <td>
+        <p class="cot-section-head">Cliente</p>
+        <div class="cot-card">
+          <div class="cot-field-gap">
+            <p class="cot-field-label">Nombre</p>
+            <p class="cot-field-value">${CLIENTE_NOMBRE}</p>
+          </div>
+          <div class="cot-field-gap">
+            <p class="cot-field-label">Documento</p>
+            <p class="cot-field-value">${CLIENTE_DOCUMENTO}</p>
+          </div>
+        </div>
+      </td>
+      <td>
+        <p class="cot-section-head">Equipo</p>
+        <div class="cot-card">
+          <div class="cot-field-gap">
+            <p class="cot-field-label">Resumen</p>
+            <p class="cot-field-value">${EQUIPO_RESUMEN}</p>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <div class="cot-section">
+    <p class="cot-section-head">Detalle</p>
+    <table class="cot-table">
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Descripción</th>
+          <th class="num">Cant.</th>
+          <th class="num">P. unitario</th>
+          <th class="num">Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{DETALLE_ROWS}}
+      </tbody>
+    </table>
+    <table class="cot-totales">
+      <tr>
+        <td class="label">Subtotal</td>
+        <td class="value">${SUBTOTAL}</td>
+      </tr>
+      <tr class="total-row">
+        <td class="label">Total</td>
+        <td class="value">${TOTAL}</td>
+      </tr>
+    </table>
+  </div>
+
+  <table class="cot-section">
+    <tr>
+      <td style="width:66%;padding-right:10px;">
+        <p class="cot-section-head">Observaciones</p>
+        <p class="cot-note-label">Notas de la cotización</p>
+        <div class="cot-note">${OBSERVACIONES}</div>
+      </td>
+      <td style="width:34%;vertical-align:top;">
+        <p class="cot-section-head">Consulta</p>
+        <div class="cot-qr-panel">
+          <img src="${QR_DATA_URI}" alt="QR documento"/>
+          <p class="cot-qr-title">Escanea el código</p>
+          <p class="cot-qr-hint">Consulta de este documento en el taller.</p>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <table class="cot-footer">
+    <tr>
+      <td style="width:55%;">
+        <strong>${EMPRESA_NOMBRE}</strong> · ${EMPRESA_CONTACTO}<br/>
+        ${FOOTER_TEXTO}<br/>
+        <span class="cot-autoria">${SOFTWARE_AUTORIA}</span>
+      </td>
+      <td class="cot-footer-right" style="width:45%;">
+        <span class="cot-pill">SOLVIX</span><br/>
+        ${NUMERO_COTIZACION} · ${NUMERO_OT}
+      </td>
+    </tr>
+  </table>
+
+</div>
+</body>
+</html>

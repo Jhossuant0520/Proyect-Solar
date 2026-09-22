@@ -1,0 +1,139 @@
+<div class="entrega-dialog">
+  <header class="dlg-head">
+    <p class="kicker">Último paso del servicio</p>
+    <h2>Entrega de equipo</h2>
+    <p>Constancia digital de recepción. La firma es manuscrita en pantalla (no es firma electrónica avanzada).</p>
+  </header>
+
+  <section class="bloque resumen" aria-label="Resumen de la orden">
+    <h3>Orden</h3>
+    <dl class="facts">
+      <div>
+        <dt>Número</dt>
+        <dd class="solvix-mono">{{ orden.numero }}</dd>
+      </div>
+      <div>
+        <dt>Cliente</dt>
+        <dd>{{ orden.clienteNombre || '—' }}</dd>
+      </div>
+      <div>
+        <dt>Equipo</dt>
+        <dd>{{ equipoLabel(orden) }}</dd>
+      </div>
+      <div>
+        <dt>Recepción</dt>
+        <dd class="solvix-mono">{{ fecha(orden.fechaRecepcion) }}</dd>
+      </div>
+    </dl>
+    @if (orden.trabajoRealizado) {
+      <p class="campo">
+        <span>Trabajo realizado</span>
+        {{ orden.trabajoRealizado }}
+      </p>
+    }
+    @if (repuestosUsados.length) {
+      <p class="campo">
+        <span>Repuestos utilizados</span>
+        @for (r of repuestosUsados; track r.id; let last = $last) {
+          <span class="rep-item">{{ r.productoNombre }} ({{ r.cantidadNetaConsumida }})@if (!last) {; }</span>
+        }
+      </p>
+    }
+  </section>
+
+  <form class="bloque form-entrega" [formGroup]="form" (ngSubmit)="registrar()">
+    <h3>Confirmación del cliente</h3>
+    <p class="aviso">
+      Quien recibe declara haber tomado el equipo y la información de esta orden.
+    </p>
+
+    <label class="check">
+      <input type="checkbox" formControlName="clienteConfirmo" />
+      <span>El cliente confirma la recepción del equipo.</span>
+    </label>
+
+    <div class="grid-2">
+      <label>
+        <span class="label-row">Nombre del firmante <span class="req">requerido</span></span>
+        <input formControlName="nombreFirmante" maxlength="150" autocomplete="name" />
+        <span class="hint">Puede ser el cliente o quien lo represente al retirar el equipo.</span>
+      </label>
+
+      <label>
+        <span class="label-row">
+          @if (documentoClienteOrigen === 'cliente') {
+            Documento del cliente
+          } @else {
+            Documento del firmante <span class="opt">opcional</span>
+          }
+        </span>
+        <input
+          formControlName="documentoFirmante"
+          maxlength="50"
+          [readonly]="documentoClienteReadonly"
+          [attr.aria-busy]="cargandoCliente"
+        />
+        @if (documentoClienteOrigen === 'cliente') {
+          <span class="hint">Tomado del perfil del cliente. Si firma otra persona, anota su documento en observaciones.</span>
+        } @else {
+          <span class="hint">Úsalo si quien firma no es el titular o el cliente no tiene documento registrado.</span>
+        }
+      </label>
+    </div>
+
+    <h3 class="sep">Firma</h3>
+    <p class="aviso">Firma con mouse, dedo o stylus dentro del área.</p>
+    <div class="firma-wrap">
+      <canvas #firmaCanvas class="firma-canvas" aria-label="Área de firma del cliente"></canvas>
+    </div>
+    <div class="firma-bar">
+      <span class="firma-status" [class.ok]="firmado">
+        {{ firmado ? 'Firma capturada' : 'Sin firma' }}
+      </span>
+      <solvix-button family="tech" rank="tertiary" type="button" (click)="limpiarFirma()">
+        Limpiar firma
+      </solvix-button>
+    </div>
+
+    <h3 class="sep">Observaciones de entrega <span class="opt">opcional</span></h3>
+    <label class="obs-label">
+      <textarea
+        formControlName="observaciones"
+        rows="2"
+        maxlength="1000"
+        placeholder="Novedades o condición del equipo al entregarlo"
+      ></textarea>
+      <span class="hint">Registre cualquier novedad relevante al momento de entregar el equipo.</span>
+    </label>
+
+    <section class="resumen-final" aria-label="Resumen antes de registrar">
+      <h3>Antes de registrar</h3>
+      <ul class="checklist">
+        <li [class.ok]="form.controls.clienteConfirmo.value">Confirmación del cliente</li>
+        <li [class.ok]="firmado">Firma manuscrita</li>
+        <li [class.ok]="!!form.controls.nombreFirmante.value?.trim()">Nombre del firmante</li>
+      </ul>
+      <p class="aviso final-hint">
+        Al confirmar, la orden pasará a <strong>Entregado</strong> y luego a <strong>Cerrado</strong>.
+      </p>
+    </section>
+
+    @if (error) {
+      <p class="form-error" role="alert">{{ error }}</p>
+    }
+
+    <div class="dlg-actions">
+      <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
+        Cancelar
+      </solvix-button>
+      <solvix-button
+        family="tech"
+        rank="primary"
+        type="submit"
+        [disabled]="!puedeRegistrar"
+      >
+        {{ enviando ? 'Registrando…' : 'Registrar entrega' }}
+      </solvix-button>
+    </div>
+  </form>
+</div>

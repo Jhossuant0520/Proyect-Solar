@@ -7,10 +7,13 @@ import {
   CompletarReparacionRequestDTO,
   ConsumirRepuestoRequestDTO,
   DevolverRepuestoRequestDTO,
+  EntregaOrdenServicioResponseDTO,
   HistorialEstadoOrdenServicioResponseDTO,
   OrdenServicioFiltros,
   OrdenServicioRequestDTO,
   OrdenServicioResponseDTO,
+  RegistrarEntregaRequestDTO,
+  RegistrarEntregaResponseDTO,
   RegistrarNuevaFallaRequestDTO,
   RepuestoOrdenServicioRequestDTO,
   RepuestoOrdenServicioResponseDTO,
@@ -52,10 +55,6 @@ export class OrdenServicioService {
     return this.http.post<OrdenServicioResponseDTO>(this.apiUrl, request);
   }
 
-  /**
-   * Actualiza textos. El body debe conservar clienteId y equipoId originales;
-   * el backend rechaza cambios de relación y de estado.
-   */
   actualizar(id: number, request: OrdenServicioRequestDTO): Observable<OrdenServicioResponseDTO> {
     return this.http.put<OrdenServicioResponseDTO>(`${this.apiUrl}/${id}`, request);
   }
@@ -67,7 +66,6 @@ export class OrdenServicioService {
     return this.http.post<TransicionOrdenServicioResponseDTO>(`${this.apiUrl}/${id}/estado`, request);
   }
 
-  /** EN_DIAGNOSTICO → DIAGNOSTICADO (ficha técnica + historial atómicos). */
   completarDiagnostico(
     id: number,
     request: CompletarDiagnosticoRequestDTO
@@ -78,7 +76,6 @@ export class OrdenServicioService {
     );
   }
 
-  /** EN_REPARACION → LISTO (trabajo realizado + historial atómicos). */
   completarReparacion(
     id: number,
     request: CompletarReparacionRequestDTO
@@ -89,7 +86,6 @@ export class OrdenServicioService {
     );
   }
 
-  /** EN_REPARACION → REQUIERE_APROBACION_ADICIONAL. */
   registrarNuevaFalla(
     id: number,
     request: RegistrarNuevaFallaRequestDTO
@@ -98,6 +94,17 @@ export class OrdenServicioService {
       `${this.apiUrl}/${id}/nueva-falla`,
       request
     );
+  }
+
+  registrarEntrega(
+    id: number,
+    request: RegistrarEntregaRequestDTO
+  ): Observable<RegistrarEntregaResponseDTO> {
+    return this.http.post<RegistrarEntregaResponseDTO>(`${this.apiUrl}/${id}/entrega`, request);
+  }
+
+  obtenerEntrega(id: number): Observable<EntregaOrdenServicioResponseDTO> {
+    return this.http.get<EntregaOrdenServicioResponseDTO>(`${this.apiUrl}/${id}/entrega`);
   }
 
   listarRepuestos(ordenId: number): Observable<RepuestoOrdenServicioResponseDTO[]> {
@@ -125,7 +132,6 @@ export class OrdenServicioService {
     );
   }
 
-  /** Soft-anular (DELETE). Solo si no hay consumo neto. */
   anularRepuesto(ordenId: number, repuestoId: number): Observable<RepuestoOrdenServicioResponseDTO> {
     return this.http.delete<RepuestoOrdenServicioResponseDTO>(
       `${this.apiUrl}/${ordenId}/repuestos/${repuestoId}`

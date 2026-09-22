@@ -38,10 +38,13 @@ public class OrdenServicioRepuestoService {
     private static final Set<EstadoOrdenServicio> ESTADOS_PLANIFICAR = EnumSet.of(
         EstadoOrdenServicio.RECEPCIONADO,
         EstadoOrdenServicio.EN_DIAGNOSTICO,
+        EstadoOrdenServicio.DIAGNOSTICADO,
         EstadoOrdenServicio.COTIZADO,
+        EstadoOrdenServicio.PENDIENTE_APROBACION,
         EstadoOrdenServicio.APROBADO,
         EstadoOrdenServicio.EN_REPARACION,
-        EstadoOrdenServicio.ESPERA_REPUESTO);
+        EstadoOrdenServicio.ESPERA_REPUESTO,
+        EstadoOrdenServicio.REQUIERE_APROBACION_ADICIONAL);
 
     /** Consumo físico solo con uso confirmado en reparación. */
     private static final Set<EstadoOrdenServicio> ESTADOS_CONSUMIR = EnumSet.of(

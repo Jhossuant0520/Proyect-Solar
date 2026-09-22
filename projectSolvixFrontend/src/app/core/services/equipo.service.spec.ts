@@ -13,7 +13,7 @@ describe('EquipoService', () => {
     marca: 'Dell',
     modelo: 'XPS',
     numeroSerie: 'SN-1',
-    nombre: 'Notebook Ana',
+    referenciaInterna: 'Notebook Ana',
     observaciones: null,
     activo: true
   };

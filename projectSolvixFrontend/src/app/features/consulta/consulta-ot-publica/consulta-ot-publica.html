@@ -1,0 +1,49 @@
+<section class="consulta-page">
+  <div class="consulta-glow consulta-glow--a" aria-hidden="true"></div>
+  <div class="consulta-glow consulta-glow--b" aria-hidden="true"></div>
+  <div class="consulta-grid" aria-hidden="true"></div>
+
+  <a routerLink="/" class="consulta-home" aria-label="Ir al inicio">
+    <img src="LogoSolvix3.1.png" alt="SOLVIX" class="consulta-logo" />
+  </a>
+
+  <article class="consulta-card fade-up">
+    @if (state === 'loading') {
+      <solvix-loading-state label="Consultando tu orden." />
+    } @else if (state === 'error' || state === 'sin-token') {
+      <solvix-error-state
+        title="No pudimos mostrar la orden."
+        [message]="errorMessage"
+      />
+    } @else if (data) {
+      <p class="kicker">Consulta de servicio</p>
+      <h1 class="solvix-mono">{{ data.numero }}</h1>
+      <p class="estado">{{ data.estadoPublico }}</p>
+
+      <dl class="facts">
+        <div>
+          <dt>Equipo</dt>
+          <dd>{{ equipoResumen() }}</dd>
+        </div>
+        @if (data.referenciaInterna) {
+          <div>
+            <dt>Referencia</dt>
+            <dd class="solvix-mono">{{ data.referenciaInterna }}</dd>
+          </div>
+        }
+        <div>
+          <dt>Recepción</dt>
+          <dd class="solvix-mono">{{ fecha(data.fechaRecepcion) }}</dd>
+        </div>
+        <div>
+          <dt>Actualización</dt>
+          <dd class="solvix-mono">{{ fecha(data.fechaActualizacion) }}</dd>
+        </div>
+      </dl>
+
+      @if (data.mensaje) {
+        <p class="mensaje">{{ data.mensaje }}</p>
+      }
+    }
+  </article>
+</section>

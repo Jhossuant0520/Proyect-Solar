@@ -67,7 +67,7 @@ export class ClienteEquiposPanelComponent implements OnChanges {
       marca: ['', Validators.maxLength(80)],
       modelo: ['', Validators.maxLength(80)],
       numeroSerie: ['', Validators.maxLength(100)],
-      nombre: ['', Validators.maxLength(120)],
+      referenciaInterna: ['', Validators.maxLength(120)],
       observaciones: ['', Validators.maxLength(1000)]
     });
   }
@@ -127,7 +127,7 @@ export class ClienteEquiposPanelComponent implements OnChanges {
       marca: '',
       modelo: '',
       numeroSerie: '',
-      nombre: '',
+      referenciaInterna: '',
       observaciones: ''
     });
   }
@@ -144,7 +144,7 @@ export class ClienteEquiposPanelComponent implements OnChanges {
       marca: equipo.marca ?? '',
       modelo: equipo.modelo ?? '',
       numeroSerie: equipo.numeroSerie ?? '',
-      nombre: equipo.nombre ?? '',
+      referenciaInterna: equipo.referenciaInterna ?? equipo.nombre ?? '',
       observaciones: equipo.observaciones ?? ''
     });
   }
@@ -228,7 +228,7 @@ export class ClienteEquiposPanelComponent implements OnChanges {
       marca: equipo.marca,
       modelo: equipo.modelo,
       numeroSerie: equipo.numeroSerie,
-      nombre: equipo.nombre,
+      referenciaInterna: equipo.referenciaInterna ?? equipo.nombre ?? null,
       observaciones: equipo.observaciones,
       activo: true
     };
@@ -255,7 +255,7 @@ export class ClienteEquiposPanelComponent implements OnChanges {
       marca: textoONull(v.marca),
       modelo: textoONull(v.modelo),
       numeroSerie: textoONull(v.numeroSerie),
-      nombre: textoONull(v.nombre),
+      referenciaInterna: textoONull(v.referenciaInterna),
       observaciones: textoONull(v.observaciones),
       activo: true
     };

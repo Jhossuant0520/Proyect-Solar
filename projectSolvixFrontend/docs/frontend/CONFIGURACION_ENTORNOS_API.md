@@ -160,3 +160,12 @@ http.expectOne(`${environment.apiBaseUrl}/v1/productos`);
 ```
 
 en lugar de literales `http://localhost:8080/...`.
+
+## 15. QR de consulta de servicio (`frontend.base-url`)
+
+Los PDFs de orden de servicio incluyen un QR. La URL la arma el **backend** con la propiedad `frontend.base-url` (p. ej. `http://localhost:4200` en local):
+
+- Comprobante / acta → `{frontend.base-url}/consulta/ot/{token}`
+- Cotización → `{frontend.base-url}/consulta/documento/{tokenDocumento}`
+
+El Angular no necesita un `frontendBaseUrl` en `environment` para generar el QR. Solo debe existir la ruta pública correspondiente (sin `authGuard`). Si el QR apunta a otro host, ajusta `frontend.base-url` en el backend.
