@@ -6,7 +6,7 @@
     "start": "ng serve",
     "start:test": "ng serve --configuration=test",
     "build": "ng build",
-    "build:test": "ng build --configuration=test",
+    "build:test": "ng build --configuration=test && node scripts/postbuild-test.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
