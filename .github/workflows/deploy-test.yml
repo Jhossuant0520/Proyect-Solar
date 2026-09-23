@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
@@ -28,12 +28,12 @@ jobs:
       - name: Build Angular TEST
         run: npm run build:test
 
-      - name: Verify Angular build
+      - name: Verify build
         run: |
-          test -f dist/projectSolarFishFrontend/index.html
-          echo "Angular build OK"
+          test -f dist/projectSolarFishFrontend/browser/index.html
+          echo "✅ Angular TEST build verified"
 
-      - name: Deploy to cPanel TEST
+      - name: Deploy TEST via FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -41,5 +41,11 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftps
           port: 21
-          local-dir: ./dist/projectSolarFishFrontend/
-          server-dir: /public_html/test/
+          local-dir: ./dist/projectSolarFishFrontend/browser/
+          server-dir: /
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            .well-known/**
+            projectSolarFishFrontend/**
