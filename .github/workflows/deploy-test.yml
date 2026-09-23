@@ -38,7 +38,7 @@ jobs:
         run: |
           set -euo pipefail
           test -f dist/projectSolarFishFrontend/browser/index.html
-          find dist/projectSolarFishFrontend/browser -maxdepth 1 -type f -regex '.*/(main.*\.js|polyfills.*\.js|styles.*\.css)$' | grep -q .
+          find dist/projectSolarFishFrontend/browser -regextype posix-extended -maxdepth 1 -type f -regex '.*/(main.*\.js|polyfills.*\.js|styles.*\.css)$' | grep -q .
           find dist/projectSolarFishFrontend/browser -maxdepth 1 -type f -name 'chunk-*.js' | grep -q .
           python - <<'PY'
           import hashlib, json
