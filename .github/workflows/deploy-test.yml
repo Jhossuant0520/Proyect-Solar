@@ -1,0 +1,45 @@
+name: Deploy Angular TEST
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy TEST
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Angular TEST
+        run: npm run build:test
+
+      - name: Verify Angular build
+        run: |
+          test -f dist/projectSolarFishFrontend/index.html
+          echo "Angular build OK"
+
+      - name: Deploy to cPanel TEST
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./dist/projectSolarFishFrontend/
+          server-dir: /public_html/test/
