@@ -33,10 +33,96 @@ jobs:
       - name: Build Angular TEST
         run: npm run build:test
 
-      - name: Verify build
+      - name: Verify Angular TEST build artifacts
+        shell: bash
         run: |
+          set -euo pipefail
           test -f dist/projectSolarFishFrontend/browser/index.html
-          echo "Angular TEST build verified"
+          find dist/projectSolarFishFrontend/browser -maxdepth 1 -type f -regex '.*/(main.*\.js|polyfills.*\.js|styles.*\.css)$' | grep -q .
+          find dist/projectSolarFishFrontend/browser -maxdepth 1 -type f -name 'chunk-*.js' | grep -q .
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          base = Path('dist/projectSolarFishFrontend/browser')
+          manifest = {}
+          for p in sorted(base.rglob('*')):
+              if p.is_file() and '.git' not in p.parts and p.name not in {'.ftp-deploy-sync-state.json','.ftp-deploy-sync-state-test.json'}:
+                  manifest[p.relative_to(base).as_posix()] = hashlib.sha256(p.read_bytes()).hexdigest()
+          out = Path('/tmp/test-build-manifest.json')
+          out.write_text(json.dumps(manifest, indent=2, sort_keys=True))
+          print(f'Wrote {out}')
+          PY
+
+      - name: Clean stale Angular files from FTP TEST root
+        shell: bash
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import ftplib
+          import os
+          host = os.environ['FTP_SERVER']
+          user = os.environ['FTP_USERNAME']
+          password = os.environ['FTP_PASSWORD']
+          ftp = ftplib.FTP_TLS()
+          ftp.connect(host, 21, timeout=30)
+          ftp.login(user, password)
+          ftp.prot_p()
+          ftp.cwd('/')
+
+          def remove_tree(remote_path: str) -> None:
+              try:
+                  items = ftp.nlst(remote_path)
+              except Exception:
+                  return
+              for item in items:
+                  name = item.rsplit('/', 1)[-1]
+                  if name in {'.well-known'}:
+                      continue
+                  try:
+                      ftp.cwd(item)
+                  except Exception:
+                      try:
+                          ftp.delete(item)
+                      except Exception:
+                          pass
+                  else:
+                      remove_tree(item)
+                      try:
+                          ftp.rmd(item)
+                      except Exception:
+                          pass
+                      ftp.cwd('/')
+
+          names = ftp.nlst()
+          for name in names:
+              if name in {'.well-known', '.ftp-deploy-sync-state.json', '.ftp-deploy-sync-state-test.json'}:
+                  continue
+              if name in {'assets', 'browser', 'projectSolarFishFrontend'}:
+                  remove_tree(name)
+                  try:
+                      ftp.rmd(name)
+                  except Exception:
+                      pass
+                  continue
+              if name.startswith('main') or name.startswith('polyfills') or name.startswith('styles') or name.startswith('chunk-'):
+                  try:
+                      ftp.delete(name)
+                  except Exception:
+                      pass
+                  continue
+              if name.endswith(('.js', '.css', '.html', '.json', '.map', '.ico', '.png', '.svg', '.jpg', '.jpeg', '.webp', '.gif', '.xml', '.txt')):
+                  try:
+                      ftp.delete(name)
+                  except Exception:
+                      pass
+                  continue
+
+          ftp.quit()
+          PY
 
       - name: Deploy TEST via FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0
@@ -48,9 +134,11 @@ jobs:
           port: 21
           local-dir: ./projectSolvixFrontend/dist/projectSolarFishFrontend/browser/
           server-dir: /
+          state-name: .ftp-deploy-sync-state-test.json
           exclude: |
             **/.git*
             **/.git*/**
             **/.github/**
             .well-known/**
             projectSolarFishFrontend/**
+            browser/**

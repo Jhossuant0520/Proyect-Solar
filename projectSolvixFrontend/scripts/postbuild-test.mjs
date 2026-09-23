@@ -8,23 +8,30 @@ if (!fs.existsSync(indexFile)) {
   throw new Error('No se encontró dist/projectSolarFishFrontend/browser/index.html tras el build de TEST.');
 }
 
-const jsFiles = ['main.js', 'polyfills.js', 'styles.css'];
-for (const file of jsFiles) {
-  const candidate = path.join(browserDir, file);
-  if (!fs.existsSync(candidate)) {
-    throw new Error(`Falta el artefacto requerido de la build TEST: ${file}`);
-  }
+const files = fs.readdirSync(browserDir).filter((name) => fs.statSync(path.join(browserDir, name)).isFile());
+const mainFile = files.find((name) => /^main.*\.js$/.test(name));
+const polyfillsFile = files.find((name) => /^polyfills.*\.js$/.test(name));
+const stylesFile = files.find((name) => /^styles.*\.css$/.test(name));
+
+if (!mainFile) {
+  throw new Error('Falta el bundle principal de la build TEST (main*.js).');
+}
+if (!polyfillsFile) {
+  throw new Error('Falta el polyfills de la build TEST (polyfills*.js).');
+}
+if (!stylesFile) {
+  throw new Error('Falta el CSS principal de la build TEST (styles*.css).');
 }
 
-const chunks = fs.readdirSync(browserDir).filter((name) => /^chunk-.*\.js$/.test(name));
+const chunks = files.filter((name) => /^chunk-.*\.js$/.test(name));
 if (chunks.length === 0) {
   throw new Error('La build TEST no generó chunks Angular.');
 }
 
 const content = fs.readFileSync(indexFile, 'utf8');
-const hasMain = /<script[^>]+src="main\.js"/i.test(content);
-const hasPolyfills = /<script[^>]+src="polyfills\.js"/i.test(content);
-const hasStyles = /<link[^>]+href="styles\.css"/i.test(content);
+const hasMain = /<script[^>]+src="[^"]*main[^\"]*\.js"/i.test(content);
+const hasPolyfills = /<script[^>]+src="[^"]*polyfills[^\"]*\.js"/i.test(content);
+const hasStyles = /<link[^>]+href="[^"]*styles[^\"]*\.css"/i.test(content);
 
 if (!hasMain || !hasPolyfills || !hasStyles) {
   throw new Error('El index.html generado por Angular no referencia los assets requeridos del build de TEST.');
