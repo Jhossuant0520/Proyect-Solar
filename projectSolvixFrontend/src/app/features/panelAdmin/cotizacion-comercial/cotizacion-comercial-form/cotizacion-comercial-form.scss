@@ -1,0 +1,245 @@
+.cot-form-page {
+  position: relative;
+  z-index: 1;
+  max-width: 80rem;
+}
+
+.form-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(16rem, 0.8fr);
+  gap: 1.25rem;
+}
+
+.panel {
+  background: var(--solvix-panel);
+  border: 1px solid var(--solvix-border);
+  border-radius: var(--solvix-radius);
+  padding: 1.2rem 1.3rem;
+  margin-bottom: 1.25rem;
+}
+
+.sticky {
+  position: sticky;
+  top: 1rem;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  color: var(--solvix-text-muted);
+  font-family: var(--solvix-font);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+input,
+textarea {
+  background: var(--solvix-surface-low);
+  border: 1px solid var(--solvix-border-subtle);
+  color: var(--solvix-text);
+  border-radius: 0.125rem;
+  padding: 0.55rem 0.7rem;
+  font-family: var(--solvix-font-mono);
+  font-size: 0.85rem;
+}
+
+input:focus,
+textarea:focus {
+  outline: 2px solid var(--solvix-secondary);
+}
+
+.campo-label {
+  color: var(--solvix-text-muted);
+  font-family: var(--solvix-font);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.hint,
+.empty-line {
+  text-transform: none;
+  font-size: 0.75rem;
+  color: var(--solvix-text-muted);
+}
+
+.agregar {
+  display: grid;
+  gap: 0.8rem;
+  margin: 0.8rem 0 1rem;
+}
+
+.agregar-producto {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.agregar-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  border: 1px dashed rgba(79, 209, 255, 0.45);
+  background: transparent;
+  color: #4fd1ff;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.chip:hover {
+  background: rgba(79, 209, 255, 0.08);
+}
+
+.chip .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+.linea {
+  border: 1px solid var(--solvix-border-subtle);
+  border-left: 3px solid var(--solvix-secondary);
+  border-radius: 0.35rem;
+  padding: 0.9rem;
+  margin-bottom: 0.8rem;
+}
+
+.linea[data-tipo='MANO_OBRA'] {
+  border-left-color: #f59e0b;
+}
+
+.linea[data-tipo='OTRO'] {
+  border-left-color: #a78bfa;
+}
+
+.linea header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.7rem;
+  margin-bottom: 0.8rem;
+}
+
+.linea strong {
+  display: block;
+  color: var(--solvix-text);
+}
+
+.tipo {
+  display: inline-block;
+  font-family: var(--solvix-font-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--solvix-text-muted);
+  margin-bottom: 0.2rem;
+}
+
+.linea-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+  align-items: end;
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+.subtotal {
+  display: grid;
+  gap: 0.3rem;
+  text-align: right;
+}
+
+.subtotal strong {
+  color: var(--solvix-primary);
+}
+
+.icon-btn {
+  background: transparent;
+  border: 0;
+  color: var(--solvix-text-muted);
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  color: var(--solvix-error);
+}
+
+.facts {
+  display: grid;
+  gap: 0.8rem;
+  margin: 0 0 1rem;
+}
+
+.facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.facts .total {
+  border-top: 1px solid var(--solvix-border-subtle);
+  padding-top: 0.7rem;
+}
+
+.facts .total dd {
+  color: var(--solvix-primary);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+dt {
+  color: var(--solvix-text-muted);
+  font-family: var(--solvix-font);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+dd {
+  margin: 0;
+  color: var(--solvix-text);
+  font-family: var(--solvix-font-mono);
+}
+
+.aviso {
+  font-size: 0.8rem;
+  color: #fbbf24;
+}
+
+.form-error {
+  color: var(--solvix-error);
+  font-size: 0.85rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 1.2rem;
+}
+
+@media (max-width: 1023px) {
+  .form-layout,
+  .linea-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sticky {
+    position: static;
+  }
+
+  .subtotal {
+    text-align: left;
+  }
+}

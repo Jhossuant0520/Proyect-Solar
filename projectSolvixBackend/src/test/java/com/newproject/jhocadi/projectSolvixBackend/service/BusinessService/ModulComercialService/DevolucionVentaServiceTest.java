@@ -116,7 +116,7 @@ class DevolucionVentaServiceTest extends ComercialTestSupport {
         devolver(venta, 1);
 
         assertThat(ventaRepository.count()).isEqualTo(ventasAntes);
-        assertThat(ventaService.listar(null, null, null, null)).hasSize(1);
+        assertThat(ventaService.listar(null, null, null, null, null, 0, 50).getContenido()).hasSize(1);
         assertThat(devolucionVentaRepository.count()).isEqualTo(1);
     }
 

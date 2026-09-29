@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { SolvixBadgeComponent } from '../../../../shared/components/solvix-badge/solvix-badge';
 import { SolvixButtonComponent } from '../../../../shared/components/solvix-button/solvix-button';
 import { SolvixEmptyStateComponent } from '../../../../shared/components/solvix-empty-state/solvix-empty-state';
@@ -9,6 +9,7 @@ import { SolvixErrorStateComponent } from '../../../../shared/components/solvix-
 import { SolvixLoadingStateComponent } from '../../../../shared/components/solvix-loading-state/solvix-loading-state';
 import { SolvixPageHeaderComponent } from '../../../../shared/components/solvix-page-header/solvix-page-header';
 import { DialogoConfirmacionDelete } from '../../../../shared/components/dialogo-confirmacion-delete/dialogo-confirmacion-delete';
+import { SolvixFeedbackService } from '../../../../shared/services/solvix-feedback.service';
 import { ClienteService } from '../../../../core/services/cliente.service';
 import { ClienteResponseDTO, TipoCliente } from '../../../../core/models/cliente.models';
 import { aRequestConEstado } from '../cliente-mapper';
@@ -21,7 +22,6 @@ import {
   puedeDesactivarCliente,
   puedeEditarCliente
 } from '../cliente-ui';
-import { showSolvixSnack } from '../../../../shared/utils/solvix-snack';
 
 type ListaEstado = 'loading' | 'ready' | 'empty' | 'error';
 
@@ -57,7 +57,7 @@ export class ClienteListComponent implements OnInit {
   constructor(
     private clienteService: ClienteService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar,
+    private feedback: SolvixFeedbackService,
     private router: Router
   ) {}
 
@@ -139,15 +139,10 @@ export class ClienteListComponent implements OnInit {
       this.clienteService.desactivar(cliente.id, aRequestConEstado(cliente, false)).subscribe({
         next: actualizado => {
           this.clientes = this.clientes.map(item => item.id === actualizado.id ? actualizado : item);
-          showSolvixSnack(this.snackBar, 'Cliente desactivado. El historial se conserva.', 'warning');
+          this.feedback.warning('Cliente actualizado');
         },
         error: err => {
-          showSolvixSnack(
-            this.snackBar,
-            mensajeErrorCliente(err, 'No pudimos desactivar este cliente.'),
-            'error',
-            4000
-          );
+          this.feedback.error(mensajeErrorCliente(err, 'No pudimos desactivar este cliente.'), 4000);
         }
       });
     });
@@ -160,15 +155,10 @@ export class ClienteListComponent implements OnInit {
     this.clienteService.actualizar(cliente.id, aRequestConEstado(cliente, true)).subscribe({
       next: actualizado => {
         this.clientes = this.clientes.map(item => item.id === actualizado.id ? actualizado : item);
-        showSolvixSnack(this.snackBar, 'Cliente activo de nuevo.', 'success');
+        this.feedback.success('Cliente actualizado');
       },
       error: err => {
-        showSolvixSnack(
-          this.snackBar,
-          mensajeErrorCliente(err, 'No pudimos activar este cliente.'),
-          'error',
-          4000
-        );
+        this.feedback.error(mensajeErrorCliente(err, 'No pudimos activar este cliente.'), 4000);
       }
     });
   }

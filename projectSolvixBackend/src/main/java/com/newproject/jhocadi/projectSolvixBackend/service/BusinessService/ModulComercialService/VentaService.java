@@ -5,12 +5,15 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulComercialDtos.DetalleVentaRequestDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulComercialDtos.PaginaResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulComercialDtos.VentaRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulComercialDtos.VentaResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.exception.BusinessException;
@@ -125,19 +128,36 @@ public class VentaService {
         return VentaResponseDTO.fromEntity(ventaRepository.save(venta));
     }
 
+    private static final int TAMANO_DEFAULT_PAGINA = 20;
+    private static final int TAMANO_MAXIMO_PAGINA = 50;
+
     @Transactional(readOnly = true)
-    public List<VentaResponseDTO> listar(
-            Long clienteId, EstadoVenta estado, LocalDateTime desde, LocalDateTime hasta) {
+    public PaginaResponseDTO<VentaResponseDTO> listar(
+            String q,
+            Long clienteId,
+            EstadoVenta estado,
+            LocalDateTime desde,
+            LocalDateTime hasta,
+            Integer pagina,
+            Integer tamano) {
 
         if (desde != null && hasta != null && desde.isAfter(hasta)) {
             throw new BusinessException("La fecha inicial no puede ser posterior a la fecha final.");
         }
 
-        return ventaRepository
-            .findAll(VentaSpecifications.conFiltros(clienteId, estado, desde, hasta))
-            .stream()
-            .map(VentaResponseDTO::fromEntity)
-            .toList();
+        int numeroPagina = pagina != null && pagina > 0 ? pagina : 0;
+        int tamanoPagina = tamano != null
+            ? Math.min(Math.max(tamano, 1), TAMANO_MAXIMO_PAGINA)
+            : TAMANO_DEFAULT_PAGINA;
+
+        return PaginaResponseDTO.desde(
+            ventaRepository.findAll(
+                VentaSpecifications.conFiltros(q, clienteId, estado, desde, hasta),
+                PageRequest.of(
+                    numeroPagina,
+                    tamanoPagina,
+                    Sort.by(Sort.Order.desc("fecha"), Sort.Order.desc("id")))),
+            VentaResponseDTO::fromEntity);
     }
 
     @Transactional(readOnly = true)

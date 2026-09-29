@@ -26,13 +26,13 @@ describe('OrdenServicioService', () => {
 
   afterEach(() => http.verify());
 
-  it('lista con filtros reales', () => {
-    service.listar({ clienteId: 4, estado: 'RECEPCIONADO' }).subscribe();
+  it('lista con filtros reales y paginación', () => {
+    service.listar({ clienteId: 4, estado: 'RECEPCIONADO', q: '125' }).subscribe();
     const req = http.expectOne(
-      `${environment.apiBaseUrl}/v1/ordenes-servicio?clienteId=4&estado=RECEPCIONADO`
+      `${environment.apiBaseUrl}/v1/ordenes-servicio?q=125&clienteId=4&estado=RECEPCIONADO&pagina=0&tamano=20`
     );
     expect(req.request.method).toBe('GET');
-    req.flush([]);
+    req.flush({ contenido: [], pagina: 0, tamano: 20, totalElementos: 0, totalPaginas: 0 });
   });
 
   it('obtiene por id', () => {

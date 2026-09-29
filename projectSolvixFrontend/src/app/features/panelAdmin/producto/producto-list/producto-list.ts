@@ -16,7 +16,6 @@ import { InventarioKpiDTO } from '../../../../core/models/analytics.models';
 import { CategoriaProductoModel, ProductoFiltros, ProductoModel } from '../productoClase';
 import { formatMoney, formatMetricValue, labelEstadoMetrica, notaEstadoMetrica } from '../../dashboard/utils/dashboard-format';
 import { periodoInicial, toQueryDesde, toQueryHasta } from '../../dashboard/utils/dashboard-period';
-import { AjusteCostoDialogComponent } from '../ajuste-costo-dialog/ajuste-costo-dialog';
 import { productoCoincideBusqueda } from '../producto-ui';
 
 type ListaEstado = 'loading' | 'ready' | 'empty' | 'error';
@@ -159,35 +158,15 @@ export class ProductoList implements OnInit {
     this.router.navigate(['/productos', producto.id, 'editar']);
   }
 
-  ajustarCosto(producto: ProductoModel): void {
-    if (producto.id == null) {
-      return;
-    }
-    const ref = this.dialog.open(AjusteCostoDialogComponent, {
-      data: {
-        productoId: producto.id,
-        nombre: producto.nombre,
-        costoActual: producto.costoActual ?? null,
-        costoConocido: producto.costoConocido === true,
-        stockActual: producto.stockActual ?? 0
-      },
-      panelClass: 'solvix-dialog-panel',
-      backdropClass: 'solvix-dialog-backdrop'
-    });
-    ref.afterClosed().subscribe(resultado => {
-      if (resultado) {
-        this.cargarProductos();
-        this.cargarIndicadoresInventario();
-      }
-    });
-  }
-
   desactivarProducto(id: number | undefined): void {
     if (id == null) {
       return;
     }
     const dialogRef = this.dialog.open(DialogoConfirmacionDelete, {
-      data: { mensaje: '¿Desactivar este producto del catálogo?' },
+      data: {
+        mensaje: '¿Desactivar este producto? No se borra: su historial se conserva, '
+          + 'pero no podrá usarse en ventas ni cotizaciones nuevas.'
+      },
       panelClass: 'solvix-dialog-panel',
       backdropClass: 'solvix-dialog-backdrop'
     });
@@ -202,8 +181,15 @@ export class ProductoList implements OnInit {
     });
   }
 
-  costoTexto(producto: ProductoModel): string {
-    return producto.costoConocido ? this.money(producto.costoActual) : 'Sin costo';
+  activarProducto(id: number | undefined): void {
+    if (id == null) {
+      return;
+    }
+    this.productoService.activar(id).subscribe({
+      next: actualizado => {
+        this.productos = this.productos.map(item => item.id === id ? actualizado : item);
+      }
+    });
   }
 
   valorInventarioTexto(): string {

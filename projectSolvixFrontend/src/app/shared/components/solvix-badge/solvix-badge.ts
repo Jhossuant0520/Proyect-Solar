@@ -17,26 +17,36 @@ export type SolvixBadgeTone = 'neutral' | 'success' | 'warning' | 'error';
       gap: 0.25rem;
       padding: 0.15rem 0.5rem;
       border-radius: 0.25rem;
-      font-family: var(--solvix-font-mono);
-      font-size: 0.75rem;
+      border: 1px solid transparent;
+      font-family: var(--solvix-font);
+      font-size: 0.68rem;
+      font-weight: 600;
       letter-spacing: 0.06em;
       text-transform: uppercase;
+      transition:
+        background-color var(--motion-fast, 140ms) var(--ease-standard, ease),
+        color var(--motion-fast, 140ms) var(--ease-standard, ease),
+        border-color var(--motion-fast, 140ms) var(--ease-standard, ease);
     }
     .solvix-badge--neutral {
-      color: var(--solvix-text-muted);
-      background: rgba(148, 163, 184, 0.12);
+      color: var(--solvix-text-secondary);
+      background: var(--solvix-neutral-soft);
+      border-color: var(--solvix-border);
     }
     .solvix-badge--success {
       color: var(--solvix-success);
-      background: rgba(16, 185, 129, 0.12);
+      background: var(--solvix-success-soft);
+      border-color: color-mix(in srgb, var(--solvix-success) 28%, transparent);
     }
     .solvix-badge--warning {
       color: var(--solvix-warning);
-      background: rgba(245, 158, 11, 0.12);
+      background: var(--solvix-warning-soft);
+      border-color: color-mix(in srgb, var(--solvix-warning) 28%, transparent);
     }
     .solvix-badge--error {
       color: var(--solvix-error);
-      background: rgba(147, 0, 10, 0.35);
+      background: var(--solvix-danger-soft);
+      border-color: color-mix(in srgb, var(--solvix-error) 28%, transparent);
     }
   `]
 })

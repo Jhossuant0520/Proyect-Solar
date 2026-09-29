@@ -83,4 +83,42 @@ class EquipoServiceTest extends ComercialTestSupport {
         assertThat(equipoService.crear(b).getId()).isNotNull();
         assertThat(equipoService.listar(cliente.getId(), true)).hasSize(2);
     }
+
+    @Test
+    @DisplayName("buscar: coincidencia parcial por serie y marca con límite")
+    void buscarParcialPorSerieYMarca() {
+        Cliente cliente = crearCliente("Busca equipo");
+        EquipoRequestDTO request = new EquipoRequestDTO();
+        request.setClienteId(cliente.getId());
+        request.setTipoEquipo(TipoEquipo.PORTATIL);
+        request.setMarca("Lenovo");
+        request.setModelo("ThinkPad");
+        request.setNumeroSerie("ABC123XYZ");
+        EquipoResponseDTO creado = equipoService.crear(request);
+
+        assertThat(equipoService.buscar("abc", 10, cliente.getId(), true))
+            .extracting(EquipoResponseDTO::getId)
+            .contains(creado.getId());
+        assertThat(equipoService.buscar("len", 10, cliente.getId(), true))
+            .extracting(EquipoResponseDTO::getMarca)
+            .contains("Lenovo");
+        assertThat(equipoService.buscar("zzz-no-existe", 10, cliente.getId(), true)).isEmpty();
+        assertThat(equipoService.buscar("len", 500, cliente.getId(), true)).hasSizeLessThanOrEqualTo(50);
+    }
+
+    @Test
+    @DisplayName("D.3: preview sin q textual acota a máximo 5 (orden fechaRegistro)")
+    void previewSinQMaximoCinco() {
+        Cliente cliente = crearCliente("Preview equipos");
+        for (int i = 0; i < 8; i++) {
+            EquipoRequestDTO request = new EquipoRequestDTO();
+            request.setClienteId(cliente.getId());
+            request.setTipoEquipo(TipoEquipo.PORTATIL);
+            request.setMarca("Marca" + i);
+            request.setModelo("M" + i);
+            equipoService.crear(request);
+        }
+        assertThat(equipoService.buscar("", 5, cliente.getId(), true)).hasSize(5);
+        assertThat(equipoService.buscar(null, 5, cliente.getId(), true)).hasSize(5);
+    }
 }

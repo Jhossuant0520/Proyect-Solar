@@ -1,0 +1,300 @@
+// Refinamientos del tema claro (referencia Stitch / catálogo Productos).
+// Solo aplica bajo html[data-theme='light']. El oscuro permanece intacto.
+
+html[data-theme='light'] {
+  /* Tipografía más cercana a Stitch */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Sin blob cian; el claro es limpio y plano */
+  .admin-shell__content::before {
+    opacity: 0;
+  }
+
+  /* Sidebar: ítem activo tipo pill sky */
+  .admin-sidebar {
+    background: var(--solvix-surface);
+    border-right-color: var(--solvix-border);
+    box-shadow: var(--solvix-shadow-sm);
+  }
+
+  .admin-sidebar__name {
+    color: #0369a1; /* sky-700 */
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  .admin-sidebar__kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.68rem;
+    color: #94a3b8;
+  }
+
+  .admin-sidebar__link {
+    border-radius: 0.5rem;
+    border: 1px solid transparent;
+    color: #475569;
+    font-weight: 500;
+  }
+
+  .admin-sidebar__link .material-symbols-outlined {
+    color: #94a3b8;
+  }
+
+  .admin-sidebar__link:hover,
+  .admin-sidebar__link:focus-visible {
+    color: #0f172a;
+    background: #f1f5f9;
+  }
+
+  .admin-sidebar__link:hover .material-symbols-outlined,
+  .admin-sidebar__link:focus-visible .material-symbols-outlined {
+    color: #64748b;
+  }
+
+  .admin-sidebar__link.is-active {
+    color: #0369a1;
+    background: #f0f9ff;
+    border: 1px solid rgba(186, 230, 253, 0.85); /* sky-200 */
+    border-right-width: 1px;
+    box-shadow: 0 1px 2px rgba(2, 132, 199, 0.06);
+    font-weight: 600;
+  }
+
+  .admin-sidebar__link.is-active .material-symbols-outlined {
+    color: #0284c7;
+  }
+
+  /* Topbar limpia */
+  .admin-topbar {
+    border-bottom: 1px solid var(--solvix-border);
+    backdrop-filter: blur(10px);
+  }
+
+  .admin-topbar__search input {
+    background: var(--solvix-surface-low);
+    border: 1px solid var(--solvix-border);
+    border-radius: 0.5rem;
+  }
+
+  .admin-topbar__search input:focus {
+    background: #ffffff;
+    border-color: var(--solvix-primary);
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+  }
+
+  .admin-topbar__avatar {
+    background: #e2e8f0;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+  }
+
+  /* Cabeceras de página: más peso tipográfico */
+  .solvix-page-header h1 {
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  .solvix-page-header__kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+
+  /* Cards KPI */
+  .metric {
+    background: var(--solvix-panel) !important;
+    backdrop-filter: none !important;
+    border-color: rgba(226, 232, 240, 0.95) !important;
+    border-radius: var(--solvix-radius-card) !important;
+    box-shadow: var(--solvix-shadow-sm);
+  }
+
+  .metric:hover {
+    border-color: #cbd5e1 !important;
+  }
+
+  /* Botones tech → CTA sky (Stitch) */
+  .btn-tech-primary {
+    background-color: var(--solvix-btn-tech-primary-bg);
+    color: var(--solvix-btn-tech-primary-fg);
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 2px rgba(2, 132, 199, 0.2);
+    letter-spacing: 0.06em;
+  }
+
+  .btn-tech-primary::before {
+    display: none;
+  }
+
+  .btn-tech-primary:hover {
+    background-color: var(--solvix-btn-tech-primary-hover);
+  }
+
+  .btn-tech-secondary {
+    background-color: var(--solvix-btn-tech-secondary-bg);
+    color: var(--solvix-btn-tech-secondary-fg);
+    border: 1px solid var(--solvix-border);
+    border-radius: 0.375rem;
+  }
+
+  .btn-tech-secondary::after {
+    display: none;
+  }
+
+  .btn-tech-secondary:hover {
+    background-color: var(--solvix-btn-tech-secondary-hover);
+  }
+
+  .btn-tech-tertiary {
+    color: var(--solvix-btn-tech-tertiary-fg);
+  }
+
+  .btn-tech-tertiary:hover {
+    color: var(--solvix-btn-tech-tertiary-hover);
+  }
+
+  /* Paneles / filtros / tablas del admin */
+  .filter-bar,
+  .table-panel,
+  .dash-panel,
+  .panel,
+  .form-layout .panel,
+  .form-layout .col > .panel {
+    background: var(--solvix-panel);
+    border-color: rgba(226, 232, 240, 0.95);
+    border-radius: var(--solvix-radius-card);
+    box-shadow: var(--solvix-shadow-sm);
+  }
+
+  .filter-bar input,
+  .filter-bar select,
+  .search input {
+    background: var(--solvix-surface-low);
+    border-color: var(--solvix-border);
+    border-radius: 0.5rem;
+    color: var(--solvix-text-secondary);
+  }
+
+  .filter-bar input:focus,
+  .filter-bar select:focus,
+  .search input:focus {
+    background: #ffffff;
+    border-color: var(--solvix-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+  }
+
+  thead,
+  .prod-table thead,
+  .venta-table thead,
+  .servicio-table thead {
+    background: var(--solvix-surface-low);
+  }
+
+  .prod-table tbody tr:hover,
+  .venta-table tbody tr:hover,
+  .servicio-table tbody tr:hover,
+  table tbody tr:hover {
+    background: var(--solvix-row-hover);
+  }
+
+  /* Badges / chips más “Stitch” */
+  .cat,
+  solvix-badge {
+    border-radius: 0.25rem;
+  }
+
+  .dash-panel {
+    backdrop-filter: none;
+    border-radius: var(--solvix-radius-card);
+    box-shadow: var(--solvix-shadow-sm);
+  }
+
+  .dash-panel::before {
+    opacity: 0.25;
+  }
+/* —— Tipografía admin (Stitch): Inter en UI, mono solo en montos/IDs —— */
+  .solvix-mono {
+    letter-spacing: -0.02em;
+  }
+
+  .clear {
+    font-family: var(--solvix-font) !important;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    text-decoration: none;
+  }
+
+  .clear:hover {
+    text-decoration: underline;
+  }
+
+  th,
+  .prod-table th,
+  .venta-table th,
+  .servicio-table th,
+  .dash-table th {
+    font-family: var(--solvix-font);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+
+  .sub,
+  .hint,
+  .meta,
+  .field-hint {
+    font-family: var(--solvix-font) !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+  }
+
+  .help__btn {
+    background: var(--solvix-surface-low) !important;
+    color: var(--solvix-text-muted) !important;
+    border-color: var(--solvix-border) !important;
+    font-family: var(--solvix-font) !important;
+  }
+
+  .help__tip {
+    background: #ffffff !important;
+    color: #334155 !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: var(--solvix-shadow) !important;
+    font-family: var(--solvix-font) !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+  }
+
+  .solvix-snack .mdc-snackbar__surface,
+  .mat-mdc-snack-bar-label {
+    font-family: var(--solvix-font) !important;
+    letter-spacing: 0 !important;
+  }
+
+  /* —— Homepage (LIGHT): jerarquía de superficies + glows suaves —— */
+  .faq,
+  .steps-homepage,
+  .catalog-preview,
+  .services {
+    background: var(--solvix-surface-low);
+  }
+
+  .stats-header h1 span,
+  .stats .icon {
+    text-shadow: none;
+  }
+
+  .holo-card:hover,
+  .stat-card:hover,
+  .preview-card:hover,
+  .card:hover,
+  .faq-item:hover {
+    box-shadow: var(--solvix-home-card-hover-shadow);
+  }
+}

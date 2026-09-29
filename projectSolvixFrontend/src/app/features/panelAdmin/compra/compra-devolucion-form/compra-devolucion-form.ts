@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { SolvixFeedbackService } from '../../../../shared/services/solvix-feedback.service';
 import { SolvixBadgeComponent } from '../../../../shared/components/solvix-badge/solvix-badge';
 import { SolvixButtonComponent } from '../../../../shared/components/solvix-button/solvix-button';
 import { SolvixErrorStateComponent } from '../../../../shared/components/solvix-error-state/solvix-error-state';
@@ -60,7 +61,7 @@ export class CompraDevolucionFormComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private compraService: CompraService,
-    private snackBar: MatSnackBar
+    private feedback: SolvixFeedbackService
   ) {
     this.form = this.fb.group({
       motivo: [null as MotivoDevolucionCompra | null, Validators.required],
@@ -153,9 +154,7 @@ export class CompraDevolucionFormComponent implements OnInit {
     this.compraService.registrarDevolucion(this.compra.id, request).subscribe({
       next: devolucion => {
         this.submitState = 'idle';
-        this.snackBar.open(`Devolución ${devolucion.numero} registrada. La compra original no cambia.`, 'Cerrar', {
-          duration: 4000
-        });
+        this.feedback.error(`Devolución ${devolucion.numero} registrada. La compra original no cambia.`, 4000);
         this.router.navigate(['/compras', this.compra?.id, 'devoluciones', devolucion.id]);
       },
       error: error => {

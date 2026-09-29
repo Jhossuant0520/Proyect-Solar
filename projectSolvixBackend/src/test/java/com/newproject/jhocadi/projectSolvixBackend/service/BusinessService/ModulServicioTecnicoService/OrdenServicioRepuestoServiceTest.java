@@ -289,6 +289,7 @@ class OrdenServicioRepuestoServiceTest extends ComercialTestSupport {
         OrdenServicioRequestDTO request = new OrdenServicioRequestDTO();
         request.setClienteId(cliente.getId());
         request.setEquipoId(equipo.getId());
+        FirmaRecepcionTestSupport.aplicarFirmaRecepcion(request);
         return ordenServicioService.crear(request, USUARIO_TEST);
     }
 

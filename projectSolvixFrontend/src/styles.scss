@@ -3,17 +3,22 @@
 
 
 @use './styles/solvix-tokens';
+@use './styles/solvix-motion';
 @use './styles/solvix-buttons';
 @use './styles/solvix-scrollbars';
 @use './styles/solvix-snackbar';
+@use './styles/solvix-material-theme';
+@use './styles/solvix-a11y';
+@use './styles/solvix-theme-light';
 
 :root {
-  --app-bg-color: var(--solvix-bg);
+  --app-bg-color: var(--color-bg, var(--solvix-bg));
 }
 
 html, body {
   background: var(--app-bg-color);
   background-color: var(--app-bg-color);
+  color: var(--color-text-primary, var(--solvix-text));
   min-height: 100%;
   margin: 0;
   padding: 0;
@@ -21,6 +26,27 @@ html, body {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Transición discreta al cambiar tema (sin animar layout). */
+html,
+body,
+.admin-shell,
+.admin-topbar,
+.admin-sidebar,
+.mat-mdc-dialog-surface,
+.mat-mdc-menu-panel,
+.mat-mdc-select-panel,
+.solvix-snack .mdc-snackbar__surface {
+  transition:
+    background-color var(--motion-fast, 140ms) var(--ease-standard, ease),
+    color var(--motion-fast, 140ms) var(--ease-standard, ease),
+    border-color var(--motion-fast, 140ms) var(--ease-standard, ease),
+    box-shadow var(--motion-fast, 140ms) var(--ease-standard, ease);
 }
 
 button,
@@ -32,8 +58,10 @@ option {
   font-family: inherit;
 }
 
-html {
-  scroll-behavior: smooth;
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-muted, var(--solvix-text-muted));
+  opacity: 0.9;
 }
 
 /* Compatibilidad con Angular Material dialogs */
@@ -46,43 +74,39 @@ html {
    ESTILOS GLOBALES PARA EL MENÚ DESPLEGABLE (SolarFish Glassmorphism)
    ========================================================================== */
 .sf-select-panel {
-  background: rgba(10, 20, 35, 0.85) !important;
+  background: var(--solvix-select-panel-bg) !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(0, 200, 255, 0.3) !important;
+  border: 1px solid var(--color-border, var(--solvix-border)) !important;
   border-radius: 12px !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0, 200, 255, 0.1) !important;
+  box-shadow: var(--solvix-shadow), inset 0 0 15px var(--color-primary-soft) !important;
 
-  /* Color de las opciones no seleccionadas */
   .mat-mdc-option {
-    color: #cfe9ff !important;
-    
+    color: var(--color-text-secondary, var(--solvix-text-secondary)) !important;
+
     &:hover {
-      background: rgba(0, 200, 255, 0.1) !important;
+      background: var(--color-primary-soft, var(--solvix-primary-soft)) !important;
     }
   }
 
-  /* Color de la opción activa/seleccionada */
   .mat-mdc-option.mdc-list-item--selected {
-    background: rgba(0, 200, 255, 0.15) !important;
-    
+    background: var(--color-primary-soft, var(--solvix-primary-soft)) !important;
+
     .mdc-list-item__primary-text {
-      color: #4fd1ff !important;
+      color: var(--color-primary, var(--solvix-primary)) !important;
       font-weight: 600;
-      text-shadow: 0 0 8px rgba(0, 200, 255, 0.4);
     }
   }
 }
 
 .solvix-dialog-panel .mat-mdc-dialog-container,
 .solvix-dialog-panel .mat-mdc-dialog-surface {
-  /* Superficie sólida SOLVIX: legible sobre el overlay (no transparente). */
-  background: var(--solvix-surface, #0f172a) !important;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(79, 209, 255, 0.22) !important;
+  background: var(--color-surface-elevated, var(--solvix-surface-elevated)) !important;
+  box-shadow: var(--solvix-shadow), 0 0 0 1px var(--color-border, var(--solvix-border)) !important;
   padding: 0 !important;
   overflow: hidden !important;
   border-radius: 14px !important;
-  color: var(--solvix-text, #ffffff);
+  color: var(--color-text-primary, var(--solvix-text));
 }
 
 .solvix-dialog-panel .mat-mdc-dialog-surface {
@@ -91,6 +115,5 @@ html {
 }
 
 .solvix-dialog-backdrop {
-  background: rgba(2, 6, 23, 0.82) !important;
+  background: var(--color-overlay, var(--solvix-overlay)) !important;
 }
-

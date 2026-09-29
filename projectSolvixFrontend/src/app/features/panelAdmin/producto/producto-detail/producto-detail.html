@@ -67,7 +67,7 @@
           />
           <div class="commerce">
             <article>
-              <span class="hint">Precio de venta</span>
+              <span class="hint">Precio de venta actual</span>
               <strong class="solvix-mono">{{ money(producto.precioVentaActual) }}</strong>
             </article>
             <article>
@@ -81,6 +81,24 @@
                 </solvix-button>
               </div>
               <p class="hint">Controlado por compras o por un ajuste explícito. No cambia el stock.</p>
+            </article>
+            <article class="sugerido-calc">
+              <span class="hint">Recargo sobre costo (calculadora)</span>
+              <div class="recargo-row">
+                <input
+                  type="text"
+                  inputmode="decimal"
+                  [value]="recargoTexto"
+                  (input)="onRecargoInput($event)"
+                  (blur)="onRecargoBlur()"
+                  placeholder="Ej. 30"
+                  aria-label="Recargo sobre costo en porcentaje"
+                />
+                <span class="recargo-suffix">%</span>
+              </div>
+              <span class="hint">Precio sugerido</span>
+              <strong class="solvix-mono">{{ precioSugerido != null ? money(precioSugerido) : '—' }}</strong>
+              <p class="hint">Solo referencia. No se guarda el porcentaje. Para aplicar el sugerido, edita el producto.</p>
             </article>
           </div>
         </section>

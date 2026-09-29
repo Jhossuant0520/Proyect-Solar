@@ -7,6 +7,7 @@ import {
   OrdenServicioResponseDTO
 } from '../../../core/models/orden-servicio.models';
 import { formatFechaVenta, mapHttpError as mapVentaHttpError, ApiUiError } from '../venta/venta-ui';
+import { CODIGOS_ESTADO_ORDEN, estadoOrdenUx } from './estado-orden-ux';
 
 /** Espejo de transiciones FE 3.15.7. La autoridad sigue siendo el backend. */
 const TRANSICIONES: Record<EstadoOrdenServicio, EstadoOrdenServicio[]> = {
@@ -205,39 +206,48 @@ export function accionParaDestino(destino: EstadoOrdenServicio): AccionWorkflowU
 
 /** Acción principal hacia adelante (excluye cancelación, espera y nueva falla). */
 export function accionPrincipalDesde(estado: EstadoOrdenServicio | string): AccionWorkflowUi | null {
+  const ux = estadoOrdenUx(estado);
+  const conLabel = (accion: AccionWorkflowUi): AccionWorkflowUi =>
+    ux.botonPrincipal ? { ...accion, boton: ux.botonPrincipal, titulo: ux.botonPrincipal } : accion;
+
   if (estado === 'EN_DIAGNOSTICO') {
-    return {
+    return conLabel({
       ...accionParaDestino('DIAGNOSTICADO'),
-      titulo: 'Completar ficha técnica',
+      titulo: 'Registrar diagnóstico',
       descripcion: 'Completa y guarda el diagnóstico técnico.',
-      boton: 'Ir al diagnóstico'
-    };
+      boton: 'Registrar diagnóstico'
+    });
   }
   // Cotización: CTAs de dominio (no transición directa COTIZADO→APROBADO).
   if (estado === 'DIAGNOSTICADO') {
-    return accionParaDestino('COTIZADO');
+    return conLabel(accionParaDestino('COTIZADO'));
   }
   if (estado === 'COTIZADO') {
-    return accionParaDestino('PENDIENTE_APROBACION');
+    return conLabel(accionParaDestino('PENDIENTE_APROBACION'));
   }
   if (estado === 'PENDIENTE_APROBACION') {
-    return accionParaDestino('APROBADO');
+    return conLabel({
+      ...accionParaDestino('APROBADO'),
+      titulo: 'Registrar respuesta del cliente',
+      descripcion: 'Registra la aprobación o el rechazo de la cotización vigente.',
+      boton: 'Registrar respuesta del cliente'
+    });
   }
   if (estado === 'REQUIERE_APROBACION_ADICIONAL') {
-    return {
+    return conLabel({
       destino: 'PENDIENTE_APROBACION',
-      titulo: 'Ampliar cotización',
+      titulo: 'Preparar cotización adicional',
       descripcion: 'Prepara una cotización adicional por la nueva situación.',
-      boton: 'Ampliar cotización',
+      boton: 'Preparar cotización adicional',
       esCancelacion: false,
       requiereDiagnostico: false,
       requiereTrabajo: false
-    };
+    });
   }
   if (estado === 'LISTO') {
-    return accionParaDestino('ENTREGADO');
+    return conLabel(accionParaDestino('ENTREGADO'));
   }
-  if (estado === 'ENTREGADO' || estado === 'CERRADO') {
+  if (estado === 'ENTREGADO' || estado === 'CERRADO' || estado === 'CANCELADO') {
     return null;
   }
   const destinos = transicionesDesde(estado).filter(
@@ -251,22 +261,25 @@ export function accionPrincipalDesde(estado: EstadoOrdenServicio | string): Acci
   );
   if (destinos.length === 0) {
     if (estado === 'ESPERA_REPUESTO' && transicionesDesde(estado).includes('EN_REPARACION')) {
-      return {
+      return conLabel({
         ...accionParaDestino('EN_REPARACION'),
         titulo: 'Continuar reparación',
         descripcion: 'Se retoma la reparación tras la espera de repuesto.',
         boton: 'Continuar reparación'
-      };
+      });
     }
     return null;
   }
   if (estado === 'EN_REPARACION' && destinos.includes('LISTO')) {
-    return accionParaDestino('LISTO');
+    return conLabel(accionParaDestino('LISTO'));
   }
   if (estado === 'APROBADO' && destinos.includes('EN_REPARACION')) {
-    return accionParaDestino('EN_REPARACION');
+    return conLabel(accionParaDestino('EN_REPARACION'));
   }
-  return accionParaDestino(destinos[0]);
+  if (estado === 'RECEPCIONADO' && destinos.includes('EN_DIAGNOSTICO')) {
+    return conLabel(accionParaDestino('EN_DIAGNOSTICO'));
+  }
+  return conLabel(accionParaDestino(destinos[0]));
 }
 
 export function accionCancelarDesde(estado: EstadoOrdenServicio | string): AccionWorkflowUi | null {
@@ -302,46 +315,18 @@ export function textoProximaAccion(
   opciones?: { pendingRepuestos?: number }
 ): string {
   const pending = opciones?.pendingRepuestos ?? 0;
-  switch (estado) {
-    case 'RECEPCIONADO':
-      return 'Iniciar diagnóstico';
-    case 'EN_DIAGNOSTICO':
-      return 'Completar ficha técnica';
-    case 'DIAGNOSTICADO':
-      return 'Preparar cotización inicial.';
-    case 'COTIZADO':
-      return 'Presentar cotización al cliente.';
-    case 'PENDIENTE_APROBACION':
-      return 'Esperando aprobación del cliente.';
-    case 'APROBADO':
-      return 'Reparación autorizada.';
-    case 'EN_REPARACION':
-      if (pending > 0) {
-        return pending === 1
-          ? 'Continuar reparación. Existe un repuesto pendiente.'
-          : `Continuar reparación. Hay ${pending} repuestos pendientes.`;
-      }
-      return 'Continuar reparación';
-    case 'ESPERA_REPUESTO':
-      if (pending > 0) {
-        return pending === 1
-          ? 'Resolver repuestos pendientes. Queda 1 pendiente.'
-          : `Resolver repuestos pendientes. Quedan ${pending} pendientes.`;
-      }
-      return 'Resolver repuestos pendientes';
-    case 'REQUIERE_APROBACION_ADICIONAL':
-      return 'Existe una nueva situación que requiere una ampliación de cotización.';
-    case 'LISTO':
-      return 'El equipo está listo para entrega.';
-    case 'ENTREGADO':
-      return 'Orden entregada.';
-    case 'CERRADO':
-      return 'Orden completada';
-    case 'CANCELADO':
-      return 'Orden cancelada';
-    default:
-      return 'Revisa el estado de la orden.';
+  const ux = estadoOrdenUx(estado);
+  if (estado === 'EN_REPARACION' && pending > 0) {
+    return pending === 1
+      ? 'Continuar reparación. Existe un repuesto pendiente.'
+      : `Continuar reparación. Hay ${pending} repuestos pendientes.`;
   }
+  if (estado === 'ESPERA_REPUESTO' && pending > 0) {
+    return pending === 1
+      ? 'Resolver repuestos pendientes. Queda 1 pendiente.'
+      : `Resolver repuestos pendientes. Quedan ${pending} pendientes.`;
+  }
+  return ux.siguienteTaller;
 }
 
 export function requisitoBloqueaAccion(
@@ -421,22 +406,6 @@ function labelCortoWorkflow(estado: EstadoOrdenServicio): string {
   }
 }
 
-const LABEL_ESTADO: Record<EstadoOrdenServicio, string> = {
-  RECEPCIONADO: 'Recepcionado',
-  EN_DIAGNOSTICO: 'En diagnóstico',
-  DIAGNOSTICADO: 'Diagnosticado',
-  COTIZADO: 'Cotizado',
-  PENDIENTE_APROBACION: 'Pendiente de aprobación',
-  APROBADO: 'Aprobado',
-  EN_REPARACION: 'En reparación',
-  ESPERA_REPUESTO: 'Espera repuesto',
-  REQUIERE_APROBACION_ADICIONAL: 'Requiere aprobación adicional',
-  LISTO: 'Listo',
-  ENTREGADO: 'Entregado',
-  CERRADO: 'Cerrado',
-  CANCELADO: 'Cancelado'
-};
-
 const LABEL_TIPO_EQUIPO: Record<TipoEquipo, string> = {
   COMPUTADOR: 'Computador',
   PORTATIL: 'Portátil',
@@ -451,12 +420,13 @@ export const TIPOS_EQUIPO: { id: TipoEquipo; label: string }[] = (
   Object.keys(LABEL_TIPO_EQUIPO) as TipoEquipo[]
 ).map(id => ({ id, label: LABEL_TIPO_EQUIPO[id] }));
 
-export const ESTADOS_ORDEN: { id: EstadoOrdenServicio; label: string }[] = (
-  Object.keys(LABEL_ESTADO) as EstadoOrdenServicio[]
-).map(id => ({ id, label: LABEL_ESTADO[id] }));
+/** Etiquetas del panel: fuente única = estado-orden-ux. */
+export const ESTADOS_ORDEN: { id: EstadoOrdenServicio; label: string }[] = CODIGOS_ESTADO_ORDEN.map(
+  id => ({ id, label: estadoOrdenUx(id).nombreInterno })
+);
 
 export function labelEstadoOrden(estado: EstadoOrdenServicio | string): string {
-  return LABEL_ESTADO[estado as EstadoOrdenServicio] ?? String(estado);
+  return estadoOrdenUx(estado).nombreInterno;
 }
 
 export function labelTipoEquipo(tipo: TipoEquipo | string | null | undefined): string {
@@ -467,24 +437,7 @@ export function labelTipoEquipo(tipo: TipoEquipo | string | null | undefined): s
 }
 
 export function toneEstadoOrden(estado: EstadoOrdenServicio | string): SolvixBadgeTone {
-  switch (estado) {
-    case 'LISTO':
-    case 'ENTREGADO':
-    case 'CERRADO':
-      return 'success';
-    case 'ESPERA_REPUESTO':
-    case 'REQUIERE_APROBACION_ADICIONAL':
-    case 'COTIZADO':
-    case 'PENDIENTE_APROBACION':
-    case 'APROBADO':
-      return 'warning';
-    case 'DIAGNOSTICADO':
-      return 'neutral';
-    case 'CANCELADO':
-      return 'error';
-    default:
-      return 'neutral';
-  }
+  return estadoOrdenUx(estado).tono;
 }
 
 /** Destinos válidos conocidos por el backend para el estado actual. */

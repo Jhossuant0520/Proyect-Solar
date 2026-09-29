@@ -6,9 +6,13 @@ import {
   Output,
   SimpleChanges
 } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { SolvixFeedbackService } from '../../../../shared/services/solvix-feedback.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { finalize } from 'rxjs/operators';
 import { SolvixBadgeComponent } from '../../../../shared/components/solvix-badge/solvix-badge';
 import { SolvixButtonComponent } from '../../../../shared/components/solvix-button/solvix-button';
 import { SolvixEmptyStateComponent } from '../../../../shared/components/solvix-empty-state/solvix-empty-state';
@@ -28,7 +32,6 @@ import {
 } from '../../../../core/models/documento-orden-servicio.models';
 import { EstadoOrdenServicio } from '../../../../core/models/orden-servicio.models';
 import { formatMoney } from '../../dashboard/utils/dashboard-format';
-import { showSolvixSnack } from '../../../../shared/utils/solvix-snack';
 import {
   formatFechaOrden,
   labelEstadoCotizacion,
@@ -80,6 +83,8 @@ export interface DocumentoCotizacionEsperado {
     MatDialogModule,
     MatSnackBarModule,
     MatTooltipModule,
+    MatMenuModule,
+    MatButtonModule,
     SolvixSectionHeaderComponent,
     SolvixButtonComponent,
     SolvixBadgeComponent,
@@ -92,6 +97,8 @@ export class ServicioCotizacionesPanelComponent implements OnChanges {
   @Input({ required: true }) ordenId!: number;
   @Input({ required: true }) estado!: EstadoOrdenServicio;
   @Input() canManage = true;
+  /** Resumen económico más compacto (detalle C.3). */
+  @Input() compactResumen = false;
 
   @Output() readonly cotizacionesChange = new EventEmitter<CotizacionesPanelChange>();
   /** Cuando present/approve/reject mueve el estado de la OT. */
@@ -105,6 +112,8 @@ export class ServicioCotizacionesPanelComponent implements OnChanges {
   resumenState: 'idle' | 'loading' | 'ready' | 'error' = 'idle';
   errorMessage = 'No pudimos cargar las cotizaciones.';
   accionEnCurso = false;
+  /** Acción documental/presentación en curso (para [loading]). */
+  accionTipo: 'presentar' | 'generar-pdf' | 'ver-pdf' | 'descargar-pdf' | null = null;
   expandidaId: number | null = null;
   /** Docs COTIZACION indexados por cotizacionId (versión más reciente). */
   docsPorCotizacion = new Map<number, DocumentoOrdenServicioResponseDTO>();
@@ -121,7 +130,7 @@ export class ServicioCotizacionesPanelComponent implements OnChanges {
     private cotizacionService: CotizacionServicioService,
     private documentoService: DocumentoOrdenServicioService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private feedback: SolvixFeedbackService
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -138,6 +147,52 @@ export class ServicioCotizacionesPanelComponent implements OnChanges {
 
   get puedeCrearAdicional(): boolean {
     return this.canManage && this.estado === 'REQUIERE_APROBACION_ADICIONAL';
+  }
+
+  /** Cotización vigente: la más reciente activa (borrador o pendiente). */
+  get cotizacionVigente(): CotizacionServicioResponseDTO | null {
+    const activas = this.cotizaciones.filter(
+      c => c.estado === 'BORRADOR' || c.estado === 'PENDIENTE_APROBACION'
+    );
+    if (activas.length) {
+      return activas[activas.length - 1];
+    }
+    const aprobadas = this.cotizaciones.filter(c => c.estado === 'APROBADA');
+    return aprobadas.length ? aprobadas[aprobadas.length - 1] : null;
+  }
+
+  get cotizacionesAnteriores(): CotizacionServicioResponseDTO[] {
+    const vigenteId = this.cotizacionVigente?.id;
+    return this.cotizaciones.filter(c => c.id !== vigenteId);
+  }
+
+  get mostrarAnteriores(): boolean {
+    return this.anterioresAbiertas;
+  }
+
+  anterioresAbiertas = false;
+
+  toggleAnteriores(): void {
+    this.anterioresAbiertas = !this.anterioresAbiertas;
+  }
+
+  /** Una sola acción primaria visible por cotización (secundaria al CTA de Siguiente paso). */
+  accionPrimariaCotizacion(
+    cot: CotizacionServicioResponseDTO
+  ): 'presentar' | 'editar' | 'ver-pdf' | 'ver' | null {
+    if (cot.puedePresentar && this.canManage) {
+      return 'presentar';
+    }
+    if (cot.estado === 'BORRADOR' && cot.puedeEditar && this.canManage) {
+      return 'editar';
+    }
+    if (this.puedePdf(cot) && this.docDe(cot)) {
+      return 'ver-pdf';
+    }
+    if (cot.puedeEditar && this.canManage && cot.estado === 'PENDIENTE_APROBACION') {
+      return 'editar';
+    }
+    return 'ver';
   }
 
   get cotizacionPresentable(): CotizacionServicioResponseDTO | null {
@@ -197,21 +252,20 @@ export class ServicioCotizacionesPanelComponent implements OnChanges {
       return;
     }
     this.accionEnCurso = true;
+    this.accionTipo = 'ver-pdf';
     this.pdfAccionId = cotizacion.id;
-    this.documentoService.descargarPdf(this.ordenId, doc.id, 'inline').subscribe({
-      next: blob => {
+    this.documentoService.descargarPdf(this.ordenId, doc.id, 'inline').pipe(
+      finalize(() => {
         this.accionEnCurso = false;
+        this.accionTipo = null;
         this.pdfAccionId = null;
+      })
+    ).subscribe({
+      next: blob => {
         this.documentoService.abrirPdfEnNuevaPestana(blob);
       },
       error: err => {
-        this.accionEnCurso = false;
-        this.pdfAccionId = null;
-        showSolvixSnack(
-          this.snackBar,
-          mensajeErrorServicio(err, 'No pudimos abrir el PDF.'),
-          'error'
-        );
+        this.feedback.error(mensajeErrorServicio(err, 'No pudimos abrir el PDF.'));
       }
     });
   }
@@ -222,24 +276,23 @@ export class ServicioCotizacionesPanelComponent implements OnChanges {
       return;
     }
     this.accionEnCurso = true;
+    this.accionTipo = 'descargar-pdf';
     this.pdfAccionId = cotizacion.id;
-    this.documentoService.descargarPdf(this.ordenId, doc.id, 'attachment').subscribe({
-      next: blob => {
+    this.documentoService.descargarPdf(this.ordenId, doc.id, 'attachment').pipe(
+      finalize(() => {
         this.accionEnCurso = false;
+        this.accionTipo = null;
         this.pdfAccionId = null;
+      })
+    ).subscribe({
+      next: blob => {
         this.documentoService.descargarBlobComoArchivo(
           blob,
           doc.nombreArchivo || `${cotizacion.numero}.pdf`
         );
       },
       error: err => {
-        this.accionEnCurso = false;
-        this.pdfAccionId = null;
-        showSolvixSnack(
-          this.snackBar,
-          mensajeErrorServicio(err, 'No pudimos descargar el PDF.'),
-          'error'
-        );
+        this.feedback.error(mensajeErrorServicio(err, 'No pudimos descargar el PDF.'));
       }
     });
   }
@@ -249,23 +302,22 @@ export class ServicioCotizacionesPanelComponent implements OnChanges {
       return;
     }
     this.accionEnCurso = true;
+    this.accionTipo = 'generar-pdf';
     this.pdfAccionId = cotizacion.id;
-    this.documentoService.generarCotizacionPdf(this.ordenId, cotizacion.id).subscribe({
-      next: doc => {
+    this.documentoService.generarCotizacionPdf(this.ordenId, cotizacion.id).pipe(
+      finalize(() => {
         this.accionEnCurso = false;
+        this.accionTipo = null;
         this.pdfAccionId = null;
+      })
+    ).subscribe({
+      next: doc => {
         this.docsPorCotizacion.set(cotizacion.id, doc);
-        showSolvixSnack(this.snackBar, 'Documento de cotización generado.', 'success');
+        this.feedback.success('Documento de cotización generado.');
         this.documentoEsperado.emit({ tipo: 'COTIZACION', cotizacionId: cotizacion.id });
       },
       error: err => {
-        this.accionEnCurso = false;
-        this.pdfAccionId = null;
-        showSolvixSnack(
-          this.snackBar,
-          mensajeErrorServicio(err, 'No pudimos generar el PDF de cotización.'),
-          'error'
-        );
+        this.feedback.error(mensajeErrorServicio(err, 'No pudimos generar el PDF de cotización.'));
       }
     });
   }
@@ -304,22 +356,14 @@ export class ServicioCotizacionesPanelComponent implements OnChanges {
         if (this.cotizacionPresentable) {
           this.presentar(this.cotizacionPresentable);
         } else {
-          showSolvixSnack(
-            this.snackBar,
-            'No hay una cotización en borrador lista para presentar.',
-            'warning'
-          );
+          this.feedback.warning('No hay una cotización en borrador lista para presentar.');
         }
         break;
       case 'aprobar':
         if (this.cotizacionAprobable) {
           this.aprobar(this.cotizacionAprobable);
         } else {
-          showSolvixSnack(
-            this.snackBar,
-            'No hay una cotización pendiente de aprobación.',
-            'warning'
-          );
+          this.feedback.warning('No hay una cotización pendiente de aprobación.');
         }
         break;
       case 'scroll':
@@ -343,14 +387,17 @@ export class ServicioCotizacionesPanelComponent implements OnChanges {
         cotizacion: cotizacion ?? null
       } satisfies CotizacionFormDialogData
     });
+    const estabaPresentada = cotizacion?.estado === 'PENDIENTE_APROBACION';
     ref.afterClosed().subscribe(result => {
       if (!result) {
         return;
       }
-      showSolvixSnack(
-        this.snackBar,
-        'Cotización guardada. Preséntala al cliente para generar el PDF.',
-        'success'
+      this.feedback.success(
+        estabaPresentada
+          ? 'Cotización actualizada y devuelta a borrador. Preséntala de nuevo para generar el documento actualizado.'
+          : modo === 'editar'
+            ? 'Cotización actualizada. Preséntala al cliente para generar el PDF.'
+            : 'Cotización guardada. Preséntala al cliente para generar el PDF.'
       );
       this.cargar();
       this.ordenActualizada.emit();
@@ -375,18 +422,21 @@ export class ServicioCotizacionesPanelComponent implements OnChanges {
       data: { modo: 'presentar', numero: cotizacion.numero } satisfies CotizacionConfirmarDialogData
     });
     ref.afterClosed().subscribe(ok => {
-      if (!ok) {
+      if (!ok || this.accionEnCurso) {
         return;
       }
       this.accionEnCurso = true;
-      this.cotizacionService.presentar(this.ordenId, cotizacion.id).subscribe({
-        next: () => {
+      this.accionTipo = 'presentar';
+      this.pdfAccionId = cotizacion.id;
+      this.cotizacionService.presentar(this.ordenId, cotizacion.id).pipe(
+        finalize(() => {
           this.accionEnCurso = false;
-          showSolvixSnack(
-            this.snackBar,
-            'Cotización presentada. Generando documento PDF…',
-            'success'
-          );
+          this.accionTipo = null;
+          this.pdfAccionId = null;
+        })
+      ).subscribe({
+        next: () => {
+          this.feedback.success('Cotización presentada.');
           this.cargar();
           this.ordenActualizada.emit();
           this.documentoEsperado.emit({
@@ -395,12 +445,7 @@ export class ServicioCotizacionesPanelComponent implements OnChanges {
           });
         },
         error: err => {
-          this.accionEnCurso = false;
-          showSolvixSnack(
-            this.snackBar,
-            mensajeErrorServicio(err, 'No pudimos presentar la cotización.'),
-            'error'
-          );
+          this.feedback.error(mensajeErrorServicio(err, 'No pudimos presentar la cotización.'));
         }
       });
     });
@@ -424,17 +469,13 @@ export class ServicioCotizacionesPanelComponent implements OnChanges {
       this.cotizacionService.aprobar(this.ordenId, cotizacion.id).subscribe({
         next: () => {
           this.accionEnCurso = false;
-          showSolvixSnack(this.snackBar, 'Cotización aprobada.', 'success');
+          this.feedback.success('Cotización aprobada.');
           this.cargar();
           this.ordenActualizada.emit();
         },
         error: err => {
           this.accionEnCurso = false;
-          showSolvixSnack(
-            this.snackBar,
-            mensajeErrorServicio(err, 'No pudimos aprobar la cotización.'),
-            'error'
-          );
+          this.feedback.error(mensajeErrorServicio(err, 'No pudimos aprobar la cotización.'));
         }
       });
     });
@@ -458,17 +499,13 @@ export class ServicioCotizacionesPanelComponent implements OnChanges {
       this.cotizacionService.rechazar(this.ordenId, cotizacion.id, body).subscribe({
         next: () => {
           this.accionEnCurso = false;
-          showSolvixSnack(this.snackBar, 'Cotización rechazada.', 'success');
+          this.feedback.success('Cotización rechazada.');
           this.cargar();
           this.ordenActualizada.emit();
         },
         error: err => {
           this.accionEnCurso = false;
-          showSolvixSnack(
-            this.snackBar,
-            mensajeErrorServicio(err, 'No pudimos rechazar la cotización.'),
-            'error'
-          );
+          this.feedback.error(mensajeErrorServicio(err, 'No pudimos rechazar la cotización.'));
         }
       });
     });
@@ -494,16 +531,12 @@ export class ServicioCotizacionesPanelComponent implements OnChanges {
       this.cotizacionService.eliminarBorrador(this.ordenId, cotizacion.id).subscribe({
         next: () => {
           this.accionEnCurso = false;
-          showSolvixSnack(this.snackBar, 'Borrador eliminado.', 'success');
+          this.feedback.success('Borrador eliminado.');
           this.cargar();
         },
         error: err => {
           this.accionEnCurso = false;
-          showSolvixSnack(
-            this.snackBar,
-            mensajeErrorServicio(err, 'No pudimos eliminar el borrador.'),
-            'error'
-          );
+          this.feedback.error(mensajeErrorServicio(err, 'No pudimos eliminar el borrador.'));
         }
       });
     });

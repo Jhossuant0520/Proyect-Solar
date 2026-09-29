@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { SolvixFeedbackService } from '../../../../shared/services/solvix-feedback.service';
 import { SolvixBadgeComponent } from '../../../../shared/components/solvix-badge/solvix-badge';
 import { SolvixButtonComponent } from '../../../../shared/components/solvix-button/solvix-button';
 import { SolvixErrorStateComponent } from '../../../../shared/components/solvix-error-state/solvix-error-state';
@@ -64,7 +65,7 @@ export class CompraDevolucionDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private compraService: CompraService,
-    private snackBar: MatSnackBar
+    private feedback: SolvixFeedbackService
   ) {
     this.form = this.fb.group({
       metodoReembolso: [null as MetodoReembolso | null, Validators.required]
@@ -121,7 +122,7 @@ export class CompraDevolucionDetailComponent implements OnInit {
       next: devolucion => {
         this.devolucion = devolucion;
         this.accionState = 'idle';
-        this.snackBar.open('Reembolso registrado.', 'Cerrar', { duration: 3000 });
+        this.feedback.success('Reembolso registrado.', 3000);
       },
       error: error => {
         const mapped = mapHttpError(error, 'No pudimos registrar el reembolso.');

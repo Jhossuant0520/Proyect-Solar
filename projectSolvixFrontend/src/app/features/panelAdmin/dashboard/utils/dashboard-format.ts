@@ -20,9 +20,12 @@ export function formatMoney(value: number | null | undefined, compact = false): 
   }
   if (compact && Math.abs(value) >= 1_000_000) {
     const millions = value / 1_000_000;
-    return `$${millions.toLocaleString(esCO, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} M`;
+    return `$${millions.toLocaleString(esCO, { minimumFractionDigits: 0, maximumFractionDigits: 1 })} M`;
   }
-  return `$${value.toLocaleString(esCO, { maximumFractionDigits: 0 })}`;
+  return `$${value.toLocaleString(esCO, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  })}`;
 }
 
 export function formatPercent(value: number | null | undefined): string {

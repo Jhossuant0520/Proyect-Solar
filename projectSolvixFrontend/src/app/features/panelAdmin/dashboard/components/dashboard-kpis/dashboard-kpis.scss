@@ -2,6 +2,29 @@
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 1rem;
+  position: relative;
+}
+
+.kpi-card {
+  animation: solvix-kpi-enter var(--motion-normal) var(--ease-enter) both;
+  animation-delay: calc(var(--kpi-i, 0) * var(--motion-stagger, 50ms));
+}
+
+.kpi-grid.is-loading::after {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: var(--solvix-radius);
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    color-mix(in srgb, var(--solvix-primary) 8%, transparent) 50%,
+    transparent 80%
+  );
+  background-size: 200% 100%;
+  animation: solvix-shimmer var(--motion-count) var(--ease-standard) 1;
+  opacity: 0.7;
 }
 
 @media (max-width: 1199px) {
@@ -13,5 +36,16 @@
 @media (max-width: 767px) {
   .kpi-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kpi-card {
+    animation: none;
+  }
+
+  .kpi-grid.is-loading::after {
+    animation: none;
+    opacity: 0;
   }
 }

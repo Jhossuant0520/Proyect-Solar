@@ -10,13 +10,36 @@ import {
   SimpleChanges,
   ViewChild
 } from '@angular/core';
-import { Chart, ChartConfiguration, registerables } from 'chart.js';
+import { Chart, ChartConfiguration, Plugin, registerables } from 'chart.js';
 import { SolvixSectionHeaderComponent } from '../../../../../shared/components/solvix-section-header/solvix-section-header';
+import { prefersReducedMotion } from '../../../../../shared/utils/count-up';
 import { Agrupacion, SeccionEstado, SerieMetrica, VentasSeriePunto } from '../../models/dashboard.models';
 import { formatMoney } from '../../utils/dashboard-format';
 import { SectionStateComponent } from '../section-state/section-state';
 
 Chart.register(...registerables);
+
+/** Crosshair vertical sutil al hover/tap del punto activo (Chart.js canvas). */
+const solvixCrosshairPlugin: Plugin<'line'> = {
+  id: 'solvixCrosshair',
+  afterDraw(chart) {
+    const active = chart.getActiveElements();
+    if (!active.length) {
+      return;
+    }
+    const { ctx, chartArea } = chart;
+    const x = active[0].element.x;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(x, chartArea.top);
+    ctx.lineTo(x, chartArea.bottom);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(79, 209, 255, 0.45)';
+    ctx.setLineDash([4, 4]);
+    ctx.stroke();
+    ctx.restore();
+  }
+};
 
 @Component({
   selector: 'solvix-sales-evolution',
@@ -66,6 +89,20 @@ export class SalesEvolutionComponent implements AfterViewInit, OnChanges, OnDest
     this.chart?.destroy();
   }
 
+  private chartDuration(): number {
+    if (prefersReducedMotion()) {
+      return 0;
+    }
+    if (typeof window === 'undefined') {
+      return 700;
+    }
+    const raw = getComputedStyle(document.documentElement)
+      .getPropertyValue('--motion-chart')
+      .trim();
+    const ms = Number.parseFloat(raw);
+    return Number.isFinite(ms) && ms >= 0 ? ms : 700;
+  }
+
   private renderChart(): void {
     if (!this.canvas || this.state !== 'ready') {
       return;
@@ -85,6 +122,8 @@ export class SalesEvolutionComponent implements AfterViewInit, OnChanges, OnDest
           ? '#38bdf8'
           : '#4fd1ff';
 
+    const duration = this.chartDuration();
+
     const config: ChartConfiguration<'line'> = {
       type: 'line',
       data: {
@@ -96,15 +135,26 @@ export class SalesEvolutionComponent implements AfterViewInit, OnChanges, OnDest
           fill: true,
           tension: 0.35,
           pointRadius: 3,
-          pointBackgroundColor: color
+          pointHoverRadius: 5,
+          pointBackgroundColor: color,
+          pointHoverBackgroundColor: color
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: {
+          duration,
+          easing: 'easeOutQuart'
+        },
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
         plugins: {
           legend: { display: false },
           tooltip: {
+            enabled: true,
             callbacks: {
               label: item => formatMoney(Number(item.raw), true)
             }
@@ -124,7 +174,8 @@ export class SalesEvolutionComponent implements AfterViewInit, OnChanges, OnDest
             grid: { color: 'rgba(61, 72, 78, 0.35)' }
           }
         }
-      }
+      },
+      plugins: duration > 0 ? [solvixCrosshairPlugin] : []
     };
 
     this.chart = new Chart(ctx, config);

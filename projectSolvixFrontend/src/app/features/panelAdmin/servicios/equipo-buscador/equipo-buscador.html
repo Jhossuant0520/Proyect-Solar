@@ -1,0 +1,110 @@
+<div class="buscador">
+  @if (tieneEquipo && seleccionado) {
+    <div class="elegido">
+      <span class="material-symbols-outlined" aria-hidden="true">devices</span>
+      <div>
+        <strong>{{ labelEquipo(seleccionado) }}</strong>
+        <span class="meta">
+          {{ labelTipo(seleccionado.tipoEquipo) }}
+          @if (seleccionado.numeroSerie) {
+            · Serie {{ seleccionado.numeroSerie }}
+          }
+          @if (!requiereCliente) {
+            · {{ seleccionado.clienteNombre }}
+          }
+        </span>
+      </div>
+      <button type="button" class="cambiar" (click)="quitar()">Cambiar</button>
+    </div>
+  } @else {
+    <label class="search">
+      <span class="material-symbols-outlined" aria-hidden="true">search</span>
+      <input
+        type="search"
+        [value]="texto"
+        (input)="onInput($event)"
+        (keydown)="onKeydown($event)"
+        (focus)="onFocus()"
+        autocomplete="off"
+        spellcheck="false"
+        [placeholder]="placeholder"
+        [disabled]="requiereCliente && clienteId == null"
+        aria-label="Buscar equipo"
+        role="combobox"
+        aria-autocomplete="list"
+        [attr.aria-expanded]="listaAbierta"
+      />
+    </label>
+
+    @switch (estado) {
+      @case ('sin-cliente') {
+        <p class="hint">Primero elige un cliente para buscar sus equipos.</p>
+      }
+      @case ('idle') {
+        <p class="hint">Escribe al menos {{ minCaracteres }} caracteres (marca, modelo, serie…).</p>
+      }
+      @case ('buscando') {
+        <p class="hint" role="status">Buscando equipos…</p>
+      }
+      @case ('error') {
+        <p class="hint error" role="alert">No fue posible cargar los resultados.</p>
+      }
+      @case ('vacio') {
+        <p class="hint">No encontramos resultados para “{{ texto.trim() }}”.</p>
+      }
+      @case ('preview') {
+        <p class="hint preview-label" id="equipo-preview-label">{{ etiquetaPreview }}</p>
+        <ul class="resultados" role="listbox" aria-labelledby="equipo-preview-label">
+          @for (e of resultados; track e.id; let i = $index) {
+            <li>
+              <button
+                type="button"
+                role="option"
+                [class.is-active]="i === indiceActivo"
+                [attr.aria-selected]="i === indiceActivo"
+                (click)="elegir(e)"
+              >
+                <span class="nombre">{{ labelEquipo(e) }}</span>
+                <span class="meta">
+                  {{ labelTipo(e.tipoEquipo) }}
+                  @if (e.numeroSerie) {
+                    · Serie {{ e.numeroSerie }}
+                  }
+                  · {{ e.clienteNombre }}
+                </span>
+              </button>
+            </li>
+          }
+        </ul>
+        <p class="hint">Escribe {{ minCaracteres }} caracteres para buscar</p>
+      }
+      @case ('resultados') {
+        <ul class="resultados" role="listbox" aria-label="Resultados de equipos">
+          @for (e of resultados; track e.id; let i = $index) {
+            <li>
+              <button
+                type="button"
+                role="option"
+                [class.is-active]="i === indiceActivo"
+                [attr.aria-selected]="i === indiceActivo"
+                (click)="elegir(e)"
+              >
+                <span class="nombre">{{ labelEquipo(e) }}</span>
+                <span class="meta">
+                  {{ labelTipo(e.tipoEquipo) }}
+                  @if (e.numeroSerie) {
+                    · Serie {{ e.numeroSerie }}
+                  }
+                  · {{ e.clienteNombre }}
+                </span>
+              </button>
+            </li>
+          }
+        </ul>
+        @if (alcanzoLimite) {
+          <p class="hint">Mostrando los primeros {{ limite }}. Escribe más para afinar.</p>
+        }
+      }
+    }
+  }
+</div>

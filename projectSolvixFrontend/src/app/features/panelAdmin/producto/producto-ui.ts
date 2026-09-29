@@ -78,6 +78,44 @@ export function parseMontoEntrada(valor: unknown): number | null {
   return Number.isFinite(numero) ? numero : null;
 }
 
+/**
+ * Recargo sobre costo (%): sugerido = costo × (1 + porcentaje / 100).
+ * No es margen sobre ventas. Devuelve null si costo o % son inválidos.
+ * No muta precioVentaActual.
+ */
+export function calcularPrecioSugerido(costo: unknown, porcentaje: unknown): number | null {
+  const costoNum = aNumeroFinanciero(costo);
+  const porcentajeNum = aNumeroFinanciero(porcentaje);
+  if (costoNum == null || porcentajeNum == null) {
+    return null;
+  }
+  if (costoNum < 0 || porcentajeNum < 0) {
+    return null;
+  }
+  const sugerido = costoNum * (1 + porcentajeNum / 100);
+  return Number.isFinite(sugerido) ? sugerido : null;
+}
+
+/** true si el porcentaje es un número finito ≥ 0 (incluye 0). */
+export function esPorcentajeRecargoValido(porcentaje: unknown): boolean {
+  const n = aNumeroFinanciero(porcentaje);
+  return n != null && n >= 0;
+}
+
+function aNumeroFinanciero(valor: unknown): number | null {
+  if (valor == null || valor === '') {
+    return null;
+  }
+  if (typeof valor === 'number') {
+    return Number.isFinite(valor) ? valor : null;
+  }
+  if (typeof valor === 'string') {
+    return parseMontoEntrada(valor);
+  }
+  const n = Number(valor);
+  return Number.isFinite(n) ? n : null;
+}
+
 export function formatMontoEntrada(valor: number | null | undefined): string {
   if (valor == null || !Number.isFinite(valor)) {
     return '';

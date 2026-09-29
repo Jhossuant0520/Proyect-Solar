@@ -17,7 +17,7 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--solvix-scrollbar-track, transparent);
 }
 
 ::-webkit-scrollbar-thumb {

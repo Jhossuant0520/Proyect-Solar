@@ -17,6 +17,7 @@ import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServic
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.HistorialEstadoOrdenServicioResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.OrdenServicioRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.OrdenServicioResponseDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RecepcionOrdenServicioResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RegistrarEntregaRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RegistrarEntregaResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RegistrarNuevaFallaRequestDTO;
@@ -45,6 +46,7 @@ class OrdenServicioServiceTest extends ComercialTestSupport {
         request.setClienteId(cliente.getId());
         request.setEquipoId(equipo.getId());
         request.setProblemaReportado("No enciende");
+        FirmaRecepcionTestSupport.aplicarFirmaRecepcion(request);
 
         OrdenServicioResponseDTO orden = ordenServicioService.crear(request, USUARIO_TEST);
 
@@ -53,6 +55,66 @@ class OrdenServicioServiceTest extends ComercialTestSupport {
         assertThat(orden.getClienteId()).isEqualTo(cliente.getId());
         assertThat(orden.getEquipoId()).isEqualTo(equipo.getId());
         assertThat(orden.getProblemaReportado()).isEqualTo("No enciende");
+
+        RecepcionOrdenServicioResponseDTO recepcion =
+            ordenServicioService.obtenerRecepcion(orden.getId());
+        assertThat(recepcion.getOrdenServicioId()).isEqualTo(orden.getId());
+        assertThat(recepcion.isClienteConfirmo()).isTrue();
+        assertThat(recepcion.getFirmaUrl())
+            .startsWith("/api/v1/ordenes-servicio/recepciones/firmas/");
+        assertThat(recepcion.getUsuarioResponsable()).isEqualTo(USUARIO_TEST);
+        assertThat(recepcion.getFechaRecepcion()).isNotNull();
+        assertThat(recepcion.getNombreCliente()).isEqualTo("Firmante Test");
+    }
+
+    @Test
+    @DisplayName("D.2: crear OT sin firma de recepción → rechazo")
+    void crearOrdenSinFirmaRecepcion() {
+        Cliente cliente = crearCliente("Cliente sin firma");
+        EquipoResponseDTO equipo = crearEquipo(cliente.getId());
+        OrdenServicioRequestDTO request = new OrdenServicioRequestDTO();
+        request.setClienteId(cliente.getId());
+        request.setEquipoId(equipo.getId());
+        request.setClienteConfirmoRecepcion(true);
+        request.setNombreFirmanteRecepcion("Alguien");
+
+        assertThatThrownBy(() -> ordenServicioService.crear(request, USUARIO_TEST))
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("firma");
+    }
+
+    @Test
+    @DisplayName("D.2: crear OT sin confirmación de recepción → rechazo")
+    void crearOrdenSinConfirmacionRecepcion() {
+        Cliente cliente = crearCliente("Cliente sin confirm");
+        EquipoResponseDTO equipo = crearEquipo(cliente.getId());
+        OrdenServicioRequestDTO request = new OrdenServicioRequestDTO();
+        request.setClienteId(cliente.getId());
+        request.setEquipoId(equipo.getId());
+        FirmaRecepcionTestSupport.aplicarFirmaRecepcion(request);
+        request.setClienteConfirmoRecepcion(false);
+
+        assertThatThrownBy(() -> ordenServicioService.crear(request, USUARIO_TEST))
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("confirmar");
+    }
+
+    @Test
+    @DisplayName("D.2: firma recepción no sobrescribe firma de entrega")
+    void firmaRecepcionIndependienteDeEntrega() {
+        OrdenServicioResponseDTO orden = avanzarHastaListo();
+        RecepcionOrdenServicioResponseDTO recepcion =
+            ordenServicioService.obtenerRecepcion(orden.getId());
+        String firmaRecepcion = recepcion.getFirmaUrl();
+
+        RegistrarEntregaResponseDTO entregaRes =
+            ordenServicioService.registrarEntrega(orden.getId(), entregaValida(), USUARIO_TEST);
+
+        assertThat(entregaRes.getEntrega().getFirmaUrl())
+            .startsWith("/api/v1/ordenes-servicio/entregas/firmas/");
+        assertThat(entregaRes.getEntrega().getFirmaUrl()).isNotEqualTo(firmaRecepcion);
+        assertThat(ordenServicioService.obtenerRecepcion(orden.getId()).getFirmaUrl())
+            .isEqualTo(firmaRecepcion);
     }
 
     @Test
@@ -292,6 +354,7 @@ class OrdenServicioServiceTest extends ComercialTestSupport {
         OrdenServicioRequestDTO request = new OrdenServicioRequestDTO();
         request.setClienteId(cliente.getId());
         request.setEquipoId(equipo.getId());
+        FirmaRecepcionTestSupport.aplicarFirmaRecepcion(request);
         ordenServicioService.crear(request, USUARIO_TEST);
 
         EquipoResponseDTO otro = crearEquipo(cliente.getId());
@@ -299,6 +362,7 @@ class OrdenServicioServiceTest extends ComercialTestSupport {
         OrdenServicioRequestDTO bad = new OrdenServicioRequestDTO();
         bad.setClienteId(cliente.getId());
         bad.setEquipoId(otro.getId());
+        FirmaRecepcionTestSupport.aplicarFirmaRecepcion(bad);
         assertThatThrownBy(() -> ordenServicioService.crear(bad, USUARIO_TEST))
             .isInstanceOf(BusinessException.class)
             .hasMessageContaining("inactivo");
@@ -312,6 +376,7 @@ class OrdenServicioServiceTest extends ComercialTestSupport {
         OrdenServicioRequestDTO cross = new OrdenServicioRequestDTO();
         cross.setClienteId(cliente.getId());
         cross.setEquipoId(equipoB.getId());
+        FirmaRecepcionTestSupport.aplicarFirmaRecepcion(cross);
         assertThatThrownBy(() -> ordenServicioService.crear(cross, USUARIO_TEST))
             .isInstanceOf(BusinessException.class)
             .hasMessageContaining("no pertenece al cliente");
@@ -469,6 +534,7 @@ class OrdenServicioServiceTest extends ComercialTestSupport {
         OrdenServicioRequestDTO request = new OrdenServicioRequestDTO();
         request.setClienteId(cliente.getId());
         request.setEquipoId(equipo.getId());
+        FirmaRecepcionTestSupport.aplicarFirmaRecepcion(request);
         return ordenServicioService.crear(request, USUARIO_TEST);
     }
 
@@ -478,5 +544,30 @@ class OrdenServicioServiceTest extends ComercialTestSupport {
         request.setTipoEquipo(TipoEquipo.COMPUTADOR);
         request.setMarca("Lenovo");
         return equipoService.crear(request);
+    }
+
+    @Test
+    @DisplayName("listarPaginado: búsqueda parcial por fragmento de número OT")
+    void listarPaginadoBusquedaParcialNumero() {
+        OrdenServicioResponseDTO orden = crearOrdenBasica();
+        String fragmento = orden.getNumero().substring(orden.getNumero().length() - 3);
+
+        var pagina = ordenServicioService.listarPaginado(fragmento, null, null, null, 0, 20);
+
+        assertThat(pagina.getContenido()).extracting(OrdenServicioResponseDTO::getId)
+            .contains(orden.getId());
+        assertThat(pagina.getTamano()).isLessThanOrEqualTo(50);
+    }
+
+    @Test
+    @DisplayName("listarPaginado: sin coincidencias y límite de página")
+    void listarPaginadoSinResultadosYTope() {
+        crearOrdenBasica();
+        var vacia = ordenServicioService.listarPaginado("zzz-inexistente-999", null, null, null, 0, 20);
+        assertThat(vacia.getContenido()).isEmpty();
+        assertThat(vacia.getTotalElementos()).isZero();
+
+        var tope = ordenServicioService.listarPaginado(null, null, null, null, 0, 500);
+        assertThat(tope.getTamano()).isEqualTo(50);
     }
 }

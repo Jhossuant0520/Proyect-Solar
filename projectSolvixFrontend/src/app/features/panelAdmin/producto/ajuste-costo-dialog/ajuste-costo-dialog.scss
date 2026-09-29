@@ -68,8 +68,9 @@ label {
   flex-direction: column;
   gap: 0.3rem;
   color: var(--solvix-text-muted);
-  font-family: var(--solvix-font-mono);
+  font-family: var(--solvix-font);
   font-size: 0.68rem;
+  font-weight: 600;
   text-transform: uppercase;
 }
 

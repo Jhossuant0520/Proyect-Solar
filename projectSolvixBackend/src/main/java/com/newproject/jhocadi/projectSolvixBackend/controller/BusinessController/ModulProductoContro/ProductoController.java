@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulProductoDtos.ProductoListadoResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulProductoDtos.ProductoRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulProductoDtos.ProductoResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.ModulProductoService.ProductoService;
@@ -47,11 +48,16 @@ public class ProductoController {
     }
 
     /**
-     * Listado administrativo. Si no se envía {@code activo}, devuelve activos e inactivos.
+     * Listado administrativo resumido (sin costo). Si no se envía {@code activo},
+     * devuelve activos e inactivos. {@code q} filtra por nombre, marca o código de barras;
+     * {@code limite} (máx. 50) acota el resultado para selectores. Sin {@code limite}
+     * devuelve todo. El costo solo se expone en {@code GET /{id}}.
      * El catálogo público no usa este endpoint.
      */
     @GetMapping
-    public ResponseEntity<List<ProductoResponseDTO>> listar(
+    public ResponseEntity<List<ProductoListadoResponseDTO>> listar(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Integer limite,
             @RequestParam(required = false) String marca,
             @RequestParam(required = false) Long categoriaId,
             @RequestParam(required = false) BigDecimal precioMin,
@@ -60,7 +66,7 @@ public class ProductoController {
             @RequestParam(required = false) Boolean activo) {
 
         return ResponseEntity.ok(
-            productoService.listar(marca, categoriaId, precioMin, precioMax, stockMin, activo)
+            productoService.listar(q, limite, marca, categoriaId, precioMin, precioMax, stockMin, activo)
         );
     }
 
@@ -109,5 +115,10 @@ public class ProductoController {
             @PathVariable Long id,
             Principal principal) {
         return ResponseEntity.ok(productoService.desactivar(id));
+    }
+
+    @PostMapping("/{id}/activar")
+    public ResponseEntity<ProductoResponseDTO> activar(@PathVariable Long id) {
+        return ResponseEntity.ok(productoService.activar(id));
     }
 }

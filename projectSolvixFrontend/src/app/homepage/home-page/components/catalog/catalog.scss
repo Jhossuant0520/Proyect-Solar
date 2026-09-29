@@ -4,9 +4,9 @@
   min-height: 100vh;
   padding: 2rem 1.25rem 4rem;
   background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 51, 102, 0.45), transparent),
-    var(--solvix-bg, #020617);
-  color: var(--solvix-text, #ffffff);
+    radial-gradient(ellipse 80% 50% at 50% -20%, var(--solvix-home-glow-soft), transparent),
+    var(--color-bg, var(--solvix-bg));
+  color: var(--color-text-primary, var(--solvix-text));
 }
 
 .catalog-top {
@@ -15,13 +15,13 @@
 }
 
 .catalog-back {
-  color: var(--solvix-secondary, #38bdf8);
+  color: var(--color-primary, var(--solvix-secondary));
   text-decoration: none;
   font-size: 0.9rem;
 }
 
 .catalog-back:hover {
-  color: var(--solvix-neon, #00e5ff);
+  color: var(--solvix-neon);
 }
 
 .catalog-header {
@@ -31,7 +31,7 @@
 
 .catalog-header h1 {
   margin: 0 0 0.5rem;
-  color: var(--solvix-primary, #4fd1ff);
+  color: var(--color-primary, var(--solvix-primary));
   font-size: clamp(1.75rem, 4vw, 2.25rem);
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -39,7 +39,7 @@
 
 .catalog-header p {
   margin: 0;
-  color: var(--solvix-text-secondary, #cfe9ff);
+  color: var(--solvix-text-secondary);
   font-size: 1rem;
 }
 
@@ -63,8 +63,8 @@
   padding: 0.5rem 1.1rem;
   border-radius: 999px;
   background: transparent;
-  border: 1px solid rgba(79, 209, 255, 0.35);
-  color: var(--solvix-primary, #4fd1ff);
+  border: 1px solid var(--solvix-home-card-border);
+  color: var(--color-primary, var(--solvix-primary));
   cursor: pointer;
   transition: 0.25s ease;
   font-size: 0.875rem;
@@ -72,13 +72,13 @@
 }
 
 .filters button:hover {
-  background: rgba(79, 209, 255, 0.1);
+  background: var(--solvix-primary-soft);
 }
 
 .filters button.active {
-  background: var(--solvix-primary, #4fd1ff);
-  color: var(--solvix-on-primary, #001f29);
-  box-shadow: 0 0 12px rgba(79, 209, 255, 0.55);
+  background: var(--color-primary, var(--solvix-primary));
+  color: var(--solvix-on-primary);
+  box-shadow: var(--solvix-glow);
   border-color: transparent;
 }
 
@@ -94,18 +94,18 @@
   box-sizing: border-box;
   padding: 0.7rem 1rem;
   border-radius: 0.75rem;
-  border: 1px solid rgba(79, 209, 255, 0.25);
-  background: var(--solvix-surface, #0f172a);
-  color: var(--solvix-text, #ffffff);
+  border: 1px solid var(--solvix-home-card-border);
+  background: var(--solvix-home-card-bg-solid);
+  color: var(--color-text-primary, var(--solvix-text));
   font-size: 0.95rem;
 }
 
 .search input::placeholder {
-  color: var(--solvix-text-muted, #94a3b8);
+  color: var(--solvix-text-muted);
 }
 
 .search input:focus {
-  outline: 2px solid rgba(79, 209, 255, 0.45);
+  outline: 2px solid color-mix(in srgb, var(--solvix-primary) 45%, transparent);
   outline-offset: 1px;
 }
 
@@ -141,13 +141,13 @@
   border-radius: 1.25rem;
   background: linear-gradient(
     90deg,
-    var(--solvix-surface, #0f172a) 0%,
-    rgba(79, 209, 255, 0.08) 50%,
-    var(--solvix-surface, #0f172a) 100%
+    var(--solvix-home-card-bg-solid) 0%,
+    var(--solvix-primary-soft) 50%,
+    var(--solvix-home-card-bg-solid) 100%
   );
   background-size: 200% 100%;
   animation: catalog-shimmer 1.4s ease-in-out infinite;
-  border: 1px solid rgba(79, 209, 255, 0.12);
+  border: 1px solid var(--solvix-home-card-border);
 }
 
 @keyframes catalog-shimmer {
@@ -161,17 +161,18 @@
   text-align: center;
   padding: 2rem 1.5rem;
   border-radius: 1rem;
-  background: var(--solvix-surface, #0f172a);
-  border: 1px solid rgba(79, 209, 255, 0.18);
+  background: var(--solvix-home-card-bg-solid);
+  border: 1px solid var(--solvix-home-card-border);
+  box-shadow: var(--solvix-home-card-shadow);
 }
 
 .catalog-state p {
   margin: 0 0 1rem;
-  color: var(--solvix-text-secondary, #cfe9ff);
+  color: var(--solvix-text-secondary);
 }
 
 .catalog-state--error p {
-  color: var(--solvix-text, #ffffff);
+  color: var(--color-text-primary, var(--solvix-text));
 }
 
 .catalog-state--filter {
@@ -181,16 +182,18 @@
 .card {
   display: flex;
   flex-direction: column;
-  background: var(--solvix-surface, #0f172a);
+  background: var(--solvix-home-card-bg-solid);
   border-radius: 1.25rem;
   overflow: hidden;
-  border: 1px solid rgba(79, 209, 255, 0.2);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid var(--solvix-home-card-border);
+  box-shadow: var(--solvix-home-card-shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 0 24px rgba(79, 209, 255, 0.28);
+  box-shadow: var(--solvix-home-card-hover-shadow);
+  border-color: color-mix(in srgb, var(--solvix-primary) 45%, var(--solvix-home-card-border));
 }
 
 .image-box {
@@ -199,7 +202,7 @@
   justify-content: center;
   align-items: center;
   position: relative;
-  background: rgba(2, 6, 23, 0.55);
+  background: var(--solvix-panel-inset);
 }
 
 .image-box img {
@@ -217,8 +220,8 @@
   width: 7rem;
   height: 7rem;
   border-radius: 1rem;
-  border: 1px dashed rgba(148, 163, 184, 0.45);
-  color: var(--solvix-text-muted, #94a3b8);
+  border: 1px dashed var(--solvix-home-separator);
+  color: var(--solvix-text-muted);
   font-size: 0.8rem;
 }
 
@@ -226,7 +229,7 @@
   position: absolute;
   width: 7.5rem;
   height: 7.5rem;
-  background: radial-gradient(circle, rgba(0, 229, 255, 0.35), transparent);
+  background: radial-gradient(circle, var(--solvix-home-glow-mid), transparent);
   filter: blur(28px);
   pointer-events: none;
 }
@@ -249,14 +252,14 @@
 
 .categoria {
   font-size: 0.75rem;
-  color: var(--solvix-text-muted, #94a3b8);
+  color: var(--solvix-text-muted);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .info h2 {
   margin: 0;
-  color: var(--solvix-text, #ffffff);
+  color: var(--color-text-primary, var(--solvix-text));
   font-size: 1rem;
   line-height: 1.35;
   font-weight: 600;
@@ -264,13 +267,13 @@
 
 .marca {
   margin: 0;
-  color: var(--solvix-secondary, #38bdf8);
+  color: var(--color-primary, var(--solvix-secondary));
   font-size: 0.85rem;
 }
 
 .descripcion {
   margin: 0.35rem 0 0;
-  color: var(--solvix-text-muted, #94a3b8);
+  color: var(--solvix-text-muted);
   font-size: 0.85rem;
   line-height: 1.45;
   display: -webkit-box;
@@ -290,7 +293,7 @@
 }
 
 .price {
-  color: var(--solvix-neon, #00e5ff);
+  color: var(--solvix-neon);
   font-weight: 700;
   font-size: 1.05rem;
   font-variant-numeric: tabular-nums;

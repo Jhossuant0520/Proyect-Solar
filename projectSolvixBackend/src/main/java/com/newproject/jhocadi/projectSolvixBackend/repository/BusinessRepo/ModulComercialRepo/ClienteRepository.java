@@ -3,7 +3,10 @@ package com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.Modu
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.Cliente;
@@ -21,4 +24,16 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     List<Cliente> findByActivoTrueOrderByNombreAsc();
 
     List<Cliente> findByNombreContainingIgnoreCase(String nombre);
+
+    /** Búsqueda acotada para selectores: nombre, documento, teléfono o correo. */
+    @Query("SELECT c FROM Cliente c "
+        + "WHERE (:soloActivos = false OR c.activo = true) "
+        + "AND (LOWER(c.nombre) LIKE :patron "
+        + "  OR LOWER(COALESCE(c.numeroDocumento, '')) LIKE :patron "
+        + "  OR LOWER(COALESCE(c.telefono, '')) LIKE :patron "
+        + "  OR LOWER(COALESCE(c.email, '')) LIKE :patron)")
+    List<Cliente> buscar(
+        @Param("patron") String patron,
+        @Param("soloActivos") boolean soloActivos,
+        Pageable pageable);
 }

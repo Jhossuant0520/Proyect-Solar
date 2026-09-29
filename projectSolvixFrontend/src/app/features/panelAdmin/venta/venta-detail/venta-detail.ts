@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { SolvixFeedbackService } from '../../../../shared/services/solvix-feedback.service';
 import { SolvixBadgeComponent } from '../../../../shared/components/solvix-badge/solvix-badge';
 import { SolvixButtonComponent } from '../../../../shared/components/solvix-button/solvix-button';
 import { SolvixEmptyStateComponent } from '../../../../shared/components/solvix-empty-state/solvix-empty-state';
@@ -68,7 +69,7 @@ export class VentaDetailComponent implements OnInit {
     private router: Router,
     private ventaService: VentaService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private feedback: SolvixFeedbackService
   ) {}
 
   ngOnInit(): void {
@@ -122,11 +123,11 @@ export class VentaDetailComponent implements OnInit {
           next: venta => {
             this.venta = venta;
             this.accionando = false;
-            this.snackBar.open('Venta completada. El inventario ya se actualizó.', 'Cerrar', { duration: 3500 });
+            this.feedback.success('Venta completada. El inventario ya se actualizó.', 3500);
           },
           error: error => {
             this.accionando = false;
-            this.snackBar.open(mapHttpError(error, 'No se pudo completar la venta.').message, 'Cerrar', { duration: 4500 });
+            this.feedback.error(mapHttpError(error, 'No se pudo completar la venta.').message, 4500);
           }
         });
       }
@@ -149,11 +150,11 @@ export class VentaDetailComponent implements OnInit {
           next: venta => {
             this.venta = venta;
             this.accionando = false;
-            this.snackBar.open('Venta cancelada.', 'Cerrar', { duration: 3000 });
+            this.feedback.info('Venta cancelada.', 3000);
           },
           error: error => {
             this.accionando = false;
-            this.snackBar.open(mapHttpError(error, 'No se pudo cancelar la venta.').message, 'Cerrar', { duration: 4500 });
+            this.feedback.error(mapHttpError(error, 'No se pudo cancelar la venta.').message, 4500);
           }
         });
       }

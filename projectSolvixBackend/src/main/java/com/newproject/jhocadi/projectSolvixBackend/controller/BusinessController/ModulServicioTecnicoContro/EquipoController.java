@@ -38,8 +38,13 @@ public class EquipoController {
 
     @GetMapping
     public ResponseEntity<List<EquipoResponseDTO>> listar(
+            @RequestParam(required = false) String q,
             @RequestParam(required = false) Long clienteId,
-            @RequestParam(required = false, defaultValue = "false") Boolean soloActivos) {
+            @RequestParam(required = false, defaultValue = "false") Boolean soloActivos,
+            @RequestParam(required = false) Integer limite) {
+        if (limite != null || q != null) {
+            return ResponseEntity.ok(equipoService.buscar(q, limite, clienteId, soloActivos));
+        }
         return ResponseEntity.ok(equipoService.listar(clienteId, soloActivos));
     }
 

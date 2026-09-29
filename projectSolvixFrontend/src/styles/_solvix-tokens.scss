@@ -1,12 +1,21 @@
-// SOLVIX design tokens — fuente única de color, tipo y estado.
-// No introducir hex en componentes; usar estas variables.
+// SOLVIX design tokens — paleta + tokens semánticos.
+// Tema por defecto: oscuro. Aplicar vía html[data-theme="dark|light"].
+// Los componentes deben usar --solvix-* o --color-* (nunca hex ad-hoc).
 
-:root {
+@mixin solvix-theme-dark {
+  color-scheme: dark;
+
+  /* —— Paleta base (oscuro) —— */
   --solvix-bg: #020617;
   --solvix-surface: #0f172a;
   --solvix-surface-low: #151b2d;
   --solvix-surface-high: #23293c;
+  --solvix-surface-elevated: #1a2236;
+  --solvix-panel: rgba(15, 23, 42, 0.8);
+  --solvix-panel-inset: rgba(2, 6, 23, 0.35);
+  --solvix-row-hover: rgba(46, 52, 71, 0.35);
   --solvix-primary: #4fd1ff;
+  --solvix-primary-hover: #7ddfff;
   --solvix-secondary: #38bdf8;
   --solvix-neon: #00e5ff;
   --solvix-deep: #003366;
@@ -15,24 +24,197 @@
   --solvix-text-muted: #94a3b8;
   --solvix-border: rgba(79, 209, 255, 0.2);
   --solvix-border-subtle: rgba(61, 72, 78, 0.6);
-
   --solvix-success: #10b981;
   --solvix-warning: #f59e0b;
   --solvix-error: #ffb4ab;
   --solvix-error-bg: #93000a;
+  --solvix-info: #38bdf8;
   --solvix-on-primary: #001f29;
 
-  --solvix-font: 'Geist', 'Inter', sans-serif;
-  --solvix-font-mono: 'JetBrains Mono', 'Inconsolata', monospace;
+  --solvix-primary-soft: rgba(79, 209, 255, 0.12);
+  --solvix-success-soft: rgba(16, 185, 129, 0.14);
+  --solvix-warning-soft: rgba(245, 158, 11, 0.14);
+  --solvix-danger-soft: rgba(147, 0, 10, 0.35);
+  --solvix-info-soft: rgba(56, 189, 248, 0.14);
+  --solvix-neutral-soft: rgba(148, 163, 184, 0.12);
 
+  --solvix-overlay: rgba(2, 6, 23, 0.82);
+  --solvix-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
+  --solvix-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --solvix-glow: 0 0 12px rgba(79, 209, 255, 0.3);
+
+  --solvix-scrollbar-track: transparent;
+  --solvix-scrollbar-thumb: rgba(148, 163, 184, 0.32);
+  --solvix-scrollbar-thumb-hover: rgba(79, 209, 255, 0.28);
+
+  --solvix-topbar-bg: rgba(15, 23, 42, 0.88);
+  --solvix-snack-surface-from: rgba(15, 23, 42, 0.98);
+  --solvix-snack-surface-to: rgba(2, 6, 23, 0.96);
+  --solvix-select-panel-bg: rgba(10, 20, 35, 0.94);
+
+  --solvix-btn-tech-primary-bg: #dce1fb;
+  --solvix-btn-tech-primary-fg: #0c1324;
+  --solvix-btn-tech-primary-hover: #ffffff;
+  --solvix-btn-tech-secondary-bg: #2e3447;
+  --solvix-btn-tech-secondary-fg: #dce1fb;
+  --solvix-btn-tech-secondary-hover: #33394c;
+  --solvix-btn-tech-tertiary-fg: #94a3b8;
+  --solvix-btn-tech-tertiary-hover: #dce1fb;
+
+  /* —— Homepage (superficies glass / cards) —— */
+  --solvix-home-card-bg: rgba(15, 23, 42, 0.62);
+  --solvix-home-card-bg-solid: #151b2d;
+  --solvix-home-card-border: rgba(79, 209, 255, 0.22);
+  --solvix-home-card-shadow: 0 0 28px rgba(0, 0, 0, 0.45), inset 0 0 18px rgba(79, 209, 255, 0.05);
+  --solvix-home-card-hover-shadow: 0 0 32px rgba(79, 209, 255, 0.28), 0 12px 40px rgba(0, 0, 0, 0.45);
+  --solvix-home-separator: rgba(255, 255, 255, 0.08);
+  --solvix-home-overlay-from: rgba(2, 6, 23, 0.88);
+  --solvix-home-glow-soft: rgba(79, 209, 255, 0.12);
+  --solvix-home-glow-mid: rgba(79, 209, 255, 0.22);
+  --solvix-home-inset-glow: rgba(79, 209, 255, 0.1);
+
+  @include solvix-semantic-aliases;
+}
+
+/**
+ * Tema claro — referencia Stitch (catálogo Productos):
+ * fondo slate-50, superficies blancas, acento sky-600/700, bordes slate neutros.
+ */
+@mixin solvix-theme-light {
+  color-scheme: light;
+
+  /* —— Paleta base (claro / Stitch) —— */
+  --solvix-bg: #f8fafc; /* slate-50 */
+  --solvix-surface: #ffffff;
+  --solvix-surface-low: #f1f5f9; /* slate-100 */
+  --solvix-surface-high: #e2e8f0; /* slate-200 */
+  --solvix-surface-elevated: #ffffff;
+  --solvix-panel: #ffffff;
+  --solvix-panel-inset: #f8fafc;
+  --solvix-row-hover: rgba(248, 250, 252, 0.92);
+  --solvix-primary: #0284c7; /* sky-600 */
+  --solvix-primary-hover: #0369a1; /* sky-700 */
+  --solvix-secondary: #0ea5e9; /* sky-500 */
+  --solvix-neon: #0284c7;
+  --solvix-deep: #0369a1;
+  --solvix-text: #0f172a; /* slate-900 */
+  --solvix-text-secondary: #334155; /* slate-700 */
+  --solvix-text-muted: #64748b; /* slate-500 */
+  --solvix-border: #e2e8f0; /* slate-200 — neutrales, no cian */
+  --solvix-border-subtle: #f1f5f9; /* slate-100 */
+  --solvix-success: #047857; /* emerald-700 */
+  --solvix-warning: #d97706; /* amber-600 */
+  --solvix-error: #dc2626;
+  --solvix-error-bg: #fee2e2;
+  --solvix-info: #0284c7;
+  --solvix-on-primary: #ffffff;
+
+  --solvix-primary-soft: #f0f9ff; /* sky-50 */
+  --solvix-success-soft: #ecfdf5; /* emerald-50 */
+  --solvix-warning-soft: #fffbeb; /* amber-50 */
+  --solvix-danger-soft: #fef2f2;
+  --solvix-info-soft: #f0f9ff;
+  --solvix-neutral-soft: #f1f5f9;
+
+  --solvix-overlay: rgba(15, 23, 42, 0.4);
+  --solvix-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.06);
+  --solvix-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --solvix-glow: 0 1px 2px rgba(2, 132, 199, 0.06);
+
+  --solvix-scrollbar-track: #f1f5f9;
+  --solvix-scrollbar-thumb: #cbd5e1;
+  --solvix-scrollbar-thumb-hover: #94a3b8;
+
+  --solvix-topbar-bg: rgba(255, 255, 255, 0.92);
+  --solvix-snack-surface-from: rgba(255, 255, 255, 0.98);
+  --solvix-snack-surface-to: rgba(248, 250, 252, 0.98);
+  --solvix-select-panel-bg: #ffffff;
+
+  /* Botones tech alineados a CTA sky de Stitch */
+  --solvix-btn-tech-primary-bg: #0284c7;
+  --solvix-btn-tech-primary-fg: #ffffff;
+  --solvix-btn-tech-primary-hover: #0369a1;
+  --solvix-btn-tech-secondary-bg: #f8fafc;
+  --solvix-btn-tech-secondary-fg: #334155;
+  --solvix-btn-tech-secondary-hover: #f1f5f9;
+  --solvix-btn-tech-tertiary-fg: #64748b;
+  --solvix-btn-tech-tertiary-hover: #0f172a;
+
+  /* —— Homepage (superficies claras, identidad sky) —— */
+  --solvix-home-card-bg: #ffffff;
+  --solvix-home-card-bg-solid: #ffffff;
+  --solvix-home-card-border: #e2e8f0;
+  --solvix-home-card-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 10px 28px rgba(15, 23, 42, 0.06);
+  --solvix-home-card-hover-shadow: 0 4px 16px rgba(2, 132, 199, 0.12), 0 12px 32px rgba(15, 23, 42, 0.08);
+  --solvix-home-separator: #e2e8f0;
+  --solvix-home-overlay-from: rgba(248, 250, 252, 0.94);
+  --solvix-home-glow-soft: rgba(2, 132, 199, 0.08);
+  --solvix-home-glow-mid: rgba(2, 132, 199, 0.14);
+  --solvix-home-inset-glow: rgba(2, 132, 199, 0.06);
+
+  @include solvix-semantic-aliases;
+}
+
+@mixin solvix-semantic-aliases {
+  /* —— Tokens semánticos (capa 2) —— */
+  --color-bg: var(--solvix-bg);
+  --color-surface-1: var(--solvix-surface);
+  --color-surface-2: var(--solvix-surface-low);
+  --color-surface-elevated: var(--solvix-surface-elevated);
+  --color-panel: var(--solvix-panel);
+  --color-panel-inset: var(--solvix-panel-inset);
+  --color-row-hover: var(--solvix-row-hover);
+
+  --color-text-primary: var(--solvix-text);
+  --color-text-secondary: var(--solvix-text-secondary);
+  --color-text-muted: var(--solvix-text-muted);
+
+  --color-border: var(--solvix-border);
+  --color-border-subtle: var(--solvix-border-subtle);
+
+  --color-primary: var(--solvix-primary);
+  --color-primary-hover: var(--solvix-primary-hover);
+  --color-primary-soft: var(--solvix-primary-soft);
+
+  --color-success: var(--solvix-success);
+  --color-success-soft: var(--solvix-success-soft);
+  --color-warning: var(--solvix-warning);
+  --color-warning-soft: var(--solvix-warning-soft);
+  --color-danger: var(--solvix-error);
+  --color-danger-soft: var(--solvix-danger-soft);
+  --color-info: var(--solvix-info);
+  --color-info-soft: var(--solvix-info-soft);
+
+  --color-focus: var(--solvix-primary);
+  --color-overlay: var(--solvix-overlay);
+
+  --color-home-card-bg: var(--solvix-home-card-bg);
+  --color-home-card-bg-solid: var(--solvix-home-card-bg-solid);
+  --color-home-card-border: var(--solvix-home-card-border);
+  --color-home-card-shadow: var(--solvix-home-card-shadow);
+  --color-home-card-hover-shadow: var(--solvix-home-card-hover-shadow);
+  --color-home-separator: var(--solvix-home-separator);
+}
+
+/* Fallback oscuro antes / sin data-theme (anti-flash). */
+:root {
+  @include solvix-theme-dark;
+
+  --solvix-font: 'Inter', 'Geist', sans-serif;
+  --solvix-font-mono: 'JetBrains Mono', 'Inconsolata', monospace;
   --solvix-sidebar-width: 16rem;
   --solvix-topbar-height: 4rem;
   --solvix-radius: 0.5rem;
-  --solvix-glow: 0 0 12px rgba(79, 209, 255, 0.3);
-
+  --solvix-radius-card: 0.75rem; /* Stitch rounded-xl */
   --solvix-scrollbar-size: 6px;
-  --solvix-scrollbar-thumb: rgba(148, 163, 184, 0.32);
-  --solvix-scrollbar-thumb-hover: rgba(79, 209, 255, 0.28);
+}
+
+html[data-theme='dark'] {
+  @include solvix-theme-dark;
+}
+
+html[data-theme='light'] {
+  @include solvix-theme-light;
 }
 
 .material-symbols-outlined {

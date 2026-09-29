@@ -31,8 +31,11 @@ export class SolvixButtonComponent {
   @Input() type: 'button' | 'submit' = 'button';
   @Input() disabled = false;
   @Input() ariaLabel = '';
+  /** Feedback visual de carga (spin del icono). No altera la lógica del caller. */
+  @Input() loading = false;
 
   get cssClass(): string {
-    return `btn-${this.family}-${this.rank}`;
+    const base = `btn-${this.family}-${this.rank}`;
+    return this.loading ? `${base} is-loading` : base;
   }
 }

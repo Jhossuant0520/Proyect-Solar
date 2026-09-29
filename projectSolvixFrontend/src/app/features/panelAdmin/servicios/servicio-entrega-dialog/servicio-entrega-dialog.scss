@@ -1,30 +1,31 @@
 .entrega-dialog {
-  min-width: min(560px, 94vw);
-  max-width: 680px;
+  width: min(680px, 100%);
+  max-width: 100%;
   max-height: min(92vh, 900px);
   overflow: auto;
   padding: 1.25rem 1.35rem 1.15rem;
-  background: #0f172a;
-  color: #f8fafc;
+  background: var(--color-surface-elevated, var(--solvix-surface-elevated));
+  color: var(--color-text-primary, var(--solvix-text));
+  box-sizing: border-box;
 }
 
 .dlg-head .kicker {
   margin: 0 0 0.2rem;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--color-text-muted, var(--solvix-text-muted));
 }
 
 .dlg-head h2 {
   margin: 0 0 0.35rem;
   font-size: 1.2rem;
-  color: #4fd1ff;
+  color: var(--color-primary, var(--solvix-primary));
 }
 
 .dlg-head p {
   margin: 0;
-  color: #94a3b8;
+  color: var(--color-text-muted, var(--solvix-text-muted));
   font-size: 0.88rem;
   line-height: 1.45;
 }
@@ -32,7 +33,7 @@
 .bloque {
   margin-top: 1.1rem;
   padding-top: 0.95rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.18);
+  border-top: 1px solid var(--color-border-subtle, var(--solvix-border-subtle));
 }
 
 .bloque h3,
@@ -40,7 +41,7 @@
   margin: 0 0 0.55rem;
   font-size: 0.92rem;
   font-weight: 600;
-  color: #38bdf8;
+  color: var(--color-primary, var(--solvix-secondary));
 }
 
 .form-entrega h3.sep {
@@ -61,36 +62,37 @@
 }
 
 .facts dt {
-  color: #94a3b8;
+  color: var(--color-text-muted, var(--solvix-text-muted));
 }
 
 .facts dd {
   margin: 0;
-  color: #f8fafc;
+  color: var(--color-text-primary, var(--solvix-text));
+  overflow-wrap: anywhere;
 }
 
 .campo {
   margin: 0 0 0.45rem;
   font-size: 0.86rem;
   line-height: 1.4;
-  color: #f8fafc;
+  color: var(--color-text-primary, var(--solvix-text));
 }
 
 .campo span:first-child {
   display: block;
-  color: #94a3b8;
-  font-size: 0.75rem;
+  color: var(--color-text-muted, var(--solvix-text-muted));
+  font-size: 0.78rem;
   margin-bottom: 0.15rem;
 }
 
 .rep-item {
-  color: #cbd5e1;
+  color: var(--color-text-secondary, var(--solvix-text-secondary));
 }
 
 .aviso {
   margin: 0 0 0.75rem;
   font-size: 0.86rem;
-  color: #94a3b8;
+  color: var(--color-text-muted, var(--solvix-text-muted));
   line-height: 1.4;
 }
 
@@ -100,12 +102,14 @@
   align-items: flex-start;
   margin-bottom: 0.9rem;
   font-size: 0.9rem;
-  color: #f8fafc;
+  color: var(--color-text-primary, var(--solvix-text));
 }
 
 .check input {
   margin-top: 0.2rem;
   width: auto;
+  min-width: 1.1rem;
+  min-height: 1.1rem;
 }
 
 .grid-2 {
@@ -117,8 +121,8 @@
 label:not(.check) {
   display: grid;
   gap: 0.3rem;
-  font-size: 0.82rem;
-  color: #94a3b8;
+  font-size: 0.85rem;
+  color: var(--color-text-muted, var(--solvix-text-muted));
 }
 
 .label-row {
@@ -129,19 +133,19 @@ label:not(.check) {
 }
 
 .req {
-  color: #4fd1ff;
-  font-size: 0.72rem;
+  color: var(--color-primary, var(--solvix-primary));
+  font-size: 0.75rem;
 }
 
 .opt {
-  color: #94a3b8;
-  font-size: 0.72rem;
+  color: var(--color-text-muted, var(--solvix-text-muted));
+  font-size: 0.75rem;
   font-weight: 400;
 }
 
 .hint {
-  font-size: 0.75rem;
-  color: #64748b;
+  font-size: 0.8rem;
+  color: var(--color-text-muted, var(--solvix-text-muted));
   line-height: 1.35;
 }
 
@@ -149,51 +153,26 @@ input,
 textarea {
   width: 100%;
   border-radius: 8px;
-  border: 1px solid rgba(79, 209, 255, 0.28);
-  background: #020617;
-  color: #f8fafc;
-  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--color-border, var(--solvix-border));
+  background: var(--color-surface-2, var(--solvix-surface-low));
+  color: var(--color-text-primary, var(--solvix-text));
+  padding: 0.55rem 0.65rem;
   font: inherit;
+  box-sizing: border-box;
+}
+
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-focus, var(--solvix-primary));
+  outline-offset: 1px;
 }
 
 input[readonly] {
   opacity: 0.9;
-  border-color: rgba(148, 163, 184, 0.28);
+  border-color: var(--color-border-subtle, var(--solvix-border-subtle));
 }
 
-.firma-wrap {
-  border-radius: 10px;
-  border: 1px dashed rgba(79, 209, 255, 0.45);
-  background: #020617;
-  overflow: hidden;
-}
-
-.firma-canvas {
-  display: block;
-  width: 100%;
-  height: 180px;
-  touch-action: none;
-  cursor: crosshair;
-  user-select: none;
-}
-
-.firma-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.firma-status {
-  font-size: 0.8rem;
-  color: #94a3b8;
-}
-
-.firma-status.ok {
-  color: #86efac;
-}
+/* Firma: estilos en solvix-signature-pad (D.7 fondo blanco / trazo negro). */
 
 .obs-label {
   margin-bottom: 0;
@@ -203,8 +182,8 @@ input[readonly] {
   margin-top: 1rem;
   padding: 0.75rem 0.85rem;
   border-radius: 10px;
-  border: 1px solid rgba(79, 209, 255, 0.22);
-  background: rgba(2, 6, 23, 0.55);
+  border: 1px solid var(--color-border, var(--solvix-border));
+  background: var(--color-surface-2, var(--solvix-surface-low));
 }
 
 .resumen-final h3 {
@@ -215,11 +194,11 @@ input[readonly] {
   margin: 0.35rem 0 0.55rem;
   padding-left: 1.1rem;
   font-size: 0.88rem;
-  color: #94a3b8;
+  color: var(--color-text-muted, var(--solvix-text-muted));
 }
 
 .checklist .ok {
-  color: #86efac;
+  color: var(--color-success, var(--solvix-success));
 }
 
 .final-hint {
@@ -228,8 +207,8 @@ input[readonly] {
 
 .form-error {
   margin: 0.85rem 0 0;
-  color: #f87171;
-  font-size: 0.85rem;
+  color: var(--color-danger, var(--solvix-error));
+  font-size: 0.88rem;
 }
 
 .dlg-actions {
@@ -238,9 +217,23 @@ input[readonly] {
   justify-content: flex-end;
   gap: 0.55rem;
   margin-top: 1.1rem;
+  position: sticky;
+  bottom: 0;
+  padding-top: 0.75rem;
+  background: linear-gradient(
+    to top,
+    var(--color-surface-elevated, var(--solvix-surface-elevated)) 70%,
+    transparent
+  );
 }
 
-@media (max-width: 640px) {
+@media (max-width: 767px) {
+  .entrega-dialog {
+    min-width: 0;
+    padding: 1rem 0.95rem 1rem;
+    max-height: min(94vh, 960px);
+  }
+
   .grid-2,
   .facts div {
     grid-template-columns: 1fr;
@@ -249,5 +242,11 @@ input[readonly] {
   .dlg-actions {
     flex-direction: column-reverse;
     align-items: stretch;
+  }
+
+  .dlg-actions solvix-button,
+  .dlg-actions button {
+    width: 100%;
+    min-height: var(--solvix-touch-min, 44px);
   }
 }

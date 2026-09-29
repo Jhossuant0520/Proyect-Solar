@@ -1,11 +1,4 @@
 :host {
-  --solvix-bg: #020617;
-  --solvix-surface: #0f172a;
-  --solvix-primary: #4fd1ff;
-  --solvix-secondary: #38bdf8;
-  --solvix-neon: #00e5ff;
-  --solvix-text: #ffffff;
-  --solvix-text-muted: #94a3b8;
   display: block;
 }
 
@@ -20,7 +13,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse at center, rgba(79, 209, 255, 0.05), transparent 70%);
+  background: radial-gradient(ellipse at center, var(--solvix-home-glow-soft), transparent 70%);
 }
 
 .steps-inner {
@@ -72,7 +65,9 @@
   height: 64px;
   margin-bottom: 24px;
   border-radius: 50%;
-  background: #191f31;
+  background: var(--solvix-home-card-bg-solid);
+  border: 1px solid var(--solvix-home-card-border);
+  box-shadow: var(--solvix-home-card-shadow);
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -82,29 +77,29 @@
 .step-circle.is-primary {
   border: 2px solid var(--solvix-primary);
   color: var(--solvix-primary);
-  box-shadow: 0 0 16px rgba(79, 209, 255, 0.4);
+  box-shadow: var(--solvix-glow);
   animation: circleGlow 3s ease-in-out infinite;
 }
 
 .step-circle.is-neon {
   border: 2px solid var(--solvix-neon);
   color: var(--solvix-neon);
-  box-shadow: 0 0 16px rgba(0, 229, 255, 0.4);
+  box-shadow: var(--solvix-glow);
   animation: circleGlow 3s ease-in-out 0.4s infinite;
 }
 
 .step-circle.is-secondary {
   border: 2px solid var(--solvix-secondary);
   color: var(--solvix-secondary);
-  box-shadow: 0 0 16px rgba(56, 189, 248, 0.4);
+  box-shadow: var(--solvix-glow);
   animation: circleGlow 3s ease-in-out 0.8s infinite;
 }
 
 .step-circle.is-filled {
   border: 2px solid var(--solvix-primary);
   background: var(--solvix-primary);
-  color: #001f29;
-  box-shadow: 0 0 16px rgba(79, 209, 255, 0.4);
+  color: var(--solvix-on-primary);
+  box-shadow: var(--solvix-glow);
   animation: circleGlow 3s ease-in-out 1.2s infinite;
 }
 
@@ -142,7 +137,7 @@
     left: 0;
     width: 100%;
     height: 2px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--solvix-home-separator);
     z-index: 0;
     overflow: hidden;
   }
@@ -198,8 +193,8 @@
 }
 
 @keyframes circleGlow {
-  0%, 100% { box-shadow: 0 0 12px rgba(79, 209, 255, 0.25); }
-  50% { box-shadow: 0 0 22px rgba(79, 209, 255, 0.55); }
+  0%, 100% { box-shadow: 0 0 12px color-mix(in srgb, var(--solvix-primary) 30%, transparent); }
+  50% { box-shadow: 0 0 22px color-mix(in srgb, var(--solvix-primary) 50%, transparent); }
 }
 
 @keyframes lineTravel {

@@ -102,7 +102,6 @@
               <th>Marca</th>
               <th>Categoría</th>
               <th class="is-num">Precio de venta</th>
-              <th class="is-num">Costo actual</th>
               <th class="is-num">Stock</th>
               <th>Estado</th>
               <th class="is-num">Acciones</th>
@@ -122,12 +121,6 @@
                   <span class="cat">{{ producto.categoriaNombre }}</span>
                 </td>
                 <td class="is-num">{{ money(producto.precioVentaActual) }}</td>
-                <td class="is-num">
-                  <span>{{ costoTexto(producto) }}</span>
-                  <button type="button" class="icon-btn" (click)="ajustarCosto(producto)" aria-label="Ajustar costo">
-                    <span class="material-symbols-outlined">edit</span>
-                  </button>
-                </td>
                 <td class="is-num">{{ producto.stockActual ?? 0 }}</td>
                 <td>
                   <solvix-badge [tone]="producto.activo ? 'success' : 'neutral'">
@@ -141,15 +134,27 @@
                   <button type="button" class="icon-btn" (click)="editarProducto(producto)" aria-label="Editar">
                     <span class="material-symbols-outlined">edit_note</span>
                   </button>
-                  <button
-                    type="button"
-                    class="icon-btn"
-                    (click)="desactivarProducto(producto.id)"
-                    [disabled]="!producto.activo"
-                    aria-label="Desactivar"
-                  >
-                    <span class="material-symbols-outlined">visibility_off</span>
-                  </button>
+                  @if (producto.activo) {
+                    <button
+                      type="button"
+                      class="icon-btn"
+                      (click)="desactivarProducto(producto.id)"
+                      aria-label="Desactivar"
+                      title="Desactivar"
+                    >
+                      <span class="material-symbols-outlined">visibility_off</span>
+                    </button>
+                  } @else {
+                    <button
+                      type="button"
+                      class="icon-btn"
+                      (click)="activarProducto(producto.id)"
+                      aria-label="Activar"
+                      title="Activar"
+                    >
+                      <span class="material-symbols-outlined">restart_alt</span>
+                    </button>
+                  }
                 </td>
               </tr>
             }
@@ -176,9 +181,15 @@
                 <button type="button" class="icon-btn" (click)="editarProducto(producto)" aria-label="Editar">
                   <span class="material-symbols-outlined">edit_note</span>
                 </button>
-                <button type="button" class="icon-btn" (click)="ajustarCosto(producto)" aria-label="Ajustar costo">
-                  <span class="material-symbols-outlined">edit</span>
-                </button>
+                @if (producto.activo) {
+                  <button type="button" class="icon-btn" (click)="desactivarProducto(producto.id)" aria-label="Desactivar">
+                    <span class="material-symbols-outlined">visibility_off</span>
+                  </button>
+                } @else {
+                  <button type="button" class="icon-btn" (click)="activarProducto(producto.id)" aria-label="Activar">
+                    <span class="material-symbols-outlined">restart_alt</span>
+                  </button>
+                }
               </div>
             </div>
           </li>

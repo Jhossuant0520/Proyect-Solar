@@ -15,10 +15,12 @@ import {
   RegistrarEntregaRequestDTO,
   RegistrarEntregaResponseDTO,
   RegistrarNuevaFallaRequestDTO,
+  RecepcionOrdenServicioResponseDTO,
   RepuestoOrdenServicioRequestDTO,
   RepuestoOrdenServicioResponseDTO,
   TransicionOrdenServicioResponseDTO
 } from '../models/orden-servicio.models';
+import { PaginaResponseDTO } from '../models/cotizacion-comercial.models';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -29,8 +31,12 @@ export class OrdenServicioService {
 
   constructor(private http: HttpClient) {}
 
-  listar(filtros?: OrdenServicioFiltros): Observable<OrdenServicioResponseDTO[]> {
+  listar(filtros?: OrdenServicioFiltros): Observable<PaginaResponseDTO<OrdenServicioResponseDTO>> {
     let params = new HttpParams();
+    const q = filtros?.q?.trim();
+    if (q) {
+      params = params.set('q', q);
+    }
     if (filtros?.clienteId != null) {
       params = params.set('clienteId', String(filtros.clienteId));
     }
@@ -40,7 +46,9 @@ export class OrdenServicioService {
     if (filtros?.estado) {
       params = params.set('estado', filtros.estado);
     }
-    return this.http.get<OrdenServicioResponseDTO[]>(this.apiUrl, { params });
+    params = params.set('pagina', String(filtros?.pagina ?? 0));
+    params = params.set('tamano', String(filtros?.tamano ?? 20));
+    return this.http.get<PaginaResponseDTO<OrdenServicioResponseDTO>>(this.apiUrl, { params });
   }
 
   obtenerPorId(id: number): Observable<OrdenServicioResponseDTO> {
@@ -105,6 +113,10 @@ export class OrdenServicioService {
 
   obtenerEntrega(id: number): Observable<EntregaOrdenServicioResponseDTO> {
     return this.http.get<EntregaOrdenServicioResponseDTO>(`${this.apiUrl}/${id}/entrega`);
+  }
+
+  obtenerRecepcion(id: number): Observable<RecepcionOrdenServicioResponseDTO> {
+    return this.http.get<RecepcionOrdenServicioResponseDTO>(`${this.apiUrl}/${id}/recepcion`);
   }
 
   listarRepuestos(ordenId: number): Observable<RepuestoOrdenServicioResponseDTO[]> {

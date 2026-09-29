@@ -7,7 +7,7 @@ import { Component, Input } from '@angular/core';
     <header class="solvix-page-header">
       <div class="solvix-page-header__copy">
         @if (kicker) {
-          <p class="solvix-page-header__kicker solvix-mono">{{ kicker }}</p>
+          <p class="solvix-page-header__kicker">{{ kicker }}</p>
         }
         <h1>{{ title }}</h1>
         @if (subtitle) {
@@ -30,19 +30,27 @@ import { Component, Input } from '@angular/core';
     .solvix-page-header__kicker {
       margin: 0 0 0.35rem;
       color: var(--solvix-text-muted);
-      font-size: 0.75rem;
+      font-family: var(--solvix-font);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
     h1 {
       margin: 0;
       color: var(--solvix-text);
+      font-family: var(--solvix-font);
       font-size: 1.75rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
+      font-weight: 800;
+      letter-spacing: -0.03em;
     }
     .solvix-page-header__subtitle {
       margin: 0.4rem 0 0;
       color: var(--solvix-text-muted);
+      font-family: var(--solvix-font);
       max-width: 40rem;
+      letter-spacing: 0;
+      text-transform: none;
     }
     .solvix-page-header__actions {
       display: flex;

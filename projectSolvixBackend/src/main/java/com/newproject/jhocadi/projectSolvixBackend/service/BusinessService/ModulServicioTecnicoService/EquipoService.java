@@ -3,6 +3,8 @@ package com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.Modu
 import java.util.EnumSet;
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,8 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class EquipoService {
+
+    private static final int LIMITE_MAXIMO_BUSQUEDA = 50;
 
     private final EquipoRepository equipoRepository;
     private final ClienteRepository clienteRepository;
@@ -50,6 +54,31 @@ public class EquipoService {
             equipos = equipoRepository.findAllByOrderByFechaRegistroDesc();
         }
         return equipos.stream().map(EquipoResponseDTO::fromEntity).toList();
+    }
+
+    /**
+     * Autocomplete: búsqueda parcial por marca/modelo/serie/referencia/cliente.
+     * Sin {@code q} y con {@code clienteId} devuelve los más recientes (tope {@code limite}).
+     */
+    @Transactional(readOnly = true)
+    public List<EquipoResponseDTO> buscar(
+            String texto,
+            Integer limite,
+            Long clienteId,
+            Boolean soloActivos) {
+        int tope = limite != null ? Math.min(Math.max(limite, 1), LIMITE_MAXIMO_BUSQUEDA) : 10;
+        String q = texto != null ? texto.trim() : "";
+        String patron = q.isEmpty() ? null : "%" + q.toLowerCase(java.util.Locale.ROOT) + "%";
+        boolean activos = soloActivos == null || soloActivos;
+        return equipoRepository
+            .buscar(
+                patron,
+                clienteId,
+                activos,
+                PageRequest.of(0, tope, Sort.by(Sort.Direction.DESC, "fechaRegistro")))
+            .stream()
+            .map(EquipoResponseDTO::fromEntity)
+            .toList();
     }
 
     @Transactional(readOnly = true)

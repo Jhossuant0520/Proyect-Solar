@@ -1,0 +1,430 @@
+<!DOCTYPE html><html lang="es" style=""><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acta de Entrega Oficial - Computer &amp; Electronic Center</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&amp;family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['"Geist Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              navy: '#0b1329',
+              dark: '#0f172a',
+              accent: '#0284c7',
+              cyan: '#38bdf8',
+              muted: '#64748b',
+              light: '#f8fafc',
+              border: '#e2e8f0',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @media print {
+      body {
+        background-color: #ffffff !important;
+        padding: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .sheet-container {
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 12mm 14mm !important;
+      }
+    }
+    .sheet-corner {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-color: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 min-h-screen text-slate-800 font-sans py-8 px-4 flex flex-col items-center selection:bg-cyan-100">
+
+  <!-- Top Action Bar (Screen preview only) -->
+  <header class="no-print w-full max-w-[850px] mb-6 flex items-center justify-between bg-slate-900 border border-slate-800 rounded-xl px-5 py-3 shadow-lg">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-xs font-semibold uppercase tracking-wider text-slate-200">Acta de Entrega de Servicio Técnico</h1>
+        <p class="text-[11px] text-slate-400">Computer &amp; Electronic Center S.A.S · Formato Carta Imprimible (95%+ Monocromo)</p>
+      </div>
+    </div>
+    <button onclick="window.print()" class="flex items-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-400 active:scale-95 text-slate-950 font-semibold text-xs rounded-lg transition-all shadow-md shadow-sky-500/20 cursor-pointer">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+      </svg>
+      <span class="">IMPRIMIR / EXPORTAR PDF</span>
+    </button>
+  </header>
+
+  <!-- Printable Sheet Document (Letter) -->
+  <main class="sheet-container relative w-full max-w-[850px] bg-white border border-slate-300 shadow-2xl p-8 sm:p-10 text-[11px] leading-tight text-slate-800">
+    
+    <!-- Calibration Crop Marks -->
+    <div class="sheet-corner top-2 left-2 border-t-2 border-l-2"></div>
+    <div class="sheet-corner top-2 right-2 border-t-2 border-r-2"></div>
+    <div class="sheet-corner bottom-2 left-2 border-b-2 border-l-2"></div>
+    <div class="sheet-corner bottom-2 right-2 border-b-2 border-r-2"></div>
+
+    <!-- Sub-header Tracking bar -->
+    <div class="flex justify-between items-center text-[9px] uppercase tracking-wider text-slate-400 pb-2 border-b border-slate-200 mb-4 font-mono">
+      <span class="">Sistema de Gestión de Custodia Técnica&nbsp;</span>
+      <span class="">Documento de Entrega, Liquidación y Garantía</span>
+    </div>
+
+    <!-- Company Header -->
+    <section class="flex flex-col sm:flex-row justify-between items-start gap-4 pb-4 border-b-2 border-slate-900">
+      <div class="flex items-start gap-3.5">
+        <div class="w-12 h-12 bg-slate-950 rounded-lg flex items-center justify-center text-white shrink-0 p-1.5 shadow-sm border border-slate-800">
+          <svg class="w-full h-full text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-base sm:text-lg font-extrabold tracking-tight text-slate-950 uppercase leading-none font-sans">
+            Computer &amp; Electronic Center S.A.S
+          </h2>
+          <p class="text-[10px] font-semibold tracking-wide text-sky-700 mt-1 uppercase font-mono">
+            Servicio Técnico Especializado · Laboratorio de Ingeniería
+          </p>
+          <p class="text-[9px] text-slate-500 mt-1 max-w-md leading-normal">
+            Venta de computadores y accesorios · Mantenimiento de computadores e impresoras · Cableado estructurado · Fotocopiado e impresión · Mantenimiento e instalación de aires acondicionados · Suministro de cámaras de seguridad
+          </p>
+        </div>
+      </div>
+
+      <div class="text-right shrink-0 font-mono text-[9.5px] space-y-0.5 self-end sm:self-auto border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-200 w-full sm:w-auto">
+        <div class="font-bold text-slate-900">NIT: 901.482.391-4</div>
+        <div class="text-slate-600">Tel: +57 301 5316116</div>
+        <div class="text-slate-600">computerelectronic@hotmail.com</div>
+        <div class="text-slate-500">Yondó · Antioquia · Colombia</div>
+        <div class="inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded font-semibold text-[9px] mt-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+          <span class="">ENTREGA CONFORME</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Document Title & OT Badge Strip -->
+    <section class="mt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-3 border-b border-slate-300">
+      <div>
+        <span class="text-[9px] font-bold uppercase tracking-wider text-sky-700 font-mono">Servicio Técnico · Protocolo de Cierre</span>
+        <h3 class="text-xl sm:text-2xl font-black text-slate-950 tracking-tight uppercase">Acta de Entrega</h3>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="text-right">
+          <span class="block text-[8.5px] uppercase tracking-wider font-mono text-slate-400">Orden de Servicio</span>
+          <span class="font-mono text-xs font-bold text-slate-500">FECHA: 22/09/2026 · 10:42</span>
+        </div>
+        <div class="bg-sky-50 border border-sky-300 px-3.5 py-1.5 rounded-lg text-slate-950 font-mono text-sm sm:text-base font-bold tracking-tight shadow-sm">
+          OS-2026-000013
+        </div>
+      </div>
+    </section>
+
+    <!-- Grid [01] Cliente y Equipo + Confirmación -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 mt-3.5">
+      
+      <!-- Cliente y Equipo -->
+      <article class="border border-slate-300 rounded-lg overflow-hidden">
+        <div class="bg-slate-950 text-white px-3 py-1 flex justify-between items-center">
+          <span class="font-mono text-[9px] font-bold uppercase tracking-wider text-sky-400">[01] Información del Cliente y Equipo</span>
+          <span class="text-[8px] uppercase tracking-widest text-slate-400 font-mono">Titular</span>
+        </div>
+        <div class="p-3 bg-white space-y-2">
+          <div>
+            <span class="block text-[8.5px] uppercase font-mono text-slate-400 font-bold">Cliente</span>
+            <span class="text-xs font-bold text-slate-950">Jhossuant Cabezas Diaz</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100">
+            <div>
+              <span class="block text-[8.5px] uppercase font-mono text-slate-400 font-bold">Equipo</span>
+              <span class="text-xs font-semibold text-slate-900">PORTÁTIL · hp 123 · xddd</span>
+            </div>
+            <div>
+              <span class="block text-[8.5px] uppercase font-mono text-slate-400 font-bold">Responsable Taller</span>
+              <span class="text-xs font-semibold text-slate-900">Jhossuant</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Confirmación de Recepción -->
+      <article class="border border-slate-300 rounded-lg overflow-hidden">
+        <div class="bg-slate-950 text-white px-3 py-1 flex justify-between items-center">
+          <span class="font-mono text-[9px] font-bold uppercase tracking-wider text-sky-400">[02] Confirmación de Recepción</span>
+          <span class="text-[8px] uppercase tracking-widest text-slate-400 font-mono">Activo</span>
+        </div>
+        <div class="p-3 bg-white space-y-2">
+          <div>
+            <span class="block text-[8.5px] uppercase font-mono text-slate-400 font-bold">Firmante Autorizado</span>
+            <span class="text-xs font-bold text-slate-950">Jhossuant Cabezas Diaz</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100">
+            <div>
+              <span class="block text-[8.5px] uppercase font-mono text-slate-400 font-bold">Documento / C.C.</span>
+              <span class="text-xs font-mono font-semibold text-slate-900">1096243745</span>
+            </div>
+            <div>
+              <span class="block text-[8.5px] uppercase font-mono text-slate-400 font-bold">Confirmó Recepción</span>
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[9.5px]">
+                <svg class="w-3 h-3 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Sí · Aceptada
+              </span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- Section [03] Trabajo Realizado -->
+    <section class="mt-3.5 border border-slate-300 rounded-lg overflow-hidden">
+      <div class="bg-slate-950 text-white px-3 py-1 flex justify-between items-center">
+        <span class="font-mono text-[9px] font-bold uppercase tracking-wider text-sky-400">[03] Trabajo Realizado &amp; Control de Calidad</span>
+        <span class="text-[8px] uppercase tracking-widest text-slate-400 font-mono">Laboratorio</span>
+      </div>
+      <div class="p-3 bg-white space-y-2">
+        <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-md">
+          <span class="block text-[8.5px] uppercase font-mono text-sky-800 font-bold mb-0.5">Descripción de la Intervención Técnica</span>
+          <p class="text-xs font-semibold text-slate-950">
+            Arreglo de Visagras
+          </p>
+          <p class="text-[10px] text-slate-600 mt-1 leading-relaxed">
+            Reconstrucción mecánica de soportes internos del chasis, lubricación con compuesto de alta densidad, calibración de par de tensión de apertura/cierre y pruebas de integridad sobre pantalla sin flexión de carcasa.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- NEW SECTION REQUESTED: Fase de Entrega / Cotización Aprobada y Valor a Pagar -->
+    <section class="mt-3.5 border border-slate-300 rounded-lg overflow-hidden">
+      <div class="bg-slate-950 text-white px-3 py-1 flex justify-between items-center">
+        <span class="font-mono text-[9px] font-bold uppercase tracking-wider text-sky-400">[04] Liquidación Económica · Cotización Aprobada y Valor a Pagar</span>
+        <span class="text-[8px] uppercase tracking-widest text-emerald-400 font-mono">Cotización Aprobada</span>
+      </div>
+      <div class="p-3 bg-white">
+        <table class="w-full border-collapse text-left font-mono text-[10px]">
+          <thead>
+            <tr class="border-b border-slate-200 text-slate-400 text-[8.5px] uppercase">
+              <th class="py-1 font-semibold">Concepto / Ítem de Servicio</th>
+              <th class="py-1 font-semibold text-center">Cant.</th>
+              <th class="py-1 font-semibold text-right">Precio Unitario</th>
+              <th class="py-1 font-semibold text-right">Total</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-slate-800">
+            <tr>
+              <td class="py-1.5 font-sans font-medium text-slate-900">
+                Reparación, fijación estructural y calibración de bisagras
+                <span class="block text-[8.5px] text-slate-500 font-mono">Mano de obra especializada + refuerzo epóxico de chasis</span>
+              </td>
+              <td class="py-1.5 text-center">1</td>
+              <td class="py-1.5 text-right font-mono">$ 80.000</td>
+              <td class="py-1.5 text-right font-mono font-bold">$ 80.000</td>
+            </tr>
+            <tr>
+              <td class="py-1.5 font-sans font-medium text-slate-900">
+                Kit de bujes y tornillería de acero reforzada
+                <span class="block text-[8.5px] text-slate-500 font-mono">Repuestos certificados para laptop HP</span>
+              </td>
+              <td class="py-1.5 text-center">1</td>
+              <td class="py-1.5 text-right font-mono">$ 40.000</td>
+              <td class="py-1.5 text-right font-mono font-bold">$ 40.000</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Summary & Balance Strip -->
+        <div class="mt-2.5 pt-2 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-50 p-2.5 rounded-lg border">
+          <div class="space-y-0.5">
+            <div class="flex items-center gap-2">
+              <span class="text-[9px] uppercase font-mono font-bold text-slate-500">Estado de Cotización:</span>
+              <span class="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">
+                Aprobada previamente por cliente
+              </span>
+            </div>
+            <div class="text-[9px] text-slate-500 font-mono">
+              Forma de pago registrada: <span class="font-bold text-slate-800">Transferencia / Contado</span> · Comprobante validado
+            </div>
+          </div>
+
+          <div class="w-full sm:w-auto flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-200">
+            <div class="text-right">
+              <span class="block text-[8.5px] uppercase font-mono text-slate-500 font-bold">Total Liquidado</span>
+              <span class="text-[10px] text-slate-400 line-through font-mono">$ 120.000</span>
+            </div>
+            <div class="bg-slate-950 text-white px-3 py-1.5 rounded-md text-right shrink-0 border border-slate-800 shadow-sm">
+              <span class="block text-[8px] uppercase tracking-wider font-mono text-sky-400 font-bold">Valor a Pagar / Cancelado</span>
+              <span class="text-base font-black font-mono tracking-tight text-white">$ 120.000 COP</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Grid [05] Observaciones + QR Consulta -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 mt-3.5">
+      
+      <!-- Observaciones de Entrega -->
+      <article class="md:col-span-2 border border-slate-300 rounded-lg overflow-hidden flex flex-col justify-between">
+        <div class="bg-slate-950 text-white px-3 py-1 flex justify-between items-center">
+          <span class="font-mono text-[9px] font-bold uppercase tracking-wider text-sky-400">[05] Observaciones de Entrega &amp; Garantía</span>
+          <span class="text-[8px] uppercase tracking-widest text-slate-400 font-mono">Garantía 30 Días</span>
+        </div>
+        <div class="p-3 bg-white flex-1 flex flex-col justify-between space-y-2">
+          <div class="p-2.5 bg-slate-50 border border-slate-200 rounded min-h-[52px]">
+            <span class="block text-[8px] uppercase font-mono text-slate-400 font-bold mb-0.5">Observaciones</span>
+            <p class="text-[10.5px] text-slate-700 leading-snug">
+              Se entrega equipo verificado y testeado en presencia del cliente. Se recomienda no forzar la pantalla más allá del ángulo natural de apertura (130°).
+            </p>
+          </div>
+          <div class="flex items-center gap-2 p-2 bg-sky-50/70 border border-sky-200 rounded text-[9px] text-slate-700">
+            <svg class="w-4 h-4 text-sky-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+            <span class=""><br></span>
+          </div>
+        </div>
+      </article>
+
+      <!-- QR de Consulta (Sin token innecesario) -->
+      <article class="border border-slate-300 rounded-lg overflow-hidden flex flex-col items-center justify-center p-3 text-center bg-white">
+        <div class="w-full flex justify-between items-center mb-1 text-[8.5px] font-mono text-slate-400 border-b pb-1">
+          <span class="font-bold text-sky-800 uppercase">Consulta Pública</span>
+          <span class="">En Línea</span>
+        </div>
+        <!-- QR Code clean visual -->
+        <div class="p-2 bg-white border border-slate-900 rounded-md relative shadow-sm my-1">
+          <!-- QR SVG -->
+          <svg class="w-20 h-20" viewBox="0 0 29 29" fill="black">
+            <!-- Finder pattern top-left -->
+            <rect x="0" y="0" width="7" height="7"></rect>
+            <rect x="1" y="1" width="5" height="5" fill="white"></rect>
+            <rect x="2" y="2" width="3" height="3"></rect>
+            <!-- Finder pattern top-right -->
+            <rect x="22" y="0" width="7" height="7"></rect>
+            <rect x="23" y="1" width="5" height="5" fill="white"></rect>
+            <rect x="24" y="2" width="3" height="3"></rect>
+            <!-- Finder pattern bottom-left -->
+            <rect x="0" y="22" width="7" height="7"></rect>
+            <rect x="1" y="23" width="5" height="5" fill="white"></rect>
+            <rect x="2" y="24" width="3" height="3"></rect>
+            <!-- Data modules -->
+            <rect x="9" y="1" width="2" height="2"></rect>
+            <rect x="13" y="0" width="1" height="3"></rect>
+            <rect x="16" y="2" width="3" height="1"></rect>
+            <rect x="1" y="9" width="3" height="1"></rect>
+            <rect x="5" y="10" width="2" height="2"></rect>
+            <rect x="9" y="8" width="1" height="4"></rect>
+            <rect x="12" y="11" width="5" height="2"></rect>
+            <rect x="18" y="7" width="2" height="3"></rect>
+            <rect x="11" y="4" width="3" height="2"></rect>
+            <rect x="21" y="10" width="1" height="3"></rect>
+            <rect x="25" y="9" width="3" height="2"></rect>
+            <rect x="8" y="14" width="3" height="1"></rect>
+            <rect x="14" y="15" width="2" height="3"></rect>
+            <rect x="19" y="13" width="2" height="2"></rect>
+            <rect x="23" y="14" width="3" height="2"></rect>
+            <rect x="9" y="18" width="2" height="3"></rect>
+            <rect x="13" y="20" width="3" height="2"></rect>
+            <rect x="18" y="18" width="2" height="2"></rect>
+            <rect x="24" y="19" width="3" height="2"></rect>
+            <rect x="9" y="24" width="4" height="2"></rect>
+            <rect x="15" y="25" width="2" height="3"></rect>
+            <rect x="20" y="23" width="2" height="3"></rect>
+            <rect x="24" y="26" width="4" height="2"></rect>
+          </svg>
+        </div>
+        <p class="text-[9px] font-bold text-slate-900 mt-1 uppercase">Escanea el código</p>
+        <p class="text-[8px] text-slate-500 leading-tight">Consulta pública de la orden de forma segura&nbsp;</p>
+      </article>
+
+    </div>
+
+    <!-- Signatures and Custody Transfer Section -->
+    <section class="mt-4 pt-3 border-t border-slate-300">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Firma Recibido por el Taller -->
+        <div class="flex flex-col justify-end items-center text-center">
+          <div class="w-full max-w-[260px] h-16 border-b border-dashed border-slate-400 flex items-center justify-center">
+            <!-- Digital Stamp of Workshop -->
+            <div class="border border-sky-500/40 bg-sky-50/50 px-3 py-1 rounded text-sky-800 text-[8.5px] font-mono uppercase tracking-wider">
+              SELLO DE TALLER AUTORIZADO · C&amp;E
+            </div>
+          </div>
+          <div class="mt-1.5 font-bold text-slate-950 text-[10px] uppercase">
+            Recibido y Entregado por el Taller
+          </div>
+          <div class="text-[8.5px] text-slate-500 font-mono">
+            Computer &amp; Electronic Center S.A.S · Responsable: Ing Nestor Cabezas</div>
+        </div>
+
+        <!-- Firma del Cliente -->
+        <div class="flex flex-col justify-end items-center text-center">
+          <div class="w-full max-w-[260px] h-16 border-b border-slate-800 flex items-center justify-center relative">
+            <!-- Exact Client Signature stroke extracted from reference -->
+            <svg class="w-36 h-12 text-slate-950" viewBox="0 0 200 80" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M 20 45 L 60 45 L 60 20 L 75 70 L 105 25 C 120 15, 145 20, 155 35 C 165 50, 150 70, 135 65 C 120 60, 125 40, 140 30 C 155 20, 175 40, 185 60"></path>
+            </svg>
+          </div>
+          <div class="mt-1.5 font-bold text-slate-950 text-[10px] uppercase">
+            Firma y Conformidad del Cliente
+          </div>
+          <div class="text-[8.5px] text-slate-600 font-mono font-semibold">
+            Jhossuant Cabezas Diaz · C.C. 1096243745
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Legal declaration -->
+      <p class="text-[8px] text-slate-500 text-center mt-3 leading-relaxed max-w-2xl mx-auto">
+        Con la firma del presente documento, el cliente confirma que el equipo especificado fue entregado en correcto estado de funcionamiento respecto a la orden efectuada, habiendo probado las bisagras a satisfacción y aceptando las condiciones de garantía descritas.
+      </p>
+    </section>
+
+    <!-- Footer Strip -->
+    <footer class="mt-5 pt-2.5 border-t border-slate-200 text-[8px] font-mono text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-1.5">
+      <div class="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
+        <span class="font-bold text-slate-700">Computer &amp; Electronic Center</span>
+        <span class="">· Tel: +57 301 5316116</span>
+        <span class="">· WhatsApp: +57 302 5499626</span>
+        <span class="">· soporte.solvix@gmail.com</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-slate-400">https://test.computerelectroniccentersas.com/</span>
+        <span class="px-1.5 py-0.5 bg-slate-100 rounded text-slate-600 font-bold">SOLVIX OS-2026-000013</span>
+      </div>
+    </footer>
+
+  </main>
+
+
+
+
+</body></html>

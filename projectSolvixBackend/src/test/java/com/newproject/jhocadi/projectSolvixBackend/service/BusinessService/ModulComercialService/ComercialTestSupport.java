@@ -28,6 +28,7 @@ import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.Modul
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.HistorialEstadoOrdenServicioRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.OrdenServicioRepuestoRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.OrdenServicioRepository;
+import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.RecepcionOrdenServicioRepository;
 
 /**
  * Base de pruebas del módulo comercial. No usa @Transactional para que las reglas
@@ -88,13 +89,24 @@ public abstract class ComercialTestSupport {
     protected EntregaOrdenServicioRepository entregaOrdenServicioRepository;
 
     @Autowired
+    protected RecepcionOrdenServicioRepository recepcionOrdenServicioRepository;
+
+    @Autowired
     protected com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.CotizacionServicioRepository cotizacionServicioRepository;
 
     @Autowired
     protected com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.DocumentoOrdenServicioRepository documentoOrdenServicioRepository;
 
+    @Autowired
+    protected com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulComercialRepo.DocumentoCotizacionComercialRepository documentoCotizacionComercialRepository;
+
+    @Autowired
+    protected com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulComercialRepo.CotizacionComercialRepository cotizacionComercialRepository;
+
     @BeforeEach
     protected void limpiarDatos() {
+        documentoCotizacionComercialRepository.deleteAll();
+        cotizacionComercialRepository.deleteAll();
         movimientoRepository.deleteAll();
         // Las devoluciones referencian el detalle del documento original:
         // deben borrarse antes que las ventas y las compras.
@@ -108,6 +120,7 @@ public abstract class ComercialTestSupport {
         ordenServicioRepuestoRepository.deleteAll();
         historialEstadoOrdenServicioRepository.deleteAll();
         entregaOrdenServicioRepository.deleteAll();
+        recepcionOrdenServicioRepository.deleteAll();
         ordenServicioRepository.deleteAll();
         equipoRepository.deleteAll();
         productoRepository.deleteAll();

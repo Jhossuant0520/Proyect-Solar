@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Cotización — ${NUMERO_COTIZACION}</title>
+  <link rel="stylesheet" type="text/css" href="styles/comprobante-recepcion.css"/>
+  <link rel="stylesheet" type="text/css" href="styles/cotizacion.css"/>
+</head>
+<body class="cr-body">
+<div class="cr-sheet">
+
+  <table class="cr-meta">
+    <tr>
+      <td class="cr-meta-left">${DOCUMENTO_META_IZQ}</td>
+      <td class="cr-meta-right">${DOCUMENTO_META_DER}</td>
+    </tr>
+  </table>
+
+  <table class="cr-header">
+    <tr>
+      <td class="cr-header-brand">
+        <table class="cr-brand-row">
+          <tr>
+            <td class="cr-logo-box">${LOGO_HTML}</td>
+            <td class="cr-brand-copy">
+              <p class="cr-company">${EMPRESA_NOMBRE}</p>
+              <p class="cr-lab">${EMPRESA_ETIQUETA_LABORATORIO}</p>
+              <p class="cr-services">${EMPRESA_SUBTITULO}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+      <td class="cr-header-contact">
+        <div class="cr-header-contact-inner">
+          <p class="cr-nit">${EMPRESA_IDENTIFICACION}</p>
+          <p class="cr-phone-line">
+            <span class="cr-phone">${EMPRESA_TELEFONO}</span>
+          </p>
+          <p class="cr-mail">${EMPRESA_CORREO}</p>
+          <p class="cr-addr">${EMPRESA_DIRECCION}</p>
+          <p class="cr-status-line">
+            <span class="cr-status-dot"></span>
+            <span class="cr-status-text">Cotización comercial</span>
+          </p>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <table class="cr-banner">
+    <tr>
+      <td class="cr-banner-left">
+        <p class="cr-kicker">Comercial • Propuesta</p>
+        <p class="cr-doc-title">Cotización comercial</p>
+      </td>
+      <td class="cr-banner-right">
+        <p class="cr-ot-row">
+          <span class="cr-ot-label">Cotización:</span>
+          <span class="cr-ot-chip">${NUMERO_COTIZACION}</span>
+        </p>
+        <p class="cr-fecha-row">
+          <span class="cr-fecha-label">Fecha:</span>
+          <span class="cr-fecha-value">${FECHA_COTIZACION}</span>
+        </p>
+      </td>
+    </tr>
+  </table>
+
+  <table class="cr-two">
+    <tr>
+      <td class="cr-two-col cr-two-col-left">
+        <table class="cr-card">
+          <tr>
+            <td class="cr-card-head">
+              <table class="cr-card-head-inner">
+                <tr>
+                  <td class="cr-card-head-left">
+                    <span class="cr-num">[01]</span>
+                    <span class="cr-card-title">Información del Cliente</span>
+                  </td>
+                  <td class="cr-card-head-right">Titular</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="cr-card-body">
+              <p class="cr-label">Nombre completo</p>
+              <p class="cr-value-lg">${CLIENTE_NOMBRE}</p>
+              <table class="cr-split">
+                <tr>
+                  <td class="cr-split-cell" colspan="2">
+                    <p class="cr-label">Documento / C.C.</p>
+                    <p class="cr-value-mono">${CLIENTE_DOCUMENTO}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+      <td class="cr-two-col cr-two-col-right">
+        <table class="cr-card">
+          <tr>
+            <td class="cr-card-head">
+              <table class="cr-card-head-inner">
+                <tr>
+                  <td class="cr-card-head-left">
+                    <span class="cr-num">[02]</span>
+                    <span class="cr-card-title">Datos de contacto</span>
+                  </td>
+                  <td class="cr-card-head-right">Cliente</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="cr-card-body">
+              <table class="cr-split cr-split-top">
+                <tr>
+                  <td class="cr-split-cell">
+                    <p class="cr-label">Teléfono</p>
+                    <p class="cr-value-mono">${CLIENTE_TELEFONO}</p>
+                  </td>
+                  <td class="cr-split-cell">
+                    <p class="cr-label">Correo</p>
+                    <p class="cr-value-sm">${CLIENTE_CORREO}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table class="cr-card cr-card-full">
+    <tr>
+      <td class="cr-card-head">
+        <table class="cr-card-head-inner">
+          <tr>
+            <td class="cr-card-head-left">
+              <span class="cr-num">[03]</span>
+              <span class="cr-card-title">Detalle de la cotización</span>
+            </td>
+            <td class="cr-card-head-right">Líneas</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td class="cr-card-body cr-card-body-table">
+        <table class="cr-lines">
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Descripción</th>
+              <th class="num">Cant.</th>
+              <th class="num">P. unitario</th>
+              <th class="num">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{DETALLE_ROWS}}
+          </tbody>
+        </table>
+        <table class="cr-totales">
+          <tr>
+            <td class="label">Subtotal</td>
+            <td class="value">${SUBTOTAL}</td>
+          </tr>
+          <tr class="total-row">
+            <td class="label">Total</td>
+            <td class="value">${TOTAL}</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <div class="cr-legal">
+    <p class="cr-legal-title">Observaciones y condiciones</p>
+    <div class="cr-legal-text">${OBSERVACIONES}</div>
+  </div>
+
+  <table class="cr-footer">
+    <tr>
+      <td class="cr-footer-left">
+        <span class="cr-footer-company">${EMPRESA_NOMBRE}</span>
+        <span class="cr-footer-sep">•</span>
+        <span class="cr-footer-wa">WhatsApp: ${EMPRESA_WHATSAPP}</span>
+        <span class="cr-footer-sep">•</span>
+        <span class="cr-footer-web">${EMPRESA_SITIO_WEB}</span>
+      </td>
+      <td class="cr-footer-right">
+        <p class="cr-author-line">
+          <span class="cr-author-label">SOFTWARE DESARROLLADO POR</span>
+          <strong class="cr-author-name">${SOFTWARE_DESARROLLADO_POR}</strong>
+          <span class="cr-author-role">${SOFTWARE_ROL}</span>
+        </p>
+      </td>
+    </tr>
+  </table>
+
+</div>
+</body>
+</html>

@@ -1,4 +1,4 @@
-<section class="detalle-page">
+<section class="detalle-page" [class.has-sticky-cta]="!!accionPrincipal && !editando">
   @if (state === 'loading') {
     <solvix-loading-state label="Cargando orden de servicio." />
   } @else if (state === 'error' || !orden) {
@@ -8,408 +8,439 @@
       (retry)="cargar()"
     />
   } @else {
+    <!-- ZONA 1: Cabecera -->
     <header class="detalle-head">
-      <div>
-        <p class="kicker">Orden de servicio</p>
-        <h1 class="solvix-mono">{{ orden.numero }}</h1>
-        <div class="head-meta">
-          <solvix-badge [tone]="estadoTone(orden.estado)">
+      <div class="head-main">
+        <div class="head-title-row">
+          <div>
+            <p class="kicker">Orden de servicio</p>
+            <h1 class="solvix-mono">{{ orden.numero }}</h1>
+          </div>
+          <div class="head-actions">
+            <solvix-button family="tech" rank="tertiary" icon="arrow_back" (click)="volver()">
+              Volver
+            </solvix-button>
+            @if (hayMenuMasAcciones) {
+              <button
+                type="button"
+                class="btn-mas-acciones"
+                [matMenuTriggerFor]="menuMasAcciones"
+                aria-label="Más acciones"
+              >
+                Más acciones
+                <span class="material-symbols-outlined" aria-hidden="true">more_vert</span>
+              </button>
+              <mat-menu #menuMasAcciones="matMenu" class="solvix-menu">
+                @if (accionEspera) {
+                  <button
+                    mat-menu-item
+                    type="button"
+                    [disabled]="cambiandoEstado || editando || pendingRepuestos <= 0"
+                    (click)="ejecutarAccionEspera()"
+                  >
+                    {{ accionEspera.boton }}
+                  </button>
+                }
+                @if (accionFalla) {
+                  <button
+                    mat-menu-item
+                    type="button"
+                    [disabled]="cambiandoEstado || editando"
+                    (click)="ejecutarAccionFalla()"
+                  >
+                    {{ accionFalla.boton }}
+                  </button>
+                }
+                @if (accionCancelar) {
+                  <button
+                    mat-menu-item
+                    type="button"
+                    class="menu-danger"
+                    [disabled]="cambiandoEstado || editando"
+                    (click)="ejecutarAccionCancelar()"
+                  >
+                    {{ accionCancelar.boton }}
+                  </button>
+                }
+              </mat-menu>
+            }
+          </div>
+        </div>
+
+        <div class="head-estado" [attr.data-estado]="orden.estado">
+          <span class="material-symbols-outlined estado-icono" aria-hidden="true">{{ ux.icono }}</span>
+          <solvix-badge class="estado-badge" [tone]="estadoTone(orden.estado)">
             {{ estadoLabel(orden.estado) }}
           </solvix-badge>
         </div>
-      </div>
-      <div class="head-actions">
-        <solvix-button family="tech" rank="tertiary" icon="arrow_back" (click)="volver()">
-          Volver
-        </solvix-button>
+
+        <dl class="head-facts">
+          <div>
+            <dt>Cliente</dt>
+            <dd>
+              <a [routerLink]="['/clientes', orden.clienteId]">{{ orden.clienteNombre }}</a>
+            </dd>
+          </div>
+          <div>
+            <dt>Equipo</dt>
+            <dd>{{ equipo(orden) }}</dd>
+          </div>
+          <div class="fact-fecha">
+            <dt>Recepción</dt>
+            <dd class="solvix-mono">{{ fecha(orden.fechaRecepcion) }}</dd>
+          </div>
+          @if (orden.fechaActualizacion) {
+            <div class="fact-fecha">
+              <dt>Actualización</dt>
+              <dd class="solvix-mono">{{ fecha(orden.fechaActualizacion) }}</dd>
+            </div>
+          }
+        </dl>
       </div>
     </header>
 
-    <section class="panel workflow-panel">
-      <solvix-section-header
-        kicker="Proceso"
-        title="Progreso de la orden"
-        subtitle="Solo informativo. No cambia el estado al tocar los pasos."
-      />
-      <ol class="workflow-track" aria-label="Progreso del workflow">
-        @for (paso of workflowPasos; track paso.estado) {
-          <li [class]="'wf-step is-' + paso.fase">
-            <span class="wf-dot"></span>
-            <span class="wf-label">{{ paso.label }}</span>
-          </li>
-        }
-      </ol>
-      @if (orden.estado === 'ESPERA_REPUESTO') {
-        <p class="hint especial-hint">
-          Estado intermedio: espera de repuesto.
-          @if (pendingRepuestos > 0) {
-            Pendientes de consumir: {{ pendingRepuestos }}.
-          }
-        </p>
-      }
-      @if (orden.estado === 'REQUIERE_APROBACION_ADICIONAL') {
-        <p class="hint especial-hint">
-          Se requiere una ampliación de cotización antes de continuar la reparación.
-        </p>
-      }
-      @if (orden.estado === 'CANCELADO') {
-        <p class="hint cancel-hint">La orden terminó por cancelación.</p>
-      }
-    </section>
-
+    <!-- ZONA 2: Siguiente paso + progreso -->
     <section
-      class="panel proxima-panel"
-      [class.is-attention]="orden.estado === 'ESPERA_REPUESTO' || orden.estado === 'REQUIERE_APROBACION_ADICIONAL'"
+      class="panel siguiente-panel"
+      [class.is-attention]="
+        orden.estado === 'ESPERA_REPUESTO' || orden.estado === 'REQUIERE_APROBACION_ADICIONAL'
+      "
+      aria-labelledby="siguiente-titulo"
     >
-      <solvix-section-header kicker="Operación" title="Próxima acción" />
-      <p class="proxima-estado">
-        Estado actual: <strong>{{ estadoLabel(orden.estado) }}</strong>
-      </p>
-      <p class="proxima-texto">{{ proximaAccionTexto }}</p>
+      <solvix-section-header kicker="Operación" title="Siguiente paso" />
 
-      @if (orden.estado === 'COTIZADO') {
-        <p class="hint cotizacion-hint">
-          Hay una cotización lista. Preséntala al cliente para continuar.
-        </p>
-      }
-
-      @if (orden.estado === 'PENDIENTE_APROBACION') {
-        <p class="hint cotizacion-hint">
-          Cotización presentada. Esperando la decisión del cliente.
-        </p>
-      }
-
-      @if (requiereAprobacionAdicional) {
-        <p class="hint especial-hint">
-          Durante la reparación se detectó una situación no contemplada en la aprobación anterior.
-          Prepara una cotización adicional.
-        </p>
-      }
-
-      <div class="proxima-actions">
-        @if (accionPrincipal) {
-          <solvix-button
-            family="tech"
-            rank="primary"
-            [disabled]="cambiandoEstado || editando"
-            [matTooltip]="accionPrincipal.descripcion"
-            (click)="ejecutarAccionPrincipal()"
-          >
-            {{ accionPrincipal.boton }}
-          </solvix-button>
-        }
-        @if (accionEspera) {
-          <solvix-button
-            family="tech"
-            rank="secondary"
-            [disabled]="cambiandoEstado || editando || pendingRepuestos <= 0"
-            matTooltip="Poner en espera por repuestos pendientes"
-            (click)="ejecutarAccionEspera()"
-          >
-            {{ accionEspera.boton }}
-          </solvix-button>
-        }
-        @if (accionFalla) {
-          <solvix-button
-            family="tech"
-            rank="secondary"
-            [disabled]="cambiandoEstado || editando"
-            matTooltip="Registrar una nueva falla durante la reparación"
-            (click)="ejecutarAccionFalla()"
-          >
-            {{ accionFalla.boton }}
-          </solvix-button>
-        }
-        @if (accionCancelar) {
-          <solvix-button
-            family="tech"
-            rank="danger"
-            [disabled]="cambiandoEstado || editando"
-            matTooltip="Cancelar la orden"
-            (click)="ejecutarAccionCancelar()"
-          >
-            {{ accionCancelar.boton }}
-          </solvix-button>
-        }
+      <div class="progreso-wrap progreso-desktop">
+        <solvix-progress-fases
+          [estadoCodigo]="orden.estado"
+          [faseAlCancelar]="faseAlCancelar"
+          variant="desktop"
+        />
       </div>
-      @if (orden.estado === 'LISTO') {
-        <p class="hint guia-hint">El equipo está listo para entrega.</p>
+      <div class="progreso-wrap progreso-compact">
+        <solvix-progress-fases
+          [estadoCodigo]="orden.estado"
+          [faseAlCancelar]="faseAlCancelar"
+          variant="compact"
+        />
+      </div>
+
+      @if (resumenFase; as rf) {
+        <p class="fase-chip">Fase {{ rf.numero }} de {{ rf.total }} · {{ rf.label }}</p>
       }
-      @if (orden.estado === 'CERRADO') {
-        <p class="hint guia-hint">
-          Orden cerrada. El equipo fue entregado y la constancia quedó registrada.
-        </p>
+
+      <h2 id="siguiente-titulo" class="sr-only">Contexto del siguiente paso</h2>
+      <p class="siguiente-desc">{{ ux.descripcionTaller }}</p>
+
+      <div class="siguiente-block">
+        <p class="label-mini">Qué sigue</p>
+        <p class="siguiente-texto">{{ ux.siguienteTaller }}</p>
+      </div>
+
+      @if (requisitosPendientes.length) {
+        <ul class="requisitos" aria-label="Requisitos pendientes">
+          @for (req of requisitosPendientes; track req) {
+            <li>{{ req }}</li>
+          }
+        </ul>
       }
+
       @if (guiaTecnica) {
         <p class="hint guia-hint">{{ guiaTecnica }}</p>
       }
       @if (estadoError) {
         <p class="form-error">{{ estadoError }}</p>
       }
-    </section>
 
-    <section class="panel">
-      <solvix-section-header kicker="Relación" title="Cliente" />
-      <dl class="facts">
-        <div>
-          <dt>Nombre</dt>
-          <dd>
-            <a [routerLink]="['/clientes', orden.clienteId]" matTooltip="Ver ficha del cliente">
-              {{ orden.clienteNombre }}
-            </a>
-          </dd>
-        </div>
-      </dl>
-    </section>
-
-    <section class="panel">
-      <solvix-section-header kicker="Relación" title="Equipo" />
-      <dl class="facts">
-        <div>
-          <dt>Equipo</dt>
-          <dd>{{ equipo(orden) }}</dd>
-        </div>
-        <div>
-          <dt>Tipo</dt>
-          <dd>{{ tipoEquipo(orden.equipoTipo) }}</dd>
-        </div>
-        @if (orden.equipoMarca) {
-          <div>
-            <dt>Marca</dt>
-            <dd>{{ orden.equipoMarca }}</dd>
-          </div>
-        }
-        @if (orden.equipoModelo) {
-          <div>
-            <dt>Modelo</dt>
-            <dd>{{ orden.equipoModelo }}</dd>
-          </div>
-        }
-      </dl>
-    </section>
-
-    <section #panelTecnico class="panel tecnico-panel" [class.is-resumen]="esResumenCompleto">
-      <div class="tecnico-head">
-        <solvix-section-header
-          kicker="Taller"
-          title="Sección técnica"
-          [subtitle]="
-            esResumenCompleto
-              ? 'Resumen completo de la información técnica de esta orden.'
-              : enDiagnostico
-                ? 'Completa el diagnóstico técnico y guárdalo para continuar.'
-                : 'Registra el problema, el diagnóstico y el trabajo realizado.'
-          "
-        />
-        @if (puedeEditar(orden.estado) && !editando) {
+      <div class="siguiente-actions siguiente-actions--desktop">
+        @if (accionPrincipal) {
           <solvix-button
             family="tech"
-            rank="secondary"
-            icon="edit"
-            matTooltip="Editar información técnica"
-            (click)="iniciarEdicion()"
+            rank="primary"
+            [disabled]="cambiandoEstado || editando"
+            (click)="ejecutarAccionPrincipal()"
           >
-            Editar información
+            {{ accionPrincipal.boton }}
           </solvix-button>
         }
       </div>
+    </section>
 
-      @if (enDiagnostico && diagnosticoYaDiligenciado && !editando) {
-        <p class="hint guia-hint">
-          El diagnóstico ya está diligenciado. Guarda la ficha para continuar.
-        </p>
-      }
+    <div class="detalle-layout">
+      <!-- Columna principal -->
+      <div class="col-principal">
+        <section #panelTecnico class="panel seccion-colapsable tecnico-panel" [class.is-resumen]="esResumenCompleto">
+          <button
+            type="button"
+            class="seccion-toggle"
+            (click)="toggleSeccion('tecnico')"
+            [attr.aria-expanded]="secciones.tecnico"
+          >
+            <solvix-section-header
+              kicker="Taller"
+              title="Sección técnica"
+              [subtitle]="
+                esResumenCompleto
+                  ? 'Resumen técnico de esta orden.'
+                  : enDiagnostico
+                    ? 'Completa el diagnóstico técnico.'
+                    : 'Información técnica de la orden.'
+              "
+            />
+            <span
+              class="material-symbols-outlined seccion-chevron"
+              [class.is-open]="secciones.tecnico"
+              aria-hidden="true"
+            >expand_more</span>
+          </button>
 
-      @if (!puedeEditar(orden.estado)) {
-        <p class="hint lectura-hint">
-          Esta orden está {{ estadoLabel(orden.estado).toLowerCase() }}. La información técnica es de solo lectura.
-        </p>
-      }
-
-      @if (!editando) {
-        <div class="campos-tecnicos">
-          @for (campo of campos; track campo.id) {
-            <article
-              class="campo-tecnico"
-              [class.is-destacado]="esCampoDestacado(campo.id)"
-              [attr.data-campo]="campo.id"
-            >
-              <header class="campo-head">
-                <h3>{{ campo.label }}</h3>
-                @if (esCampoDestacado(campo.id)) {
-                  <span class="foco-tag">En foco</span>
-                }
-              </header>
-              <p class="campo-hint">{{ campo.hint }}</p>
-              <p class="body-text" [class.is-empty]="!valorCampo(orden, campo.id)">
-                {{ texto(valorCampo(orden, campo.id)) }}
-              </p>
-            </article>
-          }
-        </div>
-        @if (enDiagnostico) {
-          <div class="inline-actions">
-            <solvix-button
-              family="tech"
-              rank="primary"
-              icon="save"
-              [disabled]="cambiandoEstado"
-              (click)="guardarDiagnosticoCompleto()"
-            >
-              Guardar diagnóstico
-            </solvix-button>
-          </div>
-        }
-      } @else {
-        <form class="edit-panel" [formGroup]="form" (ngSubmit)="guardarTextos()">
-          <p class="hint">
-            @if (enDiagnostico) {
-              Al guardar un diagnóstico válido, la orden pasa a Diagnosticado.
-            } @else {
-              Solo se guardan estos textos. Cliente, equipo y estado no cambian aquí.
-            }
-          </p>
-
-          @for (campo of campos; track campo.id) {
-            <label
-              class="campo-edit"
-              [class.is-destacado]="esCampoDestacado(campo.id)"
-              [attr.data-campo]="campo.id"
-            >
-              <span class="label-row">
-                {{ campo.label }}
-                @if (campo.id === 'diagnostico' && enDiagnostico) {
-                  <span class="req">requerido</span>
-                }
-                @if (esCampoDestacado(campo.id)) {
-                  <span class="foco-tag">En foco</span>
-                }
-              </span>
-              <span class="campo-hint">{{ campo.hint }}</span>
-              <textarea
-                [formControlName]="campo.id"
-                [attr.maxlength]="campo.maxLength"
-                [attr.rows]="campo.id === 'observaciones' ? 2 : 3"
-                [attr.placeholder]="campo.hint"
-              ></textarea>
-            </label>
-          }
-
-          @if (guiaTecnica) {
-            <p class="hint guia-hint">{{ guiaTecnica }}</p>
-          }
-          @if (editError) {
-            <p class="form-error">{{ editError }}</p>
-          }
-
-          <div class="inline-actions">
-            <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelarEdicion()">
-              Cancelar
-            </solvix-button>
-            <solvix-button
-              family="tech"
-              rank="primary"
-              type="submit"
-              icon="save"
-              [disabled]="guardando || form.invalid || (enDiagnostico ? false : !hayCambiosTextos)"
-            >
-              @if (guardando) {
-                Guardando…
-              } @else if (enDiagnostico) {
-                Guardar diagnóstico
-              } @else {
-                Guardar
+          @if (secciones.tecnico) {
+            <div class="seccion-body">
+              @if (puedeEditar(orden.estado) && !editando) {
+                <div class="inline-actions">
+                  <solvix-button
+                    family="tech"
+                    rank="secondary"
+                    icon="edit"
+                    (click)="iniciarEdicion()"
+                  >
+                    Editar información
+                  </solvix-button>
+                </div>
               }
-            </solvix-button>
-          </div>
-        </form>
-      }
-    </section>
 
-    <section #panelCotizaciones class="panel">
-      <app-servicio-cotizaciones-panel
-        [ordenId]="orden.id"
-        [estado]="orden.estado"
-        [canManage]="puedeGestionarRepuestos"
-        (ordenActualizada)="onCotizacionOrdenActualizada()"
-        (documentoEsperado)="onDocumentoCotizacionEsperado($event)"
-      />
-    </section>
-
-    <section #panelReparacion class="panel">
-      <app-servicio-repuestos-panel
-        [ordenId]="orden.id"
-        [estado]="orden.estado"
-        [canManage]="puedeGestionarRepuestos"
-        (repuestosChange)="onRepuestosChange($event)"
-      />
-    </section>
-
-    <section class="panel">
-      <solvix-section-header kicker="Tiempo" title="Fechas" />
-      <dl class="facts">
-        <div>
-          <dt>Recepción</dt>
-          <dd class="solvix-mono">{{ fecha(orden.fechaRecepcion) }}</dd>
-        </div>
-        <div>
-          <dt>Actualización</dt>
-          <dd class="solvix-mono">{{ fecha(orden.fechaActualizacion) }}</dd>
-        </div>
-        <div>
-          <dt>Cierre</dt>
-          <dd class="solvix-mono">{{ fecha(orden.fechaCierre) }}</dd>
-        </div>
-        @if (orden.createdBy) {
-          <div>
-            <dt>Registrado por</dt>
-            <dd>{{ orden.createdBy }}</dd>
-          </div>
-        }
-      </dl>
-    </section>
-
-    <section class="panel">
-      <app-servicio-documentos-panel
-        [ordenId]="orden.id"
-        [estado]="orden.estado"
-        [canManage]="true"
-        [esperarComprobante]="esperarComprobante"
-      />
-    </section>
-
-    <section class="panel historial-panel">
-      <solvix-section-header
-        kicker="Trazabilidad"
-        title="Historial de la orden"
-        subtitle="Cambios de estado más recientes primero."
-      />
-      @if (historialState === 'loading') {
-        <solvix-loading-state label="Cargando historial." />
-      } @else if (historialState === 'error') {
-        <p class="form-error">{{ historialError }}</p>
-      } @else if (historialState === 'empty') {
-        <p class="hint">Todavía no hay cambios de estado registrados.</p>
-      } @else {
-        <ol class="timeline">
-          @for (item of historial; track item.id; let i = $index) {
-            <li [class.is-actual]="i === 0" [class.is-cancel]="item.estadoNuevo === 'CANCELADO'">
-              <div class="tl-marker"></div>
-              <div class="tl-body">
-                <p class="tl-fecha solvix-mono">{{ fecha(item.fechaCambio) }}</p>
-                <p class="tl-estados">
-                  {{ estadoLabel(item.estadoAnterior) }} → {{ estadoLabel(item.estadoNuevo) }}
+              @if (!puedeEditar(orden.estado)) {
+                <p class="hint lectura-hint">
+                  Esta orden está {{ estadoLabel(orden.estado).toLowerCase() }}. La información
+                  técnica es de solo lectura.
                 </p>
-                <p class="tl-motivo"><span>Motivo:</span> {{ item.motivo }}</p>
-                @if (item.observacion) {
-                  <p class="tl-obs"><span>Observación:</span> {{ item.observacion }}</p>
-                }
-                <p class="tl-user"><span>Realizado por:</span> {{ item.usuario }}</p>
-              </div>
-            </li>
+              }
+
+              @if (!editando) {
+                <div class="campos-tecnicos">
+                  @for (campo of campos; track campo.id) {
+                    <article
+                      class="campo-tecnico"
+                      [class.is-destacado]="esCampoDestacado(campo.id) && tieneTexto(campo.id)"
+                      [attr.data-campo]="campo.id"
+                    >
+                      <header class="campo-head">
+                        <h3>{{ campo.label }}</h3>
+                        @if (esCampoDestacado(campo.id) && tieneTexto(campo.id)) {
+                          <span class="foco-tag">En foco</span>
+                        }
+                      </header>
+                      @if (tieneTexto(campo.id)) {
+                        <p class="campo-hint">{{ campo.hint }}</p>
+                        <p class="body-text">{{ valorCampo(orden, campo.id) }}</p>
+                      } @else if (puedeEditar(orden.estado)) {
+                        <button
+                          type="button"
+                          class="btn-agregar-campo"
+                          (click)="iniciarEdicion(campo.id)"
+                        >
+                          Agregar {{ campo.label.toLowerCase() }}
+                        </button>
+                      } @else {
+                        <p class="hint">Sin información registrada.</p>
+                      }
+                    </article>
+                  }
+                </div>
+              } @else {
+                <form class="edit-panel" [formGroup]="form" (ngSubmit)="guardarTextos()">
+                  <p class="hint">
+                    @if (enDiagnostico) {
+                      Al guardar un diagnóstico válido, la orden pasa a Diagnosticado.
+                    } @else {
+                      Solo se guardan estos textos. Cliente, equipo y estado no cambian aquí.
+                    }
+                  </p>
+
+                  @for (campo of campos; track campo.id) {
+                    <label
+                      class="campo-edit"
+                      [class.is-destacado]="esCampoDestacado(campo.id)"
+                      [attr.data-campo]="campo.id"
+                    >
+                      <span class="label-row">
+                        {{ campo.label }}
+                        @if (campo.id === 'diagnostico' && enDiagnostico) {
+                          <span class="req">requerido</span>
+                        }
+                        @if (esCampoDestacado(campo.id)) {
+                          <span class="foco-tag">En foco</span>
+                        }
+                      </span>
+                      <span class="campo-hint">{{ campo.hint }}</span>
+                      <textarea
+                        [formControlName]="campo.id"
+                        [attr.maxlength]="campo.maxLength"
+                        [attr.rows]="campo.id === 'observaciones' ? 2 : 3"
+                        [attr.placeholder]="campo.hint"
+                      ></textarea>
+                    </label>
+                  }
+
+                  @if (guiaTecnica) {
+                    <p class="hint guia-hint">{{ guiaTecnica }}</p>
+                  }
+                  @if (editError) {
+                    <p class="form-error">{{ editError }}</p>
+                  }
+
+                  <div class="inline-actions">
+                    <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelarEdicion()">
+                      Cancelar
+                    </solvix-button>
+                    <solvix-button
+                      family="tech"
+                      rank="primary"
+                      type="submit"
+                      icon="save"
+                      [disabled]="guardando || form.invalid || (enDiagnostico ? false : !hayCambiosTextos)"
+                    >
+                      @if (guardando) {
+                        Guardando…
+                      } @else if (enDiagnostico) {
+                        Guardar diagnóstico
+                      } @else {
+                        Guardar
+                      }
+                    </solvix-button>
+                  </div>
+                </form>
+              }
+            </div>
           }
-        </ol>
-      }
-    </section>
+        </section>
+
+        <section #panelCotizaciones class="panel seccion-colapsable">
+          <button
+            type="button"
+            class="seccion-toggle"
+            (click)="toggleSeccion('cotizaciones')"
+            [attr.aria-expanded]="secciones.cotizaciones"
+          >
+            <solvix-section-header kicker="Economía" title="Cotizaciones" />
+            <span
+              class="material-symbols-outlined seccion-chevron"
+              [class.is-open]="secciones.cotizaciones"
+              aria-hidden="true"
+            >expand_more</span>
+          </button>
+          @if (secciones.cotizaciones) {
+            <div class="seccion-body">
+              <app-servicio-cotizaciones-panel
+                [ordenId]="orden.id"
+                [estado]="orden.estado"
+                [canManage]="puedeGestionarRepuestos"
+                [compactResumen]="true"
+                (ordenActualizada)="onCotizacionOrdenActualizada()"
+                (documentoEsperado)="onDocumentoCotizacionEsperado($event)"
+              />
+            </div>
+          }
+        </section>
+      </div>
+
+      <!-- Columna secundaria: documentos + actividad (en móvil va justo después de Siguiente paso) -->
+      <aside class="col-secundaria">
+        <section class="panel">
+          <app-servicio-documentos-panel
+            [ordenId]="orden.id"
+            [estado]="orden.estado"
+            [canManage]="true"
+            [esperarComprobante]="esperarComprobante"
+            [documentoRelevante]="documentoRelevante"
+            [layoutCompacto]="true"
+          />
+        </section>
+
+        <section class="panel seccion-colapsable">
+          <button
+            type="button"
+            class="seccion-toggle"
+            (click)="toggleSeccion('actividad')"
+            [attr.aria-expanded]="secciones.actividad"
+          >
+            <solvix-section-header
+              kicker="Trazabilidad"
+              title="Actividad reciente"
+              subtitle="Últimos cambios de estado."
+            />
+            <span
+              class="material-symbols-outlined seccion-chevron"
+              [class.is-open]="secciones.actividad"
+              aria-hidden="true"
+            >expand_more</span>
+          </button>
+          @if (secciones.actividad) {
+            <div class="seccion-body">
+              @if (historialState === 'loading') {
+                <solvix-loading-state label="Cargando historial." />
+              } @else if (historialState === 'error') {
+                <p class="form-error">{{ historialError }}</p>
+              } @else if (historialState === 'empty') {
+                <p class="hint">Todavía no hay cambios de estado registrados.</p>
+              } @else {
+                <ol class="timeline">
+                  @for (
+                    item of historialCompleto ? historial : historialReciente;
+                    track item.id;
+                    let i = $index
+                  ) {
+                    <li
+                      [class.is-actual]="i === 0"
+                      [class.is-cancel]="item.estadoNuevo === 'CANCELADO'"
+                    >
+                      <div class="tl-marker"></div>
+                      <div class="tl-body">
+                        <p class="tl-fecha solvix-mono">{{ fecha(item.fechaCambio) }}</p>
+                        <p class="tl-estados">
+                          {{ estadoLabel(item.estadoAnterior) }} →
+                          {{ estadoLabel(item.estadoNuevo) }}
+                        </p>
+                        <p class="tl-motivo"><span>Motivo:</span> {{ item.motivo }}</p>
+                        @if (item.observacion) {
+                          <p class="tl-obs"><span>Observación:</span> {{ item.observacion }}</p>
+                        }
+                        <p class="tl-user"><span>Realizado por:</span> {{ item.usuario }}</p>
+                      </div>
+                    </li>
+                  }
+                </ol>
+                @if (hayMasHistorial) {
+                  <button
+                    type="button"
+                    class="btn-link"
+                    (click)="historialCompleto = !historialCompleto"
+                  >
+                    {{
+                      historialCompleto
+                        ? 'Ver solo recientes'
+                        : 'Ver historial completo (' + historial.length + ')'
+                    }}
+                  </button>
+                }
+              }
+            </div>
+          }
+        </section>
+      </aside>
+    </div>
+
+    <!-- CTA fijo móvil -->
+    @if (accionPrincipal && !editando) {
+      <div class="sticky-cta" role="region" aria-label="Acción principal">
+        <solvix-button
+          family="tech"
+          rank="primary"
+          [disabled]="cambiandoEstado"
+          (click)="ejecutarAccionPrincipal()"
+        >
+          {{ accionPrincipal.boton }}
+        </solvix-button>
+      </div>
+    }
   }
 </section>

@@ -1,0 +1,71 @@
+<div class="recepcion-dialog">
+  <header class="dlg-head">
+    <p class="kicker">Recepción del equipo</p>
+    <h2>Firma del cliente</h2>
+  </header>
+
+  <section class="bloque resumen" aria-label="Resumen de la recepción">
+    <dl class="facts">
+      <div>
+        <dt>Cliente</dt>
+        <dd>{{ data.cliente.nombre }}</dd>
+      </div>
+      <div>
+        <dt>Equipo</dt>
+        <dd>{{ equipoLabel(data.equipo) }}</dd>
+      </div>
+      @if (data.request.problemaReportado) {
+        <div>
+          <dt>Problema</dt>
+          <dd>{{ data.request.problemaReportado }}</dd>
+        </div>
+      }
+    </dl>
+  </section>
+
+  <form class="bloque form-recepcion" [formGroup]="form" (ngSubmit)="registrar()">
+    <label class="check">
+      <input type="checkbox" formControlName="clienteConfirmo" />
+      <span>Confirmo la recepción</span>
+    </label>
+
+    <div class="grid-2">
+      <label>
+        <span class="label-row">Nombre del firmante <span class="req">requerido</span></span>
+        <input formControlName="nombreFirmante" maxlength="150" autocomplete="name" />
+      </label>
+      <label>
+        <span class="label-row">Documento <span class="opt">opcional</span></span>
+        <input
+          formControlName="documentoFirmante"
+          maxlength="50"
+          [readonly]="documentoReadonly"
+        />
+      </label>
+    </div>
+
+    <section class="firma-card" aria-label="Área de firma">
+      <h3>Firma</h3>
+      <solvix-signature-pad (firmadoChange)="onFirmadoChange($event)" />
+    </section>
+
+    @if (error) {
+      <p class="form-error" role="alert">{{ error }}</p>
+    }
+
+    <div class="dlg-actions">
+      <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
+        Cancelar
+      </solvix-button>
+      <solvix-button
+        family="tech"
+        rank="primary"
+        type="submit"
+        [loading]="enviando"
+        [disabled]="!puedeRegistrar"
+      >
+        {{ enviando ? 'Registrando…' : 'Confirmar recepción' }}
+      </solvix-button>
+    </div>
+  </form>
+</div>

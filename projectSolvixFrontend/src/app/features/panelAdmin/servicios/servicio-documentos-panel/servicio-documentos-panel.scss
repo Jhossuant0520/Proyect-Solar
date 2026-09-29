@@ -20,7 +20,7 @@
   padding: 0.85rem 1rem;
   border-radius: 12px;
   border: 1px solid rgba(148, 163, 184, 0.22);
-  background: rgba(2, 6, 23, 0.35);
+  background: var(--solvix-panel-inset);
 }
 
 .espera-titulo {
@@ -84,10 +84,13 @@
   border-radius: 12px;
   border: 1px solid rgba(148, 163, 184, 0.22);
   border-left-width: 3px;
-  background: rgba(2, 6, 23, 0.35);
+  background: var(--solvix-panel-inset);
   display: grid;
   gap: 0.75rem;
-  transition: border-color 0.2s ease, background 0.2s ease;
+  transition:
+    border-color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-normal) var(--ease-standard);
 }
 
 .tipo-chip {
@@ -170,7 +173,10 @@
 }
 
 .card-doc.is-nuevo {
-  box-shadow: 0 0 0 1px rgba(79, 209, 255, 0.35);
+  animation:
+    solvix-page-enter var(--motion-normal) var(--ease-enter) both,
+    solvix-highlight-pulse var(--motion-slow) var(--ease-emphasized) both;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--solvix-primary) 35%, transparent);
 }
 
 .card-title {
@@ -204,9 +210,243 @@
   gap: 0.45rem;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 767px) {
   .card-actions {
-    flex-direction: column;
-    align-items: stretch;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .card-doc {
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .card-title strong {
+    overflow-wrap: anywhere;
+  }
+
+  .card-actions > solvix-button {
+    flex: 1 1 auto;
+    min-height: var(--solvix-touch-min, 44px);
+  }
+}
+
+.grupo.is-relevante {
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  border-radius: 12px;
+  padding: 0.75rem;
+  background: rgba(52, 211, 153, 0.05);
+}
+
+.grupo-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-icon-menu {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: transparent;
+  color: var(--solvix-text-secondary, #cfe9ff);
+  cursor: pointer;
+}
+
+.btn-icon-menu:focus-visible {
+  outline: 2px solid var(--solvix-primary, #4fd1ff);
+  outline-offset: 2px;
+}
+
+.slots {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.slot {
+  padding: 0.85rem 0.95rem;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: var(--solvix-panel-inset);
+}
+
+.slot.is-relevante {
+  border-color: rgba(52, 211, 153, 0.4);
+  background: rgba(52, 211, 153, 0.06);
+}
+
+.slot-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.slot-fase {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--solvix-neon, #00e5ff);
+  font-weight: 700;
+}
+
+.slot-pendiente {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: start;
+}
+
+.slot-titulo {
+  margin: 0;
+  color: var(--solvix-text, #fff);
+  font-weight: 600;
+}
+
+.slot-hint {
+  margin: 0;
+  color: var(--solvix-text-muted, #94a3b8);
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.card-doc {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.card-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.card-title strong {
+  color: var(--solvix-text, #fff);
+  font-size: 0.95rem;
+}
+
+.meta {
+  margin: 0.35rem 0 0;
+  color: var(--solvix-text-muted, #94a3b8);
+  font-size: 0.8rem;
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card-actions solvix-button:hover .material-symbols-outlined,
+  .card-actions ::ng-deep button:hover .material-symbols-outlined {
+    display: inline-block;
+  }
+
+  .card-actions ::ng-deep button[class*='secondary']:hover .material-symbols-outlined,
+  .card-actions ::ng-deep .btn-tech-secondary:hover .material-symbols-outlined {
+    transform: scale(1.06);
+  }
+
+  .card-actions ::ng-deep .btn-tech-tertiary:hover .material-symbols-outlined {
+    transform: translateY(2px);
+  }
+}
+
+.card-actions ::ng-deep .material-symbols-outlined {
+  transition: transform var(--motion-fast) var(--ease-standard);
+}
+
+.btn-versiones {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.65rem;
+  padding: 0.35rem 0;
+  border: 0;
+  background: none;
+  color: var(--solvix-primary, #4fd1ff);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btn-versiones .material-symbols-outlined {
+  transition: transform var(--motion-normal) var(--ease-emphasized);
+}
+
+.btn-versiones[aria-expanded='true'] .material-symbols-outlined {
+  transform: rotate(180deg);
+}
+
+.lista-anteriores {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+  animation: solvix-fade-in var(--motion-fast) var(--ease-enter) both;
+}
+
+.lista-anteriores .card-doc.is-historial {
+  /* stagger corto limitado: solo primeras 6 vía nth-child */
+  animation: solvix-page-enter var(--motion-fast) var(--ease-enter) both;
+}
+
+.lista-anteriores .card-doc.is-historial:nth-child(1) { animation-delay: 0ms; }
+.lista-anteriores .card-doc.is-historial:nth-child(2) { animation-delay: 40ms; }
+.lista-anteriores .card-doc.is-historial:nth-child(3) { animation-delay: 80ms; }
+.lista-anteriores .card-doc.is-historial:nth-child(4) { animation-delay: 120ms; }
+.lista-anteriores .card-doc.is-historial:nth-child(5) { animation-delay: 160ms; }
+.lista-anteriores .card-doc.is-historial:nth-child(6) { animation-delay: 200ms; }
+.lista-anteriores .card-doc.is-historial:nth-child(n + 7) {
+  animation: solvix-fade-in var(--motion-fast) var(--ease-enter) both;
+  animation-delay: 0ms;
+}
+
+.btn-versiones:focus-visible {
+  outline: 2px solid var(--solvix-primary, #4fd1ff);
+  outline-offset: 2px;
+}
+
+.card-doc.is-historial {
+  opacity: 0.85;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.archivo {
+  display: none;
+}
+
+.card-doc.is-nuevo {
+  border-radius: 10px;
+  outline: 1px solid var(--color-success, var(--solvix-success));
+  background: var(--color-success-soft, var(--solvix-success-soft));
+  padding: 0.55rem 0.65rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lista-anteriores,
+  .lista-anteriores .card-doc.is-historial {
+    animation: none;
+  }
+
+  .card-actions ::ng-deep .material-symbols-outlined {
+    transition: none;
+    transform: none !important;
   }
 }

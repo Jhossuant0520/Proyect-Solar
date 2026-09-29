@@ -45,6 +45,7 @@
         [value]="searchNumero"
         (input)="onSearch($event)"
         placeholder="Buscar por número o cliente"
+        aria-label="Buscar venta por número o cliente"
       />
     </label>
     <select [value]="filtroPeriodo" (change)="onPeriodo($event)" aria-label="Período">
@@ -52,12 +53,16 @@
         <option [value]="periodo.id">{{ periodo.label }}</option>
       }
     </select>
-    <select [value]="filtroClienteId ?? ''" (change)="onCliente($event)" aria-label="Cliente">
-      <option value="">Cliente: todos</option>
-      @for (cliente of clientes; track cliente.id) {
-        <option [value]="cliente.id">{{ cliente.nombre }}</option>
-      }
-    </select>
+    <div class="filtro-cliente">
+      <app-cliente-buscador
+        [seleccionado]="filtroCliente"
+        [limite]="8"
+        [mostrarHintSinSeleccion]="false"
+        etiquetaSinCliente="Cliente: todos"
+        placeholder="Filtrar por cliente…"
+        (seleccionadoChange)="onCliente($event)"
+      />
+    </div>
     <select [value]="filtroEstado" (change)="onEstado($event)" aria-label="Estado">
       <option value="">Estado: todos</option>
       @for (estado of estados; track estado.id) {
@@ -84,7 +89,7 @@
       actionIcon="add"
       (action)="nuevaVenta()"
     />
-  } @else if (visibles.length === 0) {
+  } @else if (ventas.length === 0) {
     <solvix-empty-state
       icon="search_off"
       title="No encontramos ventas con estos filtros."
@@ -111,7 +116,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (venta of visibles; track venta.id) {
+            @for (venta of ventas; track venta.id) {
               <tr [class.is-cancelada]="venta.estado === 'CANCELADA'">
                 <td>
                   <button type="button" class="name-btn" (click)="verVenta(venta)">
@@ -141,7 +146,7 @@
       </div>
 
       <ul class="mobile-list">
-        @for (venta of visibles; track venta.id) {
+        @for (venta of ventas; track venta.id) {
           <li>
             <button type="button" class="card-main" (click)="verVenta(venta)">
               <strong class="solvix-mono">{{ venta.numero }}</strong>
@@ -159,6 +164,20 @@
           </li>
         }
       </ul>
+
+      <nav class="pager" aria-label="Paginación de ventas">
+        <p class="pager-meta">
+          {{ totalElementos }} ventas · página {{ pagina + 1 }} de {{ totalPaginas || 1 }}
+        </p>
+        <div class="pager-actions">
+          <button type="button" class="page-btn" [disabled]="!hayAnterior" (click)="irAPagina(-1)">
+            Anterior
+          </button>
+          <button type="button" class="page-btn" [disabled]="!haySiguiente" (click)="irAPagina(1)">
+            Siguiente
+          </button>
+        </div>
+      </nav>
     </div>
   }
 </section>

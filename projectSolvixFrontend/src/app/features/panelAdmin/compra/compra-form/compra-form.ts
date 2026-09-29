@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { SolvixFeedbackService } from '../../../../shared/services/solvix-feedback.service';
 import { SolvixButtonComponent } from '../../../../shared/components/solvix-button/solvix-button';
 import { SolvixErrorStateComponent } from '../../../../shared/components/solvix-error-state/solvix-error-state';
 import { SolvixLoadingStateComponent } from '../../../../shared/components/solvix-loading-state/solvix-loading-state';
@@ -63,7 +64,7 @@ export class CompraFormComponent implements OnInit {
     private compraService: CompraService,
     private proveedorService: ProveedorService,
     private productoService: ProductoService,
-    private snackBar: MatSnackBar,
+    private feedback: SolvixFeedbackService,
     private router: Router
   ) {
     this.form = this.fb.group({
@@ -138,11 +139,7 @@ export class CompraFormComponent implements OnInit {
       error: error => {
         this.buscandoCodigo = false;
         const mapped = mapHttpError(error, 'No pudimos buscar el producto.');
-        this.snackBar.open(
-          mensajeErrorLookupCodigoBarras(error, mapped.message),
-          'Cerrar',
-          { duration: 4000 }
-        );
+        this.feedback.error(mensajeErrorLookupCodigoBarras(error, mapped.message), 4000);
       }
     });
   }
@@ -152,7 +149,7 @@ export class CompraFormComponent implements OnInit {
       return;
     }
     if (idsProductosEnLineas(this.detalles.controls).has(producto.id)) {
-      this.snackBar.open(MENSAJE_PRODUCTO_YA_EN_COMPRA, 'Cerrar', { duration: 3000 });
+      this.feedback.info(MENSAJE_PRODUCTO_YA_EN_COMPRA, 3000);
       this.busquedaProducto = '';
       return;
     }
@@ -169,10 +166,12 @@ export class CompraFormComponent implements OnInit {
       ]
     }));
     this.busquedaProducto = '';
+    this.feedback.success('Producto agregado');
   }
 
   quitarLinea(index: number): void {
     this.detalles.removeAt(index);
+    this.feedback.info('Producto eliminado');
   }
 
   registrar(): void {
@@ -206,9 +205,7 @@ export class CompraFormComponent implements OnInit {
     this.compraService.crear(request).subscribe({
       next: compra => {
         this.submitState = 'idle';
-        this.snackBar.open(`Compra ${compra.numero} registrada. Queda pendiente hasta completarla.`, 'Cerrar', {
-          duration: 4000
-        });
+        this.feedback.success(`Compra ${compra.numero} registrada`);
         this.router.navigate(['/compras', compra.id]);
       },
       error: error => {
@@ -225,7 +222,7 @@ export class CompraFormComponent implements OnInit {
 
   private integrarProductoResuelto(producto: ProductoModel): void {
     if (producto.activo === false) {
-      this.snackBar.open('Ese producto está inactivo y no se puede comprar.', 'Cerrar', { duration: 4000 });
+      this.feedback.warning('Ese producto está inactivo y no se puede comprar.', 4000);
       return;
     }
     if (producto.id != null && !this.catalogo.some(item => item.id === producto.id)) {

@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
 import { SolvixBadgeComponent } from '../../../../shared/components/solvix-badge/solvix-badge';
 import { SolvixButtonComponent } from '../../../../shared/components/solvix-button/solvix-button';
 import { SolvixMetricTone } from '../../../../shared/components/solvix-metric-card/solvix-metric-card';
@@ -8,8 +9,8 @@ import { SolvixErrorStateComponent } from '../../../../shared/components/solvix-
 import { SolvixLoadingStateComponent } from '../../../../shared/components/solvix-loading-state/solvix-loading-state';
 import { SolvixMetricCardComponent } from '../../../../shared/components/solvix-metric-card/solvix-metric-card';
 import { SolvixPageHeaderComponent } from '../../../../shared/components/solvix-page-header/solvix-page-header';
+import { ClienteBuscadorComponent } from '../../cliente/cliente-buscador/cliente-buscador';
 import { AnalyticsService } from '../../../../core/services/analytics.service';
-import { ClienteService } from '../../../../core/services/cliente.service';
 import { VentaService } from '../../../../core/services/venta.service';
 import { ClienteResponseDTO } from '../../../../core/models/cliente.models';
 import { EstadoVenta, VentaFiltros, VentaResponseDTO } from '../../../../core/models/venta.models';
@@ -29,6 +30,9 @@ import {
 type ListaEstado = 'loading' | 'ready' | 'empty' | 'error';
 type KpiEstado = 'loading' | 'ready' | 'error' | 'hidden';
 
+export const TAMANO_PAGINA_VENTAS = 20;
+export const DEBOUNCE_BUSQUEDA_VENTAS_MS = 300;
+
 @Component({
   selector: 'app-venta-list',
   standalone: true,
@@ -41,23 +45,26 @@ type KpiEstado = 'loading' | 'ready' | 'error' | 'hidden';
     SolvixMetricCardComponent,
     SolvixLoadingStateComponent,
     SolvixEmptyStateComponent,
-    SolvixErrorStateComponent
+    SolvixErrorStateComponent,
+    ClienteBuscadorComponent
   ]
 })
-export class VentaListComponent implements OnInit {
+export class VentaListComponent implements OnInit, OnDestroy {
   ventas: VentaResponseDTO[] = [];
-  clientes: ClienteResponseDTO[] = [];
   kpis: DashboardMetricVista[] = [];
   state: ListaEstado = 'loading';
   kpiState: KpiEstado = 'loading';
   errorTitle = 'No pudimos cargar las ventas.';
   errorMessage = 'Revisa la conexión e inténtalo de nuevo.';
   searchNumero = '';
-  filtroClienteId: number | null = null;
+  filtroCliente: ClienteResponseDTO | null = null;
   filtroEstado: EstadoVenta | '' = '';
   filtroPeriodo: PeriodoPreset | 'todas' = 'mes';
   desde = '';
   hasta = '';
+  pagina = 0;
+  totalPaginas = 0;
+  totalElementos = 0;
 
   readonly estados = ESTADOS_VENTA;
   readonly periodos = [{ id: 'todas' as const, label: 'Todos los períodos' }, ...PERIODO_PRESETS.filter(item => item.id !== 'personalizado')];
@@ -68,9 +75,11 @@ export class VentaListComponent implements OnInit {
   readonly productos = resumenProductos;
   readonly cliente = clienteVisible;
 
+  private readonly busquedas = new Subject<string>();
+  private sub?: Subscription;
+
   constructor(
     private ventaService: VentaService,
-    private clienteService: ClienteService,
     private analytics: AnalyticsService,
     private router: Router
   ) {}
@@ -79,38 +88,44 @@ export class VentaListComponent implements OnInit {
     const inicial = periodoInicial();
     this.desde = inicial.desde;
     this.hasta = inicial.hasta;
-    this.clienteService.listar(true).subscribe({
-      next: clientes => this.clientes = clientes
-    });
+    this.sub = this.busquedas
+      .pipe(debounceTime(DEBOUNCE_BUSQUEDA_VENTAS_MS), distinctUntilChanged())
+      .subscribe(() => {
+        this.pagina = 0;
+        this.cargar();
+      });
     this.cargar();
   }
 
-  get visibles(): VentaResponseDTO[] {
-    const query = this.searchNumero.trim().toLowerCase();
-    if (!query) {
-      return this.ventas;
-    }
-    return this.ventas.filter(venta =>
-      venta.numero.toLowerCase().includes(query)
-      || (venta.clienteNombre ?? '').toLowerCase().includes(query)
-    );
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
   }
 
   get hayFiltros(): boolean {
     return Boolean(
       this.searchNumero.trim()
-      || this.filtroClienteId != null
+      || this.filtroCliente != null
       || this.filtroEstado
       || this.filtroPeriodo !== 'mes'
     );
   }
 
+  get hayAnterior(): boolean {
+    return this.pagina > 0;
+  }
+
+  get haySiguiente(): boolean {
+    return this.pagina + 1 < this.totalPaginas;
+  }
+
   cargar(): void {
     this.state = 'loading';
     this.ventaService.listar(this.filtrosApi()).subscribe({
-      next: ventas => {
-        this.ventas = ventas;
-        this.state = ventas.length === 0 && !this.hayFiltros ? 'empty' : 'ready';
+      next: pagina => {
+        this.ventas = pagina.contenido;
+        this.totalPaginas = pagina.totalPaginas;
+        this.totalElementos = pagina.totalElementos;
+        this.state = pagina.totalElementos === 0 && !this.hayFiltros ? 'empty' : 'ready';
       },
       error: error => {
         const mapped = mapHttpError(error, 'No pudimos cargar las ventas.');
@@ -145,16 +160,18 @@ export class VentaListComponent implements OnInit {
 
   onSearch(event: Event): void {
     this.searchNumero = (event.target as HTMLInputElement).value;
+    this.busquedas.next(this.searchNumero.trim());
   }
 
-  onCliente(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.filtroClienteId = value ? Number(value) : null;
+  onCliente(cliente: ClienteResponseDTO | null): void {
+    this.filtroCliente = cliente;
+    this.pagina = 0;
     this.cargar();
   }
 
   onEstado(event: Event): void {
     this.filtroEstado = (event.target as HTMLSelectElement).value as EstadoVenta | '';
+    this.pagina = 0;
     this.cargar();
   }
 
@@ -166,17 +183,29 @@ export class VentaListComponent implements OnInit {
       this.desde = rango.desde;
       this.hasta = rango.hasta;
     }
+    this.pagina = 0;
     this.cargar();
   }
 
   limpiarFiltros(): void {
     const inicial = periodoInicial();
     this.searchNumero = '';
-    this.filtroClienteId = null;
+    this.filtroCliente = null;
     this.filtroEstado = '';
     this.filtroPeriodo = 'mes';
     this.desde = inicial.desde;
     this.hasta = inicial.hasta;
+    this.pagina = 0;
+    this.busquedas.next('');
+    this.cargar();
+  }
+
+  irAPagina(delta: number): void {
+    const destino = this.pagina + delta;
+    if (destino < 0 || destino >= this.totalPaginas) {
+      return;
+    }
+    this.pagina = destino;
     this.cargar();
   }
 
@@ -218,9 +247,16 @@ export class VentaListComponent implements OnInit {
   }
 
   private filtrosApi(): VentaFiltros {
-    const filtros: VentaFiltros = {};
-    if (this.filtroClienteId != null) {
-      filtros.clienteId = this.filtroClienteId;
+    const filtros: VentaFiltros = {
+      pagina: this.pagina,
+      tamano: TAMANO_PAGINA_VENTAS
+    };
+    const q = this.searchNumero.trim();
+    if (q) {
+      filtros.q = q;
+    }
+    if (this.filtroCliente?.id != null) {
+      filtros.clienteId = this.filtroCliente.id;
     }
     if (this.filtroEstado) {
       filtros.estado = this.filtroEstado;

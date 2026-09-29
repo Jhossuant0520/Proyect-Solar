@@ -75,6 +75,13 @@ export const routes: Routes = [
         m => m.ConsultaDocumentoPublicaComponent
       )
   },
+  {
+    path: 'consulta/cotizacion/:token',
+    loadComponent: () =>
+      import('./features/consulta/consulta-cotizacion-publica/consulta-cotizacion-publica').then(
+        m => m.ConsultaCotizacionPublicaComponent
+      )
+  },
 
   {
     path: '',
@@ -94,6 +101,35 @@ export const routes: Routes = [
       { path: 'ventas/:id/devolucion', component: VentaDevolucionFormComponent, canActivate: [adminGuard] },
       { path: 'ventas/:id/devoluciones/:devolucionId', component: VentaDevolucionDetailComponent, canActivate: [adminGuard] },
       { path: 'ventas/:id', component: VentaDetailComponent, canActivate: [adminGuard] },
+
+      {
+        path: 'cotizaciones',
+        loadComponent: () =>
+          import('./features/panelAdmin/cotizacion-comercial/cotizacion-comercial-list/cotizacion-comercial-list')
+            .then(m => m.CotizacionComercialListComponent),
+        canActivate: [adminGuard]
+      },
+      {
+        path: 'cotizaciones/nueva',
+        loadComponent: () =>
+          import('./features/panelAdmin/cotizacion-comercial/cotizacion-comercial-form/cotizacion-comercial-form')
+            .then(m => m.CotizacionComercialFormComponent),
+        canActivate: [adminGuard]
+      },
+      {
+        path: 'cotizaciones/:id/editar',
+        loadComponent: () =>
+          import('./features/panelAdmin/cotizacion-comercial/cotizacion-comercial-form/cotizacion-comercial-form')
+            .then(m => m.CotizacionComercialFormComponent),
+        canActivate: [adminGuard]
+      },
+      {
+        path: 'cotizaciones/:id',
+        loadComponent: () =>
+          import('./features/panelAdmin/cotizacion-comercial/cotizacion-comercial-detail/cotizacion-comercial-detail')
+            .then(m => m.CotizacionComercialDetailComponent),
+        canActivate: [adminGuard]
+      },
 
       { path: 'compras', component: CompraListComponent, canActivate: [adminGuard] },
       { path: 'compras/nueva', component: CompraFormComponent, canActivate: [adminGuard] },

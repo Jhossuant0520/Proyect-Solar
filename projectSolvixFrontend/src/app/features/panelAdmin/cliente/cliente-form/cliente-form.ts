@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { SolvixButtonComponent } from '../../../../shared/components/solvix-button/solvix-button';
 import { SolvixErrorStateComponent } from '../../../../shared/components/solvix-error-state/solvix-error-state';
 import { SolvixLoadingStateComponent } from '../../../../shared/components/solvix-loading-state/solvix-loading-state';
 import { SolvixPageHeaderComponent } from '../../../../shared/components/solvix-page-header/solvix-page-header';
+import { SolvixFeedbackService } from '../../../../shared/services/solvix-feedback.service';
 import { ClienteService } from '../../../../core/services/cliente.service';
 import { ClienteResponseDTO } from '../../../../core/models/cliente.models';
 import { aClienteRequest, ClienteFormValores, valoresDesdeCliente } from '../cliente-mapper';
@@ -16,7 +17,6 @@ import {
   esConsumidorFinal,
   mensajeErrorCliente
 } from '../cliente-ui';
-import { showSolvixSnack } from '../../../../shared/utils/solvix-snack';
 
 type CargaEstado = 'loading' | 'ready' | 'error' | 'reservado';
 
@@ -48,7 +48,7 @@ export class ClienteFormComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private clienteService: ClienteService,
-    private snackBar: MatSnackBar
+    private feedback: SolvixFeedbackService
   ) {
     this.form = this.fb.group({
       nombre: ['', [Validators.required, Validators.maxLength(150)]],
@@ -145,11 +145,7 @@ export class ClienteFormComponent implements OnInit {
 
     peticion.subscribe({
       next: (cliente: ClienteResponseDTO) => {
-        showSolvixSnack(
-          this.snackBar,
-          id == null ? 'Cliente registrado.' : 'Cliente actualizado.',
-          'success'
-        );
+        this.feedback.success(id == null ? 'Cliente creado' : 'Cliente actualizado');
         this.router.navigate(['/clientes', cliente.id]);
       },
       error: err => {

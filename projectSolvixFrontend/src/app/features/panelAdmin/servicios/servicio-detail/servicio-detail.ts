@@ -1,14 +1,16 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { SolvixBadgeComponent } from '../../../../shared/components/solvix-badge/solvix-badge';
 import { SolvixButtonComponent } from '../../../../shared/components/solvix-button/solvix-button';
 import { SolvixErrorStateComponent } from '../../../../shared/components/solvix-error-state/solvix-error-state';
 import { SolvixLoadingStateComponent } from '../../../../shared/components/solvix-loading-state/solvix-loading-state';
 import { SolvixSectionHeaderComponent } from '../../../../shared/components/solvix-section-header/solvix-section-header';
+import { SolvixProgressFasesComponent } from '../../../../shared/components/solvix-progress-fases/solvix-progress-fases';
 import { OrdenServicioService } from '../../../../core/services/orden-servicio.service';
 import {
   HistorialEstadoOrdenServicioResponseDTO,
@@ -26,6 +28,7 @@ import {
   accionPrincipalDesde,
   accionSecundariaEspera,
   campoTecnicoDestacado,
+  contarRepuestosPendientes,
   equipoResumen,
   esEstadoTerminal,
   esResumenTecnicoCompleto,
@@ -34,15 +37,22 @@ import {
   labelTipoEquipo,
   mapHttpError,
   mensajeErrorServicio,
-  pasosWorkflow,
   puedeEditarTextos,
-  textoProximaAccion,
-  textosTecnicosSinCambios,
   tipoAccionWorkflow,
   toneEstadoOrden,
-  valorTextoTecnico
+  valorTextoTecnico,
+  textosTecnicosSinCambios
 } from '../servicio-ui';
-import { showSolvixSnack } from '../../../../shared/utils/solvix-snack';
+import {
+  FasePublicaOrden,
+  SeccionDetalleId,
+  documentoRelevantePorEstado,
+  estadoOrdenUx,
+  resumenFaseActual,
+  seccionesAbiertasPorEstado
+} from '../estado-orden-ux';
+import { SolvixActionRevealService } from '../../../../shared/services/solvix-action-reveal.service';
+import { SolvixFeedbackService } from '../../../../shared/services/solvix-feedback.service';
 import {
   TransicionEstadoDialogComponent,
   TransicionEstadoDialogResult,
@@ -52,10 +62,6 @@ import {
   ServicioEntregaDialogComponent,
   ServicioEntregaDialogData
 } from '../servicio-entrega-dialog/servicio-entrega-dialog';
-import {
-  RepuestosPanelChange,
-  ServicioRepuestosPanelComponent
-} from '../servicio-repuestos-panel/servicio-repuestos-panel';
 import {
   CotizacionPanelIntent,
   DocumentoCotizacionEsperado,
@@ -76,20 +82,20 @@ import {
     RouterLink,
     MatSnackBarModule,
     MatDialogModule,
-    MatTooltipModule,
+    MatMenuModule,
+    MatButtonModule,
     SolvixBadgeComponent,
     SolvixButtonComponent,
     SolvixSectionHeaderComponent,
     SolvixLoadingStateComponent,
     SolvixErrorStateComponent,
-    ServicioRepuestosPanelComponent,
+    SolvixProgressFasesComponent,
     ServicioCotizacionesPanelComponent,
     ServicioDocumentosPanelComponent
   ]
 })
 export class ServicioDetailComponent implements OnInit {
   @ViewChild('panelTecnico') panelTecnico?: ElementRef<HTMLElement>;
-  @ViewChild('panelReparacion') panelReparacion?: ElementRef<HTMLElement>;
   @ViewChild('panelCotizaciones') panelCotizaciones?: ElementRef<HTMLElement>;
   @ViewChild(ServicioCotizacionesPanelComponent)
   cotizacionesPanel?: ServicioCotizacionesPanelComponent;
@@ -99,11 +105,11 @@ export class ServicioDetailComponent implements OnInit {
   orden: OrdenServicioResponseDTO | null = null;
   historial: HistorialEstadoOrdenServicioResponseDTO[] = [];
   historialState: 'idle' | 'loading' | 'ready' | 'empty' | 'error' = 'idle';
+  historialCompleto = false;
   state: 'loading' | 'ready' | 'error' = 'loading';
   editando = false;
   guardando = false;
   cambiandoEstado = false;
-  /** Tras crear OT: el panel de documentos espera el comprobante afterCommit. */
   esperarComprobante = false;
   errorTitle = 'No pudimos cargar esta orden.';
   errorMessage = 'La orden no existe o no está disponible.';
@@ -114,6 +120,8 @@ export class ServicioDetailComponent implements OnInit {
   pendingRepuestos = 0;
   pendientesResumen: string[] = [];
   repuestosItems: RepuestoOrdenServicioResponseDTO[] = [];
+  secciones: Record<SeccionDetalleId, boolean> = seccionesAbiertasPorEstado(null);
+  faseAlCancelar: FasePublicaOrden | null = null;
 
   readonly form;
   readonly campos = CAMPOS_TECNICOS;
@@ -131,7 +139,8 @@ export class ServicioDetailComponent implements OnInit {
     private router: Router,
     private dialog: MatDialog,
     private ordenServicioService: OrdenServicioService,
-    private snackBar: MatSnackBar
+    private feedback: SolvixFeedbackService,
+    private actionReveal: SolvixActionRevealService
   ) {
     this.form = this.fb.group({
       problemaReportado: ['', Validators.maxLength(2000)],
@@ -158,6 +167,14 @@ export class ServicioDetailComponent implements OnInit {
   get ordenId(): number | null {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     return Number.isFinite(id) && id > 0 ? id : null;
+  }
+
+  get ux() {
+    return estadoOrdenUx(this.orden?.estado);
+  }
+
+  get resumenFase() {
+    return resumenFaseActual(this.orden?.estado);
   }
 
   get campoDestacado(): CampoTecnicoId | null {
@@ -191,18 +208,8 @@ export class ServicioDetailComponent implements OnInit {
     return this.orden ? accionNuevaFalla(this.orden.estado) : null;
   }
 
-  get proximaAccionTexto(): string {
-    return this.orden
-      ? textoProximaAccion(this.orden.estado, { pendingRepuestos: this.pendingRepuestos })
-      : '';
-  }
-
   get puedeGestionarRepuestos(): boolean {
     return this.orden ? !esEstadoTerminal(this.orden.estado) : false;
-  }
-
-  get workflowPasos() {
-    return this.orden ? pasosWorkflow(this.orden.estado) : [];
   }
 
   get enDiagnostico(): boolean {
@@ -221,8 +228,48 @@ export class ServicioDetailComponent implements OnInit {
     return !!(this.orden?.diagnostico ?? '').trim();
   }
 
-  get proximaEsNormal(): boolean {
-    return !this.requiereAprobacionAdicional && this.orden?.estado !== 'ESPERA_REPUESTO';
+  get historialReciente(): HistorialEstadoOrdenServicioResponseDTO[] {
+    return this.historial.slice(0, 3);
+  }
+
+  get hayMasHistorial(): boolean {
+    return this.historial.length > 3;
+  }
+
+  get documentoRelevante() {
+    return documentoRelevantePorEstado(this.orden?.estado);
+  }
+
+  get requisitosPendientes(): string[] {
+    const items: string[] = [];
+    if (!this.orden) {
+      return items;
+    }
+    if (this.orden.estado === 'EN_DIAGNOSTICO' && !this.diagnosticoYaDiligenciado) {
+      items.push('Falta registrar el diagnóstico técnico.');
+    }
+    if (this.orden.estado === 'EN_REPARACION' && this.pendingRepuestos > 0) {
+      items.push(
+        this.pendingRepuestos === 1
+          ? 'Hay 1 repuesto pendiente de consumir.'
+          : `Hay ${this.pendingRepuestos} repuestos pendientes de consumir.`
+      );
+    }
+    if (this.orden.estado === 'ESPERA_REPUESTO') {
+      items.push(
+        this.pendingRepuestos > 0
+          ? `Repuestos pendientes: ${this.pendingRepuestos}.`
+          : 'Resolver la espera de repuesto para continuar.'
+      );
+    }
+    if (this.orden.estado === 'EN_REPARACION' && !(this.orden.trabajoRealizado ?? '').trim()) {
+      items.push('Completa el trabajo realizado antes de marcar como listo.');
+    }
+    return items;
+  }
+
+  get hayMenuMasAcciones(): boolean {
+    return !!(this.accionCancelar || this.accionEspera || this.accionFalla);
   }
 
   cargar(): void {
@@ -238,8 +285,7 @@ export class ServicioDetailComponent implements OnInit {
     this.guiaTecnica = '';
     this.ordenServicioService.obtenerPorId(id).subscribe({
       next: orden => {
-        this.orden = orden;
-        this.patchForm(orden);
+        this.aplicarOrden(orden);
         this.state = 'ready';
         this.cargarHistorial(id);
       },
@@ -259,6 +305,7 @@ export class ServicioDetailComponent implements OnInit {
       next: items => {
         this.historial = items;
         this.historialState = items.length ? 'ready' : 'empty';
+        this.actualizarFaseCancelacion(items);
       },
       error: error => {
         this.historial = [];
@@ -268,32 +315,40 @@ export class ServicioDetailComponent implements OnInit {
     });
   }
 
-  onRepuestosChange(change: RepuestosPanelChange): void {
-    this.pendingRepuestos = change.pending;
-    this.repuestosItems = change.items ?? [];
-    this.pendientesResumen = (change.items ?? [])
-      .filter(l => !l.anulado && (l.cantidadPendiente ?? 0) > 0)
-      .map(l => {
-        const nombre = l.productoNombre ?? `Producto #${l.productoId}`;
-        return `${nombre} — pendiente: ${l.cantidadPendiente}`;
-      });
-  }
-
   volver(): void {
     this.router.navigate(['/servicios']);
+  }
+
+  toggleSeccion(id: SeccionDetalleId): void {
+    this.secciones = { ...this.secciones, [id]: !this.secciones[id] };
+  }
+
+  abrirSeccion(id: SeccionDetalleId): void {
+    this.secciones = { ...this.secciones, [id]: true };
   }
 
   esCampoDestacado(campo: CampoTecnicoId): boolean {
     return this.campoDestacado === campo;
   }
 
-  iniciarEdicion(): void {
+  tieneTexto(campo: CampoTecnicoId): boolean {
+    if (!this.orden) {
+      return false;
+    }
+    return !!(this.valorCampo(this.orden, campo) ?? '').trim();
+  }
+
+  iniciarEdicion(campo?: CampoTecnicoId): void {
     if (!this.orden || !puedeEditarTextos(this.orden.estado)) {
       return;
     }
     this.patchForm(this.orden);
     this.editError = '';
     this.editando = true;
+    this.abrirSeccion('tecnico');
+    if (campo) {
+      this.enfocarCampo(campo);
+    }
   }
 
   cancelarEdicion(): void {
@@ -326,11 +381,10 @@ export class ServicioDetailComponent implements OnInit {
 
     this.ordenServicioService.actualizar(this.orden.id, request).subscribe({
       next: orden => {
-        this.orden = orden;
-        this.patchForm(orden);
+        this.aplicarOrden(orden, false);
         this.editando = false;
         this.guardando = false;
-        showSolvixSnack(this.snackBar, 'Información técnica guardada.', 'success');
+        this.feedback.success('Información técnica guardada.');
       },
       error: error => {
         this.guardando = false;
@@ -339,16 +393,14 @@ export class ServicioDetailComponent implements OnInit {
     });
   }
 
-  /** Completa diagnóstico de forma atómica (EN_DIAGNOSTICO → DIAGNOSTICADO). */
   guardarDiagnosticoCompleto(): void {
     if (!this.orden || this.cambiandoEstado || this.guardando) {
       return;
     }
     const diagnostico = (this.form.controls.diagnostico.value ?? '').trim();
     if (!diagnostico) {
-      this.iniciarEdicion();
+      this.iniciarEdicion('diagnostico');
       this.guiaTecnica = 'Completa el diagnóstico técnico para continuar.';
-      this.enfocarCampo('diagnostico');
       return;
     }
     this.cambiandoEstado = true;
@@ -362,7 +414,11 @@ export class ServicioDetailComponent implements OnInit {
         observaciones: this.form.controls.observaciones.value ?? null
       })
       .subscribe({
-        next: t => this.onTransicionOk(t, 'Diagnóstico completado.'),
+        next: t => {
+          this.onTransicionOk(t, 'Diagnóstico registrado.');
+          this.abrirSeccion('cotizaciones');
+          this.actionReveal.reveal(this.panelCotizaciones, { highlight: true });
+        },
         error: error => this.onTransicionError(error)
       });
   }
@@ -379,7 +435,6 @@ export class ServicioDetailComponent implements OnInit {
       return;
     }
 
-    // Cotización (3.15.7): CTAs de dominio, no transición directa de estado.
     if (estado === 'DIAGNOSTICADO') {
       this.irACotizaciones('crear-inicial');
       return;
@@ -437,7 +492,7 @@ export class ServicioDetailComponent implements OnInit {
   }
 
   irACotizaciones(intent: CotizacionPanelIntent = 'scroll'): void {
-    this.panelCotizaciones?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    this.abrirSeccion('cotizaciones');
     queueMicrotask(() => this.cotizacionesPanel?.ejecutarIntent(intent));
   }
 
@@ -450,20 +505,12 @@ export class ServicioDetailComponent implements OnInit {
       tipo: ev.tipo,
       cotizacionId: ev.cotizacionId
     };
-    queueMicrotask(() => {
-      this.documentosPanel?.esperarDocumento(opts);
-      this.panelDocumentosScroll();
-    });
+    this.abrirSeccion('documentos');
+    queueMicrotask(() => this.documentosPanel?.esperarDocumento(opts));
   }
 
   refrescarDocumentos(): void {
     this.documentosPanel?.cargar();
-  }
-
-  private panelDocumentosScroll(): void {
-    // Scroll suave al panel de documentos si está en el DOM
-    const el = document.querySelector('app-servicio-documentos-panel');
-    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   abrirEntrega(): void {
@@ -484,18 +531,13 @@ export class ServicioDetailComponent implements OnInit {
       if (!result?.orden) {
         return;
       }
-      this.orden = result.orden;
-      this.patchForm(result.orden);
+      this.aplicarOrden(result.orden);
       this.editando = false;
-      showSolvixSnack(
-        this.snackBar,
-        result.mensaje || 'Entrega registrada. Orden cerrada.',
-        'success'
-      );
+      this.feedback.success(result.mensaje || 'Entrega registrada. Orden cerrada.');
       this.cargarHistorial(result.orden.id);
+      this.abrirSeccion('documentos');
       queueMicrotask(() => {
         this.documentosPanel?.esperarDocumento({ tipo: 'ACTA_ENTREGA' });
-        this.panelDocumentosScroll();
       });
     });
   }
@@ -524,34 +566,26 @@ export class ServicioDetailComponent implements OnInit {
   }
 
   irAlDiagnostico(): void {
-    this.iniciarEdicion();
+    this.iniciarEdicion('diagnostico');
     if (this.diagnosticoYaDiligenciado) {
       this.guiaTecnica = 'El diagnóstico ya está diligenciado. Guarda la ficha para continuar.';
     } else {
       this.guiaTecnica = 'Escribe el diagnóstico técnico y pulsa Guardar diagnóstico.';
     }
-    this.enfocarCampo('diagnostico');
-  }
-
-  irAReparacion(): void {
-    this.guiaTecnica = '';
-    this.panelReparacion?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  texto(value: string | null | undefined): string {
-    const trimmed = (value ?? '').trim();
-    return trimmed || 'Sin información.';
   }
 
   private intentarMarcarListo(): void {
     if (!this.orden) {
       return;
     }
-    const trabajo = (this.form.controls.trabajoRealizado.value ?? this.orden.trabajoRealizado ?? '').trim();
+    const trabajo = (
+      this.form.controls.trabajoRealizado.value ??
+      this.orden.trabajoRealizado ??
+      ''
+    ).trim();
     if (!trabajo) {
-      this.iniciarEdicion();
+      this.iniciarEdicion('trabajoRealizado');
       this.guiaTecnica = 'Completa el trabajo realizado antes de marcar la orden como lista.';
-      this.enfocarCampo('trabajoRealizado');
       return;
     }
     this.cambiandoEstado = true;
@@ -579,8 +613,8 @@ export class ServicioDetailComponent implements OnInit {
         if (destino === 'EN_DIAGNOSTICO') {
           queueMicrotask(() => this.irAlDiagnostico());
         }
-        if (destino === 'EN_REPARACION' && this.orden?.estado === 'EN_REPARACION') {
-          queueMicrotask(() => this.irAReparacion());
+        if (destino === 'EN_REPARACION') {
+          this.abrirSeccion('tecnico');
         }
       },
       error: error => this.onTransicionError(error)
@@ -647,16 +681,13 @@ export class ServicioDetailComponent implements OnInit {
   }
 
   private onTransicionOk(transicion: TransicionOrdenServicioResponseDTO, snack?: string): void {
-    this.orden = transicion.orden;
-    this.patchForm(transicion.orden);
+    this.aplicarOrden(transicion.orden);
     this.editando = false;
     this.cambiandoEstado = false;
     this.guardando = false;
     this.guiaTecnica = '';
-    showSolvixSnack(
-      this.snackBar,
-      snack || transicion.mensaje || `Estado: ${labelEstadoOrden(transicion.orden.estado)}.`,
-      'success'
+    this.feedback.success(
+      snack || transicion.mensaje || `Estado: ${labelEstadoOrden(transicion.orden.estado)}.`
     );
     this.cargarHistorial(transicion.orden.id);
   }
@@ -678,7 +709,6 @@ export class ServicioDetailComponent implements OnInit {
   }
 
   private enfocarCampo(campo: CampoTecnicoId): void {
-    this.panelTecnico?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
     requestAnimationFrame(() => {
       const el = document.querySelector<HTMLTextAreaElement>(
         `[data-campo="${campo}"] textarea, textarea[formcontrolname="${campo}"]`
@@ -704,5 +734,46 @@ export class ServicioDetailComponent implements OnInit {
       trabajoRealizado: valores.trabajoRealizado,
       observaciones: valores.observaciones
     });
+  }
+
+  private aplicarOrden(orden: OrdenServicioResponseDTO, resetSecciones = true): void {
+    this.orden = orden;
+    this.patchForm(orden);
+    if (resetSecciones) {
+      this.secciones = seccionesAbiertasPorEstado(orden.estado);
+    }
+    this.cargarRepuestos(orden.id);
+  }
+
+  /** Datos de dominio para workflow/entrega; sin card visual de repuestos (D.11). */
+  private cargarRepuestos(ordenId: number): void {
+    this.ordenServicioService.listarRepuestos(ordenId).subscribe({
+      next: items => this.aplicarDatosRepuestos(items),
+      error: () => this.aplicarDatosRepuestos([])
+    });
+  }
+
+  private aplicarDatosRepuestos(items: RepuestoOrdenServicioResponseDTO[]): void {
+    this.repuestosItems = items;
+    this.pendingRepuestos = contarRepuestosPendientes(items);
+    this.pendientesResumen = items
+      .filter(l => !l.anulado && (l.cantidadPendiente ?? 0) > 0)
+      .map(l => {
+        const nombre = l.productoNombre ?? `Producto #${l.productoId}`;
+        return `${nombre} — pendiente: ${l.cantidadPendiente}`;
+      });
+  }
+
+  private actualizarFaseCancelacion(items: HistorialEstadoOrdenServicioResponseDTO[]): void {
+    if (this.orden?.estado !== 'CANCELADO') {
+      this.faseAlCancelar = null;
+      return;
+    }
+    const cancel = items.find(i => i.estadoNuevo === 'CANCELADO');
+    if (!cancel?.estadoAnterior) {
+      this.faseAlCancelar = null;
+      return;
+    }
+    this.faseAlCancelar = estadoOrdenUx(cancel.estadoAnterior).fase;
   }
 }

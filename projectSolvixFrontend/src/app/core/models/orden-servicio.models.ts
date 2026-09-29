@@ -49,6 +49,23 @@ export interface OrdenServicioRequestDTO {
   diagnostico?: string | null;
   trabajoRealizado?: string | null;
   observaciones?: string | null;
+  /** D.2 — obligatorios solo al crear (recepción firmada). */
+  clienteConfirmoRecepcion?: boolean | null;
+  nombreFirmanteRecepcion?: string | null;
+  documentoFirmanteRecepcion?: string | null;
+  firmaBase64Recepcion?: string | null;
+}
+
+export interface RecepcionOrdenServicioResponseDTO {
+  id: number;
+  ordenServicioId: number;
+  fechaRecepcion: string | number[] | null;
+  usuarioResponsable: string;
+  clienteConfirmo: boolean;
+  nombreCliente: string | null;
+  documentoCliente: string | null;
+  firmaUrl: string | null;
+  observaciones: string | null;
 }
 
 /**
@@ -104,9 +121,12 @@ export interface TransicionOrdenServicioResponseDTO {
 }
 
 export interface OrdenServicioFiltros {
+  q?: string | null;
   clienteId?: number | null;
   equipoId?: number | null;
   estado?: EstadoOrdenServicio | '';
+  pagina?: number;
+  tamano?: number;
 }
 
 /** Estado derivado de una línea de repuesto (no se persiste en backend). */

@@ -1,0 +1,184 @@
+<section class="cot-detail-page">
+  @if (estado === 'loading') {
+    <solvix-loading-state label="Cargando la cotización." />
+  } @else if (estado === 'error' || !cotizacion) {
+    <solvix-error-state [title]="errorTitle" [message]="errorMessage" (retry)="cargar()" />
+  } @else {
+    <solvix-page-header
+      kicker="Cotización comercial"
+      [title]="cotizacion.numero"
+      [subtitle]="cotizacion.clienteNombre"
+    >
+      <solvix-button family="tech" rank="tertiary" icon="arrow_back" (click)="volver()">
+        Volver
+      </solvix-button>
+    </solvix-page-header>
+
+    <div class="acciones" role="toolbar" aria-label="Acciones de la cotización">
+      <solvix-badge [tone]="estadoTone(cotizacion.estado)">{{ estadoLabel(cotizacion.estado) }}</solvix-badge>
+      <div class="acciones-botones">
+        @if (cotizacion.puedeEditar) {
+          <solvix-button family="tech" rank="tertiary" icon="edit" (click)="editar()" [disabled]="procesando !== null">
+            Editar
+          </solvix-button>
+        }
+        @if (cotizacion.puedePresentar) {
+          <solvix-button
+            family="tech"
+            rank="primary"
+            icon="send"
+            (click)="presentar()"
+            [disabled]="procesando !== null"
+            [loading]="procesando === 'presentar'"
+            ariaLabel="Presentar cotización y generar PDF"
+          >
+            {{ procesando === 'presentar' ? 'Presentando y generando PDF…' : 'Presentar' }}
+          </solvix-button>
+        }
+        @if (cotizacion.puedeAprobar) {
+          <solvix-button family="tech" rank="primary" icon="check_circle" (click)="aprobar()" [disabled]="procesando !== null">
+            {{ procesando === 'aprobar' ? 'Aprobando…' : 'Aprobar' }}
+          </solvix-button>
+        }
+        @if (cotizacion.puedeRechazar) {
+          <solvix-button family="tech" rank="secondary" icon="cancel" (click)="rechazar()" [disabled]="procesando !== null">
+            Rechazar
+          </solvix-button>
+        }
+        @if (puedeVerDocumento && documentoVigente) {
+          <solvix-button family="tech" rank="tertiary" icon="picture_as_pdf" (click)="verPdf()" [disabled]="procesando !== null">
+            Ver PDF
+          </solvix-button>
+          <solvix-button family="tech" rank="tertiary" icon="download" (click)="descargarPdf()" [disabled]="procesando !== null">
+            Descargar
+          </solvix-button>
+        }
+        @if (cotizacion.puedeAnular) {
+          <solvix-button family="tech" rank="tertiary" icon="block" (click)="anular()" [disabled]="procesando !== null">
+            Anular
+          </solvix-button>
+        }
+      </div>
+    </div>
+
+    @if (cotizacion.estado === 'PENDIENTE_APROBACION') {
+      <p class="aviso">Si la editas, vuelve a borrador y deberás presentarla otra vez.</p>
+    }
+    @if (cotizacion.estado === 'RECHAZADA' && cotizacion.motivoRechazo) {
+      <p class="aviso aviso--error">Motivo del rechazo: {{ cotizacion.motivoRechazo }}</p>
+    }
+
+    <div class="layout">
+      <section class="panel">
+        <solvix-section-header kicker="Líneas" title="Detalle cotizado" />
+        <div class="table-wrap">
+          <table class="lineas">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Descripción</th>
+                <th class="is-num">Cantidad</th>
+                <th class="is-num">Precio unitario</th>
+                <th class="is-num">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (d of cotizacion.detalles; track d.id) {
+                <tr>
+                  <td><span class="tipo">{{ labelTipo(d.tipo) }}</span></td>
+                  <td>
+                    {{ d.descripcion }}
+                    @if (d.tipo === 'PRODUCTO' && d.productoActivo === false) {
+                      <span class="hint">(producto inactivo en catálogo)</span>
+                    }
+                  </td>
+                  <td class="is-num">{{ d.cantidad }}</td>
+                  <td class="is-num">{{ money(d.precioUnitario) }}</td>
+                  <td class="is-num">{{ money(d.subtotal) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        @if (cotizacion.observaciones) {
+          <p class="observaciones">{{ cotizacion.observaciones }}</p>
+        }
+      </section>
+
+      <aside class="col">
+        <section class="panel">
+          <solvix-section-header kicker="Resumen" title="Valores" />
+          <dl class="facts">
+            @if (participaEnResumen(cotizacion.subtotalProductos)) {
+              <div><dt>Productos</dt><dd>{{ money(cotizacion.subtotalProductos) }}</dd></div>
+            }
+            @if (participaEnResumen(cotizacion.subtotalManoObra)) {
+              <div><dt>Mano de obra</dt><dd>{{ money(cotizacion.subtotalManoObra) }}</dd></div>
+            }
+            @if (participaEnResumen(cotizacion.subtotalOtros)) {
+              <div><dt>Otros conceptos</dt><dd>{{ money(cotizacion.subtotalOtros) }}</dd></div>
+            }
+            <div class="total"><dt>Total</dt><dd>{{ money(cotizacion.total) }}</dd></div>
+          </dl>
+          <p class="hint">Cotizar no reserva ni descuenta inventario.</p>
+        </section>
+
+        <section class="panel">
+          <solvix-section-header kicker="Datos" title="Cliente y fechas" />
+          <dl class="facts facts--stack">
+            <div><dt>Cliente</dt><dd>{{ cotizacion.clienteNombre }}</dd></div>
+            @if (cotizacion.clienteDocumento) {
+              <div><dt>Documento</dt><dd>{{ cotizacion.clienteDocumento }}</dd></div>
+            }
+            <div><dt>Creada</dt><dd>{{ fecha(cotizacion.fecha) }}</dd></div>
+            @if (cotizacion.fechaAprobacion) {
+              <div><dt>Aprobada</dt><dd>{{ fecha(cotizacion.fechaAprobacion) }}</dd></div>
+            }
+            @if (cotizacion.fechaRechazo) {
+              <div><dt>Rechazada</dt><dd>{{ fecha(cotizacion.fechaRechazo) }}</dd></div>
+            }
+            @if (cotizacion.fechaAnulacion) {
+              <div><dt>Anulada</dt><dd>{{ fecha(cotizacion.fechaAnulacion) }}</dd></div>
+            }
+          </dl>
+        </section>
+
+        <section class="panel" id="panel-documentos-cotizacion">
+          <solvix-section-header kicker="Documentos" title="PDF de la cotización" />
+          @if (!puedeVerDocumento) {
+            <p class="hint">El PDF se genera al presentar la cotización.</p>
+          } @else if (documentos.length === 0) {
+            @if (pdfPendienteTrasPresentar) {
+              <p class="aviso aviso--error">Cotización presentada, pero no se pudo generar el PDF.</p>
+            } @else {
+              <p class="hint">Aún no hay PDF. Usa Generar PDF para crearlo.</p>
+            }
+            <solvix-button
+              family="tech"
+              rank="tertiary"
+              icon="refresh"
+              (click)="regenerarPdf()"
+              [disabled]="procesando !== null"
+              [loading]="procesando === 'regenerar'"
+              ariaLabel="Generar PDF de la cotización"
+            >
+              {{ procesando === 'regenerar' ? 'Generando PDF…' : 'Generar PDF' }}
+            </solvix-button>
+          } @else {
+            <ul class="docs">
+              @for (doc of documentos; track doc.id; let first = $first) {
+                <li>
+                  <span class="solvix-mono">v{{ doc.version }}</span>
+                  <span>{{ fecha(doc.fechaGeneracion) }}</span>
+                  @if (first) {
+                    <span class="vigente">Vigente</span>
+                  }
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      </aside>
+    </div>
+  }
+</section>

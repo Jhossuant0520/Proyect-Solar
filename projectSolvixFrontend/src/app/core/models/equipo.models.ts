@@ -41,6 +41,8 @@ export interface EquipoRequestDTO {
 }
 
 export interface EquipoFiltros {
+  q?: string | null;
   clienteId?: number | null;
   soloActivos?: boolean;
+  limite?: number | null;
 }

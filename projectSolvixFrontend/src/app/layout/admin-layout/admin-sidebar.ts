@@ -1,5 +1,14 @@
-import { Component, Input } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  Input,
+  OnDestroy,
+  ViewChild,
+  inject
+} from '@angular/core';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Subscription, filter } from 'rxjs';
 import { AdminNavItem } from './admin-nav';
 
 @Component({
@@ -9,6 +18,41 @@ import { AdminNavItem } from './admin-nav';
   templateUrl: './admin-sidebar.html',
   styleUrl: './admin-sidebar.scss'
 })
-export class AdminSidebarComponent {
+export class AdminSidebarComponent implements AfterViewInit, OnDestroy {
   @Input() items: AdminNavItem[] = [];
+
+  @ViewChild('nav') nav?: ElementRef<HTMLElement>;
+
+  indicatorY = 0;
+  indicatorH = 0;
+  indicatorReady = false;
+
+  private readonly router = inject(Router);
+  private sub?: Subscription;
+
+  ngAfterViewInit(): void {
+    this.sub = this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe(() => void Promise.resolve().then(() => this.syncIndicator()));
+    void Promise.resolve().then(() => this.syncIndicator());
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+  }
+
+  private syncIndicator(): void {
+    const root = this.nav?.nativeElement;
+    if (!root) {
+      return;
+    }
+    const active = root.querySelector<HTMLElement>('.admin-sidebar__link.is-active');
+    if (!active) {
+      this.indicatorReady = false;
+      return;
+    }
+    this.indicatorY = active.offsetTop;
+    this.indicatorH = active.offsetHeight;
+    this.indicatorReady = true;
+  }
 }

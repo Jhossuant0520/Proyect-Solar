@@ -24,6 +24,18 @@ export class ProductoService {
     return this.http.get<ProductoModel[]>(this.apiUrl, { params });
   }
 
+  /**
+   * Búsqueda acotada para selectores: el servidor filtra por nombre/marca/código
+   * y devuelve como máximo `limite` resultados (tope 50 en backend).
+   */
+  buscar(texto: string, limite = 10, activo: boolean | null = true): Observable<ProductoModel[]> {
+    let params = new HttpParams().set('limite', String(limite));
+    const q = texto.trim();
+    if (q) params = params.set('q', q);
+    if (activo != null) params = params.set('activo', String(activo));
+    return this.http.get<ProductoModel[]>(this.apiUrl, { params });
+  }
+
   obtenerPorId(id: number): Observable<ProductoModel> {
     return this.http.get<ProductoModel>(`${this.apiUrl}/${id}`);
   }
@@ -60,5 +72,9 @@ export class ProductoService {
   /** Soft-delete: desactiva el producto en catálogo */
   desactivar(id: number): Observable<ProductoModel> {
     return this.http.delete<ProductoModel>(`${this.apiUrl}/${id}`);
+  }
+
+  activar(id: number): Observable<ProductoModel> {
+    return this.http.post<ProductoModel>(`${this.apiUrl}/${id}/activar`, {});
   }
 }

@@ -99,14 +99,18 @@ describe('servicio-ui', () => {
     expect(accionNuevaFalla('EN_REPARACION')?.destino).toBe('REQUIERE_APROBACION_ADICIONAL');
     expect(accionNuevaFalla('ESPERA_REPUESTO')).toBeNull();
     expect(accionPrincipalDesde('EN_DIAGNOSTICO')?.destino).toBe('DIAGNOSTICADO');
-    expect(accionPrincipalDesde('EN_DIAGNOSTICO')?.boton).toBe('Ir al diagnóstico');
+    expect(accionPrincipalDesde('EN_DIAGNOSTICO')?.boton).toBe('Registrar diagnóstico');
     expect(accionPrincipalDesde('DIAGNOSTICADO')?.destino).toBe('COTIZADO');
     expect(accionPrincipalDesde('DIAGNOSTICADO')?.boton).toBe('Preparar cotización');
     expect(accionPrincipalDesde('COTIZADO')?.destino).toBe('PENDIENTE_APROBACION');
     expect(accionPrincipalDesde('COTIZADO')?.boton).toBe('Presentar cotización');
     expect(accionPrincipalDesde('PENDIENTE_APROBACION')?.destino).toBe('APROBADO');
-    expect(accionPrincipalDesde('PENDIENTE_APROBACION')?.boton).toBe('Aprobar cotización');
-    expect(accionPrincipalDesde('REQUIERE_APROBACION_ADICIONAL')?.boton).toBe('Ampliar cotización');
+    expect(accionPrincipalDesde('PENDIENTE_APROBACION')?.boton).toBe(
+      'Registrar respuesta del cliente'
+    );
+    expect(accionPrincipalDesde('REQUIERE_APROBACION_ADICIONAL')?.boton).toBe(
+      'Preparar cotización adicional'
+    );
     expect(accionPrincipalDesde('APROBADO')?.destino).toBe('EN_REPARACION');
     expect(accionPrincipalDesde('EN_REPARACION')?.destino).toBe('LISTO');
     expect(accionPrincipalDesde('LISTO')?.destino).toBe('ENTREGADO');
@@ -165,25 +169,27 @@ describe('servicio-ui', () => {
   });
 
   it('personaliza próxima acción con repuestos pendientes', () => {
-    expect(textoProximaAccion('RECEPCIONADO')).toBe('Iniciar diagnóstico');
-    expect(textoProximaAccion('EN_DIAGNOSTICO')).toBe('Completar ficha técnica');
-    expect(textoProximaAccion('DIAGNOSTICADO')).toBe('Preparar cotización inicial.');
-    expect(textoProximaAccion('COTIZADO')).toBe('Presentar cotización al cliente.');
-    expect(textoProximaAccion('PENDIENTE_APROBACION')).toBe('Esperando aprobación del cliente.');
-    expect(textoProximaAccion('APROBADO')).toBe('Reparación autorizada.');
-    expect(textoProximaAccion('EN_REPARACION')).toBe('Continuar reparación');
+    expect(textoProximaAccion('RECEPCIONADO')).toBe('Iniciar el diagnóstico técnico.');
+    expect(textoProximaAccion('EN_DIAGNOSTICO')).toBe('Registrar el diagnóstico técnico.');
+    expect(textoProximaAccion('DIAGNOSTICADO')).toBe('Preparar la cotización inicial.');
+    expect(textoProximaAccion('COTIZADO')).toBe('Presentar la cotización al cliente.');
+    expect(textoProximaAccion('PENDIENTE_APROBACION')).toBe(
+      'Registrar la respuesta del cliente (aprobar o rechazar).'
+    );
+    expect(textoProximaAccion('APROBADO')).toBe('Iniciar la reparación.');
+    expect(textoProximaAccion('EN_REPARACION')).toBe(
+      'Completar el trabajo y marcar la orden como lista.'
+    );
     expect(textoProximaAccion('EN_REPARACION', { pendingRepuestos: 2 })).toContain(
       '2 repuestos pendientes'
     );
-    expect(textoProximaAccion('ESPERA_REPUESTO')).toBe('Resolver repuestos pendientes');
+    expect(textoProximaAccion('ESPERA_REPUESTO')).toContain('continuar la reparación');
     expect(textoProximaAccion('ESPERA_REPUESTO', { pendingRepuestos: 1 })).toContain(
       'Queda 1 pendiente'
     );
-    expect(textoProximaAccion('REQUIERE_APROBACION_ADICIONAL')).toContain(
-      'ampliación de cotización'
-    );
-    expect(textoProximaAccion('LISTO')).toBe('El equipo está listo para entrega.');
-    expect(textoProximaAccion('ENTREGADO')).toBe('Orden entregada.');
+    expect(textoProximaAccion('REQUIERE_APROBACION_ADICIONAL')).toContain('cotización adicional');
+    expect(textoProximaAccion('LISTO')).toBe('Gestionar la entrega al cliente.');
+    expect(textoProximaAccion('ENTREGADO')).toContain('No hay acciones pendientes');
   });
 
   it('conoce estados de planificación de repuestos', () => {

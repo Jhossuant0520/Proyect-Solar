@@ -76,7 +76,7 @@ textarea {
   resize: vertical;
   border-radius: 8px;
   border: 1px solid rgba(79, 209, 255, 0.25);
-  background: rgba(15, 23, 42, 0.85);
+  background: var(--solvix-panel);
   color: var(--solvix-text, #fff);
   padding: 0.55rem 0.65rem;
   font: inherit;

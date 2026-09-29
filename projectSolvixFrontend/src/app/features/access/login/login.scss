@@ -78,7 +78,11 @@
   font-weight: 600;
   letter-spacing: 0.02em;
   text-decoration: none;
-  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+  transition:
+    color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
 }
 
 .back-home svg {
@@ -263,8 +267,9 @@
 }
 
 .field input::placeholder {
-  color: rgba(61, 72, 78, 0.7);
+  color: var(--color-text-muted, var(--solvix-text-muted));
   letter-spacing: normal;
+  opacity: 0.95;
 }
 
 .field input:focus {
@@ -346,7 +351,10 @@
   text-transform: uppercase;
   cursor: pointer;
   box-shadow: 0 0 15px rgba(79, 209, 255, 0.3);
-  transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.15s ease;
+  transition:
+    background-color var(--motion-normal) var(--ease-standard),
+    box-shadow var(--motion-normal) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
 }
 
 .btn-login svg {

@@ -18,8 +18,20 @@ public final class ProductoSpecifications {
             BigDecimal precioMax,
             Integer stockMin,
             Boolean activo) {
+        return conFiltros(null, marca, categoriaId, precioMin, precioMax, stockMin, activo);
+    }
+
+    public static Specification<Producto> conFiltros(
+            String texto,
+            String marca,
+            Long categoriaId,
+            BigDecimal precioMin,
+            BigDecimal precioMax,
+            Integer stockMin,
+            Boolean activo) {
 
         return Specification.allOf(
+            textoContiene(texto),
             marcaContiene(marca),
             categoriaEs(categoriaId),
             precioDesde(precioMin),
@@ -27,6 +39,29 @@ public final class ProductoSpecifications {
             stockMayorQue(stockMin),
             activoEs(activo)
         );
+    }
+
+    /**
+     * Cada palabra del texto debe aparecer en nombre, marca o código de barras
+     * ("pantalla lenovo" encuentra "Pantalla LCD Lenovo X").
+     */
+    private static Specification<Producto> textoContiene(String texto) {
+        return (root, query, cb) -> {
+            if (texto == null || texto.isBlank()) {
+                return cb.conjunction();
+            }
+            String[] palabras = texto.trim().toLowerCase().split("\\s+");
+            jakarta.persistence.criteria.Predicate[] porPalabra =
+                new jakarta.persistence.criteria.Predicate[palabras.length];
+            for (int i = 0; i < palabras.length; i++) {
+                String patron = "%" + palabras[i] + "%";
+                porPalabra[i] = cb.or(
+                    cb.like(cb.lower(root.<String>get("nombre")), patron),
+                    cb.like(cb.lower(root.<String>get("marca")), patron),
+                    cb.like(cb.lower(cb.coalesce(root.<String>get("codigoBarras"), "")), patron));
+            }
+            return cb.and(porPalabra);
+        };
     }
 
     private static Specification<Producto> marcaContiene(String marca) {

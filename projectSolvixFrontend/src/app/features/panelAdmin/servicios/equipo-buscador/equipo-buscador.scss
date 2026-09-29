@@ -1,0 +1,144 @@
+.buscador {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, var(--solvix-border));
+  background: var(--color-surface-2, var(--solvix-surface-low));
+}
+
+.search .material-symbols-outlined {
+  color: var(--color-text-muted, var(--solvix-text-muted));
+  font-size: 1.1rem;
+}
+
+.search input {
+  flex: 1;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--color-text-primary, var(--solvix-text));
+  font: inherit;
+  outline: none;
+}
+
+.search input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.search:focus-within {
+  outline: 2px solid var(--color-focus, var(--solvix-primary));
+  outline-offset: 1px;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--color-text-muted, var(--solvix-text-muted));
+}
+
+.hint.error {
+  color: var(--color-danger, var(--solvix-error));
+}
+
+.hint.preview-label {
+  margin-top: 0.65rem;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  color: var(--color-text-muted, var(--solvix-text-muted));
+}
+
+.resultados {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+  max-height: 13rem;
+  overflow: auto;
+}
+
+.resultados button {
+  width: 100%;
+  display: grid;
+  gap: 0.1rem;
+  text-align: left;
+  padding: 0.55rem 0.65rem;
+  min-height: var(--solvix-touch-min, 44px);
+  border-radius: 8px;
+  border: 1px solid var(--color-border-subtle, var(--solvix-border-subtle));
+  background: var(--color-surface-1, var(--solvix-surface));
+  color: var(--color-text-primary, var(--solvix-text));
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard);
+}
+
+.resultados button:hover,
+.resultados button:focus-visible,
+.resultados button.is-active {
+  border-color: var(--color-border, var(--solvix-border));
+  background: var(--color-primary-soft, var(--solvix-primary-soft));
+}
+
+.resultados button:focus-visible {
+  outline: 2px solid var(--color-focus, var(--solvix-primary));
+  outline-offset: 1px;
+}
+
+.nombre {
+  font-size: 0.88rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--color-text-muted, var(--solvix-text-muted));
+}
+
+.elegido {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, var(--solvix-border));
+  background: var(--color-surface-1, var(--solvix-surface));
+  color: var(--color-text-primary, var(--solvix-text));
+}
+
+.elegido > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.cambiar {
+  border: 1px dashed var(--color-border, var(--solvix-border));
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-primary, var(--solvix-primary));
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.7rem;
+  min-height: 2.25rem;
+  cursor: pointer;
+}
+
+.cambiar:focus-visible {
+  outline: 2px solid var(--color-focus, var(--solvix-primary));
+  outline-offset: 2px;
+}

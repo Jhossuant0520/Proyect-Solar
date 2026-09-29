@@ -17,6 +17,16 @@ export class ClienteService {
     return this.http.get<ClienteResponseDTO[]>(this.apiUrl, { params });
   }
 
+  /** Búsqueda acotada en servidor (nombre, documento, teléfono, correo). Tope 50. */
+  buscar(texto: string, limite = 10, soloActivos = true): Observable<ClienteResponseDTO[]> {
+    let params = new HttpParams()
+      .set('limite', String(limite))
+      .set('soloActivos', String(soloActivos));
+    const q = texto.trim();
+    if (q) params = params.set('q', q);
+    return this.http.get<ClienteResponseDTO[]>(this.apiUrl, { params });
+  }
+
   obtenerPorId(id: number): Observable<ClienteResponseDTO> {
     return this.http.get<ClienteResponseDTO>(`${this.apiUrl}/${id}`);
   }

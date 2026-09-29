@@ -2,8 +2,8 @@
 ## Módulo de Productos
 
 **Proyecto:** `projectSolvixFrontend`  
-**Estado documentado:** CRUD + detalle + ajuste de costo + movimientos  
-**Fecha de documentación:** 2026-09-11
+**Estado documentado:** CRUD + detalle + ajuste de costo + movimientos + **BLOQUE A** (precio sugerido / listado sin costo)  
+**Fecha de documentación:** 2026-09-11 (actualizado 2026-09-27 — ver `BLOQUE_A_PRECIO_SUGERIDO_COSTO.md`)
 
 ---
 

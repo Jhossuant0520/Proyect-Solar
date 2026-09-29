@@ -18,10 +18,11 @@
   flex-wrap: wrap;
   gap: 0.6rem;
   align-items: center;
-  background: rgba(15, 23, 42, 0.8);
+  background: var(--solvix-panel);
   border: 1px solid var(--solvix-border);
-  border-radius: var(--solvix-radius);
+  border-radius: var(--solvix-radius-card, var(--solvix-radius));
   padding: 0.85rem;
+  box-shadow: var(--solvix-shadow-sm, none);
 }
 
 .search {
@@ -43,10 +44,10 @@
   background: var(--solvix-surface-low);
   border: 1px solid var(--solvix-border-subtle);
   color: var(--solvix-text);
-  border-radius: 0.125rem;
+  border-radius: 0.5rem;
   padding: 0.5rem 0.7rem;
-  font-family: var(--solvix-font-mono);
-  font-size: 0.78rem;
+  font-family: var(--solvix-font);
+  font-size: 0.8rem;
 }
 
 .search input {
@@ -62,17 +63,18 @@
   background: transparent;
   border: 0;
   color: var(--solvix-primary);
-  font-family: var(--solvix-font-mono);
+  font-family: var(--solvix-font);
   font-size: 0.72rem;
   text-decoration: underline;
   cursor: pointer;
 }
 
 .table-panel {
-  background: rgba(15, 23, 42, 0.8);
+  background: var(--solvix-panel);
   border: 1px solid var(--solvix-border);
-  border-radius: var(--solvix-radius);
+  border-radius: var(--solvix-radius-card, var(--solvix-radius));
   overflow: hidden;
+  box-shadow: var(--solvix-shadow-sm, none);
 }
 
 .table-wrap {
@@ -95,10 +97,12 @@
 
 .prod-table th {
   color: var(--solvix-text-muted);
-  font-family: var(--solvix-font-mono);
+  font-family: var(--solvix-font);
   font-size: 0.68rem;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  background: var(--solvix-surface-low);
 }
 
 .prod-table td {
@@ -111,7 +115,7 @@
 }
 
 .prod-table tbody tr:hover {
-  background: rgba(46, 52, 71, 0.35);
+  background: var(--solvix-row-hover);
 }
 
 .name-btn {

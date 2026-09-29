@@ -1,33 +1,33 @@
 <div class="cotizacion-form-dialog">
   <header class="dlg-head">
-    <p class="kicker">Cotización de servicio</p>
-    <h2>{{ titulo }}</h2>
-    <p>
-      @if (esAdicional) {
-        Amplía el alcance autorizado. El total oficial lo confirma el servidor al guardar.
-      } @else {
-        Define el alcance económico. El total oficial lo confirma el servidor al guardar.
-      }
-    </p>
+    <div class="head-main">
+      <p class="kicker">Cotización de servicio</p>
+      <h2>{{ titulo }}</h2>
+    </div>
     <div class="tipo-pill" aria-label="Tipo de cotización">
       <span class="pill-label">Tipo</span>
-      <span class="pill-value">{{ esAdicional ? 'Adicional' : data.modo === 'editar' ? (data.cotizacion?.tipo === 'ADICIONAL' ? 'Adicional' : 'Inicial') : 'Inicial' }}</span>
+      <span class="pill-value">{{ tipoCotizacionLabel }}</span>
     </div>
   </header>
+
+  @if (estabaPresentada) {
+    <p class="aviso" role="note">
+      Esta cotización ya fue presentada. Al guardar vuelve a borrador (mismo número);
+      preséntala de nuevo para generar el documento actualizado.
+    </p>
+  }
 
   <form class="dlg-form" [formGroup]="form" (ngSubmit)="guardar()">
     @if (esAdicional) {
       <section class="sec">
-        <h3>Motivo de ampliación</h3>
-        <label>
-          <span class="label-row">Descripción <span class="req">requerido</span></span>
-          <textarea
-            formControlName="motivoAmpliacion"
-            rows="2"
-            maxlength="500"
-            placeholder="Qué situación nueva justifica la ampliación"
-          ></textarea>
-        </label>
+        <h3>Motivo de ampliación <span class="req">requerido</span></h3>
+        <textarea
+          formControlName="motivoAmpliacion"
+          rows="2"
+          maxlength="500"
+          placeholder="Qué situación nueva justifica la ampliación"
+          aria-label="Motivo de ampliación"
+        ></textarea>
       </section>
     }
 
@@ -35,106 +35,175 @@
       <div class="sec-head">
         <h3>Líneas de cotización</h3>
         <div class="lineas-actions">
-          <solvix-button family="tech" rank="tertiary" type="button" (click)="agregarLinea('MANO_OBRA')">
+          <solvix-button family="tech" rank="secondary" type="button" icon="inventory_2"
+            [disabled]="editorAbierto" (click)="nuevaLinea('REPUESTO')">
+            Repuesto
+          </solvix-button>
+          <solvix-button family="tech" rank="tertiary" type="button" icon="build"
+            [disabled]="editorAbierto" (click)="nuevaLinea('MANO_OBRA')">
             Mano de obra
           </solvix-button>
-          <solvix-button family="tech" rank="tertiary" type="button" (click)="agregarLinea('OTRO')">
-            Otro concepto
+          <solvix-button family="tech" rank="tertiary" type="button" icon="add"
+            [disabled]="editorAbierto" (click)="nuevaLinea('OTRO')">
+            Otro
           </solvix-button>
         </div>
       </div>
 
-      @if (!cargandoRepuestos && repuestos.length) {
-        <div class="repuestos-box">
-          <p class="hint-inline">Repuestos planificados de la orden</p>
-          <ul>
-            @for (r of repuestos; track r.id) {
-              <li>
-                <span>{{ r.productoNombre }} · planif. {{ r.cantidadPlanificada }}</span>
-                <solvix-button
-                  family="tech"
-                  rank="tertiary"
-                  type="button"
-                  (click)="agregarDesdeRepuesto(r)"
-                >
-                  Agregar
-                </solvix-button>
-              </li>
-            }
-          </ul>
+      @if (!cargandoRepuestos && repuestosDisponibles.length && !editorAbierto) {
+        <div class="planificados">
+          <span class="hint-inline">Repuestos planificados en la orden:</span>
+          @for (r of repuestosDisponibles; track r.id) {
+            <button type="button" class="chip" (click)="agregarDesdeRepuesto(r)">
+              <span class="material-symbols-outlined" aria-hidden="true">add</span>
+              {{ r.productoNombre }} · {{ r.cantidadPlanificada }}
+            </button>
+          }
         </div>
       }
 
-      <div formArrayName="detalles" class="lineas">
-        @for (linea of detalles.controls; track $index; let i = $index) {
-          <div class="linea" [formGroupName]="i">
-            <div class="linea-top">
-              <span class="tipo-tag" [attr.data-tipo]="linea.get('tipo')?.value">
-                {{ labelTipo(linea.get('tipo')?.value) }}
+      @if (detalles.length === 0 && !editorAbierto) {
+        <p class="vacio">Aún no hay líneas. Agrega un repuesto, mano de obra u otro concepto.</p>
+      }
+
+      @if (detalles.length) {
+        <div class="tabla" role="table" aria-label="Líneas de cotización">
+          <div class="fila cabecera" role="row">
+            <span role="columnheader">Concepto</span>
+            <span role="columnheader" class="num">Cant.</span>
+            <span role="columnheader" class="num">Precio unit.</span>
+            <span role="columnheader" class="num">Subtotal</span>
+            <span role="columnheader" class="acciones-col"><span class="sr-only">Acciones</span></span>
+          </div>
+          @for (linea of detalles.controls; track linea; let i = $index) {
+            <div class="fila" role="row" [class.en-edicion]="editorIndex === i"
+              [class.con-error]="lineaInvalida(i)">
+              <span class="concepto" role="cell">
+                <span class="tipo-tag" [attr.data-tipo]="linea.get('tipo')?.value">
+                  {{ labelTipo(linea.get('tipo')?.value) }}
+                </span>
+                <span class="concepto-texto">
+                  <strong>{{ conceptoLinea(i) }}</strong>
+                  @if (productoLinea(i); as prod) {
+                    <small>{{ prod }}</small>
+                  }
+                  @if (lineaInvalida(i); as problema) {
+                    <small class="problema">{{ problema }}</small>
+                  }
+                </span>
               </span>
-              <div class="linea-subtotal solvix-mono">
-                {{ money(subtotalLinea(i)) }}
-              </div>
-              <solvix-button family="tech" rank="danger" type="button" (click)="quitarLinea(i)">
-                Quitar
-              </solvix-button>
+              <span class="num solvix-mono" role="cell">{{ linea.get('cantidad')?.value }}</span>
+              <span class="num solvix-mono" role="cell">{{ money(linea.get('precioUnitario')?.value) }}</span>
+              <span class="num solvix-mono subtotal" role="cell">{{ money(subtotalLinea(i)) }}</span>
+              <span class="acciones-col" role="cell">
+                <button type="button" class="icon-btn" [disabled]="editorAbierto"
+                  (click)="editarLinea(i)" [attr.aria-label]="'Editar línea ' + (i + 1)" title="Editar">
+                  <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                </button>
+                <button type="button" class="icon-btn danger" (click)="quitarLinea(i)"
+                  [attr.aria-label]="'Eliminar línea ' + (i + 1)" title="Eliminar">
+                  <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                </button>
+              </span>
             </div>
-            <label class="concepto">
-              Concepto
-              <input
-                formControlName="descripcion"
-                maxlength="255"
-                [placeholder]="placeholderConcepto(linea.get('tipo')?.value)"
+          }
+        </div>
+      }
+
+      @if (editorAbierto) {
+        <div class="editor" [formGroup]="editor" role="group" aria-label="Editor de línea">
+          <div class="editor-head">
+            <span class="tipo-tag" [attr.data-tipo]="editorTipo">{{ labelTipo(editorTipo) }}</span>
+            <strong>{{ editorIndex === -1 ? 'Nueva línea' : 'Editar línea ' + ((editorIndex ?? 0) + 1) }}</strong>
+          </div>
+
+          @if (editorTipo === 'REPUESTO') {
+            @if (editor.get('productoId')?.value != null) {
+              <div class="producto-sel">
+                <div>
+                  <p class="producto-nombre">{{ editor.get('productoNombre')?.value }}</p>
+                  @if (editorReferencia) {
+                    <p class="hint-inline">
+                      Stock {{ editorReferencia.stock ?? 0 }}
+                      · Precio actual {{ money(editorReferencia.precioSugerido) }}
+                    </p>
+                  }
+                </div>
+                <button type="button" class="link-btn" (click)="quitarProductoEditor()">
+                  Cambiar producto
+                </button>
+              </div>
+            } @else {
+              <app-producto-buscador
+                (seleccionado)="seleccionarProducto($event)"
+                (crearSolicitado)="crearProducto($event)"
               />
+            }
+          }
+
+          <label class="campo-concepto">
+            <span>
+              Concepto
+              @if (editorTipo === 'REPUESTO') {
+                <span class="opt">opcional · por defecto el nombre del producto</span>
+              } @else {
+                <span class="req">requerido</span>
+              }
+            </span>
+            <input formControlName="descripcion" maxlength="255"
+              [placeholder]="placeholderConcepto(editorTipo)" />
+          </label>
+
+          <div class="editor-nums">
+            <label>
+              <span>Cantidad</span>
+              <input type="number" formControlName="cantidad" min="0.01" step="1" />
             </label>
-            <div class="linea-nums">
-              <label>
-                Cantidad
-                <input type="number" formControlName="cantidad" min="0.01" step="0.01" />
-              </label>
-              <label>
-                Precio unitario
-                <input type="number" formControlName="precioUnitario" min="0" step="0.01" />
-              </label>
+            <label>
+              <span>Precio unitario (cotizado)</span>
+              <input type="number" formControlName="precioUnitario" min="0" step="100" />
+            </label>
+            <div class="editor-subtotal">
+              <span>Subtotal</span>
+              <strong class="solvix-mono">{{ money(editorSubtotal) }}</strong>
             </div>
           </div>
-        }
-      </div>
+
+          @if (editorError) {
+            <p class="form-error" role="alert">{{ editorError }}</p>
+          }
+
+          <div class="editor-actions">
+            <solvix-button family="tech" rank="tertiary" type="button" (click)="cerrarEditor()">
+              Descartar
+            </solvix-button>
+            <solvix-button family="tech" rank="secondary" type="button" icon="check" (click)="aplicarEditor()">
+              {{ editorIndex === -1 ? 'Agregar línea' : 'Aplicar cambios' }}
+            </solvix-button>
+          </div>
+        </div>
+      }
     </section>
 
     <section class="sec">
       <h3>Observaciones <span class="opt">opcional</span></h3>
-      <label>
-        <textarea
-          formControlName="observaciones"
-          rows="2"
-          maxlength="1000"
-          placeholder="Notas visibles en la cotización"
-        ></textarea>
-      </label>
+      <textarea
+        formControlName="observaciones"
+        rows="2"
+        maxlength="1000"
+        placeholder="Notas visibles en la cotización"
+        aria-label="Observaciones"
+      ></textarea>
     </section>
 
     <section class="sec resumen" aria-label="Resumen económico">
-      <h3>Resumen económico</h3>
-      <dl class="preview">
-        <div>
-          <dt>Repuestos</dt>
-          <dd class="solvix-mono">{{ money(previewRepuestos) }}</dd>
-        </div>
-        <div>
-          <dt>Mano de obra</dt>
-          <dd class="solvix-mono">{{ money(previewManoObra) }}</dd>
-        </div>
-        <div>
-          <dt>Otros</dt>
-          <dd class="solvix-mono">{{ money(previewOtros) }}</dd>
-        </div>
-        <div class="total">
-          <dt>Total estimado</dt>
-          <dd class="solvix-mono">{{ money(previewTotal) }}</dd>
-        </div>
+      <dl class="totales">
+        <div><dt>Repuestos</dt><dd class="solvix-mono">{{ money(subtotalRepuestos) }}</dd></div>
+        <div><dt>Mano de obra</dt><dd class="solvix-mono">{{ money(subtotalManoObra) }}</dd></div>
+        <div><dt>Otros</dt><dd class="solvix-mono">{{ money(subtotalOtros) }}</dd></div>
+        <div class="total"><dt>Total</dt><dd class="solvix-mono">{{ money(total) }}</dd></div>
       </dl>
-      <p class="hint-inline">El total definitivo lo confirma el servidor después de guardar.</p>
+      <p class="hint-inline">Los precios quedan congelados en la cotización; no cambian si luego cambia el producto.</p>
     </section>
 
     @if (error) {
@@ -145,7 +214,7 @@
       <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
         Cancelar
       </solvix-button>
-      <solvix-button family="tech" rank="primary" type="submit" [disabled]="enviando">
+      <solvix-button family="tech" rank="primary" type="submit" icon="save" [disabled]="enviando">
         {{ enviando ? 'Guardando…' : 'Guardar cotización' }}
       </solvix-button>
     </div>

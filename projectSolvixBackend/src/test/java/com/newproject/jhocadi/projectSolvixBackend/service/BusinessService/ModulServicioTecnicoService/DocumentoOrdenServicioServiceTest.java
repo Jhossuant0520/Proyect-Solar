@@ -85,6 +85,62 @@ class DocumentoOrdenServicioServiceTest extends ComercialTestSupport {
     }
 
     @Test
+    @DisplayName("D.2: comprobante de recepción incorpora firma del cliente (HTML)")
+    void comprobanteRecepcionIncluyeFirma() throws Exception {
+        OrdenServicioResponseDTO orden = crearOrdenBasica();
+        DocumentoOrdenServicioResponseDTO doc = documentoService.listar(orden.getId()).stream()
+            .filter(d -> d.getTipoDocumento() == TipoDocumentoOrdenServicio.COMPROBANTE_RECEPCION)
+            .findFirst()
+            .orElseGet(() -> documentoService.generarComprobanteRecepcion(orden.getId(), USUARIO_TEST));
+
+        DocumentoPdfDescargaDTO descarga = documentoService.descargarPdf(orden.getId(), doc.getId());
+        byte[] bytes = descarga.getResource().getInputStream().readAllBytes();
+        assertThat(bytes.length).isGreaterThan(500);
+        assertThat(bytes[0]).isEqualTo((byte) '%');
+
+        // Regenerar produce nueva versión válida (firma recepción, no entrega)
+        DocumentoOrdenServicioResponseDTO regenerado =
+            documentoService.regenerar(orden.getId(), doc.getId(), USUARIO_TEST);
+        assertThat(regenerado.getVersion()).isGreaterThan(doc.getVersion());
+        byte[] regenBytes = documentoService.descargarPdf(orden.getId(), regenerado.getId())
+            .getResource().getInputStream().readAllBytes();
+        assertThat(regenBytes[0]).isEqualTo((byte) '%');
+        assertThat(regenBytes.length).isGreaterThan(100);
+
+        try (org.apache.pdfbox.pdmodel.PDDocument pd =
+                 org.apache.pdfbox.pdmodel.PDDocument.load(regenBytes)) {
+            String texto = new org.apache.pdfbox.text.PDFTextStripper().getText(pd);
+            assertThat(texto).doesNotContainIgnoringCase(
+                "El cliente confirma la recepción del equipo por parte del taller");
+            assertThat(texto).doesNotContainIgnoringCase("para diagnóstico, revisión o servicio");
+            assertThat(texto).containsIgnoringCase("Firma del cliente");
+        }
+    }
+
+    @Test
+    @DisplayName("D.2: acta de entrega no usa firma de recepción")
+    void actaEntregaUsaFirmaEntregaNoRecepcion() throws Exception {
+        OrdenServicioResponseDTO orden = avanzarHastaListo();
+        RegistrarEntregaRequestDTO entrega = new RegistrarEntregaRequestDTO();
+        entrega.setClienteConfirmo(true);
+        entrega.setNombreCliente("Receptor Entrega");
+        entrega.setDocumentoCliente("999");
+        entrega.setFirmaBase64(FirmaRecepcionTestSupport.PNG_1X1_DATA_URL);
+        ordenServicioService.registrarEntrega(orden.getId(), entrega, USUARIO_TEST);
+
+        DocumentoOrdenServicioResponseDTO acta = documentoService.listar(orden.getId()).stream()
+            .filter(d -> d.getTipoDocumento() == TipoDocumentoOrdenServicio.ACTA_ENTREGA)
+            .findFirst()
+            .orElseGet(() -> documentoService.generarActaEntrega(orden.getId(), USUARIO_TEST));
+
+        assertThat(acta.getTipoDocumento()).isEqualTo(TipoDocumentoOrdenServicio.ACTA_ENTREGA);
+        byte[] bytes = documentoService.descargarPdf(orden.getId(), acta.getId())
+            .getResource().getInputStream().readAllBytes();
+        assertThat(bytes[0]).isEqualTo((byte) '%');
+        assertThat(bytes.length).isGreaterThan(100);
+    }
+
+    @Test
     @DisplayName("POST comprobante-recepcion es idempotente: no duplica si ya existe")
     void generarComprobanteRecepcionNoDuplica() {
         OrdenServicioResponseDTO orden = crearOrdenBasica();
@@ -194,6 +250,43 @@ class DocumentoOrdenServicioServiceTest extends ComercialTestSupport {
     }
 
     @Test
+    @DisplayName("re-presentar la misma cotización editada genera nueva versión de PDF, no nueva cotización")
+    void representarCotizacionGeneraNuevaVersionPdf() {
+        OrdenServicioResponseDTO orden = avanzarADiagnosticado(crearOrdenBasica());
+        CotizacionServicioRequestDTO body = new CotizacionServicioRequestDTO();
+        DetalleCotizacionServicioRequestDTO mo = new DetalleCotizacionServicioRequestDTO();
+        mo.setTipo(TipoDetalleCotizacionServicio.MANO_OBRA);
+        mo.setDescripcion("Reparación");
+        mo.setCantidad(new BigDecimal("1"));
+        mo.setPrecioUnitario(new BigDecimal("300000"));
+        body.setDetalles(List.of(mo));
+
+        CotizacionServicioResponseDTO cot = cotizacionService.crearInicial(orden.getId(), body, USUARIO_TEST);
+        assertThat(documentosCotizacion(orden.getId())).isEmpty();
+
+        cotizacionService.presentar(orden.getId(), cot.getId(), USUARIO_TEST);
+        assertThat(documentosCotizacion(orden.getId())).hasSize(1);
+
+        mo.setPrecioUnitario(new BigDecimal("420000"));
+        cotizacionService.actualizar(orden.getId(), cot.getId(), body, USUARIO_TEST);
+        assertThat(documentosCotizacion(orden.getId())).hasSize(1);
+
+        cotizacionService.presentar(orden.getId(), cot.getId(), USUARIO_TEST);
+        List<DocumentoOrdenServicioResponseDTO> docs = documentosCotizacion(orden.getId());
+        assertThat(docs).hasSize(2);
+        assertThat(docs).allMatch(d -> cot.getId().equals(d.getCotizacionId()));
+        assertThat(docs).extracting(DocumentoOrdenServicioResponseDTO::getVersion)
+            .containsExactlyInAnyOrder(1, 2);
+        assertThat(cotizacionService.listar(orden.getId())).hasSize(1);
+    }
+
+    private List<DocumentoOrdenServicioResponseDTO> documentosCotizacion(Long ordenId) {
+        return documentoService.listar(ordenId).stream()
+            .filter(d -> d.getTipoDocumento() == TipoDocumentoOrdenServicio.COTIZACION)
+            .toList();
+    }
+
+    @Test
     @DisplayName("acta de entrega requiere firma; regenerar crea nueva versión")
     void actaEntregaYRegenerar() {
         OrdenServicioResponseDTO orden = avanzarHastaListo();
@@ -222,10 +315,89 @@ class DocumentoOrdenServicioServiceTest extends ComercialTestSupport {
 
         ConsultaOtPublicaDTO pub = documentoService.consultaOtPublica(entity.getTokenConsulta());
         assertThat(pub.getNumero()).isEqualTo(orden.getNumero());
+        assertThat(pub.getEstadoCodigo()).isEqualTo("RECEPCIONADO");
         assertThat(pub.getEstadoPublico()).isNotBlank();
+        assertThat(pub.getEtapaPublica()).isEqualTo("RECEPCION");
+        assertThat(pub.getEtapaPublicaNumero()).isEqualTo(1);
+        assertThat(pub.getTotalEtapasPublicas()).isEqualTo(5);
         assertThat(pub.getEquipoTipo()).isNotBlank();
         assertThat(pub.getMensaje()).contains("taller");
         assertThat(pub.getFechaRecepcion()).isNotNull();
+        assertThat(pub.isCotizacionDisponible()).isFalse();
+        assertThat(pub.getContacto()).isNotNull();
+        assertThat(pub.getContacto().getEmpresa()).isNotBlank();
+    }
+
+    @Test
+    @DisplayName("C.2: consulta pública expone estadoCodigo y etapa, no depende de etiqueta")
+    void consultaPublicaExponeCodigoYEtapa() {
+        OrdenServicioResponseDTO orden = avanzarADiagnosticado(crearOrdenBasica());
+        OrdenServicio entity = ordenServicioRepository.findById(orden.getId()).orElseThrow();
+
+        ConsultaOtPublicaDTO pub = documentoService.consultaOtPublica(entity.getTokenConsulta());
+        assertThat(pub.getEstadoCodigo()).isEqualTo("DIAGNOSTICADO");
+        assertThat(pub.getEtapaPublica()).isEqualTo("DIAGNOSTICO");
+        assertThat(pub.getEtapaPublicaNumero()).isEqualTo(2);
+        assertThat(pub.isCotizacionDisponible()).isFalse();
+        assertThatThrownBy(() -> documentoService.consultaCotizacionOtPublica(entity.getTokenConsulta()))
+            .isInstanceOf(ResponseStatusException.class)
+            .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
+            .isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("C.2: PENDIENTE_APROBACION permite ver cotización real sin ids internos")
+    void consultaPublicaCotizacionSoloPendienteAprobacion() {
+        OrdenServicioResponseDTO orden = avanzarADiagnosticado(crearOrdenBasica());
+        CotizacionServicioResponseDTO cot =
+            cotizacionService.crearInicial(orden.getId(), requestManoObra(), USUARIO_TEST);
+        cotizacionService.presentar(orden.getId(), cot.getId(), USUARIO_TEST);
+
+        OrdenServicio entity = ordenServicioRepository.findById(orden.getId()).orElseThrow();
+        assertThat(entity.getEstado()).isEqualTo(EstadoOrdenServicio.PENDIENTE_APROBACION);
+
+        ConsultaOtPublicaDTO pub = documentoService.consultaOtPublica(entity.getTokenConsulta());
+        assertThat(pub.getEstadoCodigo()).isEqualTo("PENDIENTE_APROBACION");
+        assertThat(pub.getEtapaPublica()).isEqualTo("COTIZACION");
+        assertThat(pub.isCotizacionDisponible()).isTrue();
+        assertThat(pub.getContacto().getTelefono()).isNotNull();
+
+        var cotPub = documentoService.consultaCotizacionOtPublica(entity.getTokenConsulta());
+        assertThat(cotPub.getNumero()).isEqualTo(cot.getNumero());
+        assertThat(cotPub.getTotal()).isEqualByComparingTo("80000.00");
+        assertThat(cotPub.getLineas()).hasSize(1);
+        assertThat(cotPub.getLineas().get(0).getDescripcion()).containsIgnoringCase("Mano");
+        assertThat(cotPub.getLineas().get(0).getCantidad()).isEqualByComparingTo("1");
+        assertThat(cotPub.getLineas().get(0).getPrecioUnitario()).isEqualByComparingTo("80000.00");
+        // No hay ids en el DTO público
+        assertThat(cotPub.getClass().getDeclaredFields())
+            .extracting(f -> f.getName())
+            .doesNotContain("id", "ordenServicioId", "productoId", "usuarioCreacion");
+    }
+
+    @Test
+    @DisplayName("C.2: alias del equipo (referenciaInterna) se expone como dato del cliente")
+    void consultaPublicaExponeAliasEquipo() {
+        Cliente cliente = crearCliente("Cliente Alias " + System.nanoTime());
+        EquipoRequestDTO eqReq = new EquipoRequestDTO();
+        eqReq.setClienteId(cliente.getId());
+        eqReq.setTipoEquipo(TipoEquipo.PORTATIL);
+        eqReq.setMarca("Dell");
+        eqReq.setModelo("XPS");
+        eqReq.setReferenciaInterna("Laptop Contabilidad");
+        EquipoResponseDTO equipo = equipoService.crear(eqReq);
+
+        OrdenServicioRequestDTO request = new OrdenServicioRequestDTO();
+        request.setClienteId(cliente.getId());
+        request.setEquipoId(equipo.getId());
+        request.setProblemaReportado("No enciende");
+        FirmaRecepcionTestSupport.aplicarFirmaRecepcion(request);
+        OrdenServicioResponseDTO orden = ordenServicioService.crear(request, USUARIO_TEST);
+        OrdenServicio entity = ordenServicioRepository.findById(orden.getId()).orElseThrow();
+
+        ConsultaOtPublicaDTO pub = documentoService.consultaOtPublica(entity.getTokenConsulta());
+        assertThat(pub.getReferenciaInterna()).isEqualTo("Laptop Contabilidad");
+        assertThat(pub.getEquipoMarca()).isEqualTo("Dell");
     }
 
     @Test
@@ -266,6 +438,7 @@ class DocumentoOrdenServicioServiceTest extends ComercialTestSupport {
         request.setClienteId(cliente.getId());
         request.setEquipoId(equipo.getId());
         request.setProblemaReportado("Pantalla rota");
+        FirmaRecepcionTestSupport.aplicarFirmaRecepcion(request);
 
         OrdenServicioResponseDTO orden = ordenServicioService.crear(request, USUARIO_TEST);
         assertThat(orden.getId()).isNotNull();
@@ -313,6 +486,7 @@ class DocumentoOrdenServicioServiceTest extends ComercialTestSupport {
         request.setClienteId(cliente.getId());
         request.setEquipoId(equipo.getId());
         request.setProblemaReportado("No enciende");
+        FirmaRecepcionTestSupport.aplicarFirmaRecepcion(request);
         return ordenServicioService.crear(request, USUARIO_TEST);
     }
 

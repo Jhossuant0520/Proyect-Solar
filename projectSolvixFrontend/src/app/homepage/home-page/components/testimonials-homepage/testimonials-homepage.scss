@@ -1,11 +1,4 @@
 :host {
-  --solvix-bg: #020617;
-  --solvix-surface: #0f172a;
-  --solvix-primary: #4fd1ff;
-  --solvix-secondary: #38bdf8;
-  --solvix-neon: #00e5ff;
-  --solvix-text: #ffffff;
-  --solvix-text-muted: #94a3b8;
   display: block;
 }
 
@@ -22,10 +15,10 @@
   position: absolute;
   inset: 0;
   background-image:
-    radial-gradient(circle at 20% 30%, rgba(79, 209, 255, 0.14) 1px, transparent 1px),
-    radial-gradient(circle at 80% 70%, rgba(0, 229, 255, 0.12) 1px, transparent 1px);
+    radial-gradient(circle at 20% 30%, var(--solvix-home-glow-mid) 1px, transparent 1px),
+    radial-gradient(circle at 80% 70%, var(--solvix-home-glow-soft) 1px, transparent 1px);
   background-size: 120px 120px;
-  opacity: 0.25;
+  opacity: 0.35;
   animation: moveBg 20s linear infinite;
 }
 
@@ -73,12 +66,10 @@
   padding: 32px;
   border-radius: 20px;
   text-align: left;
-  background: rgba(15, 23, 42, 0.55);
+  background: var(--solvix-home-card-bg);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(79, 209, 255, 0.2);
-  box-shadow:
-    inset 0 0 20px rgba(79, 209, 255, 0.05),
-    0 0 30px rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--solvix-home-card-border);
+  box-shadow: var(--solvix-home-card-shadow);
   overflow: hidden;
   animation: fadeInUp 0.7s ease both, floatCard 6s ease-in-out infinite;
   transition: transform 0.4s ease, border-color 0.3s ease, box-shadow 0.4s ease;
@@ -91,22 +82,23 @@
   left: 0;
   width: 100%;
   height: 1px;
-  background: linear-gradient(to right, transparent, rgba(79, 209, 255, 0.5), transparent);
+  background: linear-gradient(
+    to right,
+    transparent,
+    color-mix(in srgb, var(--solvix-primary) 50%, transparent),
+    transparent
+  );
 }
 
 .card.highlight {
   transform: scale(1.05);
   border-color: var(--solvix-neon);
-  box-shadow:
-    0 0 25px rgba(0, 229, 255, 0.35),
-    0 10px 50px rgba(0, 0, 0, 0.8);
+  box-shadow: var(--solvix-home-card-hover-shadow);
 }
 
 .card:hover {
-  border-color: rgba(79, 209, 255, 0.5);
-  box-shadow:
-    0 0 28px rgba(79, 209, 255, 0.3),
-    inset 0 0 18px rgba(79, 209, 255, 0.08);
+  border-color: color-mix(in srgb, var(--solvix-primary) 55%, var(--solvix-home-card-border));
+  box-shadow: var(--solvix-home-card-hover-shadow);
 }
 
 .quote-mark {
@@ -137,7 +129,7 @@
   align-items: center;
   gap: 16px;
   padding-top: 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--solvix-home-separator);
 }
 
 .card-footer .avatar {
@@ -148,8 +140,8 @@
   height: 48px;
   border-radius: 50%;
   flex-shrink: 0;
-  border: 1px solid rgba(79, 209, 255, 0.35);
-  background: rgba(79, 209, 255, 0.12);
+  border: 1px solid color-mix(in srgb, var(--solvix-primary) 40%, var(--solvix-home-card-border));
+  background: var(--solvix-primary-soft);
   color: var(--solvix-primary);
   font-size: 13px;
   font-weight: 700;
@@ -172,22 +164,22 @@
 }
 
 .card.is-primary .avatar {
-  border-color: rgba(79, 209, 255, 0.45);
-  background: rgba(79, 209, 255, 0.14);
+  border-color: color-mix(in srgb, var(--solvix-primary) 50%, var(--solvix-home-card-border));
+  background: var(--solvix-primary-soft);
   color: var(--solvix-primary);
 }
 .card.is-primary .role { color: var(--solvix-primary); }
 
 .card.is-neon .avatar {
-  border-color: rgba(0, 229, 255, 0.45);
-  background: rgba(0, 229, 255, 0.14);
+  border-color: color-mix(in srgb, var(--solvix-neon) 50%, var(--solvix-home-card-border));
+  background: var(--solvix-info-soft);
   color: var(--solvix-neon);
 }
 .card.is-neon .role { color: var(--solvix-neon); }
 
 .card.is-secondary .avatar {
-  border-color: rgba(56, 189, 248, 0.45);
-  background: rgba(56, 189, 248, 0.14);
+  border-color: color-mix(in srgb, var(--solvix-secondary) 50%, var(--solvix-home-card-border));
+  background: var(--solvix-info-soft);
   color: var(--solvix-secondary);
 }
 .card.is-secondary .role { color: var(--solvix-secondary); }

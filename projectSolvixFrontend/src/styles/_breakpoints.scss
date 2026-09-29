@@ -1,22 +1,74 @@
-// Tamaños comunes de dispositivos
-$breakpoint-xs: 480px;  // móviles pequeños
-$breakpoint-sm: 768px;  // tablets
-$breakpoint-md: 1024px; // laptops
-$breakpoint-lg: 1280px; // escritorio grande
+// Breakpoints SOLVIX (C.6) — sistema único.
+// XS / mobile:     < 768px
+// Tablet:          768px – 1023px
+// Laptop:          1024px – 1279px
+// Desktop:         >= 1280px
 
-// Mixin para usar más fácil
-@mixin responsive($size) {
-  @if $size == xs {
-    @media (max-width: $breakpoint-xs) { @content; }
-  } @else if $size == sm {
-    @media (max-width: $breakpoint-sm) { @content; }
-  } @else if $size == md {
-    @media (max-width: $breakpoint-md) { @content; }
-  } @else if $size == lg {
-    @media (max-width: $breakpoint-lg) { @content; }
+$breakpoint-mobile-max: 767px;
+$breakpoint-tablet-min: 768px;
+$breakpoint-tablet-max: 1023px;
+$breakpoint-laptop-min: 1024px;
+$breakpoint-laptop-max: 1279px;
+$breakpoint-desktop-min: 1280px;
+
+// Compatibilidad con nombres legacy usados en el proyecto.
+$breakpoint-xs: 480px;
+$breakpoint-sm: 768px;
+$breakpoint-md: 1024px;
+$breakpoint-lg: 1280px;
+
+@mixin mobile {
+  @media (max-width: $breakpoint-mobile-max) {
+    @content;
   }
 }
 
-@mixin mobile {
-  @media (max-width: $breakpoint-sm) { @content; }
+@mixin tablet {
+  @media (min-width: $breakpoint-tablet-min) and (max-width: $breakpoint-tablet-max) {
+    @content;
+  }
+}
+
+@mixin tablet-up {
+  @media (min-width: $breakpoint-tablet-min) {
+    @content;
+  }
+}
+
+@mixin laptop {
+  @media (min-width: $breakpoint-laptop-min) and (max-width: $breakpoint-laptop-max) {
+    @content;
+  }
+}
+
+@mixin below-desktop {
+  @media (max-width: $breakpoint-laptop-max) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: $breakpoint-desktop-min) {
+    @content;
+  }
+}
+
+@mixin responsive($size) {
+  @if $size == xs {
+    @media (max-width: $breakpoint-xs) {
+      @content;
+    }
+  } @else if $size == sm {
+    @include mobile {
+      @content;
+    }
+  } @else if $size == md {
+    @media (max-width: $breakpoint-tablet-max) {
+      @content;
+    }
+  } @else if $size == lg {
+    @include below-desktop {
+      @content;
+    }
+  }
 }

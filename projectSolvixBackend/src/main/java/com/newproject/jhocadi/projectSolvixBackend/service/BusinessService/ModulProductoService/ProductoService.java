@@ -3,12 +3,16 @@ package com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.Modu
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulProductoDtos.ProductoListadoResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulProductoDtos.ProductoRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulProductoDtos.ProductoResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.exception.BusinessException;
@@ -32,6 +36,8 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class ProductoService {
+
+    private static final int LIMITE_MAXIMO_BUSQUEDA = 50;
 
     private final ProductoRepository productoRepository;
     private final CategoriaProductoRepository categoriaRepository;
@@ -58,7 +64,26 @@ public class ProductoService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductoResponseDTO> listar(
+    public List<ProductoListadoResponseDTO> listar(
+            String marca,
+            Long categoriaId,
+            BigDecimal precioMin,
+            BigDecimal precioMax,
+            Integer stockMin,
+            Boolean activo) {
+        return listar(null, null, marca, categoriaId, precioMin, precioMax, stockMin, activo);
+    }
+
+    /**
+     * Listado/búsqueda administrativa sin costo.
+     * Con {@code limite} devuelve solo los primeros N (orden por nombre): pensado para
+     * selectores con búsqueda que no deben descargar el catálogo completo.
+     * El costo se consulta en {@link #obtenerPorId(Long)}.
+     */
+    @Transactional(readOnly = true)
+    public List<ProductoListadoResponseDTO> listar(
+            String texto,
+            Integer limite,
             String marca,
             Long categoriaId,
             BigDecimal precioMin,
@@ -67,11 +92,18 @@ public class ProductoService {
             Boolean activo) {
 
         validarRangoPrecio(precioMin, precioMax);
+        Specification<Producto> spec = ProductoSpecifications.conFiltros(
+            texto, marca, categoriaId, precioMin, precioMax, stockMin, activo);
 
-        return productoRepository
-            .findAll(ProductoSpecifications.conFiltros(marca, categoriaId, precioMin, precioMax, stockMin, activo))
-            .stream()
-            .map(ProductoResponseDTO::fromEntity)
+        List<Producto> productos = limite == null
+            ? productoRepository.findAll(spec)
+            : productoRepository.findAll(
+                spec,
+                PageRequest.of(0, Math.min(Math.max(limite, 1), LIMITE_MAXIMO_BUSQUEDA), Sort.by("nombre")))
+                .getContent();
+
+        return productos.stream()
+            .map(ProductoListadoResponseDTO::fromEntity)
             .toList();
     }
 
@@ -134,6 +166,14 @@ public class ProductoService {
     public ProductoResponseDTO desactivar(Long id) {
         Producto producto = buscarOFallar(id);
         producto.setActivo(false);
+        return ProductoResponseDTO.fromEntity(productoRepository.save(producto));
+    }
+
+    /** Vuelve a habilitar un producto desactivado para nuevas ventas y cotizaciones. */
+    @Transactional
+    public ProductoResponseDTO activar(Long id) {
+        Producto producto = buscarOFallar(id);
+        producto.setActivo(true);
         return ProductoResponseDTO.fromEntity(productoRepository.save(producto));
     }
 

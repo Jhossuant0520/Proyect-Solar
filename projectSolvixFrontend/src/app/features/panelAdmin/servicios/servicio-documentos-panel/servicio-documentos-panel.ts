@@ -6,10 +6,11 @@ import {
   SimpleChanges
 } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { SolvixFeedbackService } from '../../../../shared/services/solvix-feedback.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subscription, of, timer } from 'rxjs';
-import { catchError, filter, map, switchMap, take } from 'rxjs/operators';
+import { catchError, filter, finalize, map, switchMap, take } from 'rxjs/operators';
 import { SolvixBadgeComponent } from '../../../../shared/components/solvix-badge/solvix-badge';
 import { SolvixButtonComponent } from '../../../../shared/components/solvix-button/solvix-button';
 import { SolvixEmptyStateComponent } from '../../../../shared/components/solvix-empty-state/solvix-empty-state';
@@ -25,7 +26,7 @@ import {
   labelTipoDocumento
 } from '../../../../core/models/documento-orden-servicio.models';
 import { EstadoOrdenServicio } from '../../../../core/models/orden-servicio.models';
-import { showSolvixSnack } from '../../../../shared/utils/solvix-snack';
+import { SolvixActionRevealService } from '../../../../shared/services/solvix-action-reveal.service';
 import { formatFechaOrden, mensajeErrorServicio } from '../servicio-ui';
 
 type PanelEstado =
@@ -47,6 +48,16 @@ const ORDEN_TIPOS: TipoDocumentoOrdenServicio[] = [
   'COTIZACION',
   'ACTA_ENTREGA'
 ];
+
+export interface SlotDocumentalUi {
+  tipo: TipoDocumentoOrdenServicio;
+  faseLabel: string;
+  titulo: string;
+  pendienteMsg: string;
+  vigente: DocumentoOrdenServicioResponseDTO | null;
+  anteriores: DocumentoOrdenServicioResponseDTO[];
+  relevante: boolean;
+}
 
 /** Polling RxJS: cada 800 ms, máx. 10 ticks ≈ 8 s. */
 const POLL_INTERVAL_MS = 800;
@@ -75,17 +86,24 @@ export class ServicioDocumentosPanelComponent implements OnChanges, OnDestroy {
   @Input() canManage = true;
   /** OT recién creada: asegurar + polling automático. */
   @Input() esperarComprobante = false;
+  /** Tipo documental a destacar según la etapa (C.3). */
+  @Input() documentoRelevante: TipoDocumentoOrdenServicio | null = null;
+  @Input() layoutCompacto = false;
 
   documentos: DocumentoOrdenServicioResponseDTO[] = [];
   state: PanelEstado = 'loading';
   errorMessage = 'No pudimos cargar los documentos.';
   accionEnCurso = false;
+  /** Tipo de acción documental en curso (para [loading] del solvix-button). */
+  accionTipo: 'comprobante' | 'regenerar' | 'generar-esperado' | 'ver' | 'descargar' | null = null;
   docAccionId: number | null = null;
   /** Id del documento recién generado en esta sesión (badge NUEVO + scroll). */
   docRecienGeneradoId: number | null = null;
   /** Banner tras presentación / entrega mientras afterCommit genera el PDF. */
   esperandoDoc: EsperarDocumentoOpts | null = null;
   esperandoDocTimeout = false;
+  /** Tipos con versiones anteriores expandidas. */
+  versionesAbiertas = new Set<TipoDocumentoOrdenServicio>();
 
   readonly fecha = formatFechaOrden;
   readonly labelTipo = labelTipoDocumento;
@@ -98,7 +116,8 @@ export class ServicioDocumentosPanelComponent implements OnChanges, OnDestroy {
   constructor(
     private documentoService: DocumentoOrdenServicioService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private feedback: SolvixFeedbackService,
+    private actionReveal: SolvixActionRevealService
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -133,6 +152,34 @@ export class ServicioDocumentosPanelComponent implements OnChanges, OnDestroy {
     })).filter(g => g.items.length > 0);
   }
 
+  /** Tres espacios documentales siempre visibles (trazabilidad de la OT). */
+  get slotsDocumentales(): SlotDocumentalUi[] {
+    return ORDEN_TIPOS.map(tipo => {
+      const items = this.documentos
+        .filter(d => d.tipoDocumento === tipo)
+        .slice()
+        .sort((a, b) => (b.version ?? 0) - (a.version ?? 0));
+      return {
+        tipo,
+        faseLabel: this.chipTipo(tipo),
+        titulo: this.labelTipo(tipo),
+        pendienteMsg: this.mensajePendiente(tipo),
+        vigente: items[0] ?? null,
+        anteriores: items.slice(1),
+        relevante: this.documentoRelevante === tipo
+      };
+    });
+  }
+
+  get mostrarSlots(): boolean {
+    return (
+      this.state === 'ready' ||
+      this.state === 'empty' ||
+      this.state === 'comprobante_pendiente' ||
+      this.state === 'comprobante_timeout'
+    );
+  }
+
   get comprobante(): DocumentoOrdenServicioResponseDTO | null {
     return this.documentos.find(d => d.tipoDocumento === 'COMPROBANTE_RECEPCION') ?? null;
   }
@@ -144,8 +191,71 @@ export class ServicioDocumentosPanelComponent implements OnChanges, OnDestroy {
     return this.labelTipo(this.esperandoDoc.tipo);
   }
 
+  /** Texto corto para la tarjeta de espera / botón manual. */
+  labelGenerandoEsperado(): string {
+    if (!this.esperandoDoc) {
+      return 'Generando documento…';
+    }
+    switch (this.esperandoDoc.tipo) {
+      case 'COTIZACION':
+        return 'Generando PDF…';
+      case 'ACTA_ENTREGA':
+        return 'Generando acta de entrega…';
+      case 'COMPROBANTE_RECEPCION':
+        return 'Generando comprobante…';
+      default:
+        return 'Generando documento…';
+    }
+  }
+
+  esAccionLoading(tipo: 'comprobante' | 'regenerar' | 'generar-esperado', docId?: number): boolean {
+    if (!this.accionEnCurso || this.accionTipo !== tipo) {
+      return false;
+    }
+    if (docId != null) {
+      return this.docAccionId === docId;
+    }
+    return true;
+  }
+
   esRecienGenerado(doc: DocumentoOrdenServicioResponseDTO): boolean {
     return this.docRecienGeneradoId != null && doc.id === this.docRecienGeneradoId;
+  }
+
+  versionesAbiertasDe(tipo: TipoDocumentoOrdenServicio): boolean {
+    return this.versionesAbiertas.has(tipo);
+  }
+
+  toggleVersiones(tipo: TipoDocumentoOrdenServicio): void {
+    if (this.versionesAbiertas.has(tipo)) {
+      this.versionesAbiertas.delete(tipo);
+    } else {
+      this.versionesAbiertas.add(tipo);
+    }
+    this.versionesAbiertas = new Set(this.versionesAbiertas);
+  }
+
+  mensajePendiente(tipo: TipoDocumentoOrdenServicio): string {
+    switch (tipo) {
+      case 'COMPROBANTE_RECEPCION':
+        return 'Se genera al crear la orden.';
+      case 'COTIZACION':
+        return 'Se genera al presentar la cotización.';
+      case 'ACTA_ENTREGA':
+        return 'Se genera al registrar la entrega.';
+      default:
+        return 'Pendiente de generación.';
+    }
+  }
+
+  tituloDoc(doc: DocumentoOrdenServicioResponseDTO): string {
+    if (doc.tipoDocumento === 'COTIZACION') {
+      if (doc.cotizacionNumero?.trim()) {
+        return `Cotización ${doc.cotizacionNumero.trim()}`;
+      }
+      return 'Cotización';
+    }
+    return this.labelTipo(doc.tipoDocumento, doc.tipoDocumentoEtiqueta);
   }
 
   /** Clase CSS por tipo documental (acento visual). */
@@ -229,17 +339,21 @@ export class ServicioDocumentosPanelComponent implements OnChanges, OnDestroy {
       return;
     }
     this.accionEnCurso = true;
+    this.accionTipo = 'comprobante';
     this.state = 'esperando_comprobante';
-    this.documentoService.asegurarComprobanteRecepcion(this.ordenId).subscribe({
-      next: res => {
+    this.documentoService.asegurarComprobanteRecepcion(this.ordenId).pipe(
+      finalize(() => {
         this.accionEnCurso = false;
+        this.accionTipo = null;
+      })
+    ).subscribe({
+      next: res => {
         if (this.destroyed) {
           return;
         }
         this.aplicarAsegurar(res, true);
       },
       error: err => {
-        this.accionEnCurso = false;
         if (this.destroyed) {
           return;
         }
@@ -247,11 +361,7 @@ export class ServicioDocumentosPanelComponent implements OnChanges, OnDestroy {
           this.esperarComprobante || this.state === 'comprobante_timeout'
             ? 'comprobante_timeout'
             : 'comprobante_pendiente';
-        showSolvixSnack(
-          this.snackBar,
-          mensajeErrorServicio(err, 'El comprobante de recepción no pudo generarse.'),
-          'error'
-        );
+        this.feedback.error(mensajeErrorServicio(err, 'El comprobante de recepción no pudo generarse.'));
       }
     });
   }
@@ -266,21 +376,20 @@ export class ServicioDocumentosPanelComponent implements OnChanges, OnDestroy {
       return;
     }
     this.accionEnCurso = true;
+    this.accionTipo = 'ver';
     this.docAccionId = doc.id;
-    this.documentoService.descargarPdf(this.ordenId, doc.id, 'inline').subscribe({
-      next: blob => {
+    this.documentoService.descargarPdf(this.ordenId, doc.id, 'inline').pipe(
+      finalize(() => {
         this.accionEnCurso = false;
+        this.accionTipo = null;
         this.docAccionId = null;
+      })
+    ).subscribe({
+      next: blob => {
         this.documentoService.abrirPdfEnNuevaPestana(blob);
       },
       error: err => {
-        this.accionEnCurso = false;
-        this.docAccionId = null;
-        showSolvixSnack(
-          this.snackBar,
-          mensajeErrorServicio(err, 'No pudimos abrir el PDF.'),
-          'error'
-        );
+        this.feedback.error(mensajeErrorServicio(err, 'No pudimos abrir el PDF.'));
       }
     });
   }
@@ -290,21 +399,20 @@ export class ServicioDocumentosPanelComponent implements OnChanges, OnDestroy {
       return;
     }
     this.accionEnCurso = true;
+    this.accionTipo = 'descargar';
     this.docAccionId = doc.id;
-    this.documentoService.descargarPdf(this.ordenId, doc.id, 'attachment').subscribe({
-      next: blob => {
+    this.documentoService.descargarPdf(this.ordenId, doc.id, 'attachment').pipe(
+      finalize(() => {
         this.accionEnCurso = false;
+        this.accionTipo = null;
         this.docAccionId = null;
+      })
+    ).subscribe({
+      next: blob => {
         this.documentoService.descargarBlobComoArchivo(blob, this.nombreAmigable(doc));
       },
       error: err => {
-        this.accionEnCurso = false;
-        this.docAccionId = null;
-        showSolvixSnack(
-          this.snackBar,
-          mensajeErrorServicio(err, 'No pudimos descargar el PDF.'),
-          'error'
-        );
+        this.feedback.error(mensajeErrorServicio(err, 'No pudimos descargar el PDF.'));
       }
     });
   }
@@ -324,26 +432,25 @@ export class ServicioDocumentosPanelComponent implements OnChanges, OnDestroy {
       }
     });
     ref.afterClosed().subscribe(ok => {
-      if (!ok) {
+      if (!ok || this.accionEnCurso) {
         return;
       }
       this.accionEnCurso = true;
+      this.accionTipo = 'regenerar';
       this.docAccionId = doc.id;
-      this.documentoService.regenerar(this.ordenId, doc.id).subscribe({
-        next: () => {
+      this.documentoService.regenerar(this.ordenId, doc.id).pipe(
+        finalize(() => {
           this.accionEnCurso = false;
+          this.accionTipo = null;
           this.docAccionId = null;
-          showSolvixSnack(this.snackBar, 'Documento regenerado.', 'success');
+        })
+      ).subscribe({
+        next: () => {
+          this.feedback.success('Documento regenerado.');
           this.cargarListaSimple();
         },
         error: err => {
-          this.accionEnCurso = false;
-          this.docAccionId = null;
-          showSolvixSnack(
-            this.snackBar,
-            mensajeErrorServicio(err, 'No pudimos regenerar el documento.'),
-            'error'
-          );
+          this.feedback.error(mensajeErrorServicio(err, 'No pudimos regenerar el documento.'));
         }
       });
     });
@@ -516,6 +623,7 @@ export class ServicioDocumentosPanelComponent implements OnChanges, OnDestroy {
     }
     const opts = this.esperandoDoc;
     this.accionEnCurso = true;
+    this.accionTipo = 'generar-esperado';
     this.esperandoDocTimeout = false;
 
     const req$ =
@@ -527,13 +635,18 @@ export class ServicioDocumentosPanelComponent implements OnChanges, OnDestroy {
 
     if (!req$) {
       this.accionEnCurso = false;
+      this.accionTipo = null;
       this.reintentarGeneracion();
       return;
     }
 
-    req$.subscribe({
-      next: doc => {
+    req$.pipe(
+      finalize(() => {
         this.accionEnCurso = false;
+        this.accionTipo = null;
+      })
+    ).subscribe({
+      next: doc => {
         if (this.destroyed) {
           return;
         }
@@ -545,13 +658,8 @@ export class ServicioDocumentosPanelComponent implements OnChanges, OnDestroy {
         this.destacarDocumentoReciente(doc);
       },
       error: err => {
-        this.accionEnCurso = false;
         this.esperandoDocTimeout = true;
-        showSolvixSnack(
-          this.snackBar,
-          mensajeErrorServicio(err, 'No pudimos generar el documento.'),
-          'error'
-        );
+        this.feedback.error(mensajeErrorServicio(err, 'No pudimos generar el documento.'));
       }
     });
   }
@@ -575,14 +683,14 @@ export class ServicioDocumentosPanelComponent implements OnChanges, OnDestroy {
   }
 
   /**
-   * Feedback temporal + badge NUEVO + scroll al documento recién aparecido.
+   * Feedback temporal + badge NUEVO + reveal condicional del documento recién aparecido.
    * Solo se invoca cuando el flujo espera un documento nuevo (no al recargar OT antigua).
    */
   private destacarDocumentoReciente(doc: DocumentoOrdenServicioResponseDTO): void {
     this.docRecienGeneradoId = doc.id;
-    showSolvixSnack(this.snackBar, this.mensajeGenerado(doc.tipoDocumento), 'success');
-    queueMicrotask(() => {
-      requestAnimationFrame(() => this.scrollADocumento(doc.id));
+    this.actionReveal.success({
+      message: this.mensajeGenerado(doc.tipoDocumento),
+      target: `[data-doc-id="${doc.id}"]`
     });
   }
 
@@ -597,14 +705,6 @@ export class ServicioDocumentosPanelComponent implements OnChanges, OnDestroy {
       default:
         return 'Documento generado correctamente.';
     }
-  }
-
-  private scrollADocumento(docId: number): void {
-    if (this.destroyed) {
-      return;
-    }
-    const el = document.querySelector(`[data-doc-id="${docId}"]`);
-    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   private resolverEstadoSinFlujoAutomatico(): void {
@@ -629,11 +729,7 @@ export class ServicioDocumentosPanelComponent implements OnChanges, OnDestroy {
         this.state = this.documentos.length === 0 ? 'empty' : 'ready';
       },
       error: err => {
-        showSolvixSnack(
-          this.snackBar,
-          mensajeErrorServicio(err, 'No pudimos cargar los documentos.'),
-          'error'
-        );
+        this.feedback.error(mensajeErrorServicio(err, 'No pudimos cargar los documentos.'));
       }
     });
   }

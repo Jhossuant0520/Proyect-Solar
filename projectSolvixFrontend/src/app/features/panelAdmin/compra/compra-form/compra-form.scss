@@ -11,7 +11,7 @@
 }
 
 .panel {
-  background: rgba(15, 23, 42, 0.8);
+  background: var(--solvix-panel);
   border: 1px solid var(--solvix-border);
   border-radius: var(--solvix-radius);
   padding: 1.2rem 1.3rem;
@@ -35,8 +35,9 @@ label {
   flex-direction: column;
   gap: 0.3rem;
   color: var(--solvix-text-muted);
-  font-family: var(--solvix-font-mono);
+  font-family: var(--solvix-font);
   font-size: 0.68rem;
+  font-weight: 600;
   text-transform: uppercase;
 }
 
@@ -163,8 +164,9 @@ textarea:focus {
 
 dt {
   color: var(--solvix-text-muted);
-  font-family: var(--solvix-font-mono);
+  font-family: var(--solvix-font);
   font-size: 0.68rem;
+  font-weight: 600;
   text-transform: uppercase;
 }
 

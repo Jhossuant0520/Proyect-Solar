@@ -83,17 +83,7 @@
 
     <h3 class="sep">Firma</h3>
     <p class="aviso">Firma con mouse, dedo o stylus dentro del área.</p>
-    <div class="firma-wrap">
-      <canvas #firmaCanvas class="firma-canvas" aria-label="Área de firma del cliente"></canvas>
-    </div>
-    <div class="firma-bar">
-      <span class="firma-status" [class.ok]="firmado">
-        {{ firmado ? 'Firma capturada' : 'Sin firma' }}
-      </span>
-      <solvix-button family="tech" rank="tertiary" type="button" (click)="limpiarFirma()">
-        Limpiar firma
-      </solvix-button>
-    </div>
+    <solvix-signature-pad (firmadoChange)="onFirmadoChange($event)" />
 
     <h3 class="sep">Observaciones de entrega <span class="opt">opcional</span></h3>
     <label class="obs-label">

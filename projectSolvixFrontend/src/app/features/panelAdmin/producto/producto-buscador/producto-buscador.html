@@ -1,0 +1,111 @@
+<div class="buscador">
+  <label class="search">
+    <span class="material-symbols-outlined" aria-hidden="true">search</span>
+    <input
+      type="search"
+      [value]="texto"
+      (input)="onInput($event)"
+      (keydown)="onKeydown($event)"
+      (focus)="onFocus()"
+      autocomplete="off"
+      spellcheck="false"
+      [placeholder]="placeholder"
+      aria-label="Buscar producto"
+      role="combobox"
+      aria-autocomplete="list"
+      [attr.aria-expanded]="listaAbierta"
+    />
+  </label>
+
+  @switch (estado) {
+    @case ('idle') {
+      <p class="hint">Escribe al menos {{ minCaracteres }} caracteres para buscar.</p>
+    }
+    @case ('buscando') {
+      <p class="hint" role="status">Buscando productos…</p>
+    }
+    @case ('error') {
+      <p class="hint error" role="alert">No fue posible cargar los resultados.</p>
+    }
+    @case ('vacio') {
+      <p class="hint">No encontramos resultados para “{{ texto.trim() }}”.</p>
+    }
+    @case ('preview') {
+      <p class="hint preview-label" id="producto-preview-label">{{ etiquetaPreview }}</p>
+      <ul class="resultados" role="listbox" aria-labelledby="producto-preview-label">
+        @for (p of resultados; track p.id; let i = $index) {
+          <li>
+            <button
+              type="button"
+              role="option"
+              [class.is-active]="i === indiceActivo"
+              [class.is-agregado]="esAgregado(p)"
+              [attr.aria-selected]="i === indiceActivo"
+              (click)="elegir(p)"
+            >
+              <span class="nombre">
+                {{ p.nombre }}
+                @if (esAgregado(p)) {
+                  <span class="badge-agregado">✓ Agregado</span>
+                }
+              </span>
+              <span class="meta">
+                {{ p.marca }}
+                · Stock {{ p.stockActual ?? 0 }}
+                @if (p.codigoBarras) {
+                  · {{ p.codigoBarras }}
+                }
+              </span>
+              <span class="precio solvix-mono">{{ money(p.precioVentaActual) }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+      <p class="hint">Escribe {{ minCaracteres }} caracteres para buscar</p>
+    }
+    @case ('resultados') {
+      <ul class="resultados" role="listbox" aria-label="Resultados de productos">
+        @for (p of resultados; track p.id; let i = $index) {
+          <li>
+            <button
+              type="button"
+              role="option"
+              [class.is-active]="i === indiceActivo"
+              [class.is-agregado]="esAgregado(p)"
+              [attr.aria-selected]="i === indiceActivo"
+              (click)="elegir(p)"
+            >
+              <span class="nombre">
+                {{ p.nombre }}
+                @if (esAgregado(p)) {
+                  <span class="badge-agregado">✓ Agregado</span>
+                }
+              </span>
+              <span class="meta">
+                {{ p.marca }}
+                · Stock {{ p.stockActual ?? 0 }}
+                @if (p.codigoBarras) {
+                  · {{ p.codigoBarras }}
+                }
+              </span>
+              <span class="precio solvix-mono">{{ money(p.precioVentaActual) }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+      @if (alcanzoLimite) {
+        <p class="hint">Mostrando los primeros {{ limite }}. Escribe más para afinar.</p>
+      }
+    }
+  }
+
+  @if (permitirCrear && (estado === 'vacio' || estado === 'resultados')) {
+    <button type="button" class="crear" (click)="crear()">
+      <span class="material-symbols-outlined" aria-hidden="true">add</span>
+      Crear producto
+      @if (texto.trim()) {
+        “{{ texto.trim() }}”
+      }
+    </button>
+  }
+</div>

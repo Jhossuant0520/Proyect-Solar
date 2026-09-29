@@ -9,6 +9,7 @@ import {
   VentaRequestDTO,
   VentaResponseDTO
 } from '../models/venta.models';
+import { PaginaResponseDTO } from '../models/cotizacion-comercial.models';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -20,8 +21,12 @@ export class VentaService {
 
   constructor(private http: HttpClient) {}
 
-  listar(filtros?: VentaFiltros): Observable<VentaResponseDTO[]> {
+  listar(filtros?: VentaFiltros): Observable<PaginaResponseDTO<VentaResponseDTO>> {
     let params = new HttpParams();
+    const q = filtros?.q?.trim();
+    if (q) {
+      params = params.set('q', q);
+    }
     if (filtros?.clienteId != null) {
       params = params.set('clienteId', String(filtros.clienteId));
     }
@@ -34,7 +39,9 @@ export class VentaService {
     if (filtros?.hasta) {
       params = params.set('hasta', filtros.hasta);
     }
-    return this.http.get<VentaResponseDTO[]>(this.ventasUrl, { params });
+    params = params.set('pagina', String(filtros?.pagina ?? 0));
+    params = params.set('tamano', String(filtros?.tamano ?? 20));
+    return this.http.get<PaginaResponseDTO<VentaResponseDTO>>(this.ventasUrl, { params });
   }
 
   obtenerPorId(id: number): Observable<VentaResponseDTO> {

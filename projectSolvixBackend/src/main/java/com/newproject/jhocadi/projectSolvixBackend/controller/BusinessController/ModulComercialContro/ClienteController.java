@@ -38,7 +38,12 @@ public class ClienteController {
 
     @GetMapping
     public ResponseEntity<List<ClienteResponseDTO>> listar(
-            @RequestParam(required = false, defaultValue = "false") Boolean soloActivos) {
+            @RequestParam(required = false, defaultValue = "false") Boolean soloActivos,
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Integer limite) {
+        if (limite != null || q != null) {
+            return ResponseEntity.ok(clienteService.buscar(q, limite, soloActivos));
+        }
         return ResponseEntity.ok(clienteService.listar(soloActivos));
     }
 

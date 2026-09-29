@@ -34,16 +34,49 @@ export interface AsegurarComprobanteRecepcionResponseDTO {
 }
 
 /** Consulta pública de OT por token QR (sin datos sensibles). */
+export interface ContactoTallerPublicoDTO {
+  empresa: string | null;
+  telefono: string | null;
+  whatsapp: string | null;
+  direccion: string | null;
+  sitioWeb: string | null;
+}
+
 export interface ConsultaOtPublicaDTO {
   numero: string;
+  /** Código real del estado. La UI resolve textos con él, nunca con estadoPublico. */
+  estadoCodigo: string | null;
   estadoPublico: string;
+  etapaPublica: string | null;
+  etapaPublicaNumero: number | null;
+  totalEtapasPublicas: number;
   equipoTipo: string | null;
   equipoMarca: string | null;
   equipoModelo: string | null;
+  /** Alias conocido por el cliente (ej. "Laptop Contabilidad"). */
   referenciaInterna: string | null;
   fechaRecepcion: string | number[] | null;
   fechaActualizacion: string | number[] | null;
+  cotizacionDisponible: boolean;
+  contacto: ContactoTallerPublicoDTO | null;
   mensaje: string | null;
+}
+
+/** Cotización de OT en solo lectura desde la consulta pública. */
+export interface ConsultaCotizacionOtPublicaDTO {
+  numero: string;
+  fecha: string | number[] | null;
+  lineas: ConsultaCotizacionOtLineaPublicaDTO[];
+  subtotal: number | string | null;
+  total: number | string | null;
+  observaciones: string | null;
+}
+
+export interface ConsultaCotizacionOtLineaPublicaDTO {
+  descripcion: string;
+  cantidad: number | string | null;
+  precioUnitario: number | string | null;
+  subtotal: number | string | null;
 }
 
 /** Consulta pública de documento por token (sin PDF). */

@@ -4,9 +4,9 @@
 
 .contact {
   padding: 128px 64px 96px;
-  background: #0c1324;
-  color: #dce1fb;
-  font-family: 'Inter', sans-serif;
+  background: var(--color-bg, var(--solvix-bg));
+  color: var(--color-text-secondary, var(--solvix-text-secondary));
+  font-family: var(--solvix-font, Inter, sans-serif);
 }
 
 .contact-main {
@@ -26,14 +26,14 @@
   line-height: 1.125;
   letter-spacing: -0.04em;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--color-text-primary, var(--solvix-text));
 }
 
 .contact-header p {
   margin: 0;
   font-size: 18px;
   line-height: 28px;
-  color: #cfe9ff;
+  color: var(--color-text-secondary, var(--solvix-text-secondary));
 }
 
 .contact-grid {
@@ -52,7 +52,7 @@
   max-width: 768px;
   height: 100%;
   border-radius: 9999px;
-  background: rgba(178, 231, 255, 0.05);
+  background: var(--solvix-home-glow-soft);
   filter: blur(120px);
   pointer-events: none;
 }
@@ -62,10 +62,11 @@
   overflow: hidden;
   padding: 32px;
   border-radius: 8px;
-  background: rgba(46, 52, 71, 0.4);
+  background: var(--solvix-home-card-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(178, 231, 255, 0.1);
+  border: 1px solid var(--solvix-home-card-border);
+  box-shadow: var(--solvix-home-card-shadow);
 }
 
 .glass-panel::before {
@@ -75,7 +76,12 @@
   left: 0;
   width: 100%;
   height: 1px;
-  background: linear-gradient(to right, transparent, rgba(178, 231, 255, 0.5), transparent);
+  background: linear-gradient(
+    to right,
+    transparent,
+    color-mix(in srgb, var(--solvix-primary) 50%, transparent),
+    transparent
+  );
 }
 
 .contact-col-left {
@@ -97,7 +103,7 @@
   flex-shrink: 0;
   width: 30px;
   height: 30px;
-  color: #b2e7ff;
+  color: var(--color-primary, var(--solvix-primary));
 }
 
 .icon-headset svg {
@@ -111,14 +117,14 @@
   line-height: 32px;
   letter-spacing: -0.01em;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--color-text-primary, var(--solvix-text));
 }
 
 .support-head p {
   margin: 0;
   font-size: 16px;
   line-height: 24px;
-  color: #cfe9ff;
+  color: var(--color-text-secondary, var(--solvix-text-secondary));
 }
 
 .info-list {
@@ -140,9 +146,9 @@
   width: 40px;
   height: 40px;
   border-radius: 2px;
-  background: #23293c;
-  border: 1px solid #3d484e;
-  color: #bcc8cf;
+  background: var(--color-surface-2, var(--solvix-surface-high));
+  border: 1px solid var(--color-border, var(--solvix-border-subtle));
+  color: var(--color-text-muted, var(--solvix-text-muted));
 }
 
 .info-icon svg {
@@ -157,7 +163,7 @@
   line-height: 16px;
   letter-spacing: 0.06em;
   font-weight: 500;
-  color: #cfe9ff;
+  color: var(--color-text-secondary, var(--solvix-text-secondary));
 }
 
 .info-row strong {
@@ -165,17 +171,17 @@
   line-height: 20px;
   letter-spacing: 0.05em;
   font-weight: 500;
-  color: #dce1fb;
+  color: var(--color-text-secondary, var(--solvix-text-secondary));
 }
 
 .whatsapp-panel {
   display: block;
   text-decoration: none;
-  background: rgba(46, 52, 71, 0.6);
-  border: 1px solid rgba(178, 231, 255, 0.3);
-  box-shadow: 0 0 20px rgba(79, 209, 255, 0.15);
+  background: var(--solvix-home-card-bg-solid);
+  border: 1px solid color-mix(in srgb, var(--solvix-primary) 35%, var(--solvix-home-card-border));
+  box-shadow: var(--solvix-home-card-shadow);
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .whatsapp-panel::after {
@@ -190,7 +196,8 @@
 }
 
 .whatsapp-panel:hover {
-  background: rgba(46, 52, 71, 0.8);
+  background: var(--solvix-surface-elevated);
+  box-shadow: var(--solvix-home-card-hover-shadow);
 }
 
 .wa-body {
@@ -230,14 +237,14 @@
   line-height: 32px;
   letter-spacing: -0.01em;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--color-text-primary, var(--solvix-text));
 }
 
 .wa-body p {
   margin: 0 0 24px;
   font-size: 16px;
   line-height: 24px;
-  color: #cfe9ff;
+  color: var(--color-text-secondary, var(--solvix-text-secondary));
 }
 
 .wa-button {
@@ -274,7 +281,12 @@
 }
 
 .form-panel::before {
-  background: linear-gradient(to right, transparent, rgba(178, 231, 255, 0.3), transparent);
+  background: linear-gradient(
+    to right,
+    transparent,
+    color-mix(in srgb, var(--solvix-primary) 35%, transparent),
+    transparent
+  );
 }
 
 .form-top {
@@ -283,7 +295,7 @@
   justify-content: space-between;
   margin-bottom: 32px;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--solvix-home-separator);
 }
 
 .form-top h3 {
@@ -297,14 +309,14 @@
   font-weight: 600;
   font-family: inherit;
   text-transform: none;
-  color: #b2e7ff;
+  color: var(--color-primary, var(--solvix-primary));
 }
 
 .form-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #b2e7ff;
+  background: var(--color-primary, var(--solvix-primary));
   animation: pulse 2s ease-in-out infinite;
 }
 
@@ -314,7 +326,7 @@
   letter-spacing: 0.08em;
   font-weight: 500;
   font-family: ui-monospace, 'JetBrains Mono', monospace;
-  color: #cfe9ff;
+  color: var(--color-text-secondary, var(--solvix-text-secondary));
   opacity: 0.85;
 }
 
@@ -340,16 +352,16 @@
   font-weight: 600;
   font-family: inherit;
   text-transform: none;
-  color: #ffffff;
+  color: var(--color-text-primary, var(--solvix-text));
 }
 
 .input-tech {
   width: 100%;
   padding: 12px 16px;
   border-radius: 2px;
-  border: 1px solid rgba(178, 231, 255, 0.2);
-  background: rgba(12, 19, 36, 0.8);
-  color: #dce1fb;
+  border: 1px solid var(--solvix-home-card-border);
+  background: var(--solvix-panel-inset);
+  color: var(--color-text-primary, var(--solvix-text));
   font-size: 14px;
   line-height: 20px;
   letter-spacing: 0.05em;
@@ -359,7 +371,8 @@
 }
 
 .input-tech::placeholder {
-  color: rgba(148, 163, 184, 0.3);
+  color: var(--solvix-text-muted);
+  opacity: 0.7;
 }
 
 textarea.input-tech {
@@ -374,8 +387,8 @@ textarea.input-tech {
 
 .input-tech:focus {
   outline: none;
-  border-color: #4fd1ff;
-  box-shadow: 0 0 10px rgba(79, 209, 255, 0.3);
+  border-color: var(--color-focus, var(--solvix-primary));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--solvix-primary) 22%, transparent);
 }
 
 .select-wrap {
@@ -395,7 +408,7 @@ textarea.input-tech {
   transform: translateY(-50%);
   width: 20px;
   height: 20px;
-  color: #bcc8cf;
+  color: var(--color-text-muted, var(--solvix-text-muted));
   pointer-events: none;
 }
 
@@ -411,7 +424,7 @@ textarea.input-tech {
   justify-content: space-between;
   gap: 24px;
   padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid var(--solvix-home-separator);
 }
 
 .privacy-check {
@@ -424,7 +437,7 @@ textarea.input-tech {
   font-size: 12px !important;
   line-height: 16px !important;
   font-weight: 500 !important;
-  color: #cfe9ff !important;
+  color: var(--color-text-secondary, var(--solvix-text-secondary)) !important;
 }
 
 .privacy-check input {
@@ -433,9 +446,9 @@ textarea.input-tech {
   margin-top: 2px;
   flex-shrink: 0;
   border-radius: 4px;
-  border: 1px solid #3d484e;
-  background: #23293c;
-  accent-color: #b2e7ff;
+  border: 1px solid var(--color-border, var(--solvix-border-subtle));
+  background: var(--color-surface-2, var(--solvix-surface-high));
+  accent-color: var(--color-primary, var(--solvix-primary));
 }
 
 .btn-transmit {
@@ -447,15 +460,15 @@ textarea.input-tech {
   padding: 12px 32px;
   border: none;
   border-radius: 2px;
-  background: #b2e7ff;
-  color: #003545;
+  background: var(--color-primary, var(--solvix-primary));
+  color: var(--solvix-on-primary);
   font-size: 14px;
   line-height: 20px;
   letter-spacing: 0.05em;
   font-weight: 700;
   font-family: ui-monospace, 'JetBrains Mono', monospace;
   cursor: pointer;
-  box-shadow: 0 0 12px rgba(79, 209, 255, 0.3);
+  box-shadow: var(--solvix-glow);
   transition: all 0.3s ease;
 }
 
@@ -466,7 +479,7 @@ textarea.input-tech {
 }
 
 .btn-transmit:hover {
-  box-shadow: 0 0 20px rgba(79, 209, 255, 0.5);
+  box-shadow: var(--solvix-home-card-hover-shadow);
 }
 
 .btn-transmit:hover svg {
@@ -475,7 +488,7 @@ textarea.input-tech {
 
 .form-sent {
   margin: 0;
-  color: #8aedff;
+  color: var(--solvix-neon);
   font-size: 16px;
 }
 

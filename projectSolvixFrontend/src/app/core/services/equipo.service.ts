@@ -23,6 +23,29 @@ export class EquipoService {
     return this.http.get<EquipoResponseDTO[]>(this.apiUrl, { params });
   }
 
+  /**
+   * Autocomplete: GET /equipos?q=&limite=&clienteId=&soloActivos=
+   * Nunca descarga el catálogo completo.
+   */
+  buscar(
+    q: string,
+    limite = 10,
+    clienteId?: number | null,
+    soloActivos = true
+  ): Observable<EquipoResponseDTO[]> {
+    let params = new HttpParams()
+      .set('limite', String(limite))
+      .set('soloActivos', String(soloActivos));
+    const texto = q?.trim();
+    if (texto) {
+      params = params.set('q', texto);
+    }
+    if (clienteId != null) {
+      params = params.set('clienteId', String(clienteId));
+    }
+    return this.http.get<EquipoResponseDTO[]>(this.apiUrl, { params });
+  }
+
   /** Encapsula GET /equipos?clienteId=&soloActivos=true. No es un endpoint nuevo. */
   listarPorCliente(clienteId: number, soloActivos = true): Observable<EquipoResponseDTO[]> {
     return this.listar({ clienteId, soloActivos });

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulComercialDtos.DevolucionVentaRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulComercialDtos.DevolucionVentaResponseDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulComercialDtos.PaginaResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulComercialDtos.VentaRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulComercialDtos.VentaResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.EstadoVenta;
@@ -70,12 +71,16 @@ public class VentaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<VentaResponseDTO>> listar(
+    public ResponseEntity<PaginaResponseDTO<VentaResponseDTO>> listar(
+            @RequestParam(required = false) String q,
             @RequestParam(required = false) Long clienteId,
             @RequestParam(required = false) EstadoVenta estado,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime desde,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime hasta) {
-        return ResponseEntity.ok(ventaService.listar(clienteId, estado, desde, hasta));
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime hasta,
+            @RequestParam(required = false, defaultValue = "0") Integer pagina,
+            @RequestParam(required = false, defaultValue = "20") Integer tamano) {
+        return ResponseEntity.ok(
+            ventaService.listar(q, clienteId, estado, desde, hasta, pagina, tamano));
     }
 
     @GetMapping("/{id}")

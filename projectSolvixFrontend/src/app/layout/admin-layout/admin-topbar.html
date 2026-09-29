@@ -24,9 +24,7 @@
     <button type="button" class="admin-topbar__icon" disabled aria-label="Notificaciones. Disponible más adelante.">
       <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
     </button>
-    <button type="button" class="admin-topbar__icon" disabled aria-label="Configuración. Disponible más adelante.">
-      <span class="material-symbols-outlined" aria-hidden="true">settings</span>
-    </button>
+    <solvix-theme-toggle />
     <a routerLink="/mi-cuenta" class="admin-topbar__user" [attr.aria-label]="'Cuenta de ' + userName">
       @if (fotoUrl) {
         <img class="admin-topbar__photo" [src]="fotoUrl" alt="" />

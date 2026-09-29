@@ -4,6 +4,7 @@ import { DocumentoOrdenServicioService } from '../../../core/services/documento-
 import { ConsultaDocumentoPublicoDTO } from '../../../core/models/documento-orden-servicio.models';
 import { SolvixLoadingStateComponent } from '../../../shared/components/solvix-loading-state/solvix-loading-state';
 import { SolvixErrorStateComponent } from '../../../shared/components/solvix-error-state/solvix-error-state';
+import { SolvixThemeToggleComponent } from '../../../shared/components/solvix-theme-toggle/solvix-theme-toggle';
 import { formatFechaOrden } from '../../panelAdmin/servicios/servicio-ui';
 import { labelTipoDocumento } from '../../../core/models/documento-orden-servicio.models';
 
@@ -12,7 +13,12 @@ type Estado = 'loading' | 'ready' | 'error' | 'sin-token';
 @Component({
   selector: 'app-consulta-documento-publica',
   standalone: true,
-  imports: [RouterLink, SolvixLoadingStateComponent, SolvixErrorStateComponent],
+  imports: [
+    RouterLink,
+    SolvixLoadingStateComponent,
+    SolvixErrorStateComponent,
+    SolvixThemeToggleComponent
+  ],
   templateUrl: './consulta-documento-publica.html',
   styleUrl: './consulta-documento-publica.scss'
 })

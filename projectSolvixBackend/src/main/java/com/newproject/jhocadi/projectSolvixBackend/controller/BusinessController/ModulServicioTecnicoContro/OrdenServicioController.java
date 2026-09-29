@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulComercialDtos.PaginaResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.CambiarEstadoOrdenServicioRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.CompletarDiagnosticoRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.CompletarReparacionRequestDTO;
@@ -27,6 +28,7 @@ import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServic
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.HistorialEstadoOrdenServicioResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.OrdenServicioRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.OrdenServicioResponseDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RecepcionOrdenServicioResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RegistrarEntregaRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RegistrarEntregaResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RegistrarNuevaFallaRequestDTO;
@@ -60,11 +62,15 @@ public class OrdenServicioController {
     }
 
     @GetMapping
-    public ResponseEntity<List<OrdenServicioResponseDTO>> listar(
+    public ResponseEntity<PaginaResponseDTO<OrdenServicioResponseDTO>> listar(
+            @RequestParam(required = false) String q,
             @RequestParam(required = false) Long clienteId,
             @RequestParam(required = false) Long equipoId,
-            @RequestParam(required = false) EstadoOrdenServicio estado) {
-        return ResponseEntity.ok(ordenServicioService.listar(clienteId, equipoId, estado));
+            @RequestParam(required = false) EstadoOrdenServicio estado,
+            @RequestParam(required = false, defaultValue = "0") Integer pagina,
+            @RequestParam(required = false, defaultValue = "20") Integer tamano) {
+        return ResponseEntity.ok(
+            ordenServicioService.listarPaginado(q, estado, clienteId, equipoId, pagina, tamano));
     }
 
     @GetMapping("/{id}")
@@ -130,8 +136,22 @@ public class OrdenServicioController {
         return ResponseEntity.ok(ordenServicioService.obtenerEntrega(id));
     }
 
+    @GetMapping("/{id}/recepcion")
+    public ResponseEntity<RecepcionOrdenServicioResponseDTO> obtenerRecepcion(@PathVariable Long id) {
+        return ResponseEntity.ok(ordenServicioService.obtenerRecepcion(id));
+    }
+
     @GetMapping("/entregas/firmas/{nombreArchivo:.+}")
-    public ResponseEntity<Resource> verFirma(@PathVariable String nombreArchivo) {
+    public ResponseEntity<Resource> verFirmaEntrega(@PathVariable String nombreArchivo) {
+        Resource archivo = entregaFirmaService.cargar(nombreArchivo);
+        return ResponseEntity.ok()
+            .contentType(entregaFirmaService.mediaTypeDe(nombreArchivo))
+            .header("Cache-Control", "private, max-age=3600")
+            .body(archivo);
+    }
+
+    @GetMapping("/recepciones/firmas/{nombreArchivo:.+}")
+    public ResponseEntity<Resource> verFirmaRecepcion(@PathVariable String nombreArchivo) {
         Resource archivo = entregaFirmaService.cargar(nombreArchivo);
         return ResponseEntity.ok()
             .contentType(entregaFirmaService.mediaTypeDe(nombreArchivo))

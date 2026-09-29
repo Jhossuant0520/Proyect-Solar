@@ -8,7 +8,7 @@
   align-items: center;
   gap: 1rem;
   padding: 0 1.5rem;
-  background: rgba(15, 23, 42, 0.8);
+  background: var(--solvix-topbar-bg, var(--color-surface-1));
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--solvix-border-subtle);
 }
@@ -19,6 +19,10 @@
   border: 0;
   color: var(--solvix-text-muted);
   cursor: pointer;
+  border-radius: 0.25rem;
+  transition:
+    color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard);
 }
 
 .admin-topbar__search {
@@ -47,6 +51,7 @@
   font-size: 0.75rem;
   letter-spacing: 0.04em;
   padding: 0.45rem 0.75rem 0.45rem 2.4rem;
+  transition: border-color var(--motion-fast) var(--ease-standard);
 }
 
 .admin-topbar__search input:focus {
@@ -69,14 +74,30 @@
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 0.25rem;
+  transition:
+    color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard);
 }
 
-.admin-topbar__icon:hover,
+@media (hover: hover) and (pointer: fine) {
+  .admin-topbar__icon:hover,
+  .admin-topbar__menu:hover {
+    color: var(--solvix-primary);
+    background: var(--solvix-primary-soft);
+  }
+}
+
 .admin-topbar__icon:focus-visible,
-.admin-topbar__menu:hover,
 .admin-topbar__menu:focus-visible {
   color: var(--solvix-primary);
-  outline: none;
+  background: var(--solvix-primary-soft);
+  outline: 2px solid var(--color-focus, var(--solvix-primary));
+  outline-offset: 2px;
+}
+
+.admin-topbar__icon:active,
+.admin-topbar__menu:active {
+  transform: translateY(1px);
 }
 
 .admin-topbar__icon:disabled {
@@ -91,6 +112,18 @@
   margin-left: 0.5rem;
   color: var(--solvix-text-secondary);
   text-decoration: none;
+  border-radius: 0.25rem;
+  padding: 0.15rem 0.25rem;
+  transition:
+    color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .admin-topbar__user:hover {
+    color: var(--solvix-text);
+    background: var(--solvix-neutral-soft);
+  }
 }
 
 .admin-topbar__avatar,

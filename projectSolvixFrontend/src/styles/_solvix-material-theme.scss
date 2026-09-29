@@ -1,0 +1,76 @@
+// Angular Material overlays — respetan html[data-theme] vía tokens SOLVIX.
+
+.mat-mdc-menu-panel,
+.mat-mdc-select-panel {
+  background: var(--color-surface-elevated, var(--solvix-surface-elevated)) !important;
+  color: var(--color-text-primary, var(--solvix-text)) !important;
+  border: 1px solid var(--color-border-subtle, var(--solvix-border-subtle)) !important;
+  box-shadow: var(--solvix-shadow) !important;
+}
+
+.mat-mdc-menu-item,
+.mat-mdc-option {
+  color: var(--color-text-secondary, var(--solvix-text-secondary)) !important;
+}
+
+.mat-mdc-menu-item:hover,
+.mat-mdc-menu-item:focus,
+.mat-mdc-option:hover:not(.mdc-list-item--disabled) {
+  background: var(--color-primary-soft, var(--solvix-primary-soft)) !important;
+}
+
+.mat-mdc-menu-item .mat-icon,
+.mat-mdc-menu-item .material-symbols-outlined {
+  color: inherit;
+}
+
+.mat-mdc-tooltip .mdc-tooltip__surface {
+  background: var(--color-surface-elevated, var(--solvix-surface-elevated)) !important;
+  color: var(--color-text-secondary, var(--solvix-text-secondary)) !important;
+  border: 1px solid var(--color-border, var(--solvix-border)) !important;
+  box-shadow: var(--solvix-shadow) !important;
+  font-family: var(--solvix-font) !important;
+  font-size: 0.78rem !important;
+  line-height: 1.4 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.mat-mdc-form-field {
+  --mdc-outlined-text-field-container-shape: 0.35rem;
+  --mdc-outlined-text-field-outline-color: var(--color-border-subtle, var(--solvix-border-subtle));
+  --mdc-outlined-text-field-hover-outline-color: var(--color-border, var(--solvix-border));
+  --mdc-outlined-text-field-focus-outline-color: var(--color-primary, var(--solvix-primary));
+  --mdc-outlined-text-field-label-text-color: var(--color-text-muted, var(--solvix-text-muted));
+  --mdc-outlined-text-field-input-text-color: var(--color-text-primary, var(--solvix-text));
+  --mdc-outlined-text-field-caret-color: var(--color-primary, var(--solvix-primary));
+  --mdc-filled-text-field-container-color: var(--color-surface-2, var(--solvix-surface-low));
+  --mdc-filled-text-field-input-text-color: var(--color-text-primary, var(--solvix-text));
+  --mdc-filled-text-field-label-text-color: var(--color-text-muted, var(--solvix-text-muted));
+  --mdc-filled-text-field-caret-color: var(--color-primary, var(--solvix-primary));
+  --mdc-filled-text-field-active-indicator-color: var(--color-primary, var(--solvix-primary));
+}
+
+.mat-mdc-checkbox {
+  --mdc-checkbox-selected-icon-color: var(--color-primary, var(--solvix-primary));
+  --mdc-checkbox-selected-focus-icon-color: var(--color-primary, var(--solvix-primary));
+  --mdc-checkbox-selected-hover-icon-color: var(--color-primary-hover, var(--solvix-primary-hover));
+  --mdc-checkbox-unselected-icon-color: var(--color-text-muted, var(--solvix-text-muted));
+  --mdc-checkbox-unselected-hover-icon-color: var(--color-primary, var(--solvix-primary));
+}
+
+.mat-mdc-radio-button {
+  --mdc-radio-selected-icon-color: var(--color-primary, var(--solvix-primary));
+  --mdc-radio-unselected-icon-color: var(--color-text-muted, var(--solvix-text-muted));
+  --mdc-radio-selected-focus-icon-color: var(--color-primary, var(--solvix-primary));
+  --mdc-radio-selected-hover-icon-color: var(--color-primary-hover, var(--solvix-primary-hover));
+}
+
+.mat-mdc-chip {
+  --mdc-chip-label-text-color: var(--color-text-secondary, var(--solvix-text-secondary));
+  --mdc-chip-outline-color: var(--color-border-subtle, var(--solvix-border-subtle));
+}
+
+.cdk-overlay-dark-backdrop {
+  background: var(--color-overlay, var(--solvix-overlay));
+}

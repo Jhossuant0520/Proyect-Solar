@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { SolvixBadgeComponent } from '../../../../shared/components/solvix-badge/solvix-badge';
 import { SolvixButtonComponent } from '../../../../shared/components/solvix-button/solvix-button';
 import { SolvixEmptyStateComponent } from '../../../../shared/components/solvix-empty-state/solvix-empty-state';
@@ -10,6 +10,7 @@ import { SolvixLoadingStateComponent } from '../../../../shared/components/solvi
 import { SolvixPageHeaderComponent } from '../../../../shared/components/solvix-page-header/solvix-page-header';
 import { SolvixSectionHeaderComponent } from '../../../../shared/components/solvix-section-header/solvix-section-header';
 import { DialogoConfirmacionDelete } from '../../../../shared/components/dialogo-confirmacion-delete/dialogo-confirmacion-delete';
+import { SolvixFeedbackService } from '../../../../shared/services/solvix-feedback.service';
 import { ClienteService } from '../../../../core/services/cliente.service';
 import { VentaService } from '../../../../core/services/venta.service';
 import { ClienteResponseDTO } from '../../../../core/models/cliente.models';
@@ -28,7 +29,6 @@ import {
   puedeEditarCliente
 } from '../cliente-ui';
 import { ClienteEquiposPanelComponent } from '../cliente-equipos-panel/cliente-equipos-panel';
-import { showSolvixSnack } from '../../../../shared/utils/solvix-snack';
 
 type BloqueEstado = 'loading' | 'ready' | 'empty' | 'error';
 
@@ -81,7 +81,7 @@ export class ClienteDetailComponent implements OnInit {
     private clienteService: ClienteService,
     private ventaService: VentaService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private feedback: SolvixFeedbackService
   ) {}
 
   ngOnInit(): void {
@@ -137,15 +137,10 @@ export class ClienteDetailComponent implements OnInit {
       this.clienteService.desactivar(cliente.id, aRequestConEstado(cliente, false)).subscribe({
         next: actualizado => {
           this.cliente = actualizado;
-          showSolvixSnack(this.snackBar, 'Cliente desactivado. El historial se conserva.', 'warning');
+          this.feedback.warning('Cliente actualizado');
         },
         error: err => {
-          showSolvixSnack(
-            this.snackBar,
-            mensajeErrorCliente(err, 'No pudimos desactivar este cliente.'),
-            'error',
-            4000
-          );
+          this.feedback.error(mensajeErrorCliente(err, 'No pudimos desactivar este cliente.'), 4000);
         }
       });
     });
@@ -158,25 +153,20 @@ export class ClienteDetailComponent implements OnInit {
     this.clienteService.actualizar(this.cliente.id, aRequestConEstado(this.cliente, true)).subscribe({
       next: actualizado => {
         this.cliente = actualizado;
-        showSolvixSnack(this.snackBar, 'Cliente activo de nuevo.', 'success');
+        this.feedback.success('Cliente actualizado');
       },
       error: err => {
-        showSolvixSnack(
-          this.snackBar,
-          mensajeErrorCliente(err, 'No pudimos activar este cliente.'),
-          'error',
-          4000
-        );
+        this.feedback.error(mensajeErrorCliente(err, 'No pudimos activar este cliente.'), 4000);
       }
     });
   }
 
   private cargarVentas(id: number): void {
     this.ventasState = 'loading';
-    this.ventaService.listar({ clienteId: id }).subscribe({
-      next: ventas => {
-        this.ventas = ordenarPorFechaDesc(ventas);
-        this.ventasState = ventas.length === 0 ? 'empty' : 'ready';
+    this.ventaService.listar({ clienteId: id, tamano: 50 }).subscribe({
+      next: pagina => {
+        this.ventas = ordenarPorFechaDesc(pagina.contenido);
+        this.ventasState = pagina.contenido.length === 0 ? 'empty' : 'ready';
       },
       error: () => {
         this.ventasState = 'error';

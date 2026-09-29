@@ -6,13 +6,19 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.CotizacionServicioRequestDTO;
@@ -71,6 +77,7 @@ public class CotizacionServicioService {
     private final SecuenciaDocumentoService secuenciaDocumentoService;
     private final ProductoRepository productoRepository;
     private final ObjectProvider<DocumentoOrdenServicioService> documentoOrdenServicioService;
+    private final PlatformTransactionManager transactionManager;
 
     @Transactional(readOnly = true)
     public List<CotizacionServicioResponseDTO> listar(Long ordenId) {
@@ -133,6 +140,11 @@ public class CotizacionServicioService {
                 "La cotización inicial solo se puede crear con la orden en DIAGNOSTICADO o COTIZADO.");
         }
         validarSinCotizacionActiva(ordenId);
+        if (cotizacionRepository.existsByOrdenServicioIdAndTipoAndEstadoIn(
+                ordenId, TipoCotizacionServicio.INICIAL, List.of(EstadoCotizacionServicio.APROBADA))) {
+            throw new BusinessException(
+                "La orden ya tiene una cotización inicial aprobada. Usa una cotización adicional.");
+        }
 
         CotizacionServicio cotizacion = construirBorrador(
             orden, TipoCotizacionServicio.INICIAL, request, responsable, false);
@@ -189,9 +201,17 @@ public class CotizacionServicioService {
         OrdenServicio orden = ordenServicioService.buscarOFallar(ordenId);
         CotizacionServicio cotizacion = buscarCotizacion(ordenId, cotizacionId);
 
-        if (cotizacion.getEstado() != EstadoCotizacionServicio.BORRADOR) {
-            throw new BusinessException("Solo se puede editar una cotización en BORRADOR.");
+        if (cotizacion.getEstado() == EstadoCotizacionServicio.APROBADA) {
+            throw new BusinessException(
+                "La cotización aprobada no se puede modificar: conserva lo que autorizó el cliente. "
+                    + "Para trabajos nuevos registra una aprobación adicional.");
         }
+        if (!ESTADOS_ACTIVOS.contains(cotizacion.getEstado())) {
+            throw new BusinessException(
+                "Solo se puede editar una cotización en BORRADOR o PENDIENTE_APROBACION.");
+        }
+        boolean estabaPresentada =
+            cotizacion.getEstado() == EstadoCotizacionServicio.PENDIENTE_APROBACION;
 
         if (cotizacion.getTipo() == TipoCotizacionServicio.ADICIONAL) {
             String motivo = textoRequerido(
@@ -205,12 +225,40 @@ public class CotizacionServicioService {
         }
 
         cotizacion.setObservaciones(textoOpcional(request.getObservaciones()));
+        Set<Long> productosPrevios = cotizacion.getDetalles().stream()
+            .map(DetalleCotizacionServicio::getProducto)
+            .filter(Objects::nonNull)
+            .map(Producto::getId)
+            .collect(Collectors.toSet());
         cotizacion.limpiarDetalles();
-        aplicarDetalles(cotizacion, request.getDetalles());
+        aplicarDetalles(cotizacion, request.getDetalles(), productosPrevios);
         recalcularTotales(cotizacion);
+        if (!esCotizacionValida(cotizacion)) {
+            throw new BusinessException(
+                "La cotización debe tener al menos una línea y un total mayor que cero.");
+        }
+
+        // Editar una cotización ya presentada la devuelve a BORRADOR: misma cotización,
+        // mismo número; se presenta de nuevo y genera un PDF nuevo con el contenido vigente.
+        if (estabaPresentada) {
+            cotizacion.setEstado(EstadoCotizacionServicio.BORRADOR);
+            cotizacion.setFechaPresentacion(null);
+            cotizacion.setUsuarioPresentacion(null);
+        }
         CotizacionServicio guardada = cotizacionRepository.save(cotizacion);
 
-        if (orden.getEstado() == EstadoOrdenServicio.DIAGNOSTICADO && esCotizacionValida(guardada)) {
+        if (estabaPresentada && orden.getEstado() == EstadoOrdenServicio.PENDIENTE_APROBACION) {
+            ordenServicioService.transicionarPorDominio(
+                ordenId,
+                guardada.getTipo() == TipoCotizacionServicio.INICIAL
+                    ? EstadoOrdenServicio.COTIZADO
+                    : EstadoOrdenServicio.REQUIERE_APROBACION_ADICIONAL,
+                "Se modificó la cotización presentada; debe presentarse nuevamente.",
+                null,
+                responsable);
+        }
+
+        if (orden.getEstado() == EstadoOrdenServicio.DIAGNOSTICADO) {
             ordenServicioService.transicionarPorDominio(
                 ordenId,
                 EstadoOrdenServicio.COTIZADO,
@@ -260,7 +308,17 @@ public class CotizacionServicioService {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
                 public void afterCommit() {
-                    tryGenerarCotizacionPdf(ordenId, cotId, usuarioPdf);
+                    // La transacción original sigue ligada al hilo: sin REQUIRES_NEW el
+                    // documento se une a ella y nunca llega a confirmarse.
+                    try {
+                        TransactionTemplate tx = new TransactionTemplate(transactionManager);
+                        tx.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+                        tx.executeWithoutResult(status -> documentoOrdenServicioService.getObject()
+                            .generarCotizacionPdf(ordenId, cotId, usuarioPdf));
+                    } catch (Throwable t) {
+                        log.warn("No se pudo generar PDF de cotización {} OT {}: {}",
+                            cotId, ordenId, t.toString());
+                    }
                 }
             });
         } else {
@@ -411,25 +469,28 @@ public class CotizacionServicioService {
             .detalles(new ArrayList<>())
             .build();
 
-        aplicarDetalles(cotizacion, request.getDetalles());
+        aplicarDetalles(cotizacion, request.getDetalles(), Set.of());
         recalcularTotales(cotizacion);
         return cotizacion;
     }
 
     private void aplicarDetalles(
             CotizacionServicio cotizacion,
-            List<DetalleCotizacionServicioRequestDTO> requests) {
+            List<DetalleCotizacionServicioRequestDTO> requests,
+            Set<Long> productosPrevios) {
         if (requests == null || requests.isEmpty()) {
             return;
         }
         for (DetalleCotizacionServicioRequestDTO req : requests) {
-            cotizacion.agregarDetalle(construirDetalle(cotizacion, req));
+            cotizacion.agregarDetalle(construirDetalle(cotizacion, req, productosPrevios));
         }
     }
 
+    /** Un producto desactivado después de cotizarlo puede conservarse al editar, no agregarse. */
     private DetalleCotizacionServicio construirDetalle(
             CotizacionServicio cotizacion,
-            DetalleCotizacionServicioRequestDTO request) {
+            DetalleCotizacionServicioRequestDTO request,
+            Set<Long> productosPrevios) {
         if (request.getTipo() == null) {
             throw new BusinessException("El tipo de línea es obligatorio.");
         }
@@ -481,6 +542,9 @@ public class CotizacionServicioService {
         } else if (request.getProductoId() != null) {
             producto = productoRepository.findById(request.getProductoId())
                 .orElseThrow(() -> new BusinessException("El producto indicado no existe."));
+            if (!producto.isActivo() && !productosPrevios.contains(producto.getId())) {
+                throw new BusinessException("El producto '" + producto.getNombre() + "' está inactivo.");
+            }
             productoNombreSnapshot = producto.getNombre();
             if (descripcion == null) {
                 descripcion = producto.getNombre();
@@ -495,6 +559,10 @@ public class CotizacionServicioService {
             }
         }
 
+        if (request.getTipo() == TipoDetalleCotizacionServicio.REPUESTO && producto == null) {
+            throw new BusinessException(
+                "Las líneas de repuesto deben estar vinculadas a un producto del catálogo.");
+        }
         if (descripcion == null) {
             throw new BusinessException("La descripción de la línea es obligatoria.");
         }
@@ -596,7 +664,7 @@ public class CotizacionServicioService {
             .observaciones(cotizacion.getObservaciones())
             .motivoAmpliacion(cotizacion.getMotivoAmpliacion())
             .detalles(detalles)
-            .puedeEditar(borrador)
+            .puedeEditar(borrador || pendiente)
             .puedePresentar(borrador && esCotizacionValida(cotizacion))
             .puedeAprobar(pendiente)
             .puedeRechazar(pendiente)

@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { SolvixFeedbackService } from '../../../../shared/services/solvix-feedback.service';
 import { SolvixBadgeComponent } from '../../../../shared/components/solvix-badge/solvix-badge';
 import { SolvixButtonComponent } from '../../../../shared/components/solvix-button/solvix-button';
 import { SolvixEmptyStateComponent } from '../../../../shared/components/solvix-empty-state/solvix-empty-state';
@@ -61,7 +62,7 @@ export class CompraDetailComponent implements OnInit {
     private compraService: CompraService,
     private productoService: ProductoService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private feedback: SolvixFeedbackService
   ) {}
 
   ngOnInit(): void {
@@ -118,15 +119,13 @@ export class CompraDetailComponent implements OnInit {
           next: compra => {
             this.compra = compra;
             this.accionando = false;
-            this.snackBar.open('Compra completada. El inventario y el costo vigente ya se actualizaron.', 'Cerrar', {
-              duration: 4000
-            });
+            this.feedback.success('Compra completada. El inventario y el costo vigente ya se actualizaron.', 4000);
             this.cargarCostosCatalogo(compra);
             this.cargarDevoluciones(compra.id);
           },
           error: error => {
             this.accionando = false;
-            this.snackBar.open(mapHttpError(error, 'No se pudo completar la compra.').message, 'Cerrar', { duration: 4500 });
+            this.feedback.error(mapHttpError(error, 'No se pudo completar la compra.').message, 4500);
           }
         });
       }
@@ -149,11 +148,11 @@ export class CompraDetailComponent implements OnInit {
           next: compra => {
             this.compra = compra;
             this.accionando = false;
-            this.snackBar.open('Compra cancelada.', 'Cerrar', { duration: 3000 });
+            this.feedback.info('Compra cancelada.', 3000);
           },
           error: error => {
             this.accionando = false;
-            this.snackBar.open(mapHttpError(error, 'No se pudo cancelar la compra.').message, 'Cerrar', { duration: 4500 });
+            this.feedback.error(mapHttpError(error, 'No se pudo cancelar la compra.').message, 4500);
           }
         });
       }

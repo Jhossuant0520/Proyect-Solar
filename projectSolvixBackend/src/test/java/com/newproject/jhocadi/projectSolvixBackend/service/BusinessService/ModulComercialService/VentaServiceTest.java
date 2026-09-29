@@ -171,6 +171,24 @@ class VentaServiceTest extends ComercialTestSupport {
             .hasMessageContaining("descuento no puede superar");
     }
 
+    @Test
+    @DisplayName("listar paginado: búsqueda parcial por número y tope de página")
+    void listarPaginadoBusquedaYTope() {
+        Producto producto = crearProducto("Producto Pag", new BigDecimal("100.00"), new BigDecimal("60.00"), 10);
+        VentaResponseDTO venta = ventaService.crear(
+            requestVenta(producto.getId(), 1, null, null), USUARIO_TEST);
+
+        String fragmento = venta.getNumero().substring(venta.getNumero().length() - 3);
+        var pagina = ventaService.listar(fragmento, null, null, null, null, 0, 20);
+        assertThat(pagina.getContenido()).extracting(VentaResponseDTO::getId).contains(venta.getId());
+
+        var vacia = ventaService.listar("zzz-venta-inexistente", null, null, null, null, 0, 20);
+        assertThat(vacia.getContenido()).isEmpty();
+
+        var tope = ventaService.listar(null, null, null, null, null, 0, 999);
+        assertThat(tope.getTamano()).isEqualTo(50);
+    }
+
     private VentaRequestDTO requestVenta(
             Long productoId, int cantidad, BigDecimal descuentoLinea, BigDecimal descuentoCabecera) {
 

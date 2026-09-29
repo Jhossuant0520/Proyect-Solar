@@ -1,13 +1,4 @@
 :host {
-  --solvix-bg: #020617;
-  --solvix-surface: #0f172a;
-  --solvix-primary: #4fd1ff;
-  --solvix-secondary: #38bdf8;
-  --solvix-neon: #00e5ff;
-  --solvix-deep: #003366;
-  --solvix-text: #ffffff;
-  --solvix-text-secondary: #cfe9ff;
-  --solvix-text-muted: #94a3b8;
   display: block;
 }
 
@@ -26,7 +17,7 @@
   width: min(720px, 90%);
   height: 280px;
   border-radius: 9999px;
-  background: rgba(79, 209, 255, 0.08);
+  background: var(--solvix-home-glow-soft);
   filter: blur(80px);
   pointer-events: none;
 }
@@ -39,13 +30,11 @@
   padding: 48px 40px;
   text-align: center;
   border-radius: 16px;
-  background: rgba(15, 23, 42, 0.7);
+  background: var(--solvix-home-card-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(79, 209, 255, 0.2);
-  box-shadow:
-    0 0 40px rgba(79, 209, 255, 0.08),
-    inset 0 1px 0 rgba(178, 231, 255, 0.12);
+  border: 1px solid var(--solvix-home-card-border);
+  box-shadow: var(--solvix-home-card-shadow);
 }
 
 .cta-panel::before {
@@ -58,7 +47,7 @@
   background: linear-gradient(
     to right,
     transparent,
-    rgba(79, 209, 255, 0.55),
+    color-mix(in srgb, var(--solvix-primary) 55%, transparent),
     transparent
   );
 }
@@ -70,8 +59,8 @@
   margin-bottom: 20px;
   padding: 6px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(79, 209, 255, 0.25);
-  background: rgba(79, 209, 255, 0.08);
+  border: 1px solid color-mix(in srgb, var(--solvix-primary) 35%, var(--solvix-home-card-border));
+  background: var(--solvix-primary-soft);
   color: var(--solvix-primary);
   font-size: 12px;
   letter-spacing: 0.06em;
@@ -84,7 +73,7 @@
   height: 8px;
   border-radius: 50%;
   background: var(--solvix-neon);
-  box-shadow: 0 0 10px rgba(0, 229, 255, 0.8);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--solvix-neon) 60%, transparent);
   animation: ctaPulse 2s ease-in-out infinite;
 }
 

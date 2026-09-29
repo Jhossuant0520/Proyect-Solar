@@ -1,11 +1,4 @@
 :host {
-  --solvix-bg: #020617;
-  --solvix-surface: #0f172a;
-  --solvix-primary: #4fd1ff;
-  --solvix-secondary: #38bdf8;
-  --solvix-neon: #00e5ff;
-  --solvix-text: #ffffff;
-  --solvix-text-muted: #94a3b8;
   display: block;
 }
 
@@ -23,9 +16,9 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 50% 42%, rgba(79, 209, 255, 0.12), transparent 42%),
-    linear-gradient(rgba(79, 209, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(79, 209, 255, 0.03) 1px, transparent 1px);
+    radial-gradient(circle at 50% 42%, var(--solvix-home-glow-soft), transparent 42%),
+    linear-gradient(color-mix(in srgb, var(--solvix-primary) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--solvix-primary) 6%, transparent) 1px, transparent 1px);
   background-size: 100% 100%, 40px 40px, 40px 40px;
   animation: gridDrift 20s linear infinite;
 }
@@ -38,7 +31,7 @@
   bottom: 0;
   height: 128px;
   pointer-events: none;
-  background: linear-gradient(to top, rgba(79, 209, 255, 0.1), transparent);
+  background: linear-gradient(to top, var(--solvix-home-glow-soft), transparent);
 }
 
 .hero-grid {
@@ -64,9 +57,11 @@
   padding: 24px;
   border-radius: 12px;
   text-align: left;
-  background: rgba(15, 23, 42, 0.4);
+  background: var(--solvix-home-card-bg);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(79, 209, 255, 0.2);
+  border: 1px solid var(--solvix-home-card-border);
+  box-shadow: var(--solvix-home-card-shadow);
+  color: var(--color-text-primary, var(--solvix-text));
   animation: fadeInUp 0.7s ease both, floatCard 5s ease-in-out infinite;
 }
 
@@ -82,11 +77,16 @@
   left: 0;
   width: 100%;
   height: 1px;
-  background: linear-gradient(to right, transparent, rgba(79, 209, 255, 0.5), transparent);
+  background: linear-gradient(
+    to right,
+    transparent,
+    color-mix(in srgb, var(--solvix-primary) 55%, transparent),
+    transparent
+  );
 }
 
 .holo-card-accent {
-  border-color: rgba(79, 209, 255, 0.4);
+  border-color: color-mix(in srgb, var(--solvix-primary) 55%, transparent);
 }
 
 .holo-label {
@@ -115,7 +115,7 @@
   margin-top: 16px;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--color-text-primary, var(--solvix-text)) 8%, transparent);
 }
 
 .holo-bar-fill {
@@ -136,11 +136,11 @@
 .holo-ticks span {
   width: 16px;
   height: 8px;
-  background: rgba(0, 229, 255, 0.2);
+  background: color-mix(in srgb, var(--solvix-neon) 25%, transparent);
 }
-.holo-ticks span:nth-child(2) { background: rgba(0, 229, 255, 0.4); }
+.holo-ticks span:nth-child(2) { background: color-mix(in srgb, var(--solvix-neon) 45%, transparent); }
 .holo-ticks span.is-on { background: var(--solvix-neon); }
-.holo-ticks span:nth-child(4) { background: rgba(0, 229, 255, 0.2); }
+.holo-ticks span:nth-child(4) { background: color-mix(in srgb, var(--solvix-neon) 25%, transparent); }
 
 .holo-bars {
   align-items: flex-end;
@@ -150,11 +150,11 @@
 .holo-bars span {
   width: 8px;
   height: 50%;
-  background: rgba(56, 189, 248, 0.2);
+  background: color-mix(in srgb, var(--solvix-secondary) 25%, transparent);
 }
-.holo-bars span:nth-child(2) { height: 75%; background: rgba(56, 189, 248, 0.4); }
+.holo-bars span:nth-child(2) { height: 75%; background: color-mix(in srgb, var(--solvix-secondary) 45%, transparent); }
 .holo-bars span.is-on { height: 100%; background: var(--solvix-secondary); }
-.holo-bars span:nth-child(4) { height: 66%; background: rgba(56, 189, 248, 0.6); }
+.holo-bars span:nth-child(4) { height: 66%; background: color-mix(in srgb, var(--solvix-secondary) 60%, transparent); }
 
 .holo-status {
   display: flex;
@@ -192,7 +192,7 @@
   padding: 4px 12px;
   border-radius: 999px;
   border: 1px solid var(--solvix-primary);
-  background: rgba(178, 231, 255, 0.12);
+  background: var(--color-primary-soft, var(--solvix-primary-soft));
   color: var(--solvix-primary);
   font-size: 12px;
   font-weight: 500;
@@ -236,21 +236,21 @@
   padding: 20px 40px;
   border: none;
   border-radius: 4px;
-  background: #4fd1ff;
-  color: #001f29;
+  background: var(--color-primary, var(--solvix-primary));
+  color: var(--solvix-on-primary);
   font-size: 16px;
   font-weight: 500;
   letter-spacing: 0.05em;
   text-decoration: none;
   white-space: nowrap;
-  box-shadow: 0 0 20px rgba(79, 209, 255, 0.4);
+  box-shadow: var(--solvix-glow);
   transition: all 0.3s ease;
   animation: fadeInUp 0.7s ease 0.3s both;
 }
 
 .btn-cyber-primary:hover {
   transform: translateY(-1px) scale(1.03);
-  box-shadow: 0 0 24px rgba(79, 209, 255, 0.6);
+  box-shadow: var(--solvix-glow);
 }
 
 .btn-cyber-primary svg {

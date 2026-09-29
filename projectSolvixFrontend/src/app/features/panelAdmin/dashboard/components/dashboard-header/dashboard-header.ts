@@ -1,4 +1,14 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+  ViewChild
+} from '@angular/core';
 import { SolvixButtonComponent } from '../../../../../shared/components/solvix-button/solvix-button';
 import { SolvixPageHeaderComponent } from '../../../../../shared/components/solvix-page-header/solvix-page-header';
 import { PeriodoFiltro, PeriodoPreset } from '../../models/dashboard.models';
@@ -11,13 +21,19 @@ import { PERIODO_PRESETS, rangoDePreset } from '../../utils/dashboard-period';
   templateUrl: './dashboard-header.html',
   styleUrl: './dashboard-header.scss'
 })
-export class DashboardHeaderComponent {
+export class DashboardHeaderComponent implements AfterViewInit, OnChanges {
   @Input({ required: true }) periodo!: PeriodoFiltro;
   @Input() refreshing = false;
   @Output() periodoChange = new EventEmitter<PeriodoFiltro>();
   @Output() refresh = new EventEmitter<void>();
 
+  @ViewChild('periodChips') periodChips?: ElementRef<HTMLElement>;
+
   readonly presets = PERIODO_PRESETS;
+
+  indicatorX = 0;
+  indicatorW = 0;
+  indicatorReady = false;
 
   selectPreset(preset: PeriodoPreset): void {
     this.periodoChange.emit({
@@ -37,4 +53,28 @@ export class DashboardHeaderComponent {
     });
   }
 
+  ngAfterViewInit(): void {
+    Promise.resolve().then(() => this.syncIndicator());
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['periodo']) {
+      Promise.resolve().then(() => this.syncIndicator());
+    }
+  }
+
+  private syncIndicator(): void {
+    const root = this.periodChips?.nativeElement;
+    if (!root) {
+      return;
+    }
+    const active = root.querySelector<HTMLElement>('.dash-chip.is-active');
+    if (!active) {
+      this.indicatorReady = false;
+      return;
+    }
+    this.indicatorX = active.offsetLeft;
+    this.indicatorW = active.offsetWidth;
+    this.indicatorReady = true;
+  }
 }

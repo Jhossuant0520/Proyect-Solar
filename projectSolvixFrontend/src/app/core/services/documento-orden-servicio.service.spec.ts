@@ -67,14 +67,40 @@ describe('DocumentoOrdenServicioService', () => {
     expect(req.request.method).toBe('GET');
     req.flush({
       numero: 'OS-1',
+      estadoCodigo: 'EN_DIAGNOSTICO',
       estadoPublico: 'En diagnóstico',
+      etapaPublica: 'DIAGNOSTICO',
+      etapaPublicaNumero: 2,
+      totalEtapasPublicas: 5,
       equipoTipo: 'PORTATIL',
       equipoMarca: null,
       equipoModelo: null,
       referenciaInterna: null,
       fechaRecepcion: null,
       fechaActualizacion: null,
+      cotizacionDisponible: false,
+      contacto: {
+        empresa: 'Test',
+        telefono: null,
+        whatsapp: null,
+        direccion: null,
+        sitioWeb: null
+      },
       mensaje: 'OK'
+    });
+  });
+
+  it('consulta cotización OT pública', () => {
+    service.consultaCotizacionOtPublica('abc123').subscribe(r => expect(r.numero).toBe('COT-1'));
+    const req = http.expectOne(`${environment.apiBaseUrl}/v1/consulta/ot/abc123/cotizacion`);
+    expect(req.request.method).toBe('GET');
+    req.flush({
+      numero: 'COT-1',
+      fecha: null,
+      lineas: [],
+      subtotal: 0,
+      total: 0,
+      observaciones: null
     });
   });
 });

@@ -1,9 +1,14 @@
 <solvix-section-state [state]="state" loadingLabel="Cargando indicadores." (retry)="retry.emit()">
-  <div class="kpi-grid">
-    @for (metric of metrics; track metric.id) {
+  <div class="kpi-grid" [class.is-loading]="state === 'loading'">
+    @for (metric of metrics; track metric.id; let i = $index) {
       <solvix-metric-card
+        class="kpi-card"
+        [style.--kpi-i]="i"
         [label]="metric.label"
         [value]="displayValue(metric)"
+        [countValue]="countValue(metric)"
+        [formato]="metric.formato"
+        [compact]="metric.compact ?? false"
         [hint]="metric.hint"
         [help]="metric.help ?? ''"
         [statusNote]="nota(metric)"

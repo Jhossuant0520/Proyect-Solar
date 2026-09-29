@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Electronic BI Terminal - Catálogo de Productos</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-scrollbars">
+    /* Subtle scrollbar for light theme layout */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+<!-- BEGIN: MainLayout -->
+<div class="flex-1 flex overflow-hidden">
+<!-- BEGIN: Sidebar -->
+<aside class="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0 select-none">
+<!-- Brand / Logo Area -->
+<div class="px-6 py-5 border-b border-slate-100 flex flex-col gap-0.5">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-sky-600 flex items-center justify-center text-white shadow-sm shadow-sky-200">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="text-xl font-bold tracking-tight text-sky-700">Electronic</span>
+</div>
+<span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 pl-9">BI Terminal</span>
+</div>
+<!-- Navigation Menu -->
+<nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+<!-- Dashboard -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" href="#">
+<svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Dashboard
+        </a>
+<!-- Productos (Active Link) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-sky-700 bg-sky-50 border border-sky-200/70 shadow-[0_1px_2px_rgba(2,132,199,0.06)]" href="#">
+<svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Productos
+        </a>
+<!-- Ventas -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" href="#">
+<svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6H2.25m0 0v1.5a.75.75 0 00.75.75H3m0 0h18m0 0a.75.75 0 00.75-.75V6m0 0H21a.75.75 0 01-.75-.75V4.5m0 0a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5m18 0v12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 16.5v-12" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Ventas
+        </a>
+<!-- Cotizaciones -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" href="#">
+<svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Cotizaciones
+        </a>
+<!-- Compras -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" href="#">
+<svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Compras
+        </a>
+<!-- Clientes -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" href="#">
+<svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Clientes
+        </a>
+<!-- Servicios -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" href="#">
+<svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233l1.83-1.83a2.652 2.652 0 00-3.75-3.75l-1.83 1.83" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Servicios
+        </a>
+<!-- Proveedores -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" href="#">
+<svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Proveedores
+        </a>
+<!-- Inventario -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" href="#">
+<svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Inventario
+        </a>
+<!-- Reportes -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" href="#">
+<svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24">
+<path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Reportes
+        </a>
+</nav>
+<!-- Sidebar Footer User Status Info -->
+<div class="p-4 border-t border-slate-100 bg-slate-50/50">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center font-bold text-xs text-slate-700">
+            AD
+          </div>
+<div class="min-w-0 flex-1">
+<p class="text-xs font-semibold text-slate-800 truncate">Admin Terminal</p>
+<p class="text-[11px] text-emerald-600 font-medium flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Sistema en línea
+            </p>
+</div>
+</div>
+</div>
+</aside>
+<!-- END: Sidebar -->
+<!-- BEGIN: MainContentArea -->
+<main class="flex-1 overflow-y-auto bg-slate-50 p-6 md:p-8 space-y-6">
+<!-- BEGIN: HeaderSection -->
+<header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+<div>
+<!-- Breadcrumb indicator -->
+<div class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+            Catálogo
+          </div>
+<h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Productos
+          </h1>
+<p class="text-sm text-slate-500 mt-0.5">
+            Administra tu catálogo y controla el estado de tus productos.
+          </p>
+</div>
+<!-- Primary Call to Action Button -->
+<div>
+<button class="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white font-semibold text-xs tracking-wider uppercase px-4 py-2.5 rounded-md shadow-sm shadow-sky-500/20 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2" type="button">
+<svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+            + Nuevo Producto
+          </button>
+</div>
+</header>
+<!-- END: HeaderSection -->
+<!-- BEGIN: MetricsCardsSection -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-5" data-purpose="kpi-metrics-grid">
+<!-- Card 1: Productos Activos -->
+<article class="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between hover:border-slate-300 transition-all">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-1.5 text-xs font-bold tracking-wider uppercase text-slate-500">
+<span>Productos Activos</span>
+<!-- Tooltip info trigger -->
+<span class="inline-flex items-center justify-center w-3.5 h-3.5 text-[10px] font-bold rounded-full bg-slate-100 text-slate-400 border border-slate-200 cursor-help" title="Total de productos activos y disponibles">?</span>
+</div>
+<!-- Checkmark icon -->
+<div class="w-6 h-6 rounded-full bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600">
+<svg class="w-3.5 h-3.5 stroke-[2.5]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M4.5 12.75l6 6 9-13.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+</div>
+<div class="mt-3">
+<div class="text-3xl font-extrabold text-slate-900 font-mono tracking-tight">3</div>
+<p class="text-xs text-slate-500 mt-1 font-normal">
+              Productos disponibles en tu catálogo.
+            </p>
+</div>
+</article>
+<!-- Card 2: Stock Crítico -->
+<article class="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between hover:border-slate-300 transition-all">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-1.5 text-xs font-bold tracking-wider uppercase text-slate-500">
+<span>Stock Crítico</span>
+<span class="inline-flex items-center justify-center w-3.5 h-3.5 text-[10px] font-bold rounded-full bg-slate-100 text-slate-400 border border-slate-200 cursor-help" title="Unidades por debajo del nivel óptimo">?</span>
+</div>
+<!-- Alert icon -->
+<div class="w-6 h-6 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
+<svg class="w-3.5 h-3.5 stroke-[2.2]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+</div>
+<div class="mt-3">
+<div class="text-3xl font-extrabold text-slate-900 font-mono tracking-tight">3</div>
+<p class="text-xs text-slate-500 mt-1 font-normal">
+              Productos que se están quedando sin existencias.
+            </p>
+</div>
+</article>
+<!-- Card 3: Dinero Invertido en Inventario -->
+<article class="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between hover:border-slate-300 transition-all">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-1.5 text-xs font-bold tracking-wider uppercase text-slate-500">
+<span>Dinero Invertido en Inventario</span>
+<span class="inline-flex items-center justify-center w-3.5 h-3.5 text-[10px] font-bold rounded-full bg-slate-100 text-slate-400 border border-slate-200 cursor-help" title="Valor monetario según costo de adquisición">?</span>
+</div>
+<!-- Money / Dollar badge -->
+<div class="w-6 h-6 rounded-full bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600">
+<span class="text-xs font-bold font-mono">$</span>
+</div>
+</div>
+<div class="mt-3">
+<div class="text-3xl font-extrabold text-slate-900 font-mono tracking-tight">$438.000</div>
+<p class="text-xs text-slate-500 mt-1 font-normal">
+              Valor de los productos que tienes en stock según su costo actual.
+            </p>
+</div>
+</article>
+</section>
+<!-- END: MetricsCardsSection -->
+<!-- BEGIN: FilterBarSection -->
+<section class="bg-white border border-slate-200/90 rounded-xl p-3 md:p-4 shadow-sm" data-purpose="catalog-filters">
+<div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+<!-- Search input box -->
+<div class="relative flex-1">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<input class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm placeholder-slate-400 text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors" placeholder="Buscar por nombre, ID o código de barras" type="text"/>
+</div>
+<!-- Dropdowns & Filter Controls -->
+<div class="flex flex-wrap items-center gap-2.5">
+<!-- Marca Dropdown -->
+<div class="relative">
+<select class="appearance-none bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-medium text-slate-700 py-2 pl-3 pr-8 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors">
+<option>Marca: todas</option>
+<option>Ezviz</option>
+<option>Kingston</option>
+<option>JyR Tecnology</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+<!-- Categoría Dropdown -->
+<div class="relative">
+<select class="appearance-none bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-medium text-slate-700 py-2 pl-3 pr-8 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors">
+<option>Categoría: todas</option>
+<option>Herramienta</option>
+<option>Electrónica</option>
+<option>Accesorio</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+<!-- Estado Dropdown -->
+<div class="relative">
+<select class="appearance-none bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-medium text-slate-700 py-2 pl-3 pr-8 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors">
+<option>Estado: todos</option>
+<option>Activo</option>
+<option>Inactivo</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+<!-- Reset Filters Link -->
+<button class="text-xs font-semibold text-sky-600 hover:text-sky-700 hover:underline px-2 py-1.5 focus:outline-none" type="button">
+              Limpiar filtros
+            </button>
+</div>
+</div>
+</section>
+<!-- END: FilterBarSection -->
+<!-- BEGIN: ProductsTableSection -->
+<section class="bg-white border border-slate-200/90 rounded-xl shadow-sm overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left text-xs whitespace-nowrap">
+<!-- Table Header -->
+<thead class="bg-slate-50 text-[11px] font-semibold text-slate-500 tracking-wider uppercase border-b border-slate-200">
+<tr>
+<th class="py-3 px-4 font-semibold" scope="col">Producto</th>
+<th class="py-3 px-4 font-semibold" scope="col">Marca</th>
+<th class="py-3 px-4 font-semibold" scope="col">Categoría</th>
+<th class="py-3 px-4 font-semibold" scope="col">Precio de Venta</th>
+<th class="py-3 px-4 font-semibold" scope="col">Costo Actual</th>
+<th class="py-3 px-4 font-semibold text-center" scope="col">Stock</th>
+<th class="py-3 px-4 font-semibold text-center" scope="col">Estado</th>
+<th class="py-3 px-4 font-semibold text-right" scope="col">Acciones</th>
+</tr>
+</thead>
+<!-- Table Body -->
+<tbody class="divide-y divide-slate-100">
+<!-- Row 1: Camara H9C -->
+<tr class="hover:bg-slate-50/80 transition-colors">
+<td class="py-3 px-4">
+<div class="font-semibold text-slate-900 text-sm">Camara H9C</div>
+<div class="text-[11px] text-slate-400 font-mono">#1</div>
+</td>
+<td class="py-3 px-4 text-slate-600 font-medium">
+                  Ezviz
+                </td>
+<td class="py-3 px-4">
+<span class="inline-block px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-600 bg-slate-100 border border-slate-200 rounded">
+                    Herramienta
+                  </span>
+</td>
+<td class="py-3 px-4 font-mono font-semibold text-slate-800">
+                  $410.000
+                </td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-1.5 font-mono font-medium text-slate-700">
+<span>$315.000</span>
+<button class="text-slate-400 hover:text-sky-600 transition-colors" title="Editar costo" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</td>
+<td class="py-3 px-4 font-mono font-semibold text-slate-800 text-center">
+                  4
+                </td>
+<td class="py-3 px-4 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
+                    Inactivo
+                  </span>
+</td>
+<td class="py-3 px-4 text-right">
+<div class="inline-flex items-center gap-2 text-slate-400">
+<button class="p-1 hover:text-slate-700 hover:bg-slate-100 rounded transition-colors" title="Ver detalles" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<button class="p-1 hover:text-slate-700 hover:bg-slate-100 rounded transition-colors" title="Opciones" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<button class="p-1 hover:text-slate-700 hover:bg-slate-100 rounded transition-colors" title="Restaurar / Activar" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Camara H8C -->
+<tr class="hover:bg-slate-50/80 transition-colors">
+<td class="py-3 px-4">
+<div class="font-semibold text-slate-900 text-sm">Camara H8C</div>
+<div class="text-[11px] text-slate-400 font-mono">#2</div>
+</td>
+<td class="py-3 px-4 text-slate-600 font-medium">
+                  Ezviz
+                </td>
+<td class="py-3 px-4">
+<span class="inline-block px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-600 bg-slate-100 border border-slate-200 rounded">
+                    Electrónica
+                  </span>
+</td>
+<td class="py-3 px-4 font-mono font-semibold text-slate-800">
+                  $240.000
+                </td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-1.5 font-mono font-medium text-slate-700">
+<span>$120.000</span>
+<button class="text-slate-400 hover:text-sky-600 transition-colors" title="Editar costo" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</td>
+<td class="py-3 px-4 font-mono font-semibold text-slate-800 text-center">
+                  1
+                </td>
+<td class="py-3 px-4 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    Activo
+                  </span>
+</td>
+<td class="py-3 px-4 text-right">
+<div class="inline-flex items-center gap-2 text-slate-400">
+<button class="p-1 hover:text-slate-700 hover:bg-slate-100 rounded transition-colors" title="Ver detalles" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<button class="p-1 hover:text-slate-700 hover:bg-slate-100 rounded transition-colors" title="Opciones" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<button class="p-1 hover:text-slate-700 hover:bg-slate-100 rounded transition-colors" title="Desactivar" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3: Disco duro SSD 240Gb -->
+<tr class="hover:bg-slate-50/80 transition-colors">
+<td class="py-3 px-4">
+<div class="font-semibold text-slate-900 text-sm">Disco duro SSD 240Gb</div>
+<div class="text-[11px] text-slate-400 font-mono">#3</div>
+</td>
+<td class="py-3 px-4 text-slate-600 font-medium">
+                  Kingston
+                </td>
+<td class="py-3 px-4">
+<span class="inline-block px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-600 bg-slate-100 border border-slate-200 rounded">
+                    Accesorio
+                  </span>
+</td>
+<td class="py-3 px-4 font-mono font-semibold text-slate-800">
+                  $240.000
+                </td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-1.5 font-mono font-medium text-slate-700">
+<span>$109.000</span>
+<button class="text-slate-400 hover:text-sky-600 transition-colors" title="Editar costo" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</td>
+<td class="py-3 px-4 font-mono font-semibold text-slate-800 text-center">
+                  2
+                </td>
+<td class="py-3 px-4 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    Activo
+                  </span>
+</td>
+<td class="py-3 px-4 text-right">
+<div class="inline-flex items-center gap-2 text-slate-400">
+<button class="p-1 hover:text-slate-700 hover:bg-slate-100 rounded transition-colors" title="Ver detalles" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<button class="p-1 hover:text-slate-700 hover:bg-slate-100 rounded transition-colors" title="Opciones" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<button class="p-1 hover:text-slate-700 hover:bg-slate-100 rounded transition-colors" title="Desactivar" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4: Audifonos Inalambricos JYRBUDS 4 -->
+<tr class="hover:bg-slate-50/80 transition-colors">
+<td class="py-3 px-4">
+<div class="font-semibold text-slate-900 text-sm">Audifonos Inalambricos JYRBUDS 4</div>
+<div class="text-[11px] text-slate-400 font-mono">#4</div>
+</td>
+<td class="py-3 px-4 text-slate-600 font-medium">
+                  JyR Tecnology
+                </td>
+<td class="py-3 px-4">
+<span class="inline-block px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-600 bg-slate-100 border border-slate-200 rounded">
+                    Electrónica
+                  </span>
+</td>
+<td class="py-3 px-4 font-mono font-semibold text-slate-800">
+                  $168.000
+                </td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-1.5 font-mono font-medium text-slate-700">
+<span>$100.000</span>
+<button class="text-slate-400 hover:text-sky-600 transition-colors" title="Editar costo" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</td>
+<td class="py-3 px-4 font-mono font-semibold text-slate-800 text-center">
+                  1
+                </td>
+<td class="py-3 px-4 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    Activo
+                  </span>
+</td>
+<td class="py-3 px-4 text-right">
+<div class="inline-flex items-center gap-2 text-slate-400">
+<button class="p-1 hover:text-slate-700 hover:bg-slate-100 rounded transition-colors" title="Ver detalles" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<button class="p-1 hover:text-slate-700 hover:bg-slate-100 rounded transition-colors" title="Opciones" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<button class="p-1 hover:text-slate-700 hover:bg-slate-100 rounded transition-colors" title="Desactivar" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Pagination -->
+<div class="px-4 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+<div>
+            Mostrando <span class="font-semibold text-slate-700">4</span> de <span class="font-semibold text-slate-700">4</span> productos registrados
+          </div>
+<div class="flex items-center gap-1 font-mono">
+<span class="px-2.5 py-1 rounded bg-white border border-slate-200 font-semibold text-sky-700 shadow-xs">1</span>
+</div>
+</div>
+</section>
+<!-- END: ProductsTableSection -->
+</main>
+<!-- END: MainContentArea -->
+</div>
+<!-- END: MainLayout -->
+</body></html>

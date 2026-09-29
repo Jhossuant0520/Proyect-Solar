@@ -1,0 +1,81 @@
+// Accesibilidad transversal SOLVIX (C.6)
+
+:root {
+  --solvix-focus-ring: 2px solid var(--color-focus, var(--solvix-primary));
+  --solvix-focus-offset: 2px;
+  --solvix-touch-min: 44px;
+}
+
+/* Contenedor de app: evitar overflow horizontal accidental. */
+html,
+body {
+  overflow-x: clip;
+}
+
+/* Foco visible global (no eliminar outline sin reemplazo). */
+:where(a, button, summary, [role='button'], [tabindex]:not([tabindex='-1'])):focus-visible {
+  outline: var(--solvix-focus-ring);
+  outline-offset: var(--solvix-focus-offset);
+}
+
+:where(
+  input:not([type='checkbox']):not([type='radio']),
+  textarea,
+  select
+):focus-visible {
+  outline: var(--solvix-focus-ring);
+  outline-offset: 1px;
+}
+
+:where(input[type='checkbox'], input[type='radio']):focus-visible {
+  outline: var(--solvix-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Preferencia de movimiento reducido (refuerzo C.8; detalle en _solvix-motion). */
+@media (prefers-reduced-motion: reduce) {
+  html,
+  body,
+  .admin-shell,
+  .admin-topbar,
+  .admin-sidebar,
+  .mat-mdc-dialog-surface,
+  .mat-mdc-menu-panel,
+  .mat-mdc-select-panel,
+  .solvix-snack .mdc-snackbar__surface {
+    transition: none !important;
+  }
+}
+
+/* Dialogs: caben en móvil sin cortar acciones. */
+.cdk-overlay-pane.mat-mdc-dialog-panel,
+.cdk-overlay-pane.solvix-dialog-panel {
+  max-width: min(96vw, 720px) !important;
+}
+
+@media (max-width: 767px) {
+  .cdk-overlay-pane.mat-mdc-dialog-panel,
+  .cdk-overlay-pane.solvix-dialog-panel {
+    width: calc(100vw - 1rem) !important;
+    max-width: calc(100vw - 1rem) !important;
+    margin: 0.5rem !important;
+  }
+
+  .solvix-dialog-panel .mat-mdc-dialog-surface {
+    max-height: min(92vh, 900px) !important;
+  }
+}
+
+/* Snackbar no se sale en móvil. */
+.mat-mdc-snack-bar-container.solvix-snack {
+  max-width: min(26rem, calc(100vw - 1rem)) !important;
+}
+
+/* Targets táctiles tipados para icon-buttons SOLVIX. */
+.btn-icon-menu,
+.admin-topbar__icon,
+.admin-topbar__menu,
+.theme-toggle {
+  min-width: var(--solvix-touch-min);
+  min-height: var(--solvix-touch-min);
+}

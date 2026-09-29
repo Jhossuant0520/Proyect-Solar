@@ -1,0 +1,185 @@
+.buscador {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, var(--solvix-border));
+  background: var(--color-surface-2, var(--solvix-surface-low));
+}
+
+.search .material-symbols-outlined {
+  color: var(--color-text-muted, var(--solvix-text-muted));
+  font-size: 1.1rem;
+}
+
+.search input {
+  flex: 1;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--color-text-primary, var(--solvix-text));
+  font: inherit;
+  outline: none;
+}
+
+.search:focus-within {
+  outline: 2px solid var(--color-focus, var(--solvix-primary));
+  outline-offset: 1px;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--color-text-muted, var(--solvix-text-muted));
+}
+
+.hint.error {
+  color: var(--color-danger, var(--solvix-error));
+}
+
+.hint.preview-label {
+  margin-top: 0.65rem;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  color: var(--color-text-muted, var(--solvix-text-muted));
+}
+
+.resultados {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+  max-height: 13rem;
+  overflow: auto;
+}
+
+.resultados button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'nombre precio'
+    'meta precio';
+  gap: 0.1rem 0.75rem;
+  align-items: center;
+  text-align: left;
+  padding: 0.55rem 0.65rem;
+  min-height: var(--solvix-touch-min, 44px);
+  border-radius: 8px;
+  border: 1px solid var(--color-border-subtle, var(--solvix-border-subtle));
+  background: var(--color-surface-1, var(--solvix-surface));
+  color: var(--color-text-primary, var(--solvix-text));
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard);
+}
+
+.resultados button:hover,
+.resultados button:focus-visible,
+.resultados button.is-active {
+  border-color: var(--color-border, var(--solvix-border));
+  background: var(--color-primary-soft, var(--solvix-primary-soft));
+}
+
+.resultados button:focus-visible {
+  outline: 2px solid var(--color-focus, var(--solvix-primary));
+  outline-offset: 1px;
+}
+
+.nombre {
+  grid-area: nombre;
+  font-size: 0.88rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.badge-agregado {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--solvix-success, #34d399);
+  background: color-mix(in srgb, var(--solvix-success, #34d399) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--solvix-success, #34d399) 35%, transparent);
+}
+
+.resultados button.is-agregado {
+  opacity: 0.92;
+  border-color: color-mix(in srgb, var(--solvix-success, #34d399) 35%, transparent);
+}
+
+.meta {
+  grid-area: meta;
+  font-size: 0.78rem;
+  color: var(--color-text-muted, var(--solvix-text-muted));
+}
+
+.precio {
+  grid-area: precio;
+  font-size: 0.84rem;
+  color: var(--color-primary, var(--solvix-secondary));
+  white-space: nowrap;
+}
+
+.crear {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.45rem 0.7rem;
+  min-height: 2.25rem;
+  border-radius: 999px;
+  border: 1px dashed var(--color-border, var(--solvix-border));
+  background: transparent;
+  color: var(--color-primary, var(--solvix-primary));
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.crear .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+.crear:hover,
+.crear:focus-visible {
+  background: var(--color-primary-soft, var(--solvix-primary-soft));
+}
+
+.crear:focus-visible {
+  outline: 2px solid var(--color-focus, var(--solvix-primary));
+  outline-offset: 2px;
+}
+
+@media (max-width: 767px) {
+  .resultados button {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'nombre'
+      'meta'
+      'precio';
+  }
+
+  .precio {
+    justify-self: start;
+  }
+}

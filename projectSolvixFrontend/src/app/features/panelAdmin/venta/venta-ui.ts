@@ -7,6 +7,7 @@ import {
   MetodoReembolso,
   MotivoDevolucion
 } from '../../../core/models/venta.models';
+import { formatMoney } from '../dashboard/utils/dashboard-format';
 
 export const ESTADOS_VENTA: { id: EstadoVenta; label: string; tone: SolvixBadgeTone }[] = [
   { id: 'PENDIENTE', label: 'Pendiente', tone: 'warning' },
@@ -105,15 +106,9 @@ export function formatFechaVenta(value: unknown): string {
   });
 }
 
-/** Formatea un importe ya calculado por el backend. No calcula totales. */
+/** Formatea un importe ya calculado por el backend. No calcula totales. Presentación COP sin ,00. */
 export function formatImporte(value: number | null | undefined): string {
-  if (value == null) {
-    return '—';
-  }
-  return `$${Number(value).toLocaleString('es-CO', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })}`;
+  return formatMoney(value);
 }
 
 export interface ApiUiError {

@@ -1,23 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
 import { SolvixBadgeComponent } from '../../../../shared/components/solvix-badge/solvix-badge';
 import { SolvixButtonComponent } from '../../../../shared/components/solvix-button/solvix-button';
 import { SolvixEmptyStateComponent } from '../../../../shared/components/solvix-empty-state/solvix-empty-state';
 import { SolvixErrorStateComponent } from '../../../../shared/components/solvix-error-state/solvix-error-state';
 import { SolvixLoadingStateComponent } from '../../../../shared/components/solvix-loading-state/solvix-loading-state';
 import { SolvixPageHeaderComponent } from '../../../../shared/components/solvix-page-header/solvix-page-header';
-import { ClienteService } from '../../../../core/services/cliente.service';
+import {
+  ClienteBuscadorComponent
+} from '../../cliente/cliente-buscador/cliente-buscador';
 import { OrdenServicioService } from '../../../../core/services/orden-servicio.service';
 import { ClienteResponseDTO } from '../../../../core/models/cliente.models';
 import {
   EstadoOrdenServicio,
   OrdenServicioResponseDTO
 } from '../../../../core/models/orden-servicio.models';
-import { esConsumidorFinal } from '../../cliente/cliente-ui';
 import {
   ESTADOS_ORDEN,
   equipoResumen,
-  filtrarOrdenesLocal,
   formatFechaOrden,
   labelEstadoOrden,
   mapHttpError,
@@ -25,6 +26,9 @@ import {
 } from '../servicio-ui';
 
 type ListaEstado = 'loading' | 'ready' | 'empty' | 'error';
+
+export const TAMANO_PAGINA_ORDENES = 20;
+export const DEBOUNCE_BUSQUEDA_ORDENES_MS = 300;
 
 @Component({
   selector: 'app-servicio-list',
@@ -37,16 +41,19 @@ type ListaEstado = 'loading' | 'ready' | 'empty' | 'error';
     SolvixBadgeComponent,
     SolvixLoadingStateComponent,
     SolvixEmptyStateComponent,
-    SolvixErrorStateComponent
+    SolvixErrorStateComponent,
+    ClienteBuscadorComponent
   ]
 })
-export class ServicioListComponent implements OnInit {
+export class ServicioListComponent implements OnInit, OnDestroy {
   ordenes: OrdenServicioResponseDTO[] = [];
-  clientes: ClienteResponseDTO[] = [];
   state: ListaEstado = 'loading';
   search = '';
   filtroEstado: '' | EstadoOrdenServicio = '';
-  filtroClienteId: number | null = null;
+  filtroCliente: ClienteResponseDTO | null = null;
+  pagina = 0;
+  totalPaginas = 0;
+  totalElementos = 0;
   errorTitle = 'No pudimos cargar las órdenes.';
   errorMessage = 'Revisa la conexión e inténtalo de nuevo.';
 
@@ -56,40 +63,56 @@ export class ServicioListComponent implements OnInit {
   readonly fecha = formatFechaOrden;
   readonly equipo = equipoResumen;
 
+  private readonly busquedas = new Subject<string>();
+  private sub?: Subscription;
+
   constructor(
     private ordenServicioService: OrdenServicioService,
-    private clienteService: ClienteService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.cargarClientes();
+    this.sub = this.busquedas
+      .pipe(debounceTime(DEBOUNCE_BUSQUEDA_ORDENES_MS), distinctUntilChanged())
+      .subscribe(() => {
+        this.pagina = 0;
+        this.cargar();
+      });
     this.cargar();
   }
 
-  get visibles(): OrdenServicioResponseDTO[] {
-    return filtrarOrdenesLocal(this.ordenes, this.search);
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
   }
 
   get hayFiltros(): boolean {
-    return Boolean(this.search.trim() || this.filtroEstado || this.filtroClienteId != null);
+    return Boolean(this.search.trim() || this.filtroEstado || this.filtroCliente);
   }
 
-  get clientesFiltro(): ClienteResponseDTO[] {
-    return this.clientes.filter(c => !esConsumidorFinal(c));
+  get hayAnterior(): boolean {
+    return this.pagina > 0;
+  }
+
+  get haySiguiente(): boolean {
+    return this.pagina + 1 < this.totalPaginas;
   }
 
   cargar(): void {
     this.state = 'loading';
     this.ordenServicioService
       .listar({
+        q: this.search,
         estado: this.filtroEstado || undefined,
-        clienteId: this.filtroClienteId
+        clienteId: this.filtroCliente?.id ?? null,
+        pagina: this.pagina,
+        tamano: TAMANO_PAGINA_ORDENES
       })
       .subscribe({
-        next: lista => {
-          this.ordenes = lista;
-          this.state = lista.length === 0 ? 'empty' : 'ready';
+        next: pagina => {
+          this.ordenes = pagina.contenido;
+          this.totalPaginas = pagina.totalPaginas;
+          this.totalElementos = pagina.totalElementos;
+          this.state = pagina.totalElementos === 0 && !this.hayFiltros ? 'empty' : 'ready';
         },
         error: error => {
           const mapped = mapHttpError(error, 'No pudimos cargar las órdenes.');
@@ -100,41 +123,43 @@ export class ServicioListComponent implements OnInit {
       });
   }
 
-  cargarClientes(): void {
-    this.clienteService.listar(true).subscribe({
-      next: lista => {
-        this.clientes = lista;
-      },
-      error: () => {
-        this.clientes = [];
-      }
-    });
-  }
-
   onSearch(event: Event): void {
     this.search = (event.target as HTMLInputElement).value;
+    this.busquedas.next(this.search.trim());
   }
 
   onEstado(event: Event): void {
     this.filtroEstado = (event.target as HTMLSelectElement).value as '' | EstadoOrdenServicio;
+    this.pagina = 0;
     this.cargar();
   }
 
-  onCliente(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.filtroClienteId = value ? Number(value) : null;
+  onCliente(cliente: ClienteResponseDTO | null): void {
+    this.filtroCliente = cliente;
+    this.pagina = 0;
     this.cargar();
   }
 
   limpiarFiltros(): void {
     this.search = '';
     this.filtroEstado = '';
-    this.filtroClienteId = null;
+    this.filtroCliente = null;
+    this.pagina = 0;
+    this.busquedas.next('');
+    this.cargar();
+  }
+
+  irAPagina(delta: number): void {
+    const destino = this.pagina + delta;
+    if (destino < 0 || destino >= this.totalPaginas) {
+      return;
+    }
+    this.pagina = destino;
     this.cargar();
   }
 
   nueva(): void {
-    this.router.navigate(['/servicios', 'nueva']);
+    this.router.navigate(['/servicios/nueva']);
   }
 
   abrir(id: number): void {

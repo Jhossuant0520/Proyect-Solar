@@ -3,134 +3,247 @@
 <head>
   <meta charset="UTF-8"/>
   <title>Cotización — ${NUMERO_COTIZACION}</title>
-  <link rel="stylesheet" type="text/css" href="styles/documentos-servicios.css"/>
+  <link rel="stylesheet" type="text/css" href="styles/comprobante-recepcion.css"/>
   <link rel="stylesheet" type="text/css" href="styles/cotizacion.css"/>
 </head>
-<body class="cot-body">
-<div class="cot-wrap">
+<body class="cr-body">
+<div class="cr-sheet">
 
-  <table class="cot-top">
+  <table class="cr-meta">
     <tr>
-      <td style="width:58%;vertical-align:middle;">
-        <table>
+      <td class="cr-meta-left">${DOCUMENTO_META_IZQ}</td>
+      <td class="cr-meta-right">${DOCUMENTO_META_DER}</td>
+    </tr>
+  </table>
+
+  <table class="cr-header">
+    <tr>
+      <td class="cr-header-brand">
+        <table class="cr-brand-row">
           <tr>
-            <td class="cot-logo-cell">${LOGO_HTML}</td>
-            <td style="vertical-align:middle;padding-left:10px;">
-              <p class="cot-brand-name">${EMPRESA_NOMBRE}</p>
-              <p class="cot-brand-sub">${EMPRESA_SUBTITULO}</p>
+            <td class="cr-logo-box">${LOGO_HTML}</td>
+            <td class="cr-brand-copy">
+              <p class="cr-company">${EMPRESA_NOMBRE}</p>
+              <p class="cr-lab">${EMPRESA_ETIQUETA_LABORATORIO}</p>
+              <p class="cr-services">${EMPRESA_SUBTITULO}</p>
             </td>
           </tr>
         </table>
       </td>
-      <td class="cot-contact" style="width:42%;vertical-align:middle;">
-        <strong>${EMPRESA_IDENTIFICACION}</strong><br/>
-        ${EMPRESA_TELEFONO}<br/>
-        ${EMPRESA_CORREO}<br/>
-        ${EMPRESA_DIRECCION}
+      <td class="cr-header-contact">
+        <div class="cr-header-contact-inner">
+          <p class="cr-nit">${EMPRESA_IDENTIFICACION}</p>
+          <p class="cr-phone-line">
+            <span class="cr-phone">${EMPRESA_TELEFONO}</span>
+          </p>
+          <p class="cr-mail">${EMPRESA_CORREO}</p>
+          <p class="cr-addr">${EMPRESA_DIRECCION}</p>
+          <p class="cr-status-line">
+            <span class="cr-status-dot"></span>
+            <span class="cr-status-text">Cotización de servicio</span>
+          </p>
+        </div>
       </td>
     </tr>
   </table>
 
-  <table class="cot-hero">
+  <table class="cr-banner">
     <tr>
-      <td style="width:62%;">
-        <p class="cot-kicker">Servicio técnico</p>
-        <p class="cot-title">Cotización de servicio</p>
-        <span class="cot-chip">${NUMERO_COTIZACION}</span>
-        <span class="cot-chip cot-chip-muted">${TIPO_COTIZACION}</span>
+      <td class="cr-banner-left">
+        <p class="cr-kicker">Servicio Técnico • Cotización</p>
+        <p class="cr-doc-title">Cotización de servicio</p>
       </td>
-      <td class="cot-hero-meta" style="width:38%;">
-        <p class="label">Orden de servicio</p>
-        <p class="value">${NUMERO_OT}</p>
-        <p class="label" style="margin-top:8px;">Fecha de presentación</p>
-        <p class="value">${FECHA_PRESENTACION}</p>
-      </td>
-    </tr>
-  </table>
-
-  <table class="cot-section">
-    <tr class="cot-grid-2">
-      <td>
-        <p class="cot-section-head">Cliente</p>
-        <div class="cot-card">
-          <div class="cot-field-gap">
-            <p class="cot-field-label">Nombre</p>
-            <p class="cot-field-value">${CLIENTE_NOMBRE}</p>
-          </div>
-          <div class="cot-field-gap">
-            <p class="cot-field-label">Documento</p>
-            <p class="cot-field-value">${CLIENTE_DOCUMENTO}</p>
-          </div>
-        </div>
-      </td>
-      <td>
-        <p class="cot-section-head">Equipo</p>
-        <div class="cot-card">
-          <div class="cot-field-gap">
-            <p class="cot-field-label">Resumen</p>
-            <p class="cot-field-value">${EQUIPO_RESUMEN}</p>
-          </div>
-        </div>
+      <td class="cr-banner-right">
+        <p class="cr-ot-row">
+          <span class="cr-ot-label">Cotización:</span>
+          <span class="cr-ot-chip">${NUMERO_COTIZACION}</span>
+        </p>
+        <!-- Metadata en filas: label+valor asociados (evita Presentada/fecha en líneas distintas) -->
+        <table class="cr-cot-meta">
+          <tr>
+            <td class="cr-cot-meta-label">Orden:</td>
+            <td class="cr-cot-meta-value">${NUMERO_OT}</td>
+          </tr>
+          <tr>
+            <td class="cr-cot-meta-label">Presentada:</td>
+            <td class="cr-cot-meta-value">${FECHA_PRESENTACION}</td>
+          </tr>
+        </table>
+        <p class="cr-chip-row">
+          <span class="cr-chip-soft">${TIPO_COTIZACION}</span>
+        </p>
       </td>
     </tr>
   </table>
 
-  <div class="cot-section">
-    <p class="cot-section-head">Detalle</p>
-    <table class="cot-table">
-      <thead>
-        <tr>
-          <th>Tipo</th>
-          <th>Descripción</th>
-          <th class="num">Cant.</th>
-          <th class="num">P. unitario</th>
-          <th class="num">Subtotal</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{DETALLE_ROWS}}
-      </tbody>
-    </table>
-    <table class="cot-totales">
-      <tr>
-        <td class="label">Subtotal</td>
-        <td class="value">${SUBTOTAL}</td>
-      </tr>
-      <tr class="total-row">
-        <td class="label">Total</td>
-        <td class="value">${TOTAL}</td>
-      </tr>
-    </table>
+  <table class="cr-two">
+    <tr>
+      <td class="cr-two-col cr-two-col-left">
+        <table class="cr-card">
+          <tr>
+            <td class="cr-card-head">
+              <table class="cr-card-head-inner">
+                <tr>
+                  <td class="cr-card-head-left">
+                    <span class="cr-num">[01]</span>
+                    <span class="cr-card-title">Información del Cliente</span>
+                  </td>
+                  <td class="cr-card-head-right">Titular</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="cr-card-body">
+              <p class="cr-label">Nombre completo</p>
+              <p class="cr-value-lg">${CLIENTE_NOMBRE}</p>
+              <table class="cr-split">
+                <tr>
+                  <td class="cr-split-cell">
+                    <p class="cr-label">Documento / C.C.</p>
+                    <p class="cr-value-mono">${CLIENTE_DOCUMENTO}</p>
+                  </td>
+                  <td class="cr-split-cell">
+                    <p class="cr-label">Teléfono móvil</p>
+                    <p class="cr-value-mono">${CLIENTE_TELEFONO}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+      <td class="cr-two-col cr-two-col-right">
+        <table class="cr-card">
+          <tr>
+            <td class="cr-card-head">
+              <table class="cr-card-head-inner">
+                <tr>
+                  <td class="cr-card-head-left">
+                    <span class="cr-num">[02]</span>
+                    <span class="cr-card-title">Especificación de Hardware</span>
+                  </td>
+                  <td class="cr-card-head-right">Activo</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="cr-card-body">
+              <p class="cr-label">Equipo en servicio</p>
+              <p class="cr-value-lg">${EQUIPO_RESUMEN}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table class="cr-mid">
+    <tr>
+      <td class="cr-mid-main">
+        <table class="cr-card">
+          <tr>
+            <td class="cr-card-head">
+              <table class="cr-card-head-inner">
+                <tr>
+                  <td class="cr-card-head-left">
+                    <span class="cr-num">[03]</span>
+                    <span class="cr-card-title">Detalle de la cotización</span>
+                  </td>
+                  <td class="cr-card-head-right">Líneas</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="cr-card-body cr-card-body-table">
+              <table class="cr-lines">
+                <thead>
+                  <tr>
+                    <th>Tipo</th>
+                    <th>Descripción</th>
+                    <th class="num">Cant.</th>
+                    <th class="num">P. unitario</th>
+                    <th class="num">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{DETALLE_ROWS}}
+                </tbody>
+              </table>
+              <table class="cr-totales">
+                <tr>
+                  <td class="label">Subtotal</td>
+                  <td class="value">${SUBTOTAL}</td>
+                </tr>
+                <tr class="total-row">
+                  <td class="label">Total</td>
+                  <td class="value">${TOTAL}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+      <td class="cr-mid-side">
+        <table class="cr-qr-panel">
+          <tr>
+            <td class="cr-qr-panel-inner">
+              <table class="cr-qr-head">
+                <tr>
+                  <td class="cr-qr-head-left">[04] Consulta digital</td>
+                  <td class="cr-qr-head-right"><span class="cr-badge-sky">En línea</span></td>
+                </tr>
+              </table>
+              <table class="cr-qr-frame">
+                <tr>
+                  <td class="cr-xh cr-xh-tl">+</td>
+                  <td class="cr-xh-sp"></td>
+                  <td class="cr-xh cr-xh-tr">+</td>
+                </tr>
+                <tr>
+                  <td class="cr-xh-sp"></td>
+                  <td class="cr-qr-cell">
+                    <img class="cr-qr-img" src="${QR_DATA_URI}" alt="QR documento" width="104" height="104"/>
+                  </td>
+                  <td class="cr-xh-sp"></td>
+                </tr>
+                <tr>
+                  <td class="cr-xh cr-xh-bl">+</td>
+                  <td class="cr-xh-sp"></td>
+                  <td class="cr-xh cr-xh-br">+</td>
+                </tr>
+              </table>
+              <p class="cr-qr-title">Escanea para consultar</p>
+              <p class="cr-qr-sub">Consulta de este documento en el taller de forma segura.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <div class="cr-legal">
+    <p class="cr-legal-title">Observaciones</p>
+    <div class="cr-legal-text">${OBSERVACIONES}</div>
   </div>
 
-  <table class="cot-section">
+  <table class="cr-footer">
     <tr>
-      <td style="width:66%;padding-right:10px;">
-        <p class="cot-section-head">Observaciones</p>
-        <p class="cot-note-label">Notas de la cotización</p>
-        <div class="cot-note">${OBSERVACIONES}</div>
+      <td class="cr-footer-left">
+        <span class="cr-footer-company">${EMPRESA_NOMBRE}</span>
+        <span class="cr-footer-sep">•</span>
+        <span class="cr-footer-wa">WhatsApp: ${EMPRESA_WHATSAPP}</span>
+        <span class="cr-footer-sep">•</span>
+        <span class="cr-footer-web">${EMPRESA_SITIO_WEB}</span>
       </td>
-      <td style="width:34%;vertical-align:top;">
-        <p class="cot-section-head">Consulta</p>
-        <div class="cot-qr-panel">
-          <img src="${QR_DATA_URI}" alt="QR documento"/>
-          <p class="cot-qr-title">Escanea el código</p>
-          <p class="cot-qr-hint">Consulta de este documento en el taller.</p>
-        </div>
-      </td>
-    </tr>
-  </table>
-
-  <table class="cot-footer">
-    <tr>
-      <td style="width:55%;">
-        <strong>${EMPRESA_NOMBRE}</strong> · ${EMPRESA_CONTACTO}<br/>
-        ${FOOTER_TEXTO}<br/>
-        <span class="cot-autoria">${SOFTWARE_AUTORIA}</span>
-      </td>
-      <td class="cot-footer-right" style="width:45%;">
-        <span class="cot-pill">SOLVIX</span><br/>
-        ${NUMERO_COTIZACION} · ${NUMERO_OT}
+      <td class="cr-footer-right">
+        <p class="cr-author-line">
+          <span class="cr-author-label">SOFTWARE DESARROLLADO POR</span>
+          <strong class="cr-author-name">${SOFTWARE_DESARROLLADO_POR}</strong>
+          <span class="cr-author-role">${SOFTWARE_ROL}</span>
+        </p>
       </td>
     </tr>
   </table>

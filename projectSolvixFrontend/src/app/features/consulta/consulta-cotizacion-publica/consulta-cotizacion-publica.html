@@ -1,0 +1,48 @@
+<section class="consulta-page">
+  <div class="consulta-glow consulta-glow--a" aria-hidden="true"></div>
+  <div class="consulta-glow consulta-glow--b" aria-hidden="true"></div>
+  <div class="consulta-grid" aria-hidden="true"></div>
+
+  <a routerLink="/" class="consulta-home" aria-label="Ir al inicio">
+    <img src="LogoSolvix3.1.png" alt="SOLVIX" class="consulta-logo" />
+  </a>
+  <div class="consulta-theme">
+    <solvix-theme-toggle />
+  </div>
+
+  <article class="consulta-card fade-up">
+    @if (state === 'loading') {
+      <solvix-loading-state label="Consultando la cotización." />
+    } @else if (state === 'error' || state === 'sin-token') {
+      <solvix-error-state title="No pudimos mostrar la cotización." [message]="errorMessage" />
+    } @else if (data) {
+      <p class="kicker">Consulta de cotización</p>
+      <h1 class="solvix-mono">{{ data.numero }}</h1>
+
+      <dl class="facts">
+        <div>
+          <dt>Estado</dt>
+          <dd>{{ data.estadoPublico }}</dd>
+        </div>
+        <div>
+          <dt>Fecha</dt>
+          <dd class="solvix-mono">{{ fecha(data.fecha) }}</dd>
+        </div>
+        @for (linea of data.lineas; track $index) {
+          <div>
+            <dt>{{ linea.cantidad }} × {{ linea.descripcion }}</dt>
+            <dd class="solvix-mono">{{ money(linea.subtotal) }}</dd>
+          </div>
+        }
+        <div>
+          <dt>Total</dt>
+          <dd class="solvix-mono">{{ money(data.total) }}</dd>
+        </div>
+      </dl>
+
+      @if (data.mensaje) {
+        <p class="mensaje">{{ data.mensaje }}</p>
+      }
+    }
+  </article>
+</section>

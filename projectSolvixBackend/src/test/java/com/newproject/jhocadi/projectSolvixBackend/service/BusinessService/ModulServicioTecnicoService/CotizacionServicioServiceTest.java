@@ -143,8 +143,8 @@ class CotizacionServicioServiceTest extends ComercialTestSupport {
     }
 
     @Test
-    @DisplayName("presentar congela edición y pasa OT a PENDIENTE_APROBACION")
-    void presentarYBloqueoEdicion() {
+    @DisplayName("presentar pasa cotización y OT a PENDIENTE_APROBACION")
+    void presentarCotizacion() {
         OrdenServicioResponseDTO orden = avanzarADiagnosticado(crearOrdenBasica());
         CotizacionServicioResponseDTO cot = cotizacionService.crearInicial(
             orden.getId(), requestConManoObra("MO", "1", "100000"), USUARIO_TEST);
@@ -155,14 +155,111 @@ class CotizacionServicioServiceTest extends ComercialTestSupport {
         assertThat(presentada.getEstado()).isEqualTo(EstadoCotizacionServicio.PENDIENTE_APROBACION);
         assertThat(presentada.getFechaPresentacion()).isNotNull();
         assertThat(presentada.getUsuarioPresentacion()).isEqualTo(USUARIO_TEST);
+        assertThat(presentada.isPuedeEditar()).isTrue();
         assertThat(ordenServicioService.obtenerPorId(orden.getId()).getEstado())
             .isEqualTo(EstadoOrdenServicio.PENDIENTE_APROBACION);
+    }
 
-        CotizacionServicioRequestDTO edit = requestConManoObra("MO2", "1", "200000");
+    @Test
+    @DisplayName("editar cotización presentada: misma cotización vuelve a BORRADOR y se re-presenta")
+    void editarPresentadaSinCrearVersiones() {
+        OrdenServicioResponseDTO orden = avanzarADiagnosticado(crearOrdenBasica());
+        CotizacionServicioResponseDTO cot = cotizacionService.crearInicial(
+            orden.getId(), requestConManoObra("Reparación", "1", "300000"), USUARIO_TEST);
+        cotizacionService.presentar(orden.getId(), cot.getId(), USUARIO_TEST);
+
+        CotizacionServicioRequestDTO edit = new CotizacionServicioRequestDTO();
+        edit.setDetalles(List.of(
+            linea(TipoDetalleCotizacionServicio.MANO_OBRA, "Reparación", "1", "300000"),
+            linea(TipoDetalleCotizacionServicio.OTRO, "Insumos", "1", "120000")));
+        CotizacionServicioResponseDTO editada = cotizacionService.actualizar(
+            orden.getId(), cot.getId(), edit, USUARIO_TEST);
+
+        assertThat(editada.getId()).isEqualTo(cot.getId());
+        assertThat(editada.getNumero()).isEqualTo(cot.getNumero());
+        assertThat(editada.getEstado()).isEqualTo(EstadoCotizacionServicio.BORRADOR);
+        assertThat(editada.getFechaPresentacion()).isNull();
+        assertThat(editada.getTotal()).isEqualByComparingTo("420000.00");
+        assertThat(ordenServicioService.obtenerPorId(orden.getId()).getEstado())
+            .isEqualTo(EstadoOrdenServicio.COTIZADO);
+
+        CotizacionServicioResponseDTO represented = cotizacionService.presentar(
+            orden.getId(), cot.getId(), USUARIO_TEST);
+        assertThat(represented.getEstado()).isEqualTo(EstadoCotizacionServicio.PENDIENTE_APROBACION);
+        assertThat(ordenServicioService.obtenerPorId(orden.getId()).getEstado())
+            .isEqualTo(EstadoOrdenServicio.PENDIENTE_APROBACION);
+        assertThat(cotizacionService.listar(orden.getId())).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("PUT agrega, edita y elimina líneas sobre la misma cotización y recalcula total")
+    void putAgregaEditaEliminaLineas() {
+        OrdenServicioResponseDTO orden = avanzarADiagnosticado(crearOrdenBasica());
+        CotizacionServicioRequestDTO inicial = new CotizacionServicioRequestDTO();
+        inicial.setDetalles(List.of(
+            linea(TipoDetalleCotizacionServicio.MANO_OBRA, "Diagnóstico", "1", "50000"),
+            linea(TipoDetalleCotizacionServicio.OTRO, "Transporte", "1", "10000")));
+        CotizacionServicioResponseDTO cot = cotizacionService.crearInicial(
+            orden.getId(), inicial, USUARIO_TEST);
+        assertThat(cot.getTotal()).isEqualByComparingTo("60000.00");
+
+        CotizacionServicioRequestDTO edit = new CotizacionServicioRequestDTO();
+        edit.setObservaciones("Incluye limpieza");
+        edit.setDetalles(List.of(
+            linea(TipoDetalleCotizacionServicio.MANO_OBRA, "Diagnóstico", "2", "40000"),
+            linea(TipoDetalleCotizacionServicio.MANO_OBRA, "Limpieza interna", "1", "25000")));
+        CotizacionServicioResponseDTO editada = cotizacionService.actualizar(
+            orden.getId(), cot.getId(), edit, USUARIO_TEST);
+
+        assertThat(editada.getId()).isEqualTo(cot.getId());
+        assertThat(editada.getDetalles()).hasSize(2);
+        assertThat(editada.getDetalles())
+            .extracting(d -> d.getDescripcion())
+            .containsExactly("Diagnóstico", "Limpieza interna");
+        assertThat(editada.getDetalles().get(0).getSubtotal()).isEqualByComparingTo("80000.00");
+        assertThat(editada.getSubtotalOtros()).isEqualByComparingTo("0.00");
+        assertThat(editada.getTotal()).isEqualByComparingTo("105000.00");
+        assertThat(editada.getObservaciones()).isEqualTo("Incluye limpieza");
+        assertThat(cotizacionService.listar(orden.getId())).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("repuesto con producto real: precio congelado, stock intacto y sin producto se rechaza")
+    void repuestoConProductoReal() {
+        OrdenServicioResponseDTO orden = avanzarADiagnosticado(crearOrdenBasica());
+        Producto producto = crearProducto("Tarjeta especial XYZ", bd("180000"), bd("120000"), 1);
+
+        DetalleCotizacionServicioRequestDTO lineaProducto = new DetalleCotizacionServicioRequestDTO();
+        lineaProducto.setTipo(TipoDetalleCotizacionServicio.REPUESTO);
+        lineaProducto.setProductoId(producto.getId());
+        lineaProducto.setCantidad(bd("1"));
+        lineaProducto.setPrecioUnitario(bd("250000"));
+        CotizacionServicioRequestDTO body = new CotizacionServicioRequestDTO();
+        body.setDetalles(List.of(lineaProducto));
+
+        CotizacionServicioResponseDTO cot = cotizacionService.crearInicial(
+            orden.getId(), body, USUARIO_TEST);
+
+        assertThat(cot.getDetalles().get(0).getProductoId()).isEqualTo(producto.getId());
+        assertThat(cot.getDetalles().get(0).getProductoNombreSnapshot()).isEqualTo("Tarjeta especial XYZ");
+        assertThat(cot.getDetalles().get(0).getPrecioUnitario()).isEqualByComparingTo("250000.00");
+        assertThat(cot.getTotal()).isEqualByComparingTo("250000.00");
+        assertThat(stockDe(producto.getId())).isEqualTo(1);
+
+        Producto p = productoRepository.findById(producto.getId()).orElseThrow();
+        p.setPrecioVentaActual(bd("999999"));
+        productoRepository.save(p);
+        assertThat(cotizacionService.obtener(orden.getId(), cot.getId()).getTotal())
+            .isEqualByComparingTo("250000.00");
+
+        DetalleCotizacionServicioRequestDTO sinProducto = linea(
+            TipoDetalleCotizacionServicio.REPUESTO, "Pantalla genérica", "1", "100000");
+        CotizacionServicioRequestDTO invalida = new CotizacionServicioRequestDTO();
+        invalida.setDetalles(List.of(sinProducto));
         assertThatThrownBy(() ->
-            cotizacionService.actualizar(orden.getId(), cot.getId(), edit, USUARIO_TEST))
+            cotizacionService.actualizar(orden.getId(), cot.getId(), invalida, USUARIO_TEST))
             .isInstanceOf(BusinessException.class)
-            .hasMessageContaining("BORRADOR");
+            .hasMessageContaining("producto");
     }
 
     @Test
@@ -185,7 +282,11 @@ class CotizacionServicioServiceTest extends ComercialTestSupport {
         assertThatThrownBy(() ->
             cotizacionService.actualizar(
                 orden.getId(), cot.getId(), requestConManoObra("X", "1", "1"), USUARIO_TEST))
-            .isInstanceOf(BusinessException.class);
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("aprobada");
+        assertThat(cotizacionService.obtener(orden.getId(), cot.getId()).isPuedeEditar()).isFalse();
+        assertThat(cotizacionService.obtener(orden.getId(), cot.getId()).getTotal())
+            .isEqualByComparingTo("130000.00");
     }
 
     @Test
@@ -250,6 +351,36 @@ class CotizacionServicioServiceTest extends ComercialTestSupport {
 
         ResumenEconomicoOrdenServicioDTO resumen = cotizacionService.resumenEconomico(orden.getId());
         assertThat(resumen.getTotalAutorizado()).isEqualByComparingTo("200000.00");
+    }
+
+    @Test
+    @DisplayName("editar adicional presentada vuelve OT a REQUIERE_APROBACION_ADICIONAL")
+    void editarAdicionalPresentada() {
+        OrdenServicioResponseDTO orden = avanzarAReparacionConCotizacion();
+        RegistrarNuevaFallaRequestDTO falla = new RegistrarNuevaFallaRequestDTO();
+        falla.setNuevaFalla("Conector dañado");
+        ordenServicioService.registrarNuevaFalla(orden.getId(), falla, USUARIO_TEST);
+
+        CotizacionServicioRequestDTO req = requestConManoObra("Conector", "1", "40000");
+        req.setMotivoAmpliacion("Conector dañado");
+        CotizacionServicioResponseDTO adicional = cotizacionService.crearAdicional(
+            orden.getId(), req, USUARIO_TEST);
+        cotizacionService.presentar(orden.getId(), adicional.getId(), USUARIO_TEST);
+
+        CotizacionServicioRequestDTO edit = requestConManoObra("Conector + soldadura", "1", "55000");
+        CotizacionServicioResponseDTO editada = cotizacionService.actualizar(
+            orden.getId(), adicional.getId(), edit, USUARIO_TEST);
+
+        assertThat(editada.getEstado()).isEqualTo(EstadoCotizacionServicio.BORRADOR);
+        assertThat(editada.getMotivoAmpliacion()).isEqualTo("Conector dañado");
+        assertThat(ordenServicioService.obtenerPorId(orden.getId()).getEstado())
+            .isEqualTo(EstadoOrdenServicio.REQUIERE_APROBACION_ADICIONAL);
+
+        cotizacionService.presentar(orden.getId(), adicional.getId(), USUARIO_TEST);
+        cotizacionService.aprobar(orden.getId(), adicional.getId(), USUARIO_TEST);
+        assertThat(cotizacionService.resumenEconomico(orden.getId()).getTotalAutorizado())
+            .isEqualByComparingTo("185000.00");
+        assertThat(cotizacionService.listar(orden.getId())).hasSize(2);
     }
 
     @Test
@@ -349,6 +480,7 @@ class CotizacionServicioServiceTest extends ComercialTestSupport {
         request.setClienteId(cliente.getId());
         request.setEquipoId(equipo.getId());
         request.setProblemaReportado("No enciende");
+        FirmaRecepcionTestSupport.aplicarFirmaRecepcion(request);
         return ordenServicioService.crear(request, USUARIO_TEST);
     }
 

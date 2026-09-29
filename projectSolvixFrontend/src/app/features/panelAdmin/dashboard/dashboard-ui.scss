@@ -1,5 +1,5 @@
 .dash-panel {
-  background: rgba(15, 23, 42, 0.8);
+  background: var(--solvix-panel);
   backdrop-filter: blur(16px);
   border: 1px solid var(--solvix-border);
   border-radius: var(--solvix-radius);
@@ -15,7 +15,8 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(79, 209, 255, 0.7), transparent);
+  background: linear-gradient(90deg, transparent, var(--solvix-primary), transparent);
+  opacity: 0.55;
 }
 
 .dash-chips {
@@ -25,28 +26,34 @@
 }
 
 .dash-chip {
-  background: var(--solvix-surface-high);
+  background: var(--solvix-surface-low);
   color: var(--solvix-text-muted);
-  border: 0;
-  border-radius: 0.125rem;
+  border: 1px solid var(--solvix-border);
+  border-radius: 0.5rem;
   padding: 0.4rem 0.7rem;
-  font-family: var(--solvix-font-mono);
+  font-family: var(--solvix-font);
   font-size: 0.7rem;
+  font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
+  transition:
+    color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard);
 }
 
 .dash-chip:hover,
 .dash-chip:focus-visible {
   color: var(--solvix-text);
-  outline: 2px solid var(--solvix-secondary);
+  outline: 2px solid var(--solvix-primary);
   outline-offset: 1px;
 }
 
 .dash-chip.is-active {
-  background: #dce1fb;
-  color: #0c1324;
+  background: var(--solvix-primary-soft);
+  color: var(--solvix-primary-hover, var(--solvix-primary));
+  border-color: color-mix(in srgb, var(--solvix-primary) 35%, transparent);
   font-weight: 700;
 }
 
@@ -70,11 +77,12 @@
 
 .dash-table th {
   color: var(--solvix-text-muted);
-  font-family: var(--solvix-font-mono);
+  font-family: var(--solvix-font);
   font-size: 0.68rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-weight: 500;
+  font-weight: 600;
+  background: var(--solvix-surface-low);
 }
 
 .dash-table td {
@@ -88,7 +96,7 @@
 }
 
 .dash-table tbody tr:hover {
-  background: rgba(46, 52, 71, 0.35);
+  background: var(--solvix-row-hover);
 }
 
 @media (max-width: 767px) {

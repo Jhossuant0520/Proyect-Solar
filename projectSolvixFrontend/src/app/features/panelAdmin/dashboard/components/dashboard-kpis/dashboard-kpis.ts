@@ -29,6 +29,20 @@ export class DashboardKpisComponent {
     return formatMetricValue(metric.value, metric.formato, metric.compact);
   }
 
+  /** Solo números reales animables; estados textuales → null. */
+  countValue(metric: DashboardMetricVista): number | null {
+    if (metric.estado === 'COSTO_INCOMPLETO' && metric.value == null) {
+      return null;
+    }
+    if (metric.estado === 'SIN_DATOS' || metric.estado === 'SIN_VENTAS_RECIENTES') {
+      return null;
+    }
+    if (metric.estado === 'VALOR_CERO') {
+      return 0;
+    }
+    return metric.value;
+  }
+
   isIncomplete(metric: DashboardMetricVista): boolean {
     return metric.estado === 'COSTO_INCOMPLETO' && metric.value == null;
   }

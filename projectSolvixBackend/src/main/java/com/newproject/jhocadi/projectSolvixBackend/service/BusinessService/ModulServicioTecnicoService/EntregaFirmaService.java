@@ -22,13 +22,19 @@ import com.newproject.jhocadi.projectSolvixBackend.exception.BusinessException;
 import jakarta.annotation.PostConstruct;
 
 /**
- * Almacena firmas PNG de entrega digital en filesystem.
- * MySQL solo guarda la URL relativa en {@code EntregaOrdenServicio.firmaUrl}.
+ * Almacena firmas PNG de recepción/entrega en filesystem.
+ * MySQL solo guarda la URL relativa ({@code firmaUrl}).
+ * Prefijos públicos distintos evitan confundir recepción vs entrega.
  */
 @Service
 public class EntregaFirmaService {
 
+    /** Prefijo histórico de entrega (FASE 3.15.5.3). */
     public static final String RUTA_PUBLICA_PREFIJO = "/api/v1/ordenes-servicio/entregas/firmas/";
+    public static final String RUTA_PUBLICA_ENTREGA = RUTA_PUBLICA_PREFIJO;
+    /** Prefijo de recepción firmada (BLOQUE D.2). */
+    public static final String RUTA_PUBLICA_RECEPCION = "/api/v1/ordenes-servicio/recepciones/firmas/";
+
     private static final long TAMANO_MAXIMO = 500L * 1024;
     private static final Pattern NOMBRE_SEGURO = Pattern.compile(
         "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\.png$"
@@ -50,10 +56,19 @@ public class EntregaFirmaService {
     }
 
     /**
-     * Decodifica Base64 (data URL o crudo), valida PNG y tamaño, guarda con UUID.
-     * @return URL relativa pública
+     * Guarda firma de entrega (compatibilidad).
+     * @return URL relativa pública de entrega
      */
     public String guardarDesdeBase64(String firmaBase64) {
+        return guardarDesdeBase64(firmaBase64, RUTA_PUBLICA_ENTREGA);
+    }
+
+    /** Guarda firma de recepción del equipo en el taller. */
+    public String guardarFirmaRecepcion(String firmaBase64) {
+        return guardarDesdeBase64(firmaBase64, RUTA_PUBLICA_RECEPCION);
+    }
+
+    public String guardarDesdeBase64(String firmaBase64, String rutaPublicaPrefijo) {
         if (firmaBase64 == null || firmaBase64.isBlank()) {
             throw new BusinessException("La firma del cliente es obligatoria.");
         }
@@ -88,7 +103,7 @@ public class EntregaFirmaService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "No se pudo guardar la firma.");
         }
 
-        return RUTA_PUBLICA_PREFIJO + nombre;
+        return rutaPublicaPrefijo + nombre;
     }
 
     public Resource cargar(String nombreArchivo) {
@@ -106,6 +121,21 @@ public class EntregaFirmaService {
             return MediaType.IMAGE_PNG;
         }
         return MediaType.APPLICATION_OCTET_STREAM;
+    }
+
+    /** Extrae el nombre de archivo desde cualquier URL pública de firma. */
+    public static String extraerNombreDesdeUrl(String firmaUrl) {
+        if (firmaUrl == null) {
+            return null;
+        }
+        if (firmaUrl.startsWith(RUTA_PUBLICA_RECEPCION)) {
+            return firmaUrl.substring(RUTA_PUBLICA_RECEPCION.length());
+        }
+        if (firmaUrl.startsWith(RUTA_PUBLICA_ENTREGA)) {
+            return firmaUrl.substring(RUTA_PUBLICA_ENTREGA.length());
+        }
+        int slash = firmaUrl.lastIndexOf('/');
+        return slash >= 0 ? firmaUrl.substring(slash + 1) : firmaUrl;
     }
 
     private String extraerPayloadBase64(String valor) {

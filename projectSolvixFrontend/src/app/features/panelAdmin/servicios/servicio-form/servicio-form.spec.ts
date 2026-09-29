@@ -9,6 +9,7 @@ import { EquipoService } from '../../../../core/services/equipo.service';
 import { OrdenServicioService } from '../../../../core/services/orden-servicio.service';
 import { ClienteResponseDTO } from '../../../../core/models/cliente.models';
 import { EquipoResponseDTO } from '../../../../core/models/equipo.models';
+import { SolvixFeedbackService } from '../../../../shared/services/solvix-feedback.service';
 
 const clienteAna: ClienteResponseDTO = {
   id: 4,
@@ -22,14 +23,6 @@ const clienteAna: ClienteResponseDTO = {
   notas: null,
   activo: true,
   fechaRegistro: null
-};
-
-const consumidor: ClienteResponseDTO = {
-  ...clienteAna,
-  id: 1,
-  nombre: 'Consumidor final',
-  tipoCliente: 'CONSUMIDOR_FINAL',
-  consumidorFinal: true
 };
 
 const equipo: EquipoResponseDTO = {
@@ -52,40 +45,22 @@ describe('ServicioFormComponent — wizard', () => {
   let clienteService: jasmine.SpyObj<ClienteService>;
   let equipoService: jasmine.SpyObj<EquipoService>;
   let ordenService: jasmine.SpyObj<OrdenServicioService>;
+  let feedback: jasmine.SpyObj<SolvixFeedbackService>;
   let router: Router;
   let queryParams: Record<string, string | null> = {};
 
   beforeEach(async () => {
     queryParams = {};
-    clienteService = jasmine.createSpyObj('ClienteService', ['listar', 'crear']);
-    equipoService = jasmine.createSpyObj('EquipoService', ['listarPorCliente', 'crear']);
+    clienteService = jasmine.createSpyObj('ClienteService', ['crear', 'obtenerPorId', 'buscar']);
+    equipoService = jasmine.createSpyObj('EquipoService', ['crear', 'obtenerPorId', 'buscar']);
     ordenService = jasmine.createSpyObj('OrdenServicioService', ['crear']);
-    clienteService.listar.and.returnValue(of([clienteAna, consumidor]));
+    feedback = jasmine.createSpyObj('SolvixFeedbackService', ['success', 'error', 'info']);
     clienteService.crear.and.returnValue(of({ ...clienteAna, id: 55, nombre: 'Nuevo' }));
-    equipoService.listarPorCliente.and.returnValue(of([equipo]));
+    clienteService.obtenerPorId.and.returnValue(of(clienteAna));
+    clienteService.buscar.and.returnValue(of([clienteAna]));
     equipoService.crear.and.returnValue(of({ ...equipo, id: 99, marca: 'HP' }));
-    ordenService.crear.and.returnValue(
-      of({
-        id: 22,
-        numero: 'OS-2026-000022',
-        clienteId: 4,
-        clienteNombre: 'Ana Ruiz',
-        equipoId: 9,
-        equipoTipo: 'PORTATIL',
-        equipoMarca: 'Dell',
-        equipoModelo: 'XPS',
-        equipoNombre: 'Notebook',
-        estado: 'RECEPCIONADO',
-        problemaReportado: 'No enciende',
-        diagnostico: null,
-        trabajoRealizado: null,
-        observaciones: null,
-        fechaRecepcion: null,
-        fechaActualizacion: null,
-        fechaCierre: null,
-        createdBy: 'admin'
-      })
-    );
+    equipoService.obtenerPorId.and.returnValue(of(equipo));
+    equipoService.buscar.and.returnValue(of([equipo]));
 
     await TestBed.configureTestingModule({
       imports: [ServicioFormComponent, NoopAnimationsModule],
@@ -104,6 +79,7 @@ describe('ServicioFormComponent — wizard', () => {
         { provide: ClienteService, useValue: clienteService },
         { provide: EquipoService, useValue: equipoService },
         { provide: OrdenServicioService, useValue: ordenService },
+        { provide: SolvixFeedbackService, useValue: feedback },
         { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open']) }
       ]
     }).compileComponents();
@@ -113,22 +89,23 @@ describe('ServicioFormComponent — wizard', () => {
     router = TestBed.inject(Router);
   });
 
-  it('inicia en paso cliente', fakeAsync(() => {
+  it('inicia listo sin cargar catálogos completos', fakeAsync(() => {
     fixture.detectChanges();
     tick();
     expect(component.paso).toBe(1);
-    expect(component.clientesSeleccionables.map(c => c.id)).toEqual([4]);
+    expect(component.loadState).toBe('ready');
+    expect(fixture.nativeElement.querySelector('app-cliente-buscador')).not.toBeNull();
+    expect(clienteService.obtenerPorId).not.toHaveBeenCalled();
   }));
 
-  it('selecciona cliente y avanza a equipos', fakeAsync(() => {
+  it('selecciona cliente y avanza a equipos con buscador', fakeAsync(() => {
     fixture.detectChanges();
     tick();
-    component.seleccionarCliente(4);
-    tick();
+    component.onClienteSeleccionado(clienteAna);
     component.continuarDesdeCliente();
+    fixture.detectChanges();
     expect(component.paso).toBe(2);
-    expect(equipoService.listarPorCliente).toHaveBeenCalledWith(4, true);
-    expect(component.equipos.length).toBe(1);
+    expect(fixture.nativeElement.querySelector('app-equipo-buscador')).not.toBeNull();
   }));
 
   it('crea cliente inline y lo preselecciona', fakeAsync(() => {
@@ -142,11 +119,10 @@ describe('ServicioFormComponent — wizard', () => {
     expect(component.form.controls.clienteId.value).toBe(55);
   }));
 
-  it('filtra equipos por cliente y permite crear equipo inline', fakeAsync(() => {
+  it('crea equipo inline y lo preselecciona', fakeAsync(() => {
     fixture.detectChanges();
     tick();
-    component.seleccionarCliente(4);
-    tick();
+    component.onClienteSeleccionado(clienteAna);
     component.continuarDesdeCliente();
     component.abrirCrearEquipo();
     component.equipoInline.patchValue({ tipoEquipo: 'IMPRESORA', marca: 'HP' });
@@ -156,29 +132,40 @@ describe('ServicioFormComponent — wizard', () => {
     expect(component.form.controls.equipoId.value).toBe(99);
   }));
 
-  it('crea OT desde recepción', fakeAsync(() => {
+  it('abre firma de recepción y navega tras éxito (D.2)', fakeAsync(() => {
     const navigate = spyOn(router, 'navigate');
     fixture.detectChanges();
     tick();
-    component.seleccionarCliente(4);
-    tick();
-    component.seleccionarEquipo(9);
+    component.onClienteSeleccionado(clienteAna);
+    component.onEquipoSeleccionado(equipo);
     component.paso = 3;
     component.form.controls.problemaReportado.setValue('No enciende');
+    fixture.detectChanges();
+
+    const openSpy = jasmine.createSpy('open').and.returnValue({
+      afterClosed: () => of({ ordenId: 22, numero: 'OS-2026-000022' })
+    });
+    Object.defineProperty(component, 'dialog', {
+      value: { open: openSpy },
+      configurable: true
+    });
+
     component.guardar();
     tick();
-    expect(ordenService.crear).toHaveBeenCalled();
+    expect(openSpy).toHaveBeenCalled();
+    expect(feedback.success).toHaveBeenCalledWith('Recepción registrada');
     expect(navigate).toHaveBeenCalledWith(['/servicios', 22], {
       queryParams: { esperarComprobante: '1' }
     });
   }));
 
-  it('preselecciona cliente por query param', fakeAsync(() => {
+  it('preselecciona cliente por query param sin listar todo', fakeAsync(() => {
     queryParams = { clienteId: '4' };
     fixture = TestBed.createComponent(ServicioFormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
     tick();
+    expect(clienteService.obtenerPorId).toHaveBeenCalledWith(4);
     expect(component.form.controls.clienteId.value).toBe(4);
     expect(component.paso).toBe(2);
   }));
@@ -194,22 +181,21 @@ describe('ServicioFormComponent — wizard', () => {
     expect(component.paso).toBe(3);
   }));
 
-  it('cambia equipos al seleccionar otro cliente', fakeAsync(() => {
+  it('limpia equipo al cambiar de cliente', fakeAsync(() => {
     fixture.detectChanges();
     tick();
-    component.seleccionarCliente(4);
-    tick();
-    component.seleccionarEquipo(9);
-    const otro: EquipoResponseDTO = { ...equipo, id: 11, clienteId: 5 };
-    equipoService.listarPorCliente.and.returnValue(of([otro]));
-    component.seleccionarCliente(5);
-    tick();
+    component.onClienteSeleccionado(clienteAna);
+    component.onEquipoSeleccionado(equipo);
+    component.onClienteSeleccionado({ ...clienteAna, id: 5, nombre: 'Otro' });
     expect(component.form.controls.equipoId.value).toBeNull();
-    expect(component.equipos.map(e => e.id)).toEqual([11]);
+    expect(component.equipoSeleccionado).toBeNull();
   }));
 
-  it('muestra error de carga', fakeAsync(() => {
-    clienteService.listar.and.returnValue(throwError(() => new Error('fail')));
+  it('muestra error si el prefill de cliente falla', fakeAsync(() => {
+    queryParams = { clienteId: '4' };
+    clienteService.obtenerPorId.and.returnValue(throwError(() => new Error('fail')));
+    fixture = TestBed.createComponent(ServicioFormComponent);
+    component = fixture.componentInstance;
     fixture.detectChanges();
     tick();
     expect(component.loadState).toBe('error');

@@ -11,15 +11,14 @@
 .mat-mdc-snack-bar-container.solvix-snack .mdc-snackbar__surface {
   background: linear-gradient(
     145deg,
-    rgba(15, 23, 42, 0.98) 0%,
-    rgba(2, 6, 23, 0.96) 100%
+    var(--solvix-snack-surface-from) 0%,
+    var(--solvix-snack-surface-to) 100%
   ) !important;
-  border: 1px solid rgba(79, 209, 255, 0.28) !important;
+  border: 1px solid var(--solvix-border) !important;
   border-radius: 0.75rem !important;
   box-shadow:
-    0 12px 40px rgba(2, 6, 23, 0.65),
-    0 0 0 1px rgba(0, 229, 255, 0.06),
-    0 0 24px rgba(79, 209, 255, 0.12) !important;
+    var(--solvix-shadow),
+    0 0 0 1px var(--solvix-primary-soft) !important;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   min-width: 0 !important;
@@ -48,20 +47,18 @@
 }
 
 .mat-mdc-snack-bar-container.solvix-snack .mat-mdc-button:hover {
-  background: rgba(79, 209, 255, 0.1) !important;
+  background: var(--solvix-primary-soft) !important;
 }
 
 /* Éxito */
 .mat-mdc-snack-bar-container.solvix-snack--success .mdc-snackbar__surface {
-  border-color: rgba(16, 185, 129, 0.45) !important;
-  box-shadow:
-    0 12px 40px rgba(2, 6, 23, 0.65),
-    0 0 20px rgba(16, 185, 129, 0.15) !important;
+  border-color: var(--solvix-success) !important;
+  box-shadow: var(--solvix-shadow), 0 0 20px var(--solvix-success-soft) !important;
 }
 
 .mat-mdc-snack-bar-container.solvix-snack--success .mdc-snackbar__label,
 .mat-mdc-snack-bar-container.solvix-snack--success .mat-mdc-snack-bar-label {
-  color: #ecfdf5 !important;
+  color: var(--solvix-text) !important;
 }
 
 .mat-mdc-snack-bar-container.solvix-snack--success .mat-mdc-button {
@@ -70,15 +67,13 @@
 
 /* Aviso */
 .mat-mdc-snack-bar-container.solvix-snack--warning .mdc-snackbar__surface {
-  border-color: rgba(245, 158, 11, 0.45) !important;
-  box-shadow:
-    0 12px 40px rgba(2, 6, 23, 0.65),
-    0 0 20px rgba(245, 158, 11, 0.12) !important;
+  border-color: var(--solvix-warning) !important;
+  box-shadow: var(--solvix-shadow), 0 0 20px var(--solvix-warning-soft) !important;
 }
 
 .mat-mdc-snack-bar-container.solvix-snack--warning .mdc-snackbar__label,
 .mat-mdc-snack-bar-container.solvix-snack--warning .mat-mdc-snack-bar-label {
-  color: #fffbeb !important;
+  color: var(--solvix-text) !important;
 }
 
 .mat-mdc-snack-bar-container.solvix-snack--warning .mat-mdc-button {
@@ -87,15 +82,13 @@
 
 /* Error */
 .mat-mdc-snack-bar-container.solvix-snack--error .mdc-snackbar__surface {
-  border-color: rgba(255, 180, 171, 0.4) !important;
-  box-shadow:
-    0 12px 40px rgba(2, 6, 23, 0.65),
-    0 0 20px rgba(147, 0, 10, 0.25) !important;
+  border-color: var(--solvix-error) !important;
+  box-shadow: var(--solvix-shadow), 0 0 20px var(--solvix-danger-soft) !important;
 }
 
 .mat-mdc-snack-bar-container.solvix-snack--error .mdc-snackbar__label,
 .mat-mdc-snack-bar-container.solvix-snack--error .mat-mdc-snack-bar-label {
-  color: #ffedea !important;
+  color: var(--solvix-text) !important;
 }
 
 .mat-mdc-snack-bar-container.solvix-snack--error .mat-mdc-button {

@@ -16,15 +16,20 @@
         type="search"
         [value]="search"
         (input)="onSearch($event)"
-        placeholder="Buscar por número, cliente o equipo"
+        placeholder="Buscar por número, cliente, documento o equipo"
+        aria-label="Buscar órdenes de servicio"
       />
     </label>
-    <select [value]="filtroClienteId ?? ''" (change)="onCliente($event)" aria-label="Cliente">
-      <option value="">Cliente: todos</option>
-      @for (cliente of clientesFiltro; track cliente.id) {
-        <option [value]="cliente.id">{{ cliente.nombre }}</option>
-      }
-    </select>
+    <div class="filtro-cliente">
+      <app-cliente-buscador
+        [seleccionado]="filtroCliente"
+        [limite]="8"
+        [mostrarHintSinSeleccion]="false"
+        etiquetaSinCliente="Cliente: todos"
+        placeholder="Filtrar por cliente…"
+        (seleccionadoChange)="onCliente($event)"
+      />
+    </div>
     <select [value]="filtroEstado" (change)="onEstado($event)" aria-label="Estado">
       <option value="">Estado: todos</option>
       @for (estado of estados; track estado.id) {
@@ -53,7 +58,7 @@
       actionIcon="add"
       (action)="nueva()"
     />
-  } @else if (visibles.length === 0) {
+  } @else if (ordenes.length === 0) {
     <solvix-empty-state
       icon="search_off"
       title="No encontramos órdenes con estos filtros."
@@ -77,7 +82,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (orden of visibles; track orden.id) {
+            @for (orden of ordenes; track orden.id) {
               <tr>
                 <td>
                   <strong class="solvix-mono">{{ orden.numero }}</strong>
@@ -102,8 +107,8 @@
       </div>
 
       <ul class="mobile-cards">
-        @for (orden of visibles; track orden.id) {
-          <li class="card" (click)="abrir(orden.id)" (keyup.enter)="abrir(orden.id)" tabindex="0" role="button">
+        @for (orden of ordenes; track orden.id) {
+          <li class="card solvix-card-interactive" (click)="abrir(orden.id)" (keyup.enter)="abrir(orden.id)" tabindex="0" role="button">
             <div class="card-top">
               <strong class="solvix-mono">{{ orden.numero }}</strong>
               <solvix-badge [tone]="estadoTone(orden.estado)">
@@ -116,6 +121,33 @@
           </li>
         }
       </ul>
+
+      <div class="pager" role="navigation" aria-label="Paginación de órdenes">
+        <p class="pager-meta">
+          Página {{ pagina + 1 }} de {{ totalPaginas || 1 }}
+          · {{ totalElementos }} resultado{{ totalElementos === 1 ? '' : 's' }}
+        </p>
+        <div class="pager-actions">
+          <solvix-button
+            family="tech"
+            rank="tertiary"
+            type="button"
+            [disabled]="!hayAnterior"
+            (click)="irAPagina(-1)"
+          >
+            Anterior
+          </solvix-button>
+          <solvix-button
+            family="tech"
+            rank="tertiary"
+            type="button"
+            [disabled]="!haySiguiente"
+            (click)="irAPagina(1)"
+          >
+            Siguiente
+          </solvix-button>
+        </div>
+      </div>
     </div>
   }
 </section>

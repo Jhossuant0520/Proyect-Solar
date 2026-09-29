@@ -2,22 +2,12 @@ package com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.Modu
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Base64;
-import java.util.HexFormat;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,16 +15,14 @@ import java.util.UUID;
 import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.newproject.jhocadi.projectSolvixBackend.config.EmpresaDocumentoProperties;
-import com.newproject.jhocadi.projectSolvixBackend.config.SoftwareDocumentoProperties;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.AsegurarComprobanteRecepcionResponseDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.ConsultaCotizacionOtPublicaDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.ConsultaDocumentoPublicoDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.ConsultaOtPublicaDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.DocumentoOrdenServicioResponseDTO;
@@ -49,12 +37,15 @@ import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServ
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.Equipo;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.EstadoCotizacionServicio;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.EstadoOrdenServicio;
+import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.EtapaPublicaOrdenServicio;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.OrdenServicio;
+import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.RecepcionOrdenServicio;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.TipoDocumentoOrdenServicio;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.CotizacionServicioRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.DocumentoOrdenServicioRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.EntregaOrdenServicioRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.OrdenServicioRepository;
+import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.RecepcionOrdenServicioRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,19 +59,15 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DocumentoOrdenServicioService {
 
-    private static final DateTimeFormatter FECHA_HORA =
-        DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-    private static final Locale LOCALE_CO = Locale.forLanguageTag("es-CO");
-
     private final DocumentoOrdenServicioRepository documentoRepository;
     private final OrdenServicioRepository ordenServicioRepository;
     private final CotizacionServicioRepository cotizacionRepository;
     private final EntregaOrdenServicioRepository entregaRepository;
+    private final RecepcionOrdenServicioRepository recepcionRepository;
     private final DocumentoPdfStorageService storageService;
     private final HtmlToPdfService htmlToPdfService;
     private final QrCodeService qrCodeService;
-    private final EmpresaDocumentoProperties empresa;
-    private final SoftwareDocumentoProperties software;
+    private final DocumentoPlantillaSupport plantilla;
     private final EntregaFirmaService entregaFirmaService;
 
     @Value("${solvix.frontend.base-url:http://localhost:4200}")
@@ -164,84 +151,91 @@ public class DocumentoOrdenServicioService {
     @Transactional
     public DocumentoOrdenServicioResponseDTO generarCotizacionPdf(
             Long ordenId, Long cotizacionId, String usuario) {
-        OrdenServicio orden = buscarOrden(ordenId);
-        CotizacionServicio cotizacion = cotizacionRepository.findById(cotizacionId)
-            .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.NOT_FOUND, "Cotización no encontrada."));
-        if (!cotizacion.getOrdenServicio().getId().equals(ordenId)) {
-            throw new BusinessException("La cotización no pertenece a esta orden.");
-        }
-        if (cotizacion.getEstado() == EstadoCotizacionServicio.BORRADOR) {
-            throw new BusinessException(
-                "Solo se genera PDF de cotizaciones presentadas (no BORRADOR).");
-        }
+        try (PdfGenTiming timing = PdfGenTiming.start("COTIZACION", cotizacionId)) {
+            long tData = System.nanoTime();
+            OrdenServicio orden = buscarOrden(ordenId);
+            CotizacionServicio cotizacion = cotizacionRepository.findById(cotizacionId)
+                .orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Cotización no encontrada."));
+            if (!cotizacion.getOrdenServicio().getId().equals(ordenId)) {
+                throw new BusinessException("La cotización no pertenece a esta orden.");
+            }
+            if (cotizacion.getEstado() == EstadoCotizacionServicio.BORRADOR) {
+                throw new BusinessException(
+                    "Solo se genera PDF de cotizaciones presentadas (no BORRADOR).");
+            }
+            timing.addDataMs(PdfGenTiming.elapsedMs(tData));
 
-        String tokenDocumento = UUID.randomUUID().toString().replace("-", "");
-        Map<String, String> vars = baseEmpresaVars();
-        putClienteEquipo(vars, orden);
-        vars.put("NUMERO_OT", esc(orden.getNumero()));
-        vars.put("NUMERO_COTIZACION", esc(cotizacion.getNumero()));
-        vars.put("TIPO_COTIZACION", esc(cotizacion.getTipo() != null ? cotizacion.getTipo().name() : ""));
-        vars.put("FECHA_PRESENTACION", formatFecha(
-            cotizacion.getFechaPresentacion() != null
-                ? cotizacion.getFechaPresentacion()
-                : cotizacion.getFechaCreacion()));
-        vars.put("EQUIPO_RESUMEN", esc(resumenEquipo(orden.getEquipo())));
-        vars.put("OBSERVACIONES", esc(nvl(cotizacion.getObservaciones(), "—")));
-        vars.put("DETALLE_ROWS", construirFilasDetalle(cotizacion.getDetalles()));
-        vars.put("SUBTOTAL", formatMoney(cotizacion.getSubtotal()));
-        vars.put("TOTAL", formatMoney(cotizacion.getTotal()));
-        String qrUrl = urlConsultaDocumento(tokenDocumento);
-        vars.put("QR_DATA_URI", qrCodeService.generarPngDataUri(qrUrl));
+            String tokenDocumento = UUID.randomUUID().toString().replace("-", "");
+            Map<String, String> vars = baseEmpresaVars();
+            putClienteEquipo(vars, orden);
+            vars.put("NUMERO_OT", esc(orden.getNumero()));
+            vars.put("NUMERO_COTIZACION", esc(cotizacion.getNumero()));
+            vars.put("TIPO_COTIZACION", esc(cotizacion.getTipo() != null ? cotizacion.getTipo().name() : ""));
+            vars.put("FECHA_PRESENTACION", formatFecha(
+                cotizacion.getFechaPresentacion() != null
+                    ? cotizacion.getFechaPresentacion()
+                    : cotizacion.getFechaCreacion()));
+            vars.put("EQUIPO_RESUMEN", esc(resumenEquipo(orden.getEquipo())));
+            vars.put("OBSERVACIONES", esc(nvl(cotizacion.getObservaciones(), "—")));
+            vars.put("DETALLE_ROWS", construirFilasDetalle(cotizacion.getDetalles()));
+            vars.put("SUBTOTAL", formatMoney(cotizacion.getSubtotal()));
+            vars.put("TOTAL", formatMoney(cotizacion.getTotal()));
+            String qrUrl = urlConsultaDocumento(tokenDocumento);
+            vars.put("QR_DATA_URI", qrCodeService.generarPngDataUri(qrUrl));
 
-        byte[] pdf = htmlToPdfService.renderDesdeClasspath("cotizacion.html", vars);
-        String nombre = sanitizarNombreArchivo(cotizacion.getNumero() + ".pdf");
-        return persistirNuevo(
-            orden,
-            TipoDocumentoOrdenServicio.COTIZACION,
-            cotizacion,
-            nombre,
-            pdf,
-            usuario,
-            tokenDocumento);
+            byte[] pdf = htmlToPdfService.renderDesdeClasspath("cotizacion.html", vars);
+            String nombre = sanitizarNombreArchivo(cotizacion.getNumero() + ".pdf");
+            return persistirNuevo(
+                orden,
+                TipoDocumentoOrdenServicio.COTIZACION,
+                cotizacion,
+                nombre,
+                pdf,
+                usuario,
+                tokenDocumento);
+        }
     }
 
     @Transactional
     public DocumentoOrdenServicioResponseDTO generarActaEntrega(Long ordenId, String usuario) {
-        OrdenServicio orden = buscarOrden(ordenId);
-        EntregaOrdenServicio entrega = entregaRepository.findByOrdenServicioId(ordenId)
-            .orElseThrow(() -> new BusinessException(
-                "Se requiere una entrega con firma para generar el acta."));
-        if (entrega.getFirmaUrl() == null || entrega.getFirmaUrl().isBlank()) {
-            throw new BusinessException("La entrega no tiene firma registrada.");
+        try (PdfGenTiming timing = PdfGenTiming.start("ACTA_ENTREGA", ordenId)) {
+            long tData = System.nanoTime();
+            OrdenServicio orden = buscarOrden(ordenId);
+            EntregaOrdenServicio entrega = entregaRepository.findByOrdenServicioId(ordenId)
+                .orElseThrow(() -> new BusinessException(
+                    "Se requiere una entrega con firma para generar el acta."));
+            if (entrega.getFirmaUrl() == null || entrega.getFirmaUrl().isBlank()) {
+                throw new BusinessException("La entrega no tiene firma registrada.");
+            }
+            asegurarTokenConsulta(orden);
+            timing.addDataMs(PdfGenTiming.elapsedMs(tData));
+
+            Map<String, String> vars = baseEmpresaVars();
+            putClienteEquipo(vars, orden);
+            vars.put("NUMERO_OT", esc(orden.getNumero()));
+            vars.put("EQUIPO_RESUMEN", esc(resumenEquipo(orden.getEquipo())));
+            vars.put("FECHA_ENTREGA", formatFecha(entrega.getFechaEntrega()));
+            vars.put("USUARIO_RESPONSABLE", esc(nvl(entrega.getUsuarioResponsable(), "—")));
+            vars.put("TRABAJO_REALIZADO", esc(nvl(orden.getTrabajoRealizado(), "—")));
+            vars.put("NOMBRE_FIRMANTE", esc(nvl(entrega.getNombreCliente(), "—")));
+            vars.put("DOCUMENTO_FIRMANTE", esc(nvl(entrega.getDocumentoCliente(), "—")));
+            vars.put("CLIENTE_CONFIRMO", entrega.isClienteConfirmo() ? "Sí" : "No");
+            vars.put("OBSERVACIONES_ENTREGA", esc(nvl(entrega.getObservaciones(), "—")));
+            putTotalAprobado(vars, ordenId);
+            vars.put("FIRMA_HTML", construirFirmaHtml(entrega.getFirmaUrl()));
+
+            byte[] pdf = htmlToPdfService.renderDesdeClasspath("acta-entrega.html", vars);
+            String nombre = sanitizarNombreArchivo(orden.getNumero() + "-Entrega.pdf");
+            return persistirNuevo(
+                orden,
+                TipoDocumentoOrdenServicio.ACTA_ENTREGA,
+                null,
+                nombre,
+                pdf,
+                usuario,
+                null);
         }
-        asegurarTokenConsulta(orden);
-
-        Map<String, String> vars = baseEmpresaVars();
-        putClienteEquipo(vars, orden);
-        vars.put("NUMERO_OT", esc(orden.getNumero()));
-        vars.put("EQUIPO_RESUMEN", esc(resumenEquipo(orden.getEquipo())));
-        vars.put("FECHA_ENTREGA", formatFecha(entrega.getFechaEntrega()));
-        vars.put("USUARIO_RESPONSABLE", esc(nvl(entrega.getUsuarioResponsable(), "—")));
-        vars.put("TRABAJO_REALIZADO", esc(nvl(orden.getTrabajoRealizado(), "—")));
-        vars.put("NOMBRE_FIRMANTE", esc(nvl(entrega.getNombreCliente(), "—")));
-        vars.put("DOCUMENTO_FIRMANTE", esc(nvl(entrega.getDocumentoCliente(), "—")));
-        vars.put("CLIENTE_CONFIRMO", entrega.isClienteConfirmo() ? "Sí" : "No");
-        vars.put("OBSERVACIONES_ENTREGA", esc(nvl(entrega.getObservaciones(), "—")));
-        vars.put("FIRMA_HTML", construirFirmaHtml(entrega.getFirmaUrl()));
-        String qrUrl = urlConsultaOt(orden.getTokenConsulta());
-        vars.put("QR_DATA_URI", qrCodeService.generarPngDataUri(qrUrl));
-
-        byte[] pdf = htmlToPdfService.renderDesdeClasspath("acta-entrega.html", vars);
-        String nombre = sanitizarNombreArchivo(orden.getNumero() + "-Entrega.pdf");
-        return persistirNuevo(
-            orden,
-            TipoDocumentoOrdenServicio.ACTA_ENTREGA,
-            null,
-            nombre,
-            pdf,
-            usuario,
-            null);
     }
 
     @Transactional
@@ -270,27 +264,57 @@ public class DocumentoOrdenServicioService {
     }
 
     private DocumentoOrdenServicioResponseDTO crearComprobanteRecepcionNuevo(Long ordenId, String usuario) {
-        OrdenServicio orden = buscarOrden(ordenId);
-        asegurarTokenConsulta(orden);
-        Map<String, String> vars = baseEmpresaVars();
-        putClienteEquipo(vars, orden);
-        vars.put("NUMERO_OT", esc(orden.getNumero()));
-        vars.put("FECHA_RECEPCION", formatFecha(orden.getFechaRecepcion()));
-        vars.put("PROBLEMA_REPORTADO", esc(nvl(orden.getProblemaReportado(), "—")));
-        vars.put("OBSERVACIONES", esc(nvl(orden.getObservaciones(), "—")));
-        String qrUrl = urlConsultaOt(orden.getTokenConsulta());
-        vars.put("QR_DATA_URI", qrCodeService.generarPngDataUri(qrUrl));
+        try (PdfGenTiming timing = PdfGenTiming.start("COMPROBANTE_RECEPCION", ordenId)) {
+            long tData = System.nanoTime();
+            OrdenServicio orden = buscarOrden(ordenId);
+            asegurarTokenConsulta(orden);
+            Optional<RecepcionOrdenServicio> recepcionOpt =
+                recepcionRepository.findByOrdenServicioId(ordenId);
+            timing.addDataMs(PdfGenTiming.elapsedMs(tData));
 
-        byte[] pdf = htmlToPdfService.renderDesdeClasspath("comprobante-recepcion.html", vars);
-        String nombre = sanitizarNombreArchivo(orden.getNumero() + "-Recepcion.pdf");
-        return persistirNuevo(
-            orden,
-            TipoDocumentoOrdenServicio.COMPROBANTE_RECEPCION,
-            null,
-            nombre,
-            pdf,
-            usuario,
-            null);
+            Map<String, String> vars = baseEmpresaVars();
+            putClienteEquipo(vars, orden);
+            vars.put("NUMERO_OT", esc(orden.getNumero()));
+            vars.put("FECHA_RECEPCION", DocumentoPlantillaSupport.formatFechaStitch(
+                recepcionOpt.map(RecepcionOrdenServicio::getFechaRecepcion).orElse(orden.getFechaRecepcion())));
+            vars.put("PROBLEMA_REPORTADO", esc(nvl(orden.getProblemaReportado(), "—")));
+            vars.put("OBSERVACIONES", esc(nvl(orden.getObservaciones(), "—")));
+            String qrUrl = urlConsultaOt(orden.getTokenConsulta());
+            vars.put("QR_DATA_URI", qrCodeService.generarPngDataUri(qrUrl));
+            vars.put("TOKEN_CONSULTA", esc(nvl(orden.getTokenConsulta(), "—")));
+
+            if (recepcionOpt.isPresent()
+                    && recepcionOpt.get().getFirmaUrl() != null
+                    && !recepcionOpt.get().getFirmaUrl().isBlank()) {
+                RecepcionOrdenServicio recepcion = recepcionOpt.get();
+                vars.put("FIRMA_HTML", construirFirmaHtml(recepcion.getFirmaUrl()));
+                vars.put(
+                    "NOMBRE_FIRMANTE_RECEPCION",
+                    esc(nvl(recepcion.getNombreCliente(), nvl(orden.getCliente() != null
+                        ? orden.getCliente().getNombre() : null, "—"))));
+                vars.put(
+                    "DOCUMENTO_FIRMANTE_RECEPCION",
+                    esc(nvl(recepcion.getDocumentoCliente(), "—")));
+            } else {
+                vars.put(
+                    "FIRMA_HTML",
+                    "<span class=\"cr-sign-placeholder\">Espacio para firma del titular</span>");
+                vars.put("NOMBRE_FIRMANTE_RECEPCION", esc(nvl(
+                    orden.getCliente() != null ? orden.getCliente().getNombre() : null, "—")));
+                vars.put("DOCUMENTO_FIRMANTE_RECEPCION", "—");
+            }
+
+            byte[] pdf = htmlToPdfService.renderDesdeClasspath("comprobante-recepcion.html", vars);
+            String nombre = sanitizarNombreArchivo(orden.getNumero() + "-Recepcion.pdf");
+            return persistirNuevo(
+                orden,
+                TipoDocumentoOrdenServicio.COMPROBANTE_RECEPCION,
+                null,
+                nombre,
+                pdf,
+                usuario,
+                null);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -298,12 +322,16 @@ public class DocumentoOrdenServicioService {
         if (token == null || token.isBlank()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden no encontrada.");
         }
-        OrdenServicio orden = ordenServicioRepository.findByTokenConsulta(token.trim())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden no encontrada."));
+        OrdenServicio orden = buscarPorTokenConsulta(token);
         Equipo equipo = orden.getEquipo();
+        EtapaPublicaOrdenServicio etapa = EtapaPublicaOrdenServicio.desde(orden.getEstado());
         return ConsultaOtPublicaDTO.builder()
             .numero(orden.getNumero())
+            .estadoCodigo(orden.getEstado() != null ? orden.getEstado().name() : null)
             .estadoPublico(etiquetaEstadoPublico(orden.getEstado()))
+            .etapaPublica(etapa != null ? etapa.name() : null)
+            .etapaPublicaNumero(etapa != null ? etapa.getNumero() : null)
+            .totalEtapasPublicas(EtapaPublicaOrdenServicio.TOTAL)
             .equipoTipo(equipo != null && equipo.getTipoEquipo() != null
                 ? equipo.getTipoEquipo().name() : null)
             .equipoMarca(equipo != null ? equipo.getMarca() : null)
@@ -311,8 +339,71 @@ public class DocumentoOrdenServicioService {
             .referenciaInterna(equipo != null ? equipo.getReferenciaInterna() : null)
             .fechaRecepcion(orden.getFechaRecepcion())
             .fechaActualizacion(orden.getFechaActualizacion())
+            .cotizacionDisponible(buscarCotizacionPublicable(orden).isPresent())
+            .contacto(plantilla.contactoPublico())
             .mensaje("Consulta informativa. Para más detalle comunícate con el taller.")
             .build();
+    }
+
+    /**
+     * Cotización que el cliente puede leer desde el QR. Solo lectura: aprobar o rechazar
+     * sigue siendo presencial o por el taller.
+     */
+    @Transactional(readOnly = true)
+    public ConsultaCotizacionOtPublicaDTO consultaCotizacionOtPublica(String token) {
+        OrdenServicio orden = buscarPorTokenConsulta(token);
+        CotizacionServicio cotizacion = buscarCotizacionPublicable(orden)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "No hay una cotización pendiente de tu respuesta."));
+
+        List<ConsultaCotizacionOtPublicaDTO.Linea> lineas = cotizacion.getDetalles().stream()
+            .map(d -> ConsultaCotizacionOtPublicaDTO.Linea.builder()
+                .descripcion(descripcionPublica(d))
+                .cantidad(d.getCantidad())
+                .precioUnitario(d.getPrecioUnitario())
+                .subtotal(d.getSubtotal())
+                .build())
+            .toList();
+
+        return ConsultaCotizacionOtPublicaDTO.builder()
+            .numero(cotizacion.getNumero())
+            .fecha(cotizacion.getFechaPresentacion() != null
+                ? cotizacion.getFechaPresentacion() : cotizacion.getFechaCreacion())
+            .lineas(lineas)
+            .subtotal(cotizacion.getSubtotal())
+            .total(cotizacion.getTotal())
+            .observaciones(cotizacion.getObservaciones())
+            .build();
+    }
+
+    /**
+     * Última cotización presentada mientras la OT espera la decisión del cliente.
+     * Fuera de PENDIENTE_APROBACION no hay nada que el cliente deba leer.
+     */
+    private Optional<CotizacionServicio> buscarCotizacionPublicable(OrdenServicio orden) {
+        if (orden.getEstado() != EstadoOrdenServicio.PENDIENTE_APROBACION) {
+            return Optional.empty();
+        }
+        return cotizacionRepository
+            .findByOrdenServicioIdOrderByFechaCreacionAsc(orden.getId()).stream()
+            .filter(c -> c.getEstado() == EstadoCotizacionServicio.PENDIENTE_APROBACION)
+            .reduce((primera, ultima) -> ultima);
+    }
+
+    private static String descripcionPublica(DetalleCotizacionServicio detalle) {
+        String descripcion = detalle.getDescripcion();
+        if (descripcion != null && !descripcion.isBlank()) {
+            return descripcion.trim();
+        }
+        return DocumentoPlantillaSupport.nvl(detalle.getProductoNombreSnapshot(), "Concepto");
+    }
+
+    private OrdenServicio buscarPorTokenConsulta(String token) {
+        if (token == null || token.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden no encontrada.");
+        }
+        return ordenServicioRepository.findByTokenConsulta(token.trim())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden no encontrada."));
     }
 
     @Transactional(readOnly = true)
@@ -359,7 +450,14 @@ public class DocumentoOrdenServicioService {
             .tokenDocumento(tokenDocumento)
             .build();
 
-        return DocumentoOrdenServicioResponseDTO.fromEntity(documentoRepository.save(doc));
+        long tDb = System.nanoTime();
+        DocumentoOrdenServicioResponseDTO response =
+            DocumentoOrdenServicioResponseDTO.fromEntity(documentoRepository.save(doc));
+        PdfGenTiming timing = PdfGenTiming.current();
+        if (timing != null) {
+            timing.addDbMs(PdfGenTiming.elapsedMs(tDb));
+        }
+        return response;
     }
 
     private OrdenServicio buscarOrden(Long ordenId) {
@@ -382,18 +480,7 @@ public class DocumentoOrdenServicioService {
     }
 
     private Map<String, String> baseEmpresaVars() {
-        Map<String, String> vars = new LinkedHashMap<>();
-        vars.put("EMPRESA_NOMBRE", esc(nvl(empresa.getNombre(), "")));
-        vars.put("EMPRESA_SUBTITULO", esc(nvl(empresa.getSubtitulo(), "")));
-        vars.put("EMPRESA_TELEFONO", esc(textoContacto("Tel.", empresa.getTelefono())));
-        vars.put("EMPRESA_CORREO", esc(nvl(empresa.getCorreo(), "")));
-        vars.put("EMPRESA_DIRECCION", esc(nvl(empresa.getDireccion(), "")));
-        vars.put("EMPRESA_IDENTIFICACION", esc(nvl(empresa.getIdentificacionFiscal(), "")));
-        vars.put("EMPRESA_CONTACTO", esc(contactoFooter()));
-        vars.put("FOOTER_TEXTO", esc(nvl(empresa.getFooterTexto(), "Documento generado por SOLVIX")));
-        vars.put("SOFTWARE_AUTORIA", esc(nvl(software.lineaAutoria(), "")));
-        vars.put("LOGO_HTML", logoHtml());
-        return vars;
+        return plantilla.baseEmpresaVars();
     }
 
     private void putClienteEquipo(Map<String, String> vars, OrdenServicio orden) {
@@ -407,30 +494,6 @@ public class DocumentoOrdenServicioService {
         vars.put("EQUIPO_MARCA_MODELO", esc(marcaModelo(equipo)));
         vars.put("EQUIPO_REFERENCIA", esc(equipo != null ? nvl(equipo.getReferenciaInterna(), "—") : "—"));
         vars.put("EQUIPO_SERIE", esc(equipo != null ? nvl(equipo.getNumeroSerie(), "—") : "—"));
-    }
-
-    private String logoHtml() {
-        String path = empresa.getLogoClasspath();
-        if (path == null || path.isBlank()) {
-            return "";
-        }
-        String normalized = path.startsWith("/") ? path.substring(1) : path;
-        ClassPathResource resource = new ClassPathResource(normalized);
-        if (!resource.exists()) {
-            return "";
-        }
-        try (InputStream in = resource.getInputStream()) {
-            byte[] bytes = in.readAllBytes();
-            if (bytes.length == 0) {
-                return "";
-            }
-            String mime = mimeFromPath(normalized);
-            String b64 = Base64.getEncoder().encodeToString(bytes);
-            return "<img class=\"doc-logo\" src=\"data:" + mime + ";base64," + b64 + "\" alt=\"Logo\"/>";
-        } catch (IOException e) {
-            log.warn("No se pudo cargar logo classpath {}: {}", normalized, e.getMessage());
-            return "";
-        }
     }
 
     private String construirFilasDetalle(List<DetalleCotizacionServicio> detalles) {
@@ -451,20 +514,36 @@ public class DocumentoOrdenServicioService {
     }
 
     private String construirFirmaHtml(String firmaUrl) {
+        long tTotal = System.nanoTime();
+        long readMs = 0L;
+        long cropMs = 0L;
         try {
             String nombre = extraerNombreFirma(firmaUrl);
+            long tRead = System.nanoTime();
             Resource resource = entregaFirmaService.cargar(nombre);
             try (InputStream in = resource.getInputStream()) {
-                byte[] bytes = recortarFirmaParaActa(in.readAllBytes());
+                byte[] raw = in.readAllBytes();
+                readMs = PdfGenTiming.elapsedMs(tRead);
+                long tCrop = System.nanoTime();
+                byte[] bytes = recortarFirmaParaActa(raw);
+                cropMs = PdfGenTiming.elapsedMs(tCrop);
                 String b64 = Base64.getEncoder().encodeToString(bytes);
+                PdfGenTiming timing = PdfGenTiming.current();
+                if (timing != null) {
+                    timing.addSignature(PdfGenTiming.elapsedMs(tTotal), readMs, cropMs);
+                }
                 // Tabla centrada: OpenHTMLToPDF no respeta bien margin:auto en <img>.
-                return "<table class=\"ae-firma-img-wrap\" style=\"width:100%;\">"
-                    + "<tr><td style=\"text-align:center;vertical-align:middle;\">"
-                    + "<img class=\"ae-firma-img\" src=\"data:image/png;base64," + b64
-                    + "\" alt=\"Firma\" style=\"max-height:80px;max-width:240px;\"/>"
+                return "<table class=\"cr-firma-img-wrap\" style=\"width:100%;\">"
+                    + "<tr><td style=\"text-align:center;vertical-align:bottom;\">"
+                    + "<img class=\"cr-firma-img\" src=\"data:image/png;base64," + b64
+                    + "\" alt=\"Firma\" style=\"max-height:48px;max-width:200px;\"/>"
                     + "</td></tr></table>";
             }
         } catch (Exception e) {
+            PdfGenTiming timing = PdfGenTiming.current();
+            if (timing != null) {
+                timing.addSignature(PdfGenTiming.elapsedMs(tTotal), readMs, cropMs);
+            }
             log.warn("No se pudo incrustar firma en acta: {}", e.getMessage());
             return "<p class=\"muted\" style=\"text-align:center;\">Firma registrada en el sistema</p>";
         }
@@ -489,13 +568,8 @@ public class DocumentoOrdenServicioService {
             for (int y = 0; y < h; y++) {
                 for (int x = 0; x < w; x++) {
                     int argb = src.getRGB(x, y);
-                    int a = (argb >>> 24) & 0xFF;
-                    int r = (argb >> 16) & 0xFF;
-                    int g = (argb >> 8) & 0xFF;
-                    int b = argb & 0xFF;
-                    // Fondo del canvas de entrega ≈ #020617; el trazo es claro.
-                    boolean trazo = a > 20 && (r + g + b) > 90;
-                    if (trazo) {
+                    // D.7 negro/blanco + histórico claro/oscuro
+                    if (esPixelTrazoFirma(argb)) {
                         if (x < minX) {
                             minX = x;
                         }
@@ -528,16 +602,32 @@ public class DocumentoOrdenServicioService {
         }
     }
 
+    /**
+     * Detecta tinta de firma en formato D.7 (negro sobre blanco) y
+     * en firmas históricas (claro sobre fondo oscuro ~#020617).
+     */
+    private static boolean esPixelTrazoFirma(int argb) {
+        int a = (argb >>> 24) & 0xFF;
+        if (a <= 20) {
+            return false;
+        }
+        int r = (argb >> 16) & 0xFF;
+        int g = (argb >> 8) & 0xFF;
+        int b = argb & 0xFF;
+        // D.7: fondo blanco sólido — no es trazo
+        if (r >= 248 && g >= 248 && b >= 248) {
+            return false;
+        }
+        // Histórico: fondo oscuro del canvas (#020617) — no es trazo
+        if (r <= 40 && g <= 50 && b <= 60 && (r + g + b) <= 120) {
+            return false;
+        }
+        return true;
+    }
+
     private String extraerNombreFirma(String firmaUrl) {
-        if (firmaUrl == null) {
-            return "";
-        }
-        String prefijo = EntregaFirmaService.RUTA_PUBLICA_PREFIJO;
-        if (firmaUrl.startsWith(prefijo)) {
-            return firmaUrl.substring(prefijo.length());
-        }
-        int slash = firmaUrl.lastIndexOf('/');
-        return slash >= 0 ? firmaUrl.substring(slash + 1) : firmaUrl;
+        String nombre = EntregaFirmaService.extraerNombreDesdeUrl(firmaUrl);
+        return nombre != null ? nombre : "";
     }
 
     private String urlConsultaOt(String tokenConsulta) {
@@ -577,13 +667,7 @@ public class DocumentoOrdenServicioService {
     }
 
     private static String documentoCliente(Cliente cliente) {
-        if (cliente == null) {
-            return "—";
-        }
-        String tipo = cliente.getTipoDocumento() != null ? cliente.getTipoDocumento().name() + " " : "";
-        String num = nvl(cliente.getNumeroDocumento(), "");
-        String full = (tipo + num).trim();
-        return full.isEmpty() ? "—" : full;
+        return DocumentoPlantillaSupport.documentoCliente(cliente);
     }
 
     private static String resumenEquipo(Equipo equipo) {
@@ -620,105 +704,50 @@ public class DocumentoOrdenServicioService {
         return joined.isEmpty() ? "—" : joined;
     }
 
-    private String contactoFooter() {
-        StringBuilder sb = new StringBuilder();
-        appendContacto(sb, empresa.getTelefono());
-        appendContacto(sb, empresa.getWhatsapp() != null && !empresa.getWhatsapp().isBlank()
-            ? "WhatsApp " + empresa.getWhatsapp() : null);
-        appendContacto(sb, empresa.getCorreo());
-        appendContacto(sb, empresa.getSitioWeb());
-        return sb.toString();
+    private static String formatFecha(LocalDateTime fecha) {
+        return DocumentoPlantillaSupport.formatFecha(fecha);
     }
 
-    private static void appendContacto(StringBuilder sb, String valor) {
-        if (valor == null || valor.isBlank()) {
+    /**
+     * Valor autorizado por el cliente: suma de cotizaciones APROBADAS (inicial + adicionales).
+     * Sale del snapshot de la cotización, nunca del precio actual del producto.
+     */
+    private void putTotalAprobado(Map<String, String> vars, Long ordenId) {
+        List<String> numeros = cotizacionRepository.findByOrdenServicioIdOrderByFechaCreacionAsc(ordenId)
+            .stream()
+            .filter(c -> c.getEstado() == EstadoCotizacionServicio.APROBADA)
+            .map(CotizacionServicio::getNumero)
+            .toList();
+        if (numeros.isEmpty()) {
+            vars.put("TOTAL_APROBADO", "Sin cotización aprobada");
+            vars.put("COTIZACIONES_APROBADAS", "—");
             return;
         }
-        if (sb.length() > 0) {
-            sb.append(" · ");
-        }
-        sb.append(valor.trim());
-    }
-
-    private static String textoContacto(String prefijo, String valor) {
-        if (valor == null || valor.isBlank()) {
-            return "";
-        }
-        return prefijo + " " + valor.trim();
-    }
-
-    private static String formatFecha(LocalDateTime fecha) {
-        return fecha == null ? "—" : FECHA_HORA.format(fecha);
+        vars.put("TOTAL_APROBADO", formatMoney(cotizacionRepository.totalAutorizadoAprobado(ordenId)));
+        vars.put("COTIZACIONES_APROBADAS", esc(String.join(" + ", numeros)));
     }
 
     private static String formatMoney(BigDecimal valor) {
-        BigDecimal v = valor == null ? BigDecimal.ZERO : valor.setScale(2, RoundingMode.HALF_UP);
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols(LOCALE_CO);
-        symbols.setGroupingSeparator('.');
-        symbols.setDecimalSeparator(',');
-        DecimalFormat df = new DecimalFormat("#,##0.00", symbols);
-        return "$ " + df.format(v);
+        return DocumentoPlantillaSupport.formatMoney(valor);
     }
 
     private static String formatCantidad(BigDecimal cantidad) {
-        if (cantidad == null) {
-            return "0";
-        }
-        BigDecimal stripped = cantidad.stripTrailingZeros();
-        if (stripped.scale() <= 0) {
-            return stripped.toPlainString();
-        }
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols(LOCALE_CO);
-        symbols.setDecimalSeparator(',');
-        DecimalFormat df = new DecimalFormat("0.##", symbols);
-        return df.format(cantidad);
+        return DocumentoPlantillaSupport.formatCantidad(cantidad);
     }
 
     private static String sha256Hex(byte[] data) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            return HexFormat.of().formatHex(digest.digest(data));
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 no disponible", e);
-        }
+        return DocumentoPlantillaSupport.sha256Hex(data);
     }
 
     private static String sanitizarNombreArchivo(String nombre) {
-        if (nombre == null || nombre.isBlank()) {
-            return "documento.pdf";
-        }
-        return nombre.replaceAll("[\\\\/:*?\"<>|]", "-");
-    }
-
-    private static String mimeFromPath(String path) {
-        String lower = path.toLowerCase(Locale.ROOT);
-        if (lower.endsWith(".png")) {
-            return "image/png";
-        }
-        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
-            return "image/jpeg";
-        }
-        if (lower.endsWith(".svg")) {
-            return "image/svg+xml";
-        }
-        return "image/png";
+        return DocumentoPlantillaSupport.sanitizarNombreArchivo(nombre);
     }
 
     private static String esc(String value) {
-        if (value == null) {
-            return "";
-        }
-        return value
-            .replace("&", "&amp;")
-            .replace("<", "&lt;")
-            .replace(">", "&gt;")
-            .replace("\"", "&quot;");
+        return DocumentoPlantillaSupport.esc(value);
     }
 
     private static String nvl(String value, String fallback) {
-        if (value == null || value.isBlank()) {
-            return fallback;
-        }
-        return value.trim();
+        return DocumentoPlantillaSupport.nvl(value, fallback);
     }
 }

@@ -16,12 +16,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Almacena PDFs de documentos de OT en filesystem.
  * Sin URL pública: solo acceso vía controlador ADMIN.
  */
 @Service
+@Slf4j
 public class DocumentoPdfStorageService {
 
     private static final Pattern NOMBRE_SEGURO = Pattern.compile(
@@ -53,7 +55,12 @@ public class DocumentoPdfStorageService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nombre de archivo no válido.");
         }
         try {
+            long t0 = System.nanoTime();
             Files.write(destino, pdfBytes);
+            PdfGenTiming timing = PdfGenTiming.current();
+            if (timing != null) {
+                timing.addFileMs(PdfGenTiming.elapsedMs(t0));
+            }
         } catch (IOException e) {
             throw new ResponseStatusException(
                 HttpStatus.INTERNAL_SERVER_ERROR, "No se pudo guardar el documento PDF.");

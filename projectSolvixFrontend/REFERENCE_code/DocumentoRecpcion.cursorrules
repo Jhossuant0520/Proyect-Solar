@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comprobante de Recepción - Computer & Electronic Center S.A.S</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #0b0f19;
+      color: #0f172a;
+    }
+    .font-mono {
+      font-family: 'Geist Mono', monospace;
+    }
+    @media print {
+      body {
+        background-color: #ffffff;
+        padding: 0;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .page-sheet {
+        box-shadow: none !important;
+        margin: 0 !important;
+        width: 100% !important;
+        border: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen py-10 px-4 flex flex-col items-center justify-center">
+
+  <!-- Print Action Toolbar -->
+  <div class="no-print w-full max-w-4xl mb-6 flex items-center justify-between bg-slate-900/90 border border-slate-800 backdrop-blur px-5 py-3 rounded-xl shadow-xl">
+    <div class="flex items-center gap-3">
+      <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+      </span>
+      <div>
+        <h2 class="text-white text-sm font-semibold tracking-tight">Comprobante de Recepción de Servicio Técnico</h2>
+        <p class="text-xs text-slate-400">Computer & Electronic Center S.A.S · Formato Carta Imprimible (95%+ Monocromo)</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <button onclick="window.print()" class="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold uppercase tracking-wider rounded-lg shadow-md transition-all flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+        Imprimir / Exportar PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Document Sheet (LETTER Format 8.5 x 11 in) -->
+  <div class="page-sheet w-full max-w-4xl bg-white text-slate-900 p-8 sm:p-12 shadow-2xl rounded-sm border border-slate-200 relative">
+    
+    <!-- Outer Precision Crop Marks -->
+    <div class="absolute top-2 left-2 text-[10px] text-slate-300 font-mono select-none">┌</div>
+    <div class="absolute top-2 right-2 text-[10px] text-slate-300 font-mono select-none">┐</div>
+    <div class="absolute bottom-2 left-2 text-[10px] text-slate-300 font-mono select-none">└</div>
+    <div class="absolute bottom-2 right-2 text-[10px] text-slate-300 font-mono select-none">┘</div>
+
+    <!-- Header / Metadata bar -->
+    <div class="flex justify-between items-center text-[9px] font-mono tracking-widest text-slate-400 border-b border-slate-200 pb-2 mb-6 uppercase">
+      <span>Sistema de Gestión de Custodia Técnica &bull; ISO/IEC 17025 Compliant</span>
+      <span>Documento de Control y Trazabilidad</span>
+    </div>
+
+    <!-- Main Corporate Header -->
+    <div class="grid grid-cols-12 gap-6 pb-6 border-b border-slate-900">
+      
+      <!-- Brand & Services -->
+      <div class="col-span-8 flex gap-4 items-start">
+        <!-- Logo Emblem -->
+        <div class="w-14 h-14 shrink-0 rounded-lg bg-slate-950 flex items-center justify-center text-sky-400 shadow-sm border border-slate-800">
+          <svg class="w-8 h-8" viewBox="0 0 40 40" fill="none">
+            <rect x="4" y="4" width="32" height="32" rx="6" stroke="currentColor" stroke-width="2" stroke-dasharray="3 2" />
+            <path d="M12 20H28M20 12V28" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="20" cy="20" r="4" fill="#0284c7" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-xl font-black tracking-tight text-slate-950 uppercase">Computer & Electronic Center S.A.S</h1>
+          <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wider mt-0.5">Servicio Técnico Especializado · Laboratorio de Ingeniería</p>
+          <p class="text-[9.5px] leading-relaxed text-slate-600 mt-2 max-w-xl">
+            Venta de computadores y accesorios &bull; Mantenimiento de computadores e impresoras &bull; Cableado estructurado &bull; Fotocopiado e impresión &bull; Mantenimiento e instalación de aires acondicionados &bull; Suministro e instalación de cámaras de seguridad
+          </p>
+        </div>
+      </div>
+
+      <!-- Contact & Tax Info -->
+      <div class="col-span-4 flex flex-col justify-between border-l border-slate-200 pl-6 text-right">
+        <div class="space-y-1">
+          <div class="text-[10px] font-mono font-semibold text-slate-900 tracking-tight">NIT: 901.482.391-4</div>
+          <div class="text-[10px] text-slate-600 flex items-center justify-end gap-1.5">
+            <span class="font-mono text-slate-900 font-medium">+57 301 5316116</span>
+            <span class="text-[9px] text-slate-400">TEL:</span>
+          </div>
+          <div class="text-[10px] text-slate-600 truncate">soporte.solvix@gmail.com</div>
+          <div class="text-[10px] text-slate-500">Yondó · Antioquia · Colombia</div>
+        </div>
+        <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-end gap-2">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span class="text-[9px] font-mono uppercase tracking-widest text-slate-500">Recepción Activa</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Title & Order ID Banner -->
+    <div class="grid grid-cols-12 gap-4 items-center my-6 py-3 px-4 bg-slate-50 border border-slate-200 rounded-lg">
+      <div class="col-span-7">
+        <span class="text-[9px] font-mono tracking-widest uppercase font-bold text-sky-700 block mb-0.5">Servicio Técnico &bull; Protocolo de Ingreso</span>
+        <h2 class="text-2xl font-black tracking-tight text-slate-950 uppercase">Comprobante de Recepción</h2>
+      </div>
+      <div class="col-span-5 flex flex-col items-end">
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-mono text-slate-500 uppercase">Orden Nº:</span>
+          <span class="px-3 py-1 bg-slate-950 text-sky-400 font-mono font-bold text-base rounded border border-slate-800 tracking-wider">
+            OS-2026-000014
+          </span>
+        </div>
+        <div class="text-[10px] font-mono text-slate-600 mt-1.5">
+          <span class="text-slate-400 uppercase text-[9px]">Fecha:</span> 24/09/2026 &bull; 17:15 HRS
+        </div>
+      </div>
+    </div>
+
+    <!-- Two-Column Primary Info: Cliente & Equipo -->
+    <div class="grid grid-cols-12 gap-5 mb-6">
+      
+      <!-- Columna Cliente -->
+      <div class="col-span-6 border border-slate-200 rounded-lg overflow-hidden flex flex-col">
+        <div class="bg-slate-900 text-white px-4 py-2 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-mono text-sky-400 font-bold">[01]</span>
+            <span class="text-xs font-bold tracking-wider uppercase">Información del Cliente</span>
+          </div>
+          <span class="text-[9px] font-mono text-slate-400 uppercase">Titular</span>
+        </div>
+        <div class="p-4 bg-white space-y-3 flex-1">
+          <div>
+            <div class="text-[9px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Nombre Completo</div>
+            <div class="text-sm font-bold text-slate-900 mt-0.5">Silvia Hernandez</div>
+          </div>
+          <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+            <div>
+              <div class="text-[9px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Documento / C.C.</div>
+              <div class="text-xs font-mono font-semibold text-slate-800 mt-0.5">CC 1097493827</div>
+            </div>
+            <div>
+              <div class="text-[9px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Teléfono Móvil</div>
+              <div class="text-xs font-mono font-semibold text-slate-800 mt-0.5">+57 314 3943025</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna Equipo -->
+      <div class="col-span-6 border border-slate-200 rounded-lg overflow-hidden flex flex-col">
+        <div class="bg-slate-900 text-white px-4 py-2 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-mono text-sky-400 font-bold">[02]</span>
+            <span class="text-xs font-bold tracking-wider uppercase">Especificación de Hardware</span>
+          </div>
+          <span class="text-[9px] font-mono text-slate-400 uppercase">Activo</span>
+        </div>
+        <div class="p-4 bg-white space-y-3 flex-1">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <div class="text-[9px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Tipo de Dispositivo</div>
+              <div class="text-xs font-bold text-slate-900 mt-0.5 uppercase">PORTÁTIL</div>
+            </div>
+            <div>
+              <div class="text-[9px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Marca / Modelo</div>
+              <div class="text-xs font-bold text-slate-900 mt-0.5">Lenovo Legion 5</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+            <div>
+              <div class="text-[9px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Referencia / Alias</div>
+              <div class="text-xs font-medium text-slate-700 mt-0.5">Portatil de Silvia</div>
+            </div>
+            <div>
+              <div class="text-[9px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Número de Serie (S/N)</div>
+              <div class="text-xs font-mono font-bold text-sky-800 bg-sky-50 px-2 py-0.5 rounded border border-sky-200 inline-block mt-0.5">
+                1223123123
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Middle Section: Detalle de Recepción + QR Consulta -->
+    <div class="grid grid-cols-12 gap-5 mb-6">
+      
+      <!-- Detalle Técnico Diagnóstico -->
+      <div class="col-span-8 border border-slate-200 rounded-lg overflow-hidden flex flex-col justify-between">
+        <div class="bg-slate-900 text-white px-4 py-2 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-mono text-sky-400 font-bold">[03]</span>
+            <span class="text-xs font-bold tracking-wider uppercase">Detalle de Recepción y Diagnóstico</span>
+          </div>
+          <span class="text-[9px] font-mono text-slate-400 uppercase">Evaluación</span>
+        </div>
+        
+        <div class="p-4 space-y-4 bg-white flex-1">
+          <!-- Problema Reportado -->
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-[9px] font-mono uppercase tracking-wider text-slate-500 font-bold">Problema Reportado por el Cliente</span>
+              <span class="text-[8.5px] font-mono text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded uppercase font-semibold">Falla Inicial</span>
+            </div>
+            <div class="mt-1.5 p-3 rounded-md bg-slate-50 border border-slate-200 text-xs text-slate-800 font-medium leading-relaxed min-h-[50px]">
+              Falla en el encendido y reinicios intermitentes durante carga gráfica pesada. Cliente reporta que tras actualización el equipo se apaga repentinamente.
+            </div>
+          </div>
+
+          <!-- Observaciones de Estado Físico & Accesorios -->
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-[9px] font-mono uppercase tracking-wider text-slate-500 font-bold">Observaciones de Estado Físico y Accesorios</span>
+              <span class="text-[8.5px] font-mono text-slate-400 uppercase">Inspección Visual</span>
+            </div>
+            <div class="mt-1.5 p-3 rounded-md bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed min-h-[48px] flex items-center">
+              Se recibe equipo con cargador original Lenovo de 230W. Carcasa en buen estado general con leves marcas de uso normal en tapa superior. Pantalla intacta sin rayones visibles.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trazabilidad QR & Validación -->
+      <div class="col-span-4 border border-slate-200 rounded-lg p-4 flex flex-col items-center justify-between bg-slate-50 text-center relative">
+        <div class="w-full text-left border-b border-slate-200 pb-1.5 mb-2 flex justify-between items-center">
+          <span class="text-[9px] font-mono font-bold uppercase text-slate-600">[04] Trazabilidad</span>
+          <span class="text-[8px] font-mono text-sky-600 bg-sky-100 px-1.5 rounded">En Línea</span>
+        </div>
+
+        <!-- QR Graphic with Crosshair Guides -->
+        <div class="relative p-3 bg-white rounded-lg border border-slate-300 shadow-sm my-1">
+          <div class="absolute -top-1.5 -left-1.5 text-slate-400 font-mono text-[10px] leading-none">+</div>
+          <div class="absolute -top-1.5 -right-1.5 text-slate-400 font-mono text-[10px] leading-none">+</div>
+          <div class="absolute -bottom-1.5 -left-1.5 text-slate-400 font-mono text-[10px] leading-none">+</div>
+          <div class="absolute -bottom-1.5 -right-1.5 text-slate-400 font-mono text-[10px] leading-none">+</div>
+          
+          <svg class="w-28 h-28" viewBox="0 0 100 100" fill="none">
+            <!-- QR code visual pattern -->
+            <rect width="100" height="100" fill="white"/>
+            <!-- Corner Markers -->
+            <rect x="10" y="10" width="24" height="24" fill="#0f172a" rx="2"/>
+            <rect x="14" y="14" width="16" height="16" fill="white"/>
+            <rect x="18" y="18" width="8" height="8" fill="#0f172a"/>
+
+            <rect x="66" y="10" width="24" height="24" fill="#0f172a" rx="2"/>
+            <rect x="70" y="14" width="16" height="16" fill="white"/>
+            <rect x="74" y="18" width="8" height="8" fill="#0f172a"/>
+
+            <rect x="10" y="66" width="24" height="24" fill="#0f172a" rx="2"/>
+            <rect x="14" y="70" width="16" height="16" fill="white"/>
+            <rect x="18" y="74" width="8" height="8" fill="#0f172a"/>
+
+            <!-- Data Dots Grid -->
+            <rect x="40" y="14" width="6" height="6" fill="#0f172a"/>
+            <rect x="50" y="14" width="6" height="6" fill="#0284c7"/>
+            <rect x="40" y="24" width="16" height="6" fill="#0f172a"/>
+            <rect x="14" y="44" width="6" height="12" fill="#0f172a"/>
+            <rect x="24" y="40" width="10" height="6" fill="#0284c7"/>
+            <rect x="40" y="40" width="20" height="20" fill="#0f172a"/>
+            <rect x="46" y="46" width="8" height="8" fill="white"/>
+            <rect x="66" y="40" width="8" height="8" fill="#0f172a"/>
+            <rect x="80" y="44" width="10" height="6" fill="#0284c7"/>
+            <rect x="66" y="56" width="12" height="6" fill="#0f172a"/>
+            <rect x="40" y="66" width="8" height="16" fill="#0f172a"/>
+            <rect x="54" y="70" width="16" height="6" fill="#0f172a"/>
+            <rect x="54" y="82" width="6" height="8" fill="#0284c7"/>
+            <rect x="66" y="76" width="20" height="8" fill="#0f172a"/>
+            <rect x="76" y="66" width="12" height="6" fill="#0f172a"/>
+            <rect x="88" y="86" width="6" height="6" fill="#0f172a"/>
+          </svg>
+        </div>
+
+        <div>
+          <div class="text-[10px] font-bold text-slate-900 uppercase tracking-tight">Escanea para Consulta Digital</div>
+          <div class="text-[8.5px] text-slate-500 mt-0.5 leading-snug">Rastreo de estado y avance técnico en tiempo real</div>
+        </div>
+
+        <div class="w-full pt-2 mt-2 border-t border-slate-200">
+          <div class="text-[9px] font-mono text-slate-400 uppercase">Token de Validación</div>
+          <div class="text-[9.5px] font-mono font-bold text-slate-700">SOLVIX-OT-000014</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Legal Terms & Custody Clauses -->
+    <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 mb-6">
+      <div class="text-[9px] font-mono uppercase font-bold text-slate-700 tracking-wider mb-1 flex items-center gap-1.5">
+        <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        Cláusulas Técnicas y Condiciones de Custodia
+      </div>
+      <p class="text-[8px] text-slate-500 leading-normal text-justify">
+        1. <strong>Custodia y Diagnóstico:</strong> El equipo ingresa a laboratorio para revisión técnica y emisión de presupuesto formal. La empresa no se responsabiliza por fallas preexistentes o deterioro oculto. 2. <strong>Respaldo de Información:</strong> El laboratorio técnico NO se responsabiliza bajo ninguna circunstancia por pérdida total o parcial de datos contenidos en unidades de almacenamiento; es deber estricto del cliente mantener copias de seguridad previas al depósito. 3. <strong>Retiro y Abandono:</strong> Dispositivos listos no retirados tras noventa (90) días calendario causarán recargo diario por bodegaje y podrán ser declarados formalmente en abandono conforme a la ley vigente. 4. <strong>Entrega:</strong> Es requisito indispensable e ineludible presentar este comprobante físico original o la validación del código QR junto con el documento de identidad original del titular registrado.
+      </p>
+    </div>
+
+    <!-- Signatures Section -->
+    <div class="grid grid-cols-2 gap-8 pt-6 pb-4 border-t border-b border-slate-200 mb-6">
+      
+      <!-- Firma Taller -->
+      <div class="flex flex-col items-center text-center">
+        <div class="w-full h-16 flex items-end justify-center pb-2">
+          <!-- Sello digital / Firma técnico -->
+          <div class="text-[10px] font-mono text-sky-700 font-bold border border-dashed border-sky-300 bg-sky-50/50 px-4 py-1.5 rounded">
+            SELLO DE RECEPCIÓN &bull; TALLER AUTORIZADO
+          </div>
+        </div>
+        <div class="w-4/5 border-t-2 border-slate-900 pt-1.5">
+          <div class="text-xs font-bold text-slate-900 uppercase">Recibido por el Taller</div>
+          <div class="text-[9.5px] text-slate-500 font-medium">Computer & Electronic Center S.A.S</div>
+          <div class="text-[8.5px] font-mono text-slate-400">Personal Técnico Certificado</div>
+        </div>
+      </div>
+
+      <!-- Firma Cliente -->
+      <div class="flex flex-col items-center text-center">
+        <div class="w-full h-16 flex items-end justify-center pb-2">
+          <span class="text-xs text-slate-300 italic">Espacio para firma del titular</span>
+        </div>
+        <div class="w-4/5 border-t-2 border-slate-900 pt-1.5">
+          <div class="text-xs font-bold text-slate-900 uppercase">Entregado por el Cliente</div>
+          <div class="text-[9.5px] text-slate-800 font-semibold">Silvia Hernandez</div>
+          <div class="text-[8.5px] font-mono text-slate-500">C.C. 1097493827 &bull; Conformidad de Ingreso</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Corporate Document Footer -->
+    <div class="flex flex-col sm:flex-row justify-between items-center text-[9px] text-slate-400 font-mono gap-2">
+      <div class="flex items-center gap-3">
+        <span class="font-bold text-slate-700">Computer & Electronic Center S.A.S</span>
+        <span>&bull;</span>
+        <span>WhatsApp: +57 302 5499626</span>
+        <span>&bull;</span>
+        <span class="text-sky-600">computerelectroniccentersas.com</span>
+      </div>
+      <div class="text-right">
+        <span>Software de Operación: <strong class="text-slate-600">Jhossuant Cabezas</strong> (Full Stack Developer) &bull; SOLVIX OS</span>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

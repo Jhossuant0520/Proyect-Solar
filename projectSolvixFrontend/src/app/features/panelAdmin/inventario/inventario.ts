@@ -3,7 +3,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DestroyRef, inject } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { SolvixFeedbackService } from '../../../shared/services/solvix-feedback.service';
 import { SolvixBadgeComponent } from '../../../shared/components/solvix-badge/solvix-badge';
 import { SolvixEmptyStateComponent } from '../../../shared/components/solvix-empty-state/solvix-empty-state';
 import { SolvixErrorStateComponent } from '../../../shared/components/solvix-error-state/solvix-error-state';
@@ -111,7 +112,7 @@ export class InventarioComponent implements OnInit {
     private analytics: AnalyticsService,
     private inventarioService: InventarioService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar,
+    private feedback: SolvixFeedbackService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
@@ -282,9 +283,7 @@ export class InventarioComponent implements OnInit {
         this.filtroActivo = '';
       },
       error: err => {
-        this.snackBar.open(mensajeErrorLookupCodigoBarras(err, 'No pudimos buscar ese código.'), 'Cerrar', {
-          duration: 3500
-        });
+        this.feedback.error(mensajeErrorLookupCodigoBarras(err, 'No pudimos buscar ese código.'), 3500);
       }
     });
   }
@@ -379,7 +378,7 @@ export class InventarioComponent implements OnInit {
     });
     ref.afterClosed().subscribe(resultado => {
       if (resultado) {
-        this.snackBar.open('Ajuste registrado. El stock ya quedó actualizado.', 'Cerrar', { duration: 3500 });
+        this.feedback.success('Inventario actualizado');
         this.cargarProductos();
         this.cargarIndicadores();
         this.cargarMovimientos();

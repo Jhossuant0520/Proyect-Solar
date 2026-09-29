@@ -3,15 +3,23 @@ package com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.Modu
 import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulComercialDtos.PaginaResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.CambiarEstadoOrdenServicioRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.CompletarDiagnosticoRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.CompletarReparacionRequestDTO;
@@ -22,6 +30,7 @@ import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServic
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RegistrarEntregaRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RegistrarEntregaResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RegistrarNuevaFallaRequestDTO;
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.RecepcionOrdenServicioResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.TransicionOrdenServicioResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.exception.BusinessException;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.Cliente;
@@ -31,11 +40,13 @@ import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServ
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.EstadoOrdenServicio;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.HistorialEstadoOrdenServicio;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.OrdenServicio;
+import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.RecepcionOrdenServicio;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulComercialRepo.ClienteRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.EntregaOrdenServicioRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.HistorialEstadoOrdenServicioRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.OrdenServicioRepuestoRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.OrdenServicioRepository;
+import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.RecepcionOrdenServicioRepository;
 import com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.ModulComercialService.SecuenciaDocumentoService;
 
 import lombok.RequiredArgsConstructor;
@@ -50,19 +61,30 @@ public class OrdenServicioService {
         EstadoOrdenServicio.CERRADO,
         EstadoOrdenServicio.CANCELADO
     );
+    private static final int TAMANO_DEFAULT_PAGINA = 20;
+    private static final int TAMANO_MAXIMO_PAGINA = 50;
 
     private final OrdenServicioRepository ordenServicioRepository;
     private final OrdenServicioRepuestoRepository ordenServicioRepuestoRepository;
     private final HistorialEstadoOrdenServicioRepository historialRepository;
     private final EntregaOrdenServicioRepository entregaRepository;
+    private final RecepcionOrdenServicioRepository recepcionRepository;
     private final ClienteRepository clienteRepository;
     private final EquipoService equipoService;
     private final EntregaFirmaService entregaFirmaService;
     private final SecuenciaDocumentoService secuenciaDocumentoService;
     private final ObjectProvider<DocumentoOrdenServicioService> documentoOrdenServicioService;
+    private final PlatformTransactionManager transactionManager;
 
+    /**
+     * Crea OT en RECEPCIONADO con firma digital de recepción (BLOQUE D.2).
+     * Atómico: validación + PNG + OT + RecepcionOrdenServicio; PDF tras commit.
+     */
     @Transactional
     public OrdenServicioResponseDTO crear(OrdenServicioRequestDTO request, String usuario) {
+        validarUsuario(usuario);
+        validarFirmaRecepcion(request);
+
         Cliente cliente = resolverClienteActivoParaTaller(request.getClienteId());
         Equipo equipo = equipoService.buscarOFallar(request.getEquipoId());
         validarEquipoDelCliente(cliente, equipo);
@@ -70,7 +92,10 @@ public class OrdenServicioService {
             throw new BusinessException("El equipo seleccionado está inactivo.");
         }
 
+        String firmaUrl = entregaFirmaService.guardarFirmaRecepcion(request.getFirmaBase64Recepcion());
         LocalDateTime ahora = LocalDateTime.now();
+        String responsable = usuario.trim();
+
         OrdenServicio orden = OrdenServicio.builder()
             .numero(secuenciaDocumentoService.siguienteNumero(TipoSecuencia.ORDEN_SERVICIO, ahora))
             .cliente(cliente)
@@ -80,14 +105,50 @@ public class OrdenServicioService {
             .diagnostico(textoOpcional(request.getDiagnostico()))
             .trabajoRealizado(textoOpcional(request.getTrabajoRealizado()))
             .observaciones(textoOpcional(request.getObservaciones()))
-            .createdBy(usuario)
+            .createdBy(responsable)
             .build();
 
         OrdenServicio guardada = ordenServicioRepository.save(orden);
+
+        RecepcionOrdenServicio recepcion = RecepcionOrdenServicio.builder()
+            .ordenServicio(guardada)
+            .fechaRecepcion(ahora)
+            .usuarioResponsable(responsable)
+            .clienteConfirmo(true)
+            .nombreCliente(textoOpcional(request.getNombreFirmanteRecepcion()))
+            .documentoCliente(textoOpcional(request.getDocumentoFirmanteRecepcion()))
+            .firmaUrl(firmaUrl)
+            .observaciones(null)
+            .createdAt(ahora)
+            .build();
+        recepcionRepository.save(recepcion);
+
         Long ordenId = guardada.getId();
-        String usuarioDoc = usuario;
+        String usuarioDoc = responsable;
         registrarGeneracionTrasCommit(() -> tryGenerarComprobanteRecepcion(ordenId, usuarioDoc));
         return OrdenServicioResponseDTO.fromEntity(guardada);
+    }
+
+    @Transactional(readOnly = true)
+    public RecepcionOrdenServicioResponseDTO obtenerRecepcion(Long ordenId) {
+        buscarOFallar(ordenId);
+        return recepcionRepository.findByOrdenServicioId(ordenId)
+            .map(RecepcionOrdenServicioResponseDTO::fromEntity)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "No hay recepción firmada registrada para esta orden."));
+    }
+
+    private void validarFirmaRecepcion(OrdenServicioRequestDTO request) {
+        if (!Boolean.TRUE.equals(request.getClienteConfirmoRecepcion())) {
+            throw new BusinessException(
+                "El cliente debe confirmar la entrega del equipo al taller.");
+        }
+        if (textoVacio(request.getFirmaBase64Recepcion())) {
+            throw new BusinessException("La firma del cliente es obligatoria.");
+        }
+        if (textoVacio(request.getNombreFirmanteRecepcion())) {
+            throw new BusinessException("El nombre del firmante es obligatorio.");
+        }
     }
 
     @Transactional(readOnly = true)
@@ -113,6 +174,39 @@ public class OrdenServicioService {
         }
 
         return ordenes.stream().map(OrdenServicioResponseDTO::fromEntity).toList();
+    }
+
+    /**
+     * Listado escalable: paginación + búsqueda parcial (número, cliente, equipo).
+     * {@code tamano} se acota a 50.
+     */
+    @Transactional(readOnly = true)
+    public PaginaResponseDTO<OrdenServicioResponseDTO> listarPaginado(
+            String q,
+            EstadoOrdenServicio estado,
+            Long clienteId,
+            Long equipoId,
+            Integer pagina,
+            Integer tamano) {
+        int numeroPagina = pagina != null && pagina > 0 ? pagina : 0;
+        int tamanoPagina = tamano != null
+            ? Math.min(Math.max(tamano, 1), TAMANO_MAXIMO_PAGINA)
+            : TAMANO_DEFAULT_PAGINA;
+        String patron = normalizarPatronBusqueda(q);
+        Pageable pageable = PageRequest.of(
+            numeroPagina,
+            tamanoPagina,
+            Sort.by(Sort.Order.desc("fechaRecepcion"), Sort.Order.desc("id")));
+        return PaginaResponseDTO.desde(
+            ordenServicioRepository.buscar(patron, estado, clienteId, equipoId, pageable),
+            OrdenServicioResponseDTO::fromEntity);
+    }
+
+    private static String normalizarPatronBusqueda(String q) {
+        if (q == null || q.isBlank()) {
+            return null;
+        }
+        return "%" + q.trim().toLowerCase(Locale.ROOT) + "%";
     }
 
     @Transactional(readOnly = true)
@@ -495,7 +589,11 @@ public class OrdenServicioService {
                 public void afterCommit() {
                     // Errores de enlace (p. ej. NoClassDefFoundError) no deben afectar la respuesta HTTP.
                     try {
-                        accion.run();
+                        // En afterCommit la transacción original sigue ligada al hilo: sin
+                        // REQUIRES_NEW el documento se une a ella y nunca llega a confirmarse.
+                        TransactionTemplate tx = new TransactionTemplate(transactionManager);
+                        tx.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+                        tx.executeWithoutResult(status -> accion.run());
                     } catch (Throwable t) {
                         log.warn("Generación documental post-commit falló: {}", t.toString());
                     }

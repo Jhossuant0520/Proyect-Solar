@@ -52,14 +52,14 @@
   background: transparent;
   border: 0;
   color: var(--solvix-primary);
-  font-family: var(--solvix-font-mono);
+  font-family: var(--solvix-font);
   font-size: 0.72rem;
   text-decoration: underline;
   cursor: pointer;
 }
 
 .table-panel {
-  background: rgba(15, 23, 42, 0.8);
+  background: var(--solvix-panel);
   border: 1px solid var(--solvix-border);
   border-radius: var(--solvix-radius);
   overflow: hidden;
@@ -86,8 +86,9 @@
 
 .cli-table th {
   color: var(--solvix-text-muted);
-  font-family: var(--solvix-font-mono);
+  font-family: var(--solvix-font);
   font-size: 0.68rem;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -97,7 +98,7 @@
 }
 
 .cli-table tbody tr:hover {
-  background: rgba(46, 52, 71, 0.35);
+  background: var(--solvix-row-hover);
 }
 
 .name-btn {

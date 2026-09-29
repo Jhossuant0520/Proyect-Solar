@@ -218,7 +218,7 @@ describe('ServicioDetailComponent — workflow', () => {
     fixture.detectChanges();
     tick();
 
-    expect(component.accionPrincipal?.boton).toBe('Ir al diagnóstico');
+    expect(component.accionPrincipal?.boton).toBe('Registrar diagnóstico');
     expect(component.accionPrincipal?.destino).toBe('DIAGNOSTICADO');
 
     component.iniciarEdicion();
@@ -264,7 +264,7 @@ describe('ServicioDetailComponent — workflow', () => {
     expect(component.accionPrincipal?.boton).toBe('Preparar cotización');
     const text = fixture.nativeElement.textContent as string;
     expect(text).toContain('Cotizaciones');
-    expect(text).toContain('Preparar cotización inicial');
+    expect(text).toContain('Preparar la cotización inicial');
     expect(cotizacionService.listar).toHaveBeenCalledWith(12);
   }));
 
@@ -273,17 +273,31 @@ describe('ServicioDetailComponent — workflow', () => {
     tick();
     const text = fixture.nativeElement.textContent as string;
     expect(text).toContain('Documentos');
+    expect(text).not.toContain('Documentación');
     expect(documentoService.listar).toHaveBeenCalledWith(12);
   }));
 
-  it('PENDIENTE_APROBACION muestra aprobar cotización', fakeAsync(() => {
+  it('D.11: no renderiza la card de Repuestos y sí Cotizaciones/Documentos', fakeAsync(() => {
+    fixture.detectChanges();
+    tick();
+    const root = fixture.nativeElement as HTMLElement;
+    const text = root.textContent as string;
+    expect(root.querySelector('app-servicio-repuestos-panel')).toBeNull();
+    expect(text).not.toMatch(/Inventario\s*Repuestos/);
+    expect(text).toContain('Cotizaciones');
+    expect(text).toContain('Documentos');
+    expect(text).toContain('Sección técnica');
+    expect(ordenService.listarRepuestos).toHaveBeenCalledWith(12);
+  }));
+
+  it('PENDIENTE_APROBACION muestra registrar respuesta del cliente', fakeAsync(() => {
     ordenService.obtenerPorId.and.returnValue(
       of(ordenBase({ estado: 'PENDIENTE_APROBACION' }))
     );
     fixture.detectChanges();
     tick();
-    expect(component.accionPrincipal?.boton).toBe('Aprobar cotización');
-    expect(component.proximaAccionTexto).toBe('Esperando aprobación del cliente.');
+    expect(component.accionPrincipal?.boton).toBe('Registrar respuesta del cliente');
+    expect(component.ux.siguienteTaller).toContain('respuesta del cliente');
   }));
 
   it('Marcar listo sin trabajo realizado muestra guía técnica', fakeAsync(() => {
@@ -302,17 +316,16 @@ describe('ServicioDetailComponent — workflow', () => {
     expect(component.guiaTecnica).toContain('trabajo realizado');
   }));
 
-  it('EN_REPARACION muestra botón de nueva falla', fakeAsync(() => {
+  it('EN_REPARACION tiene nueva falla en menú Más acciones', fakeAsync(() => {
     ordenService.obtenerPorId.and.returnValue(of(ordenBase({ estado: 'EN_REPARACION' })));
     fixture.detectChanges();
     tick();
     expect(component.accionFalla?.destino).toBe('REQUIERE_APROBACION_ADICIONAL');
     expect(component.accionFalla?.boton).toBe('Registrar nueva falla');
-    const text = fixture.nativeElement.textContent as string;
-    expect(text).toContain('Registrar nueva falla');
+    expect(component.hayMenuMasAcciones).toBeTrue();
   }));
 
-  it('muestra timeline de historial', fakeAsync(() => {
+  it('muestra actividad reciente del historial', fakeAsync(() => {
     const hist: HistorialEstadoOrdenServicioResponseDTO[] = [
       {
         id: 1,
@@ -328,11 +341,23 @@ describe('ServicioDetailComponent — workflow', () => {
     ordenService.listarHistorial.and.returnValue(of(hist));
     fixture.detectChanges();
     tick();
+    component.abrirSeccion('actividad');
+    fixture.detectChanges();
     const text = fixture.nativeElement.textContent as string;
-    expect(text).toContain('Historial de la orden');
+    expect(text).toContain('Actividad reciente');
     expect(text).toContain('Inicio');
     expect(text).toContain('admin');
     expect(ordenService.listarHistorial).toHaveBeenCalledWith(12);
+  }));
+
+  it('muestra Siguiente paso y progreso de 5 fases', fakeAsync(() => {
+    fixture.detectChanges();
+    tick();
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('Siguiente paso');
+    expect(text).toContain('Recepción');
+    expect(text).toContain('Iniciar diagnóstico');
+    expect(text).not.toContain('Estado actual:');
   }));
 
   it('permite editar y guardar textos fuera de diagnóstico', fakeAsync(() => {
@@ -380,4 +405,15 @@ describe('ServicioDetailComponent — workflow', () => {
     component.volver();
     expect(navigate).toHaveBeenCalledWith(['/servicios']);
   });
+
+  it('expone sticky CTA y CTA desktop cuando hay acción principal', fakeAsync(() => {
+    fixture.detectChanges();
+    tick();
+    expect(component.accionPrincipal).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.sticky-cta')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.siguiente-actions--desktop')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.sticky-cta')?.getAttribute('aria-label')).toBe(
+      'Acción principal'
+    );
+  }));
 });

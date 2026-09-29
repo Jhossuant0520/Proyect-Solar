@@ -18,13 +18,19 @@
 .solvix-state h2 {
   margin: 0;
   color: var(--solvix-text);
+  font-family: var(--solvix-font);
   font-size: 1.15rem;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .solvix-state p {
   margin: 0;
   max-width: 28rem;
+  font-family: var(--solvix-font);
+  color: var(--solvix-text-muted);
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .solvix-state--error .solvix-state__icon {
@@ -44,9 +50,9 @@
   border-radius: 0.25rem;
   background: linear-gradient(
     90deg,
-    rgba(79, 209, 255, 0.08),
-    rgba(79, 209, 255, 0.22),
-    rgba(79, 209, 255, 0.08)
+    var(--solvix-primary-soft),
+    color-mix(in srgb, var(--solvix-primary) 22%, transparent),
+    var(--solvix-primary-soft)
   );
   background-size: 200% 100%;
   animation: solvix-shimmer 1.4s ease-in-out infinite;

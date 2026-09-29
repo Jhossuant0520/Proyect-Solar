@@ -3,10 +3,10 @@ import { of, throwError } from 'rxjs';
 import { provideRouter } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ClienteEquiposPanelComponent } from './cliente-equipos-panel';
 import { EquipoService } from '../../../../core/services/equipo.service';
 import { EquipoResponseDTO } from '../../../../core/models/equipo.models';
+import { SolvixFeedbackService } from '../../../../shared/services/solvix-feedback.service';
 
 const equipoActivo: EquipoResponseDTO = {
   id: 9,
@@ -45,7 +45,10 @@ describe('ClienteEquiposPanelComponent', () => {
       providers: [
         provideRouter([]),
         { provide: EquipoService, useValue: equipoService },
-        { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open']) }
+        {
+          provide: SolvixFeedbackService,
+          useValue: jasmine.createSpyObj('SolvixFeedbackService', ['success', 'error', 'warning', 'info'])
+        }
       ]
     }).compileComponents();
 

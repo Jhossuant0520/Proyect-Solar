@@ -1,13 +1,22 @@
-import { Component, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  AbstractControl,
+  FormArray,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+  Validators
+} from '@angular/forms';
 import { Router } from '@angular/router';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { SolvixActionRevealService } from '../../../../shared/services/solvix-action-reveal.service';
+import { SolvixFeedbackService } from '../../../../shared/services/solvix-feedback.service';
+import { Subject, Subscription, catchError, debounceTime, distinctUntilChanged, map, of, switchMap, tap } from 'rxjs';
 import { SolvixButtonComponent } from '../../../../shared/components/solvix-button/solvix-button';
-import { SolvixErrorStateComponent } from '../../../../shared/components/solvix-error-state/solvix-error-state';
-import { SolvixLoadingStateComponent } from '../../../../shared/components/solvix-loading-state/solvix-loading-state';
 import { SolvixPageHeaderComponent } from '../../../../shared/components/solvix-page-header/solvix-page-header';
 import { SolvixSectionHeaderComponent } from '../../../../shared/components/solvix-section-header/solvix-section-header';
-import { ClienteService } from '../../../../core/services/cliente.service';
 import { ProductoService } from '../../../../core/services/producto.service';
 import { VentaService } from '../../../../core/services/venta.service';
 import { ClienteResponseDTO } from '../../../../core/models/cliente.models';
@@ -20,14 +29,29 @@ import {
 import {
   MENSAJE_PRODUCTO_YA_EN_VENTA,
   idsProductosEnLineas,
-  labelCodigoBarras,
-  productoCoincideBusqueda
+  labelCodigoBarras
 } from '../../producto/producto-ui';
 import { formatImporte, mapHttpError, METODOS_PAGO } from '../venta-ui';
-import { clientesParaVenta } from '../../cliente/cliente-ui';
+import { ClienteBuscadorComponent } from '../../cliente/cliente-buscador/cliente-buscador';
 
-type FormEstado = 'loading' | 'ready' | 'error';
 type SubmitEstado = 'idle' | 'processing' | 'error';
+type BusquedaEstado = 'idle' | 'buscando' | 'resultados' | 'vacio' | 'error';
+
+export const LIMITE_BUSQUEDA_PRODUCTOS_VENTA = 10;
+export const MIN_CARACTERES_PRODUCTO_VENTA = 2;
+export const DEBOUNCE_PRODUCTO_VENTA_MS = 250;
+
+/** La cantidad pedida no puede superar el stock disponible (igual es válida). */
+export function cantidadDentroDeStock(): ValidatorFn {
+  return (group: AbstractControl): ValidationErrors | null => {
+    const cantidad = Number(group.get('cantidad')?.value);
+    const stock = Number(group.get('stockActual')?.value ?? 0);
+    if (!Number.isFinite(cantidad) || cantidad <= 0) {
+      return null;
+    }
+    return cantidad <= stock ? null : { stockInsuficiente: { disponible: stock, requerido: cantidad } };
+  };
+}
 
 @Component({
   selector: 'app-venta-form',
@@ -40,32 +64,34 @@ type SubmitEstado = 'idle' | 'processing' | 'error';
     SolvixPageHeaderComponent,
     SolvixButtonComponent,
     SolvixSectionHeaderComponent,
-    SolvixLoadingStateComponent,
-    SolvixErrorStateComponent
+    ClienteBuscadorComponent
   ]
 })
-export class VentaFormComponent implements OnInit {
+export class VentaFormComponent implements OnInit, OnDestroy {
   form: FormGroup;
-  clientes: ClienteResponseDTO[] = [];
-  catalogo: ProductoModel[] = [];
+  cliente: ClienteResponseDTO | null = null;
+  resultados: ProductoModel[] = [];
   busquedaProducto = '';
+  busquedaEstado: BusquedaEstado = 'idle';
   buscandoCodigo = false;
-  loadState: FormEstado = 'loading';
   submitState: SubmitEstado = 'idle';
-  errorTitle = 'No pudimos cargar el formulario.';
-  errorMessage = 'Revisa la conexión e inténtalo de nuevo.';
   submitError = '';
 
   readonly metodos = METODOS_PAGO;
   readonly money = formatImporte;
   readonly labelCodigo = labelCodigoBarras;
+  readonly limiteBusqueda = LIMITE_BUSQUEDA_PRODUCTOS_VENTA;
+  readonly minCaracteres = MIN_CARACTERES_PRODUCTO_VENTA;
+
+  private readonly consultas = new Subject<string>();
+  private sub?: Subscription;
 
   constructor(
     private fb: FormBuilder,
     private ventaService: VentaService,
-    private clienteService: ClienteService,
     private productoService: ProductoService,
-    private snackBar: MatSnackBar,
+    private feedback: SolvixFeedbackService,
+    private actionReveal: SolvixActionRevealService,
     private router: Router
   ) {
     this.form = this.fb.group({
@@ -78,43 +104,66 @@ export class VentaFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.cargarCatalogo();
+    this.sub = this.consultas
+      .pipe(
+        map(t => t.trim()),
+        debounceTime(DEBOUNCE_PRODUCTO_VENTA_MS),
+        distinctUntilChanged(),
+        tap(t => {
+          if (t.length < MIN_CARACTERES_PRODUCTO_VENTA) {
+            this.resultados = [];
+            this.busquedaEstado = 'idle';
+          } else {
+            this.busquedaEstado = 'buscando';
+          }
+        }),
+        switchMap(t =>
+          t.length < MIN_CARACTERES_PRODUCTO_VENTA
+            ? of(null)
+            : this.productoService
+                .buscar(t, LIMITE_BUSQUEDA_PRODUCTOS_VENTA)
+                .pipe(catchError(() => of(undefined)))
+        )
+      )
+      .subscribe(lista => {
+        if (lista === null) {
+          return;
+        }
+        if (lista === undefined) {
+          this.resultados = [];
+          this.busquedaEstado = 'error';
+          return;
+        }
+        this.resultados = lista;
+        this.busquedaEstado = lista.length ? 'resultados' : 'vacio';
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
   }
 
   get detalles(): FormArray {
     return this.form.get('detalles') as FormArray;
   }
 
-  get clientesSeleccionables(): ClienteResponseDTO[] {
-    return clientesParaVenta(this.clientes);
-  }
-
   get productosFiltrados(): ProductoModel[] {
-    const query = this.busquedaProducto.trim();
     const usados = idsProductosEnLineas(this.detalles.controls);
-    return this.catalogo
-      .filter(producto => producto.id != null && !usados.has(producto.id))
-      .filter(producto => productoCoincideBusqueda(producto, query))
-      .slice(0, 8);
+    return this.resultados.filter(producto => producto.id != null && !usados.has(producto.id));
   }
 
-  cargarCatalogo(): void {
-    this.loadState = 'loading';
-    this.clienteService.listar(true).subscribe({
-      next: clientes => this.clientes = clientes,
-      error: error => this.marcarErrorCarga(error)
-    });
-    this.productoService.listar({ activo: true }).subscribe({
-      next: productos => {
-        this.catalogo = productos;
-        this.loadState = 'ready';
-      },
-      error: error => this.marcarErrorCarga(error)
-    });
+  get lineasSinStock(): number {
+    return this.detalles.controls.filter(c => c.hasError('stockInsuficiente')).length;
+  }
+
+  onClienteSeleccionado(cliente: ClienteResponseDTO | null): void {
+    this.cliente = cliente;
+    this.form.patchValue({ clienteId: cliente?.id ?? null });
   }
 
   onBuscarProducto(event: Event): void {
     this.busquedaProducto = (event.target as HTMLInputElement).value;
+    this.consultas.next(this.busquedaProducto);
   }
 
   /** HID/teclado: Enter confirma el código sin enviar el formulario. */
@@ -137,7 +186,7 @@ export class VentaFormComponent implements OnInit {
     }
 
     this.buscandoCodigo = true;
-    resolverProductoPorCodigoBarras(this.productoService, this.catalogo, query).subscribe({
+    resolverProductoPorCodigoBarras(this.productoService, this.resultados, query).subscribe({
       next: producto => {
         this.buscandoCodigo = false;
         this.integrarProductoResuelto(producto);
@@ -145,11 +194,7 @@ export class VentaFormComponent implements OnInit {
       error: error => {
         this.buscandoCodigo = false;
         const mapped = mapHttpError(error, 'No pudimos buscar el producto.');
-        this.snackBar.open(
-          mensajeErrorLookupCodigoBarras(error, mapped.message),
-          'Cerrar',
-          { duration: 4000 }
-        );
+        this.feedback.error(mensajeErrorLookupCodigoBarras(error, mapped.message), 4000);
       }
     });
   }
@@ -159,25 +204,40 @@ export class VentaFormComponent implements OnInit {
       return;
     }
     if (idsProductosEnLineas(this.detalles.controls).has(producto.id)) {
-      this.snackBar.open(MENSAJE_PRODUCTO_YA_EN_VENTA, 'Cerrar', { duration: 3000 });
-      this.busquedaProducto = '';
+      const index = this.detalles.controls.findIndex(c => Number(c.get('productoId')?.value) === producto.id);
+      this.actionReveal.info({
+        message: MENSAJE_PRODUCTO_YA_EN_VENTA,
+        target: index >= 0 ? `[data-linea-index="${index}"]` : null
+      });
+      this.limpiarBusqueda();
+      return;
+    }
+    const stock = producto.stockActual ?? 0;
+    if (stock <= 0) {
+      this.feedback.warning(`"${producto.nombre}" no tiene stock disponible.`, 4000);
       return;
     }
     this.detalles.push(this.fb.group({
       productoId: [producto.id, Validators.required],
       productoNombre: [producto.nombre],
       productoCodigoBarras: [producto.codigoBarras ?? null],
-      stockActual: [producto.stockActual ?? 0],
+      stockActual: [stock],
       precioCatalogo: [producto.precioVentaActual],
       cantidad: [1, [Validators.required, Validators.min(1)]],
       precioUnitario: [producto.precioVentaActual, [Validators.required, Validators.min(0)]],
       descuentoLinea: [0, [Validators.min(0)]]
-    }));
-    this.busquedaProducto = '';
+    }, { validators: cantidadDentroDeStock() }));
+    const index = this.detalles.length - 1;
+    this.limpiarBusqueda();
+    this.actionReveal.success({
+      message: 'Producto agregado',
+      target: `[data-linea-index="${index}"]`
+    });
   }
 
   quitarLinea(index: number): void {
     this.detalles.removeAt(index);
+    this.feedback.info('Producto eliminado');
   }
 
   registrar(): void {
@@ -186,7 +246,9 @@ export class VentaFormComponent implements OnInit {
       this.submitState = 'error';
       this.submitError = this.detalles.length === 0
         ? 'Agrega al menos un producto.'
-        : 'Revisa las cantidades, precios y descuentos.';
+        : this.lineasSinStock > 0
+          ? 'Hay líneas con más unidades que el stock disponible.'
+          : 'Revisa las cantidades, precios y descuentos.';
       return;
     }
 
@@ -214,9 +276,7 @@ export class VentaFormComponent implements OnInit {
     this.ventaService.crear(request).subscribe({
       next: venta => {
         this.submitState = 'idle';
-        this.snackBar.open(`Venta ${venta.numero} registrada. Queda pendiente hasta completarla.`, 'Cerrar', {
-          duration: 4000
-        });
+        this.feedback.success(`Venta ${venta.numero} registrada`);
         this.router.navigate(['/ventas', venta.id]);
       },
       error: error => {
@@ -231,21 +291,18 @@ export class VentaFormComponent implements OnInit {
     this.router.navigate(['/ventas']);
   }
 
-  private integrarProductoResuelto(producto: ProductoModel): void {
-    if (producto.activo === false) {
-      this.snackBar.open('Ese producto está inactivo y no se puede vender.', 'Cerrar', { duration: 4000 });
-      return;
-    }
-    if (producto.id != null && !this.catalogo.some(item => item.id === producto.id)) {
-      this.catalogo = [producto, ...this.catalogo];
-    }
-    this.agregarProducto(producto);
+  private limpiarBusqueda(): void {
+    this.busquedaProducto = '';
+    this.resultados = [];
+    this.busquedaEstado = 'idle';
+    this.consultas.next('');
   }
 
-  private marcarErrorCarga(error: unknown): void {
-    const mapped = mapHttpError(error, 'No pudimos cargar el formulario.');
-    this.errorTitle = mapped.title;
-    this.errorMessage = mapped.message;
-    this.loadState = 'error';
+  private integrarProductoResuelto(producto: ProductoModel): void {
+    if (producto.activo === false) {
+      this.feedback.warning('Ese producto está inactivo y no se puede vender.', 4000);
+      return;
+    }
+    this.agregarProducto(producto);
   }
 }

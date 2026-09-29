@@ -41,7 +41,7 @@
   padding: 0.75rem 1rem;
   border: 1px solid var(--solvix-border);
   border-radius: var(--solvix-radius);
-  background: rgba(15, 23, 42, 0.65);
+  background: var(--solvix-panel);
 }
 
 .ctx-label {
@@ -54,7 +54,7 @@
 }
 
 .panel {
-  background: rgba(15, 23, 42, 0.8);
+  background: var(--solvix-panel);
   border: 1px solid var(--solvix-border);
   border-radius: var(--solvix-radius);
   padding: 1.25rem;
@@ -79,7 +79,7 @@
   padding: 0.8rem 0.9rem;
   border-radius: 0.35rem;
   border: 1px solid var(--solvix-border-subtle);
-  background: rgba(2, 6, 23, 0.45);
+  background: var(--solvix-panel-inset);
   color: var(--solvix-text);
   cursor: pointer;
 }
@@ -111,8 +111,9 @@ label {
   flex-direction: column;
   gap: 0.3rem;
   color: var(--solvix-text-muted);
-  font-family: var(--solvix-font-mono);
+  font-family: var(--solvix-font);
   font-size: 0.68rem;
+  font-weight: 600;
   text-transform: uppercase;
 }
 

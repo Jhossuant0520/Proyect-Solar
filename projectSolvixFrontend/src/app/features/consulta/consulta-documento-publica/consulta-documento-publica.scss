@@ -1,12 +1,4 @@
 :host {
-  --solvix-bg: #020617;
-  --solvix-surface: #0f172a;
-  --solvix-primary: #4fd1ff;
-  --solvix-secondary: #38bdf8;
-  --solvix-neon: #00e5ff;
-  --solvix-text: #ffffff;
-  --solvix-text-secondary: #cfe9ff;
-  --solvix-text-muted: #94a3b8;
   display: block;
 }
 
@@ -65,6 +57,18 @@
   z-index: 2;
 }
 
+.consulta-theme {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 2;
+  padding: 0.2rem;
+  border-radius: 0.5rem;
+  background: var(--color-surface-1, var(--solvix-surface));
+  border: 1px solid var(--color-border-subtle, var(--solvix-border-subtle));
+  box-shadow: var(--solvix-shadow);
+}
+
 .consulta-logo {
   height: 40px;
   width: auto;
@@ -78,10 +82,10 @@
   max-width: 480px;
   padding: 36px 32px;
   border-radius: 16px;
-  background: rgba(15, 23, 42, 0.78);
+  background: color-mix(in srgb, var(--solvix-surface) 88%, transparent);
   backdrop-filter: blur(18px);
-  border: 1px solid rgba(79, 209, 255, 0.18);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--solvix-border);
+  box-shadow: var(--solvix-shadow);
 }
 
 .kicker {

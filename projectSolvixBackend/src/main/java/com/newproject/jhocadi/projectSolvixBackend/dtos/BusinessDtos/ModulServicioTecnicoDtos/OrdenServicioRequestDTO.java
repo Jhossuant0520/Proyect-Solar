@@ -24,4 +24,19 @@ public class OrdenServicioRequestDTO {
 
     @Size(max = 1000)
     private String observaciones;
+
+    /**
+     * BLOQUE D.2 — firma de recepción al crear la OT.
+     * Obligatorios solo en {@code crear}; se ignoran en {@code actualizar}.
+     */
+    private Boolean clienteConfirmoRecepcion;
+
+    @Size(max = 150, message = "El nombre del firmante no puede superar 150 caracteres.")
+    private String nombreFirmanteRecepcion;
+
+    @Size(max = 50, message = "El documento del firmante no puede superar 50 caracteres.")
+    private String documentoFirmanteRecepcion;
+
+    /** PNG Base64 o data URL. Obligatorio al crear. */
+    private String firmaBase64Recepcion;
 }

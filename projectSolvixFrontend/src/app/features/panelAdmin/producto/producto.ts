@@ -2,26 +2,26 @@ import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/co
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { catchError, of, switchMap } from 'rxjs';
 import { SolvixButtonComponent } from '../../../shared/components/solvix-button/solvix-button';
 import { SolvixErrorStateComponent } from '../../../shared/components/solvix-error-state/solvix-error-state';
 import { SolvixFieldHelpComponent } from '../../../shared/components/solvix-field-help/solvix-field-help';
 import { SolvixLoadingStateComponent } from '../../../shared/components/solvix-loading-state/solvix-loading-state';
 import { SolvixPageHeaderComponent } from '../../../shared/components/solvix-page-header/solvix-page-header';
+import { SolvixFeedbackService } from '../../../shared/services/solvix-feedback.service';
 import { CategoriaProductoService } from '../../../core/services/categoria-producto.service';
 import { ProductoService } from '../../../core/services/producto.service';
 import { resolverUrlMedia } from '../../../core/utils/media-url';
 import { CategoriaProductoModel, ProductoModel, ProductoRequestDTO } from './productoClase';
 import { formatMoney } from '../dashboard/utils/dashboard-format';
 import { mapHttpError } from '../venta/venta-ui';
-import { formatMontoEntrada, normalizarCodigoBarras, parseMontoEntrada } from './producto-ui';
+import { formatMontoEntrada, normalizarCodigoBarras, parseMontoEntrada, calcularPrecioSugerido } from './producto-ui';
 import {
   MENSAJE_IMAGEN_EXTERNA_FALLA,
   validarArchivoImagenProducto
 } from './producto-imagen';
 import { AjusteCostoDialogComponent } from './ajuste-costo-dialog/ajuste-costo-dialog';
-import { showSolvixSnack } from '../../../shared/utils/solvix-snack';
 
 @Component({
   selector: 'app-producto',
@@ -54,6 +54,8 @@ export class ProductoComponent implements OnInit, OnDestroy {
   guardando = false;
   precioTexto = '';
   costoTexto = '';
+  /** Solo UI: no se persiste. Recargo sobre costo (%). */
+  recargoTexto = '';
   readonly money = formatMoney;
 
   archivoImagen: File | null = null;
@@ -68,7 +70,7 @@ export class ProductoComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private productoService: ProductoService,
     private categoriaService: CategoriaProductoService,
-    private snackBar: MatSnackBar,
+    private feedback: SolvixFeedbackService,
     private dialog: MatDialog,
     private route: ActivatedRoute,
     private router: Router
@@ -119,11 +121,47 @@ export class ProductoComponent implements OnInit, OnDestroy {
     return this.previewFallida ? MENSAJE_IMAGEN_EXTERNA_FALLA : '';
   }
 
+  /** Costo usado por la calculadora (creación o vigente en edición). */
+  get costoParaSugerido(): number | null {
+    if (this.modoEdicion) {
+      return this.costoConocido ? this.costoVigente : null;
+    }
+    return parseMontoEntrada(this.costoTexto);
+  }
+
+  get precioSugerido(): number | null {
+    return calcularPrecioSugerido(this.costoParaSugerido, this.recargoTexto);
+  }
+
+  onRecargoInput(event: Event): void {
+    this.recargoTexto = (event.target as HTMLInputElement).value;
+  }
+
+  onRecargoBlur(): void {
+    const n = parseMontoEntrada(this.recargoTexto);
+    this.recargoTexto = n == null ? this.recargoTexto.trim() : formatMontoEntrada(n);
+  }
+
+  /**
+   * Copia el sugerido al precio de venta. No se ejecuta al cambiar costo/%:
+   * el usuario decide cuándo aplicarlo.
+   */
+  usarPrecioSugerido(): void {
+    const sugerido = this.precioSugerido;
+    if (sugerido == null) {
+      return;
+    }
+    this.precioTexto = formatMontoEntrada(sugerido);
+    this.productoForm.get('precioVentaActual')?.setValue(sugerido, { emitEvent: false });
+    this.productoForm.get('precioVentaActual')?.markAsTouched();
+    this.productoForm.get('precioVentaActual')?.updateValueAndValidity({ emitEvent: false });
+  }
+
   cargarCategorias(): void {
     this.categoriaService.listar(true).subscribe({
       next: categorias => this.categorias = categorias,
       error: () => {
-        showSolvixSnack(this.snackBar, 'No se pudieron cargar las categorías', 'error');
+        this.feedback.error('No se pudieron cargar las categorías');
       }
     });
   }
@@ -190,7 +228,7 @@ export class ProductoComponent implements OnInit, OnDestroy {
   onSubmit(): void {
     if (this.productoForm.invalid) {
       this.productoForm.markAllAsTouched();
-      showSolvixSnack(this.snackBar, 'Completa los campos obligatorios', 'warning', 2500);
+      this.feedback.warning('Completa los campos obligatorios', 2500);
       return;
     }
 
@@ -205,7 +243,7 @@ export class ProductoComponent implements OnInit, OnDestroy {
     const request = this.armarRequest();
     if (request == null) {
       this.productoForm.markAllAsTouched();
-      showSolvixSnack(this.snackBar, 'Revisa el precio, el costo y la categoría.', 'warning', 2500);
+      this.feedback.warning('Revisa el precio, el costo y la categoría.', 2500);
       return;
     }
 
@@ -265,13 +303,13 @@ export class ProductoComponent implements OnInit, OnDestroy {
     this.productoService.subirImagen(this.productoId, this.archivoImagen).subscribe({
       next: producto => {
         this.guardando = false;
-        showSolvixSnack(this.snackBar, 'Imagen guardada', 'success');
+        this.feedback.success('Imagen guardada');
         this.router.navigate(['/productos', producto.id]);
       },
       error: error => {
         this.guardando = false;
         this.avisoImagenParcial = 'Producto creado, pero no pudimos guardar la imagen.';
-        showSolvixSnack(this.snackBar, this.mensajeError(error, this.avisoImagenParcial), 'error', 5000);
+        this.feedback.error(this.mensajeError(error, this.avisoImagenParcial), 5000);
       }
     });
   }
@@ -297,15 +335,15 @@ export class ProductoComponent implements OnInit, OnDestroy {
         this.guardando = false;
         if (imagenFallida) {
           this.avisoImagenParcial = 'Producto creado, pero no pudimos guardar la imagen.';
-          showSolvixSnack(this.snackBar, this.avisoImagenParcial, 'warning', 6000);
+          this.feedback.warning(this.avisoImagenParcial, 6000);
           return;
         }
-        showSolvixSnack(this.snackBar, 'Producto registrado', 'success');
+        this.feedback.success('Producto creado');
         this.router.navigate(producto.id != null ? ['/productos', producto.id] : ['/productos']);
       },
       error: error => {
         this.guardando = false;
-        showSolvixSnack(this.snackBar, this.mensajeError(error, 'No pudimos registrar el producto.'), 'error', 5000);
+        this.feedback.error(this.mensajeError(error, 'No pudimos registrar el producto.'), 5000);
       }
     });
   }
@@ -327,12 +365,12 @@ export class ProductoComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: () => {
         this.guardando = false;
-        showSolvixSnack(this.snackBar, 'Producto actualizado', 'success');
+        this.feedback.success('Producto actualizado');
         this.router.navigate(['/productos', id]);
       },
       error: error => {
         this.guardando = false;
-        showSolvixSnack(this.snackBar, this.mensajeError(error, 'No pudimos actualizar el producto.'), 'error', 5000);
+        this.feedback.error(this.mensajeError(error, 'No pudimos actualizar el producto.'), 5000);
       }
     });
   }

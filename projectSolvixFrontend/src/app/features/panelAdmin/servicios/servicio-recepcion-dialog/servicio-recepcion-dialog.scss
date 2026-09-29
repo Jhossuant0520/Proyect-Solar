@@ -1,0 +1,187 @@
+.recepcion-dialog {
+  width: min(640px, 100%);
+  max-width: 100%;
+  max-height: min(92vh, 880px);
+  overflow: auto;
+  padding: 1.15rem 1.25rem 1rem;
+  background: var(--color-surface-elevated, var(--solvix-surface-elevated));
+  color: var(--color-text-primary, var(--solvix-text));
+  box-sizing: border-box;
+}
+
+.dlg-head .kicker {
+  margin: 0 0 0.15rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted, var(--solvix-text-muted));
+}
+
+.dlg-head h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--color-primary, var(--solvix-primary));
+}
+
+.bloque {
+  margin-top: 0.95rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--color-border-subtle, var(--solvix-border-subtle));
+}
+
+.facts {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.facts div {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: 0.35rem;
+  font-size: 0.86rem;
+}
+
+.facts dt {
+  color: var(--color-text-muted, var(--solvix-text-muted));
+}
+
+.facts dd {
+  margin: 0;
+  color: var(--color-text-primary, var(--solvix-text));
+  overflow-wrap: anywhere;
+}
+
+.check {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--color-text-primary, var(--solvix-text));
+}
+
+.check input {
+  margin-top: 0.15rem;
+  width: auto;
+  min-width: 1.1rem;
+  min-height: 1.1rem;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+label:not(.check) {
+  display: grid;
+  gap: 0.28rem;
+  font-size: 0.84rem;
+  color: var(--color-text-muted, var(--solvix-text-muted));
+}
+
+.label-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: baseline;
+}
+
+.req {
+  color: var(--color-primary, var(--solvix-primary));
+  font-size: 0.72rem;
+}
+
+.opt {
+  color: var(--color-text-muted, var(--solvix-text-muted));
+  font-size: 0.72rem;
+  font-weight: 400;
+}
+
+input {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, var(--solvix-border));
+  background: var(--color-surface-2, var(--solvix-surface-low));
+  color: var(--color-text-primary, var(--solvix-text));
+  padding: 0.5rem 0.65rem;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+input:focus-visible {
+  outline: 2px solid var(--color-focus, var(--solvix-primary));
+  outline-offset: 1px;
+}
+
+input[readonly] {
+  opacity: 0.9;
+  border-color: var(--color-border-subtle, var(--solvix-border-subtle));
+}
+
+/* D.9 — card de firma compacta; canvas D.7 (blanco/negro) en el pad */
+.firma-card {
+  margin-top: 0.95rem;
+  padding: 0.75rem 0.8rem 0.65rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-border, var(--solvix-border));
+  background: var(--color-surface-2, var(--solvix-surface-low));
+}
+
+.firma-card h3 {
+  margin: 0 0 0.55rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-primary, var(--solvix-secondary));
+}
+
+.form-error {
+  margin: 0.75rem 0 0;
+  color: var(--color-danger, var(--solvix-error));
+  font-size: 0.88rem;
+}
+
+.dlg-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  margin-top: 1rem;
+  position: sticky;
+  bottom: 0;
+  padding-top: 0.7rem;
+  background: linear-gradient(
+    to top,
+    var(--color-surface-elevated, var(--solvix-surface-elevated)) 70%,
+    transparent
+  );
+}
+
+@media (max-width: 767px) {
+  .recepcion-dialog {
+    min-width: 0;
+    padding: 0.95rem 0.9rem 0.95rem;
+    max-height: min(94vh, 960px);
+  }
+
+  .grid-2,
+  .facts div {
+    grid-template-columns: 1fr;
+  }
+
+  .firma-card {
+    padding: 0.65rem 0.7rem 0.55rem;
+  }
+
+  .dlg-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .dlg-actions solvix-button,
+  .dlg-actions button {
+    width: 100%;
+    min-height: var(--solvix-touch-min, 44px);
+  }
+}

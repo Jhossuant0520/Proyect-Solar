@@ -9,12 +9,12 @@
   </solvix-page-header>
 
   @if (loadState === 'loading') {
-    <solvix-loading-state label="Cargando clientes." />
+    <solvix-loading-state label="Preparando formulario." />
   } @else if (loadState === 'error') {
     <solvix-error-state
       [title]="errorTitle"
       [message]="errorMessage"
-      (retry)="cargarClientes()"
+      (retry)="cancelar()"
     />
   } @else {
     <nav class="pasos" aria-label="Progreso del asistente">
@@ -44,30 +44,16 @@
       <section class="panel">
         <solvix-section-header
           kicker="Paso 1"
-          title="Selecciona el cliente"
-          subtitle="Solo clientes activos del taller. El consumidor final no aparece."
+          title="Busca el cliente"
+          subtitle="Escribe parte del nombre, documento o teléfono. No hace falta el nombre exacto."
         />
 
-        <ul class="opcion-list">
-          @for (cliente of clientesSeleccionables; track cliente.id) {
-            <li>
-              <button
-                type="button"
-                class="opcion-card"
-                [class.is-selected]="form.controls.clienteId.value === cliente.id"
-                (click)="seleccionarCliente(cliente.id)"
-              >
-                <strong>{{ cliente.nombre }}</strong>
-                <span class="meta">
-                  {{ cliente.numeroDocumento || 'Sin documento' }}
-                  @if (cliente.telefono) {
-                    · {{ cliente.telefono }}
-                  }
-                </span>
-              </button>
-            </li>
-          }
-        </ul>
+        <app-cliente-buscador
+          [seleccionado]="clienteSeleccionado"
+          [mostrarHintSinSeleccion]="false"
+          placeholder="Buscar cliente por nombre, documento o teléfono"
+          (seleccionadoChange)="onClienteSeleccionado($event)"
+        />
 
         @if (!mostrarCrearCliente) {
           <solvix-button
@@ -123,35 +109,15 @@
       <section class="panel">
         <solvix-section-header
           kicker="Paso 2"
-          title="Selecciona el equipo"
-          subtitle="Solo equipos activos de este cliente."
+          title="Busca el equipo"
+          subtitle="Escribe marca, modelo, serie o referencia del equipo de este cliente."
         />
 
-        @if (equiposState === 'loading') {
-          <solvix-loading-state label="Cargando equipos." />
-        } @else if (equiposState === 'error') {
-          <p class="form-error">{{ equiposError }}</p>
-        } @else if (equiposState === 'empty') {
-          <p class="hint">Este cliente no tiene equipos activos.</p>
-        } @else {
-          <ul class="opcion-list">
-            @for (equipo of equipos; track equipo.id) {
-              <li>
-                <button
-                  type="button"
-                  class="opcion-card"
-                  [class.is-selected]="form.controls.equipoId.value === equipo.id"
-                  (click)="seleccionarEquipo(equipo.id)"
-                >
-                  <strong>{{ labelEquipo(equipo) }}</strong>
-                  @if (equipo.numeroSerie) {
-                    <span class="meta">Serial: {{ equipo.numeroSerie }}</span>
-                  }
-                </button>
-              </li>
-            }
-          </ul>
-        }
+        <app-equipo-buscador
+          [clienteId]="form.controls.clienteId.value"
+          [seleccionado]="equipoSeleccionado"
+          (seleccionadoChange)="onEquipoSeleccionado($event)"
+        />
 
         @if (!mostrarCrearEquipo) {
           <solvix-button
@@ -231,7 +197,7 @@
         <solvix-section-header
           kicker="Paso 3"
           title="Recepción"
-          subtitle="Describe el problema. La orden se crea en estado Recepcionado."
+          subtitle="Describe el problema y continúa a la firma digital del cliente."
         />
 
         <form class="recepcion-form" [formGroup]="form" (ngSubmit)="guardar()">
@@ -256,10 +222,10 @@
               family="tech"
               rank="primary"
               type="submit"
-              icon="assignment_add"
+              icon="draw"
               [disabled]="enviando || form.invalid"
             >
-              {{ enviando ? 'Creando…' : 'Crear orden de servicio' }}
+              Continuar a firma
             </solvix-button>
           </div>
         </form>

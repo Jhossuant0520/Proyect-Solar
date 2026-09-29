@@ -9,30 +9,18 @@
     </solvix-button>
   </solvix-page-header>
 
-  @if (loadState === 'loading') {
-    <solvix-loading-state label="Cargando clientes y productos." />
-  } @else if (loadState === 'error') {
-    <solvix-error-state
-      [title]="errorTitle"
-      [message]="errorMessage"
-      (retry)="cargarCatalogo()"
-    />
-  } @else {
     <form [formGroup]="form" (ngSubmit)="registrar()" class="form-layout">
       <div class="col">
         <section class="panel">
           <solvix-section-header kicker="Cabecera" title="Cliente y pago" />
           <div class="form-grid">
-            <label>
-              Cliente
-              <select formControlName="clienteId">
-                <option [ngValue]="null">Consumidor final</option>
-                @for (cliente of clientesSeleccionables; track cliente.id) {
-                  <option [ngValue]="cliente.id">{{ cliente.nombre }}</option>
-                }
-              </select>
-              <span class="hint">Si no eliges uno, la venta queda a nombre de consumidor final.</span>
-            </label>
+            <div class="campo full">
+              <span class="campo-label">Cliente</span>
+              <app-cliente-buscador
+                [seleccionado]="cliente"
+                (seleccionadoChange)="onClienteSeleccionado($event)"
+              />
+            </div>
             <label>
               Método de pago
               <select formControlName="metodoPago">
@@ -57,7 +45,7 @@
           <solvix-section-header
             kicker="Productos"
             title="Líneas de la venta"
-            subtitle="El stock que ves es una referencia. El sistema confirma la disponibilidad al completar."
+            subtitle="La cantidad no puede superar el stock disponible. El sistema lo confirma otra vez al completar."
           />
 
           <label class="search">
@@ -75,9 +63,13 @@
           </label>
           <span class="hint">Escribe el código o usa un lector de barras. Enter agrega el producto.</span>
 
-          @if (buscandoCodigo) {
-            <p class="empty-line">Buscando producto…</p>
-          } @else if (busquedaProducto.trim() && productosFiltrados.length === 0) {
+          @if (buscandoCodigo || busquedaEstado === 'buscando') {
+            <p class="empty-line" role="status">Buscando producto…</p>
+          } @else if (busquedaEstado === 'error') {
+            <p class="empty-line form-error" role="alert">No pudimos buscar productos. Intenta de nuevo.</p>
+          } @else if (busquedaEstado === 'idle' && busquedaProducto.trim()) {
+            <p class="empty-line">Escribe al menos {{ minCaracteres }} caracteres o pulsa Enter con el código.</p>
+          } @else if (busquedaEstado !== 'idle' && productosFiltrados.length === 0) {
             <p class="empty-line">No hay productos activos que coincidan. Prueba Enter si es un código de barras.</p>
           } @else if (productosFiltrados.length > 0) {
             <ul class="catalogo">
@@ -95,6 +87,9 @@
                 </li>
               }
             </ul>
+            @if (resultados.length >= limiteBusqueda) {
+              <p class="empty-line">Mostrando los primeros {{ limiteBusqueda }}. Escribe más para afinar.</p>
+            }
           }
 
           @if (detalles.length === 0) {
@@ -102,7 +97,7 @@
           } @else {
             <div class="lineas" formArrayName="detalles">
               @for (linea of detalles.controls; track $index; let i = $index) {
-                <article class="linea" [formGroupName]="i">
+                <article class="linea" [formGroupName]="i" [attr.data-linea-index]="i">
                   <header>
                     <div>
                       <strong>{{ linea.get('productoNombre')?.value }}</strong>
@@ -121,7 +116,19 @@
                   <div class="linea-grid">
                     <label>
                       Cantidad
-                      <input type="number" formControlName="cantidad" min="1" step="1" />
+                      <input
+                        type="number"
+                        formControlName="cantidad"
+                        min="1"
+                        [attr.max]="linea.get('stockActual')?.value"
+                        step="1"
+                        [attr.aria-invalid]="linea.hasError('stockInsuficiente')"
+                      />
+                      @if (linea.hasError('stockInsuficiente')) {
+                        <span class="hint form-error" role="alert">
+                          Stock insuficiente: disponible {{ linea.get('stockActual')?.value }} u.
+                        </span>
+                      }
                     </label>
                     <label>
                       Precio unitario
@@ -180,5 +187,4 @@
         </section>
       </aside>
     </form>
-  }
 </section>

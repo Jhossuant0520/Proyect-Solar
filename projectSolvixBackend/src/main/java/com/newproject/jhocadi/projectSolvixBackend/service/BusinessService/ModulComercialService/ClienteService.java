@@ -1,7 +1,10 @@
 package com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.ModulComercialService;
 
 import java.util.List;
+import java.util.Locale;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class ClienteService {
 
     private static final String NOMBRE_CONSUMIDOR_FINAL = "Consumidor final";
+    private static final int LIMITE_MAXIMO_BUSQUEDA = 50;
 
     private final ClienteRepository clienteRepository;
 
@@ -50,6 +54,18 @@ public class ClienteService {
             : clienteRepository.findAll();
 
         return clientes.stream().map(ClienteResponseDTO::fromEntity).toList();
+    }
+
+    /** Selector con búsqueda: devuelve como máximo {@code limite} clientes ordenados por nombre. */
+    @Transactional(readOnly = true)
+    public List<ClienteResponseDTO> buscar(String texto, Integer limite, Boolean soloActivos) {
+        String q = texto != null ? texto.trim().toLowerCase(Locale.ROOT) : "";
+        int tope = limite != null ? Math.min(Math.max(limite, 1), LIMITE_MAXIMO_BUSQUEDA) : 10;
+        return clienteRepository
+            .buscar("%" + q + "%", Boolean.TRUE.equals(soloActivos), PageRequest.of(0, tope, Sort.by("nombre")))
+            .stream()
+            .map(ClienteResponseDTO::fromEntity)
+            .toList();
     }
 
     @Transactional(readOnly = true)

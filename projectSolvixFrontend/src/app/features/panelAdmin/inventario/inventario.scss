@@ -14,7 +14,7 @@
 }
 
 .panel {
-  background: rgba(15, 23, 42, 0.8);
+  background: var(--solvix-panel);
   border: 1px solid var(--solvix-border);
   border-radius: var(--solvix-radius);
   padding: 1rem 1.1rem 1.15rem;
@@ -73,7 +73,7 @@
   background: transparent;
   border: 0;
   color: var(--solvix-primary);
-  font-family: var(--solvix-font-mono);
+  font-family: var(--solvix-font);
   font-size: 0.72rem;
   text-decoration: underline;
   cursor: pointer;
@@ -100,8 +100,9 @@
 
 .inv-table th {
   color: var(--solvix-text-muted);
-  font-family: var(--solvix-font-mono);
+  font-family: var(--solvix-font);
   font-size: 0.68rem;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -116,7 +117,7 @@
 }
 
 .inv-table tbody tr:hover {
-  background: rgba(46, 52, 71, 0.35);
+  background: var(--solvix-row-hover);
 }
 
 .name-btn {
@@ -203,7 +204,7 @@
   padding: 0.55rem 0.7rem;
   border: 1px solid var(--solvix-border-subtle);
   border-radius: 0.125rem;
-  background: rgba(2, 6, 23, 0.45);
+  background: var(--solvix-panel-inset);
 }
 
 .traza small {

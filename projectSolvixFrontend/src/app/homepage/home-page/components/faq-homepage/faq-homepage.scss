@@ -1,9 +1,4 @@
 :host {
-  --solvix-bg: #020617;
-  --solvix-surface: #0f172a;
-  --solvix-primary: #4fd1ff;
-  --solvix-text: #ffffff;
-  --solvix-text-muted: #94a3b8;
   display: block;
 }
 
@@ -20,8 +15,8 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 70% 50% at 50% -10%, rgba(79, 209, 255, 0.12), transparent 60%),
-    radial-gradient(ellipse 40% 40% at 80% 80%, rgba(0, 229, 255, 0.05), transparent 55%);
+    radial-gradient(ellipse 70% 50% at 50% -10%, var(--solvix-home-glow-soft), transparent 60%),
+    radial-gradient(ellipse 40% 40% at 80% 80%, var(--solvix-home-glow-soft), transparent 55%);
   animation: glowBreathe 8s ease-in-out infinite alternate;
 }
 
@@ -50,21 +45,22 @@
 .faq-item {
   overflow: hidden;
   border-radius: 12px;
-  background: #151b2d;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--solvix-home-card-bg-solid);
+  border: 1px solid var(--solvix-home-card-border);
+  box-shadow: var(--solvix-home-card-shadow);
   cursor: pointer;
   animation: fadeInUp 0.7s ease both;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .faq-item:hover {
-  border-color: rgba(79, 209, 255, 0.3);
-  box-shadow: 0 0 15px rgba(79, 209, 255, 0.1);
+  border-color: color-mix(in srgb, var(--solvix-primary) 45%, var(--solvix-home-card-border));
+  box-shadow: var(--solvix-home-card-hover-shadow);
 }
 
 .faq-item.active {
-  border-color: rgba(79, 209, 255, 0.4);
-  box-shadow: 0 0 18px rgba(79, 209, 255, 0.12);
+  border-color: color-mix(in srgb, var(--solvix-primary) 55%, var(--solvix-home-card-border));
+  box-shadow: var(--solvix-home-card-hover-shadow);
 }
 
 .faq-question {
@@ -80,7 +76,7 @@
 }
 
 .faq-item:hover .faq-question {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--solvix-primary-soft);
 }
 
 .faq-item.active .faq-question {

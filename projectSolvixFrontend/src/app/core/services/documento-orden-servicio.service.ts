@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   AsegurarComprobanteRecepcionResponseDTO,
+  ConsultaCotizacionOtPublicaDTO,
   ConsultaDocumentoPublicoDTO,
   ConsultaOtPublicaDTO,
   DocumentoOrdenServicioResponseDTO
@@ -91,6 +92,13 @@ export class DocumentoOrdenServicioService {
   consultaOtPublica(token: string): Observable<ConsultaOtPublicaDTO> {
     return this.http.get<ConsultaOtPublicaDTO>(
       `${environment.apiBaseUrl}/v1/consulta/ot/${encodeURIComponent(token)}`
+    );
+  }
+
+  /** Cotización OT en solo lectura (sin auth). */
+  consultaCotizacionOtPublica(token: string): Observable<ConsultaCotizacionOtPublicaDTO> {
+    return this.http.get<ConsultaCotizacionOtPublicaDTO>(
+      `${environment.apiBaseUrl}/v1/consulta/ot/${encodeURIComponent(token)}/cotizacion`
     );
   }
 

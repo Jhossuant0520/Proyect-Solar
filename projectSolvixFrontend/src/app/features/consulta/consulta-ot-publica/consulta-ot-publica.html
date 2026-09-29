@@ -6,6 +6,9 @@
   <a routerLink="/" class="consulta-home" aria-label="Ir al inicio">
     <img src="LogoSolvix3.1.png" alt="SOLVIX" class="consulta-logo" />
   </a>
+  <div class="consulta-theme">
+    <solvix-theme-toggle />
+  </div>
 
   <article class="consulta-card fade-up">
     @if (state === 'loading') {
@@ -16,33 +19,236 @@
         [message]="errorMessage"
       />
     } @else if (data) {
-      <p class="kicker">Consulta de servicio</p>
-      <h1 class="solvix-mono">{{ data.numero }}</h1>
-      <p class="estado">{{ data.estadoPublico }}</p>
-
-      <dl class="facts">
-        <div>
-          <dt>Equipo</dt>
-          <dd>{{ equipoResumen() }}</dd>
-        </div>
-        @if (data.referenciaInterna) {
-          <div>
-            <dt>Referencia</dt>
-            <dd class="solvix-mono">{{ data.referenciaInterna }}</dd>
-          </div>
+      <header class="consulta-header">
+        <p class="kicker">Consulta de servicio</p>
+        @if (contacto?.empresa) {
+          <p class="empresa">{{ contacto?.empresa }}</p>
         }
-        <div>
-          <dt>Recepción</dt>
-          <dd class="solvix-mono">{{ fecha(data.fechaRecepcion) }}</dd>
-        </div>
-        <div>
-          <dt>Actualización</dt>
-          <dd class="solvix-mono">{{ fecha(data.fechaActualizacion) }}</dd>
-        </div>
-      </dl>
+      </header>
 
-      @if (data.mensaje) {
-        <p class="mensaje">{{ data.mensaje }}</p>
+      <section class="bloque bloque-orden" aria-labelledby="orden-titulo">
+        <h1 id="orden-titulo" class="solvix-mono">{{ data.numero }}</h1>
+        <p class="equipo">{{ equipoResumen() }}</p>
+        @if (data.referenciaInterna) {
+          <p class="referencia">
+            <span class="label-inline">Referencia</span>
+            {{ data.referenciaInterna }}
+          </p>
+        }
+        <dl class="meta">
+          <div>
+            <dt>Recepción</dt>
+            <dd class="solvix-mono">{{ fecha(data.fechaRecepcion) }}</dd>
+          </div>
+          <div>
+            <dt>Actualización</dt>
+            <dd class="solvix-mono">{{ fecha(data.fechaActualizacion) }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="bloque bloque-estado" aria-labelledby="estado-titulo">
+        <p class="kicker">Estado actual</p>
+        <h2 id="estado-titulo" class="titulo-estado tono-{{ ux.tono }}">
+          {{ ux.tituloCliente }}
+        </h2>
+        <p class="nombre-cliente">{{ ux.nombreCliente }}</p>
+      </section>
+
+      @if (ux.fase !== 'CANCELADO') {
+        <section class="bloque bloque-progreso" aria-label="Progreso del servicio">
+          <p class="kicker">Progreso</p>
+          <ol class="fases">
+            @for (fase of fases(); track fase.codigo) {
+              <li
+                class="fase fase--{{ fase.estado }}"
+                [attr.aria-current]="fase.estado === 'actual' ? 'step' : null"
+              >
+                <span class="fase-num" aria-hidden="true">{{ fase.numero }}</span>
+                <span class="fase-label">{{ fase.label }}</span>
+              </li>
+            }
+          </ol>
+        </section>
+      }
+
+      <section class="bloque" aria-labelledby="que-pasa">
+        <h3 id="que-pasa" class="seccion-titulo">Qué está pasando</h3>
+        <p class="seccion-texto">{{ ux.descripcionCliente }}</p>
+      </section>
+
+      <section class="bloque" aria-labelledby="que-sigue">
+        <h3 id="que-sigue" class="seccion-titulo">Qué sigue</h3>
+        <p class="seccion-texto">{{ ux.siguienteCliente }}</p>
+      </section>
+
+      <section class="bloque" aria-labelledby="accion-cliente">
+        <h3 id="accion-cliente" class="seccion-titulo">¿Tienes que hacer algo?</h3>
+        @if (ux.requiereAccionCliente) {
+          <p class="seccion-texto seccion-texto--accion">
+            Sí. {{
+              data.estadoCodigo === 'PENDIENTE_APROBACION'
+                ? 'Revisa la cotización y contáctanos para aprobar o rechazar.'
+                : data.estadoCodigo === 'LISTO'
+                  ? 'Puedes acercarte al taller a retirar tu equipo.'
+                  : data.estadoCodigo === 'REQUIERE_APROBACION_ADICIONAL'
+                    ? 'Contáctanos: hay un hallazgo adicional que necesita tu autorización.'
+                    : ux.accionCliente
+            }}
+          </p>
+        } @else {
+          <p class="seccion-texto">No por ahora. El taller sigue trabajando en tu equipo.</p>
+        }
+
+        <div class="acciones">
+          @if (accionPrimaria) {
+            <button type="button" class="btn btn-primary" (click)="ejecutarAccionPrimaria()">
+              {{
+                vistaCotizacion === 'lista' && puedeVerCotizacion
+                  ? 'Ocultar cotización'
+                  : accionPrimaria
+              }}
+            </button>
+          }
+          @if (mostrarBloqueContacto && (destacarContacto || ux.requiereAccionCliente)) {
+            <a class="btn btn-ghost" href="#contacto-taller">Contactar taller</a>
+          }
+        </div>
+      </section>
+
+      @if (mostrarIndicacionesEntrega && data.estadoCodigo === 'LISTO') {
+        <section class="bloque bloque-aviso" aria-label="Indicaciones de entrega">
+          <h3 class="seccion-titulo">Indicaciones de entrega</h3>
+          <p class="seccion-texto">
+            Acércate al taller con tu documento de identidad. Si alguien más retira el equipo,
+            confirma con nosotros antes de llegar.
+          </p>
+          @if (contacto?.direccion) {
+            <p class="seccion-texto">
+              <strong>Dirección:</strong> {{ contacto?.direccion }}
+            </p>
+          }
+        </section>
+      }
+
+      @if (vistaCotizacion === 'cargando') {
+        <div class="bloque">
+          <solvix-loading-state label="Cargando cotización." />
+        </div>
+      }
+
+      @if (vistaCotizacion === 'error') {
+        <p class="bloque aviso-error">{{ cotizacionError }}</p>
+      }
+
+      @if (vistaCotizacion === 'lista' && cotizacion) {
+        <section class="bloque bloque-cotizacion" aria-labelledby="cotizacion-titulo">
+          <div class="cotizacion-head">
+            <div>
+              <p class="kicker">Cotización</p>
+              <h3 id="cotizacion-titulo" class="solvix-mono">{{ cotizacion.numero }}</h3>
+            </div>
+            <button type="button" class="btn-link" (click)="cerrarCotizacion()">Cerrar</button>
+          </div>
+          <p class="cotizacion-fecha">Fecha: {{ fecha(cotizacion.fecha) }}</p>
+
+          <div class="tabla-wrap">
+            <table class="tabla-cotizacion">
+              <thead>
+                <tr>
+                  <th scope="col">Concepto</th>
+                  <th scope="col">Cant.</th>
+                  <th scope="col">P. unit.</th>
+                  <th scope="col">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (linea of cotizacion.lineas; track $index) {
+                  <tr>
+                    <td>{{ linea.descripcion }}</td>
+                    <td class="num">{{ linea.cantidad }}</td>
+                    <td class="num">{{ money(linea.precioUnitario) }}</td>
+                    <td class="num">{{ money(linea.subtotal) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <dl class="totales">
+            <div>
+              <dt>Subtotal</dt>
+              <dd>{{ money(cotizacion.subtotal) }}</dd>
+            </div>
+            <div class="total">
+              <dt>Total</dt>
+              <dd>{{ money(cotizacion.total) }}</dd>
+            </div>
+          </dl>
+
+          @if (cotizacion.observaciones) {
+            <p class="obs">
+              <strong>Observaciones:</strong> {{ cotizacion.observaciones }}
+            </p>
+          }
+
+          <p class="hint-aprobacion">
+            Esta consulta solo te permite ver la cotización. Para aprobar o rechazar,
+            contacta al taller.
+          </p>
+        </section>
+      }
+
+      @if (mostrarBloqueContacto) {
+        <section
+          id="contacto-taller"
+          class="bloque bloque-contacto"
+          [class.bloque-contacto--destacado]="destacarContacto"
+          aria-labelledby="contacto-titulo"
+        >
+          <h3 id="contacto-titulo" class="seccion-titulo">Contacto del taller</h3>
+          @if (contacto?.empresa) {
+            <p class="contacto-empresa">{{ contacto?.empresa }}</p>
+          }
+          <ul class="contacto-lista">
+            @if (contacto?.telefono) {
+              <li>
+                <span class="contacto-label">Teléfono</span>
+                @if (telHref(contacto?.telefono); as href) {
+                  <a [href]="href">{{ contacto?.telefono }}</a>
+                } @else {
+                  <span>{{ contacto?.telefono }}</span>
+                }
+              </li>
+            }
+            @if (contacto?.whatsapp) {
+              <li>
+                <span class="contacto-label">WhatsApp</span>
+                @if (waHref(contacto?.whatsapp); as href) {
+                  <a [href]="href" target="_blank" rel="noopener noreferrer">{{
+                    contacto?.whatsapp
+                  }}</a>
+                } @else {
+                  <span>{{ contacto?.whatsapp }}</span>
+                }
+              </li>
+            }
+            @if (contacto?.direccion) {
+              <li>
+                <span class="contacto-label">Dirección</span>
+                <span>{{ contacto?.direccion }}</span>
+              </li>
+            }
+            @if (contacto?.sitioWeb) {
+              <li>
+                <span class="contacto-label">Sitio web</span>
+                <a [href]="contacto?.sitioWeb!" target="_blank" rel="noopener noreferrer">{{
+                  contacto?.sitioWeb
+                }}</a>
+              </li>
+            }
+          </ul>
+        </section>
       }
     }
   </article>

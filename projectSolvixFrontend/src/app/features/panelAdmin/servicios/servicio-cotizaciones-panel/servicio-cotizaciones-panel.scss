@@ -71,9 +71,13 @@
   padding: 0.9rem 1rem;
   border-radius: 12px;
   border: 1px solid rgba(148, 163, 184, 0.22);
-  background: rgba(2, 6, 23, 0.35);
+  background: var(--solvix-panel-inset);
   display: grid;
   gap: 0.75rem;
+  transition:
+    border-color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard),
+    opacity var(--motion-normal) var(--ease-standard);
 }
 
 .card-title {
@@ -183,9 +187,9 @@
   white-space: nowrap;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 767px) {
   .totales {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .resumen-grid {
@@ -195,4 +199,102 @@
   .detalles-tecnicos li {
     grid-template-columns: 1fr;
   }
+
+  .card-cot {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .card-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .card-actions > solvix-button {
+    flex: 1 1 auto;
+  }
+
+  .totales .total,
+  .card-title strong {
+    overflow-wrap: anywhere;
+  }
+}
+
+.grupo-label {
+  margin: 0.35rem 0 0.25rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--solvix-text-muted, #94a3b8);
+  font-weight: 600;
+}
+
+.btn-anteriores,
+.btn-icon-menu {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: transparent;
+  color: var(--solvix-text-secondary, #cfe9ff);
+  font: inherit;
+  cursor: pointer;
+}
+
+.btn-anteriores {
+  margin-top: 0.35rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 10px;
+  font-size: 0.88rem;
+}
+
+.btn-icon-menu {
+  min-width: 40px;
+  min-height: 40px;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.btn-anteriores:focus-visible,
+.btn-icon-menu:focus-visible {
+  outline: 2px solid var(--solvix-primary, #4fd1ff);
+  outline-offset: 2px;
+}
+
+.resumen-grid--compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (max-width: 767px) {
+  .resumen-grid--compact {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card-cot.is-historial {
+  opacity: 0.88;
+}
+
+.tipo-banner {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--solvix-primary, #4fd1ff);
+}
+
+.tipo-banner--adicional {
+  color: var(--solvix-warning, #fbbf24);
+}
+
+.tipo-hint {
+  margin: 0 0 0.45rem;
+  color: var(--solvix-text-muted, #94a3b8);
+  font-size: 0.82rem;
+}
+
+.card-cot.is-adicional {
+  border-color: rgba(251, 191, 36, 0.28);
 }

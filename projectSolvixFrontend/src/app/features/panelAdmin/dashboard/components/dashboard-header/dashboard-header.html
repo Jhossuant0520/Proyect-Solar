@@ -4,7 +4,14 @@
   subtitle="Esto está pasando en tu negocio"
 >
   <div class="header-controls">
-    <div class="dash-chips" role="group" aria-label="Período">
+    <div class="dash-chips dash-chips--period" #periodChips role="group" aria-label="Período">
+      <span
+        class="dash-chips__indicator"
+        [class.is-ready]="indicatorReady"
+        [style.transform]="'translateX(' + indicatorX + 'px)'"
+        [style.width.px]="indicatorW"
+        aria-hidden="true"
+      ></span>
       @for (preset of presets; track preset.id) {
         <button
           type="button"
@@ -36,6 +43,7 @@
       rank="secondary"
       icon="refresh"
       [disabled]="refreshing"
+      [loading]="refreshing"
       ariaLabel="Actualizar"
       (click)="refresh.emit()"
     >

@@ -17,8 +17,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
-  align-items: center;
-  background: rgba(15, 23, 42, 0.8);
+  align-items: flex-start;
+  background: var(--solvix-panel);
   border: 1px solid var(--solvix-border);
   border-radius: var(--solvix-radius);
   padding: 0.85rem;
@@ -62,14 +62,14 @@
   background: transparent;
   border: 0;
   color: var(--solvix-primary);
-  font-family: var(--solvix-font-mono);
+  font-family: var(--solvix-font);
   font-size: 0.72rem;
   text-decoration: underline;
   cursor: pointer;
 }
 
 .table-panel {
-  background: rgba(15, 23, 42, 0.8);
+  background: var(--solvix-panel);
   border: 1px solid var(--solvix-border);
   border-radius: var(--solvix-radius);
   overflow: hidden;
@@ -95,8 +95,9 @@
 
 .venta-table th {
   color: var(--solvix-text-muted);
-  font-family: var(--solvix-font-mono);
+  font-family: var(--solvix-font);
   font-size: 0.68rem;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -116,7 +117,7 @@
 }
 
 .venta-table tbody tr:hover {
-  background: rgba(46, 52, 71, 0.35);
+  background: var(--solvix-row-hover);
 }
 
 .venta-table .is-cancelada {
@@ -224,4 +225,53 @@
   .venta-table {
     min-width: 0;
   }
+}
+
+.filtro-cliente {
+  flex: 1 1 16rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-top: 1px solid var(--solvix-border-subtle);
+}
+
+.pager-meta {
+  margin: 0;
+  color: var(--solvix-text-muted);
+  font-size: 0.85rem;
+}
+
+.pager-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.page-btn {
+  min-height: var(--solvix-touch-min, 44px);
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid var(--solvix-border);
+  background: var(--solvix-surface);
+  color: var(--solvix-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.page-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.page-btn:focus-visible {
+  outline: 2px solid var(--solvix-primary);
+  outline-offset: 2px;
 }

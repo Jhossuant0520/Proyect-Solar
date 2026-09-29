@@ -65,27 +65,10 @@
             }
           </select>
         </label>
-        <label>
-          <span class="label-row">
-            Precio de venta
-            <span class="req">Obligatorio</span>
-            <solvix-field-help text="Es el precio que se cobra al cliente. Puedes escribir 240000 o 240.000. El sistema guarda el número, no el texto." />
-          </span>
-          <input
-            type="text"
-            inputmode="decimal"
-            [value]="precioTexto"
-            (input)="onMontoInput('precioVentaActual', $event)"
-            (blur)="onMontoBlur('precioVentaActual')"
-            placeholder="240.000"
-          />
-          <span class="hint">Acepta puntos de miles. Ejemplo: 240.000</span>
-        </label>
-
         @if (!modoEdicion) {
           <label>
             <span class="label-row">
-              Costo inicial
+              Costo actual
               <span class="opt">Opcional</span>
               <solvix-field-help text="Lo que te costó el producto al crearlo. Si lo dejas vacío, el costo queda desconocido. También acepta 240.000." />
             </span>
@@ -99,6 +82,68 @@
             />
             <span class="hint">Vacío = costo desconocido. No es lo mismo que cero.</span>
           </label>
+        } @else {
+          <div class="readonly">
+            <span class="hint">Costo actual</span>
+            <strong>{{ costoConocido ? money(costoVigente) : 'Sin costo' }}</strong>
+            <span class="hint">No se edita desde aquí. Usa ajustar costo.</span>
+          </div>
+        }
+
+        <label>
+          <span class="label-row">
+            Recargo sobre costo
+            <span class="opt">Calculadora</span>
+            <solvix-field-help text="Porcentaje de recargo sobre el costo (no es margen sobre ventas). Solo calcula un precio sugerido; no se guarda." />
+          </span>
+          <div class="recargo-row">
+            <input
+              type="text"
+              inputmode="decimal"
+              [value]="recargoTexto"
+              (input)="onRecargoInput($event)"
+              (blur)="onRecargoBlur()"
+              placeholder="Ej. 30"
+              aria-label="Recargo sobre costo en porcentaje"
+            />
+            <span class="recargo-suffix">%</span>
+          </div>
+          <span class="hint">Modificable. Ejemplo: 20, 25, 30, 40. No se persiste.</span>
+        </label>
+
+        <div class="readonly sugerido-block">
+          <span class="hint">Precio sugerido</span>
+          <strong class="solvix-mono">{{ precioSugerido != null ? money(precioSugerido) : '—' }}</strong>
+          <span class="hint">costo × (1 + recargo / 100). Solo referencia.</span>
+          <solvix-button
+            family="tech"
+            rank="secondary"
+            type="button"
+            [disabled]="precioSugerido == null"
+            (click)="usarPrecioSugerido()"
+          >
+            Usar precio sugerido
+          </solvix-button>
+        </div>
+
+        <label>
+          <span class="label-row">
+            Precio de venta
+            <span class="req">Obligatorio</span>
+            <solvix-field-help text="Es el precio que se cobra al cliente. El sugerido no lo sobrescribe: solo cambia si usas el botón o lo editas tú. Puedes escribir 240000 o 240.000." />
+          </span>
+          <input
+            type="text"
+            inputmode="decimal"
+            [value]="precioTexto"
+            (input)="onMontoInput('precioVentaActual', $event)"
+            (blur)="onMontoBlur('precioVentaActual')"
+            placeholder="240.000"
+          />
+          <span class="hint">Control total del usuario. Acepta puntos de miles.</span>
+        </label>
+
+        @if (!modoEdicion) {
           <label>
             <span class="label-row">
               Stock inicial
@@ -110,11 +155,6 @@
           </label>
         } @else {
           <div class="readonly">
-            <span class="hint">Costo vigente</span>
-            <strong>{{ costoConocido ? money(costoVigente) : 'Sin costo' }}</strong>
-            <span class="hint">No se edita desde aquí. Usa ajustar costo.</span>
-          </div>
-          <div class="readonly">
             <span class="hint">Stock actual</span>
             <strong>{{ stockActual }}</strong>
             <span class="hint">Se mueve con compras, ventas o ajustes de inventario.</span>
@@ -122,11 +162,13 @@
         }
 
         <div class="full imagen-block">
-          <span class="label-row">
-            Imagen del producto
-            <span class="opt">Opcional</span>
-            <solvix-field-help text="Puedes subir una imagen desde tu equipo o pegar una URL. SOLVIX guarda una sola referencia en imagenUrl." />
-          </span>
+          <label class="imagen-label">
+            <span class="label-row">
+              Imagen del producto
+              <span class="opt">Opcional</span>
+              <solvix-field-help text="Puedes subir una imagen desde tu equipo o pegar una URL. SOLVIX guarda una sola referencia en imagenUrl." />
+            </span>
+          </label>
           <p class="hint">Puedes subir una imagen desde tu equipo o pegar una URL.</p>
 
           <div class="imagen-options">

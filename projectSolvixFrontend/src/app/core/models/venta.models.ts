@@ -84,10 +84,13 @@ export interface VentaResponseDTO {
 }
 
 export interface VentaFiltros {
+  q?: string;
   clienteId?: number;
   estado?: EstadoVenta;
   desde?: string;
   hasta?: string;
+  pagina?: number;
+  tamano?: number;
 }
 
 export interface DevolucionLineaDTO {

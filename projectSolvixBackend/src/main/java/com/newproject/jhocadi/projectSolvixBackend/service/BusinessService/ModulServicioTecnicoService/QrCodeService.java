@@ -16,10 +16,13 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Genera códigos QR PNG como data URI Base64.
  */
 @Service
+@Slf4j
 public class QrCodeService {
 
     private static final int DEFAULT_SIZE = 180;
@@ -32,6 +35,7 @@ public class QrCodeService {
         if (contenido == null || contenido.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contenido QR vacío.");
         }
+        long t0 = System.nanoTime();
         try {
             Map<EncodeHintType, Object> hints = new HashMap<>();
             hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
@@ -44,6 +48,10 @@ public class QrCodeService {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             MatrixToImageWriter.writeToStream(matrix, "PNG", baos);
             String b64 = Base64.getEncoder().encodeToString(baos.toByteArray());
+            PdfGenTiming timing = PdfGenTiming.current();
+            if (timing != null) {
+                timing.addQrMs(PdfGenTiming.elapsedMs(t0));
+            }
             return "data:image/png;base64," + b64;
         } catch (Throwable t) {
             throw new ResponseStatusException(

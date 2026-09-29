@@ -1,18 +1,12 @@
 :host {
-  --solvix-bg: #020617;
-  --solvix-surface: #151b2d;
-  --solvix-primary: #4fd1ff;
-  --solvix-neon: #00e5ff;
-  --solvix-text: #ffffff;
-  --solvix-text-muted: #94a3b8;
   display: block;
 }
 
 .catalog-preview {
   padding: 96px 64px;
   background: var(--solvix-surface);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid var(--solvix-home-separator);
+  border-bottom: 1px solid var(--solvix-home-separator);
 }
 
 .catalog-preview h2 {
@@ -42,30 +36,33 @@
   border-radius: 16px;
   overflow: hidden;
   text-decoration: none;
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(79, 209, 255, 0.2);
+  background: var(--solvix-home-card-bg);
+  border: 1px solid var(--solvix-home-card-border);
+  box-shadow: var(--solvix-home-card-shadow);
   backdrop-filter: blur(16px);
-  transition: border-color 0.3s ease, transform 0.3s ease;
+  transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .preview-card::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(2, 6, 23, 0.9), transparent);
+  background: linear-gradient(to top, var(--solvix-home-overlay-from), transparent);
+  pointer-events: none;
 }
 
 .preview-card.is-biz {
-  border-color: rgba(0, 229, 255, 0.2);
+  border-color: color-mix(in srgb, var(--solvix-neon) 35%, var(--solvix-home-card-border));
 }
 
 .preview-card:hover {
   transform: translateY(-6px);
-  border-color: rgba(79, 209, 255, 0.5);
+  border-color: color-mix(in srgb, var(--solvix-primary) 55%, var(--solvix-home-card-border));
+  box-shadow: var(--solvix-home-card-hover-shadow);
 }
 
 .preview-card.is-biz:hover {
-  border-color: rgba(0, 229, 255, 0.5);
+  border-color: color-mix(in srgb, var(--solvix-neon) 55%, var(--solvix-home-card-border));
 }
 
 .preview-icon {

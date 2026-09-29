@@ -7,7 +7,7 @@ import { Component, Input } from '@angular/core';
     <header class="section-head">
       <div>
         @if (kicker) {
-          <p class="section-head__kicker solvix-mono">{{ kicker }}</p>
+          <p class="section-head__kicker">{{ kicker }}</p>
         }
         <h2>{{ title }}</h2>
         @if (subtitle) {
@@ -30,19 +30,27 @@ import { Component, Input } from '@angular/core';
     .section-head__kicker {
       margin: 0 0 0.2rem;
       color: var(--solvix-text-muted);
+      font-family: var(--solvix-font);
       font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
     }
     h2 {
       margin: 0;
       color: var(--solvix-text);
+      font-family: var(--solvix-font);
       font-size: 1.15rem;
-      font-weight: 600;
+      font-weight: 700;
+      letter-spacing: -0.02em;
     }
     .section-head__sub {
       margin: 0.25rem 0 0;
       color: var(--solvix-text-muted);
+      font-family: var(--solvix-font);
       font-size: 0.85rem;
+      letter-spacing: 0;
+      text-transform: none;
     }
     .section-head__actions {
       display: flex;

@@ -2,7 +2,7 @@ package com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulCom
 
 /**
  * Series de numeración legible de documentos de negocio
- * (V / C / D / DC / OS / COT-{yyyy}-{seq}).
+ * (V / C / D / DC / OS / COT / CC-{yyyy}-{seq}).
  */
 public enum TipoSecuencia {
 
@@ -11,7 +11,8 @@ public enum TipoSecuencia {
     DEVOLUCION_VENTA("D"),
     DEVOLUCION_COMPRA("DC"),
     ORDEN_SERVICIO("OS"),
-    COTIZACION_SERVICIO("COT");
+    COTIZACION_SERVICIO("COT"),
+    COTIZACION_COMERCIAL("CC");
 
     private final String prefijo;
 

@@ -1,14 +1,12 @@
 :host {
-  --solvix-primary: #4fd1ff;
-  --solvix-neon: #00e5ff;
-  --solvix-text-muted: #94a3b8;
   display: block;
 }
 
 .footer {
   padding: 48px 64px;
-  background: var(--app-bg-color, #020617);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--app-bg-color, var(--color-bg, var(--solvix-bg)));
+  border-top: 1px solid var(--color-border-subtle, var(--solvix-border-subtle));
+  color: var(--color-text-secondary, var(--solvix-text-muted));
 }
 
 .footer-inner {

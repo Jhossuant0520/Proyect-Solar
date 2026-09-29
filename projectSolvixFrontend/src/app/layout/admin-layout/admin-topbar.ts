@@ -1,10 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { SolvixThemeToggleComponent } from '../../shared/components/solvix-theme-toggle/solvix-theme-toggle';
 
 @Component({
   selector: 'solvix-admin-topbar',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, SolvixThemeToggleComponent],
   templateUrl: './admin-topbar.html',
   styleUrl: './admin-topbar.scss'
 })

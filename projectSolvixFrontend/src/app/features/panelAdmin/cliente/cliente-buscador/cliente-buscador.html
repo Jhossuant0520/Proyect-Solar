@@ -1,0 +1,104 @@
+<div class="buscador">
+  @if (tieneCliente && seleccionado) {
+    <div class="elegido">
+      <span class="material-symbols-outlined" aria-hidden="true">person</span>
+      <div>
+        <strong>{{ seleccionado.nombre }}</strong>
+        <span class="meta">
+          {{ documento(seleccionado) }}
+          @if (seleccionado.telefono) {
+            · {{ seleccionado.telefono }}
+          }
+        </span>
+      </div>
+      <button type="button" class="cambiar" (click)="quitar()">Cambiar</button>
+    </div>
+  } @else {
+    @if (mostrarHintSinSeleccion) {
+      <p class="hint">Sin cliente elegido: queda a nombre de {{ etiquetaSinCliente.toLowerCase() }}.</p>
+    }
+    <label class="search">
+      <span class="material-symbols-outlined" aria-hidden="true">search</span>
+      <input
+        type="search"
+        [value]="texto"
+        (input)="onInput($event)"
+        (keydown)="onKeydown($event)"
+        (focus)="onFocus()"
+        autocomplete="off"
+        spellcheck="false"
+        [placeholder]="placeholder"
+        aria-label="Buscar cliente"
+        role="combobox"
+        aria-autocomplete="list"
+        [attr.aria-expanded]="listaAbierta"
+      />
+    </label>
+
+    @switch (estado) {
+      @case ('idle') {
+        <p class="hint">Escribe al menos {{ minCaracteres }} caracteres para buscar.</p>
+      }
+      @case ('buscando') {
+        <p class="hint" role="status">Buscando clientes…</p>
+      }
+      @case ('error') {
+        <p class="hint error" role="alert">No fue posible cargar los resultados.</p>
+      }
+      @case ('vacio') {
+        <p class="hint">No encontramos resultados para “{{ texto.trim() }}”.</p>
+      }
+      @case ('preview') {
+        <p class="hint preview-label" id="cliente-preview-label">{{ etiquetaPreview }}</p>
+        <ul class="resultados" role="listbox" aria-labelledby="cliente-preview-label">
+          @for (c of resultados; track c.id; let i = $index) {
+            <li>
+              <button
+                type="button"
+                role="option"
+                [class.is-active]="i === indiceActivo"
+                [attr.aria-selected]="i === indiceActivo"
+                (click)="elegir(c)"
+              >
+                <span class="nombre">{{ c.nombre }}</span>
+                <span class="meta">
+                  {{ documento(c) }}
+                  @if (c.telefono) {
+                    · {{ c.telefono }}
+                  }
+                </span>
+              </button>
+            </li>
+          }
+        </ul>
+        <p class="hint">Escribe {{ minCaracteres }} caracteres para buscar</p>
+      }
+      @case ('resultados') {
+        <ul class="resultados" role="listbox" aria-label="Resultados de clientes">
+          @for (c of resultados; track c.id; let i = $index) {
+            <li>
+              <button
+                type="button"
+                role="option"
+                [class.is-active]="i === indiceActivo"
+                [attr.aria-selected]="i === indiceActivo"
+                (click)="elegir(c)"
+              >
+                <span class="nombre">{{ c.nombre }}</span>
+                <span class="meta">
+                  {{ documento(c) }}
+                  @if (c.telefono) {
+                    · {{ c.telefono }}
+                  }
+                </span>
+              </button>
+            </li>
+          }
+        </ul>
+        @if (alcanzoLimite) {
+          <p class="hint">Mostrando los primeros {{ limite }}. Escribe más para afinar.</p>
+        }
+      }
+    }
+  }
+</div>

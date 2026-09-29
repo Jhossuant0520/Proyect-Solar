@@ -1,25 +1,32 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { SolvixButtonComponent } from '../../../../shared/components/solvix-button/solvix-button';
 import { SolvixErrorStateComponent } from '../../../../shared/components/solvix-error-state/solvix-error-state';
 import { SolvixLoadingStateComponent } from '../../../../shared/components/solvix-loading-state/solvix-loading-state';
 import { SolvixPageHeaderComponent } from '../../../../shared/components/solvix-page-header/solvix-page-header';
 import { SolvixSectionHeaderComponent } from '../../../../shared/components/solvix-section-header/solvix-section-header';
+import { ClienteBuscadorComponent } from '../../cliente/cliente-buscador/cliente-buscador';
+import { EquipoBuscadorComponent } from '../equipo-buscador/equipo-buscador';
 import { ClienteService } from '../../../../core/services/cliente.service';
 import { EquipoService } from '../../../../core/services/equipo.service';
 import { OrdenServicioService } from '../../../../core/services/orden-servicio.service';
 import { ClienteResponseDTO } from '../../../../core/models/cliente.models';
 import { EquipoResponseDTO, TipoEquipo } from '../../../../core/models/equipo.models';
-import { clientesParaVenta } from '../../cliente/cliente-ui';
 import { aOrdenServicioRequest } from '../servicio-mapper';
 import { equipoOpcionLabel, mapHttpError, mensajeErrorServicio, TIPOS_EQUIPO } from '../servicio-ui';
-import { showSolvixSnack } from '../../../../shared/utils/solvix-snack';
+import { SolvixFeedbackService } from '../../../../shared/services/solvix-feedback.service';
+import {
+  ServicioRecepcionDialogComponent,
+  ServicioRecepcionDialogData
+} from '../servicio-recepcion-dialog/servicio-recepcion-dialog';
 
 type FormEstado = 'loading' | 'ready' | 'error';
-type EquiposEstado = 'idle' | 'loading' | 'ready' | 'empty' | 'error';
 export type WizardPaso = 1 | 2 | 3;
 
 @Component({
@@ -35,14 +42,15 @@ export type WizardPaso = 1 | 2 | 3;
     SolvixButtonComponent,
     SolvixSectionHeaderComponent,
     SolvixLoadingStateComponent,
-    SolvixErrorStateComponent
+    SolvixErrorStateComponent,
+    ClienteBuscadorComponent,
+    EquipoBuscadorComponent
   ]
 })
 export class ServicioFormComponent implements OnInit {
-  clientes: ClienteResponseDTO[] = [];
-  equipos: EquipoResponseDTO[] = [];
-  loadState: FormEstado = 'loading';
-  equiposState: EquiposEstado = 'idle';
+  clienteSeleccionado: ClienteResponseDTO | null = null;
+  equipoSeleccionado: EquipoResponseDTO | null = null;
+  loadState: FormEstado = 'ready';
   paso: WizardPaso = 1;
   enviando = false;
   creandoCliente = false;
@@ -52,7 +60,6 @@ export class ServicioFormComponent implements OnInit {
   errorTitle = 'No pudimos cargar el formulario.';
   errorMessage = 'Revisa la conexión e inténtalo de nuevo.';
   submitError = '';
-  equiposError = '';
   inlineError = '';
 
   readonly tipos = TIPOS_EQUIPO;
@@ -63,7 +70,8 @@ export class ServicioFormComponent implements OnInit {
 
   private prefillClienteId: number | null = null;
   private prefillEquipoId: number | null = null;
-  private prefillAplicado = false;
+  private readonly dialog = inject(MatDialog);
+  private readonly feedback = inject(SolvixFeedbackService);
 
   constructor(
     private fb: FormBuilder,
@@ -71,7 +79,6 @@ export class ServicioFormComponent implements OnInit {
     private clienteService: ClienteService,
     private equipoService: EquipoService,
     private ordenServicioService: OrdenServicioService,
-    private snackBar: MatSnackBar,
     private router: Router
   ) {
     this.form = this.fb.group({
@@ -100,52 +107,27 @@ export class ServicioFormComponent implements OnInit {
     const e = Number(qp.get('equipoId'));
     this.prefillClienteId = Number.isFinite(c) && c > 0 ? c : null;
     this.prefillEquipoId = Number.isFinite(e) && e > 0 ? e : null;
-    this.cargarClientes();
+    if (this.prefillClienteId != null) {
+      this.aplicarPrefill();
+    }
   }
 
-  get clientesSeleccionables(): ClienteResponseDTO[] {
-    return clientesParaVenta(this.clientes);
-  }
-
-  get clienteSeleccionado(): ClienteResponseDTO | null {
-    const id = this.form.controls.clienteId.value;
-    return this.clientesSeleccionables.find(c => c.id === id) ?? null;
-  }
-
-  get equipoSeleccionado(): EquipoResponseDTO | null {
-    const id = this.form.controls.equipoId.value;
-    return this.equipos.find(e => e.id === id) ?? null;
-  }
-
-  cargarClientes(): void {
-    this.loadState = 'loading';
-    this.clienteService.listar(true).subscribe({
-      next: lista => {
-        this.clientes = lista;
-        this.loadState = 'ready';
-        this.aplicarPrefill();
-      },
-      error: error => {
-        const mapped = mapHttpError(error, 'No pudimos cargar el formulario.');
-        this.errorTitle = mapped.title;
-        this.errorMessage = mapped.message;
-        this.loadState = 'error';
-      }
-    });
-  }
-
-  seleccionarCliente(id: number): void {
-    this.form.controls.clienteId.setValue(id);
+  onClienteSeleccionado(cliente: ClienteResponseDTO | null): void {
+    this.clienteSeleccionado = cliente;
+    this.form.controls.clienteId.setValue(cliente?.id ?? null);
+    this.equipoSeleccionado = null;
     this.form.controls.equipoId.setValue(null);
     this.mostrarCrearCliente = false;
     this.inlineError = '';
-    this.cargarEquipos(id);
+    this.submitError = '';
   }
 
-  seleccionarEquipo(id: number): void {
-    this.form.controls.equipoId.setValue(id);
+  onEquipoSeleccionado(equipo: EquipoResponseDTO | null): void {
+    this.equipoSeleccionado = equipo;
+    this.form.controls.equipoId.setValue(equipo?.id ?? null);
     this.mostrarCrearEquipo = false;
     this.inlineError = '';
+    this.submitError = '';
   }
 
   continuarDesdeCliente(): void {
@@ -155,10 +137,6 @@ export class ServicioFormComponent implements OnInit {
       return;
     }
     this.paso = 2;
-    const clienteId = this.form.controls.clienteId.value;
-    if (clienteId != null && this.equiposState === 'idle') {
-      this.cargarEquipos(clienteId);
-    }
   }
 
   continuarDesdeEquipo(): void {
@@ -177,45 +155,6 @@ export class ServicioFormComponent implements OnInit {
     } else if (this.paso === 3) {
       this.paso = 2;
     }
-  }
-
-  cargarEquipos(clienteId: number, equipoPreferido?: number | null): void {
-    this.equiposState = 'loading';
-    this.equiposError = '';
-    this.equipoService.listarPorCliente(clienteId, true).subscribe({
-      next: lista => {
-        this.equipos = lista;
-        if (lista.length === 0) {
-          this.equiposState = 'empty';
-          this.form.controls.equipoId.setValue(null);
-          if (this.prefillEquipoId != null) {
-            this.paso = 2;
-          }
-          return;
-        }
-        this.equiposState = 'ready';
-        const preferido =
-          equipoPreferido != null && lista.some(e => e.id === equipoPreferido)
-            ? equipoPreferido
-            : this.form.controls.equipoId.value;
-        if (preferido != null && lista.some(e => e.id === preferido)) {
-          this.form.controls.equipoId.setValue(preferido);
-          if (this.prefillEquipoId === preferido) {
-            this.paso = 3;
-          }
-        } else if (this.prefillEquipoId != null) {
-          this.paso = 2;
-        }
-      },
-      error: error => {
-        this.equipos = [];
-        this.equiposState = 'error';
-        this.equiposError = mensajeErrorServicio(
-          error,
-          'No pudimos cargar los equipos de este cliente.'
-        );
-      }
-    });
   }
 
   abrirCrearCliente(): void {
@@ -259,10 +198,9 @@ export class ServicioFormComponent implements OnInit {
       .subscribe({
         next: creado => {
           this.creandoCliente = false;
-          this.clientes = [...this.clientes, creado];
           this.mostrarCrearCliente = false;
-          this.seleccionarCliente(creado.id);
-          showSolvixSnack(this.snackBar, 'Cliente registrado.', 'success');
+          this.onClienteSeleccionado(creado);
+          this.feedback.success('Cliente registrado.');
         },
         error: error => {
           this.creandoCliente = false;
@@ -294,9 +232,8 @@ export class ServicioFormComponent implements OnInit {
         next: creado => {
           this.creandoEquipo = false;
           this.mostrarCrearEquipo = false;
-          this.cargarEquipos(clienteId, creado.id);
-          this.form.controls.equipoId.setValue(creado.id);
-          showSolvixSnack(this.snackBar, 'Equipo registrado.', 'success');
+          this.onEquipoSeleccionado(creado);
+          this.feedback.success('Equipo registrado.');
         },
         error: error => {
           this.creandoEquipo = false;
@@ -309,11 +246,18 @@ export class ServicioFormComponent implements OnInit {
     this.router.navigate(['/servicios']);
   }
 
+  /**
+   * Paso 3: revisión → modal de firma → crear OT con recepción firmada (D.2).
+   */
   guardar(): void {
     this.submitError = '';
     if (this.form.invalid || this.enviando) {
       this.form.markAllAsTouched();
       this.submitError = 'Completa el problema reportado para crear la orden.';
+      return;
+    }
+    if (this.clienteSeleccionado == null || this.equipoSeleccionado == null) {
+      this.submitError = 'Selecciona un cliente y un equipo.';
       return;
     }
     const valores = {
@@ -328,40 +272,71 @@ export class ServicioFormComponent implements OnInit {
       this.submitError = 'Selecciona un cliente y un equipo.';
       return;
     }
-    this.enviando = true;
+
     const request = aOrdenServicioRequest(valores);
-    this.ordenServicioService.crear(request).subscribe({
-      next: orden => {
-        this.enviando = false;
-        showSolvixSnack(this.snackBar, `Orden ${orden.numero} creada.`);
-        this.router.navigate(['/servicios', orden.id], {
-          queryParams: { esperarComprobante: '1' }
-        });
-      },
-      error: error => {
-        this.enviando = false;
-        this.submitError = mensajeErrorServicio(error, 'No pudimos crear la orden.');
+    const ref = this.dialog.open(ServicioRecepcionDialogComponent, {
+      width: '680px',
+      maxWidth: '96vw',
+      maxHeight: '94vh',
+      panelClass: 'solvix-dialog-panel',
+      backdropClass: 'solvix-dialog-backdrop',
+      disableClose: true,
+      data: {
+        request,
+        cliente: this.clienteSeleccionado,
+        equipo: this.equipoSeleccionado
+      } satisfies ServicioRecepcionDialogData
+    });
+
+    ref.afterClosed().subscribe(result => {
+      if (!result) {
+        return;
       }
+      this.feedback.success('Recepción registrada');
+      this.router.navigate(['/servicios', result.ordenId], {
+        queryParams: { esperarComprobante: '1' }
+      });
     });
   }
 
   private aplicarPrefill(): void {
-    if (this.prefillAplicado) {
-      return;
-    }
-    this.prefillAplicado = true;
     if (this.prefillClienteId == null) {
       return;
     }
-    const existe = this.clientesSeleccionables.some(c => c.id === this.prefillClienteId);
-    if (!existe) {
-      return;
-    }
-    this.form.controls.clienteId.setValue(this.prefillClienteId);
-    this.paso = this.prefillEquipoId != null ? 3 : 2;
-    this.cargarEquipos(this.prefillClienteId, this.prefillEquipoId);
-    if (this.prefillEquipoId == null) {
-      this.paso = 2;
-    }
+    this.loadState = 'loading';
+    const cliente$ = this.clienteService.obtenerPorId(this.prefillClienteId).pipe(
+      catchError(() => of(null))
+    );
+    const equipo$ =
+      this.prefillEquipoId != null
+        ? this.equipoService.obtenerPorId(this.prefillEquipoId).pipe(catchError(() => of(null)))
+        : of(null);
+
+    forkJoin({ cliente: cliente$, equipo: equipo$ }).subscribe({
+      next: ({ cliente, equipo }) => {
+        if (!cliente || cliente.consumidorFinal) {
+          this.loadState = 'error';
+          this.errorTitle = 'Cliente no disponible';
+          this.errorMessage = 'No encontramos el cliente indicado o no es seleccionable.';
+          return;
+        }
+        this.clienteSeleccionado = cliente;
+        this.form.controls.clienteId.setValue(cliente.id);
+        if (equipo && equipo.clienteId === cliente.id && equipo.activo) {
+          this.equipoSeleccionado = equipo;
+          this.form.controls.equipoId.setValue(equipo.id);
+          this.paso = 3;
+        } else {
+          this.paso = 2;
+        }
+        this.loadState = 'ready';
+      },
+      error: error => {
+        const mapped = mapHttpError(error, 'No pudimos cargar el formulario.');
+        this.errorTitle = mapped.title;
+        this.errorMessage = mapped.message;
+        this.loadState = 'error';
+      }
+    });
   }
 }

@@ -5,7 +5,7 @@
 }
 
 .form-panel {
-  background: rgba(15, 23, 42, 0.8);
+  background: var(--solvix-panel);
   border: 1px solid var(--solvix-border);
   border-radius: var(--solvix-radius);
   padding: 1.35rem;
@@ -24,8 +24,9 @@ label,
   flex-direction: column;
   gap: 0.3rem;
   color: var(--solvix-text-muted);
-  font-family: var(--solvix-font-mono);
+  font-family: var(--solvix-font);
   font-size: 0.68rem;
+  font-weight: 600;
   text-transform: uppercase;
 }
 
@@ -94,6 +95,34 @@ textarea:focus {
   font-family: var(--solvix-font-mono);
 }
 
+.recargo-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.recargo-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.recargo-suffix {
+  flex-shrink: 0;
+  font-family: var(--solvix-font-mono);
+  font-size: 0.9rem;
+  color: var(--solvix-text-secondary);
+  text-transform: none;
+}
+
+.sugerido-block {
+  gap: 0.45rem;
+}
+
+.sugerido-block solvix-button {
+  margin-top: 0.25rem;
+  align-self: flex-start;
+}
+
 .full {
   grid-column: 1 / -1;
 }
@@ -104,13 +133,19 @@ textarea:focus {
   gap: 0.55rem;
 }
 
+.imagen-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
 .imagen-options {
   display: grid;
   gap: 1rem;
   padding: 1rem;
   border-radius: var(--solvix-radius);
   border: 1px solid var(--solvix-border);
-  background: rgba(2, 6, 23, 0.35);
+  background: var(--solvix-panel-inset);
 }
 
 .file-pick {
@@ -172,7 +207,7 @@ textarea:focus {
   padding: 0.75rem;
   border-radius: var(--solvix-radius);
   border: 1px solid var(--solvix-border);
-  background: rgba(2, 6, 23, 0.35);
+  background: var(--solvix-panel-inset);
 }
 
 .imagen-preview img {

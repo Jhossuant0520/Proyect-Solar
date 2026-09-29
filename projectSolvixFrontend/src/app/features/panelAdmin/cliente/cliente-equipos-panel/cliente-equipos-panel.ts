@@ -2,7 +2,7 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SolvixBadgeComponent } from '../../../../shared/components/solvix-badge/solvix-badge';
 import { SolvixButtonComponent } from '../../../../shared/components/solvix-button/solvix-button';
@@ -11,10 +11,10 @@ import { SolvixErrorStateComponent } from '../../../../shared/components/solvix-
 import { SolvixLoadingStateComponent } from '../../../../shared/components/solvix-loading-state/solvix-loading-state';
 import { SolvixSectionHeaderComponent } from '../../../../shared/components/solvix-section-header/solvix-section-header';
 import { DialogoConfirmacionDelete } from '../../../../shared/components/dialogo-confirmacion-delete/dialogo-confirmacion-delete';
+import { SolvixFeedbackService } from '../../../../shared/services/solvix-feedback.service';
 import { EquipoService } from '../../../../core/services/equipo.service';
 import { EquipoRequestDTO, EquipoResponseDTO, TipoEquipo } from '../../../../core/models/equipo.models';
 import { equipoOpcionLabel, labelTipoEquipo, mensajeErrorServicio, TIPOS_EQUIPO } from '../../servicios/servicio-ui';
-import { showSolvixSnack } from '../../../../shared/utils/solvix-snack';
 
 type EquiposEstado = 'loading' | 'ready' | 'empty' | 'error';
 type FormMode = 'hidden' | 'crear' | 'editar';
@@ -59,7 +59,7 @@ export class ClienteEquiposPanelComponent implements OnChanges {
     private fb: FormBuilder,
     private equipoService: EquipoService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar,
+    private feedback: SolvixFeedbackService,
     private router: Router
   ) {
     this.form = this.fb.group({
@@ -172,11 +172,7 @@ export class ClienteEquiposPanelComponent implements OnChanges {
     obs.subscribe({
       next: () => {
         this.enviando = false;
-        showSolvixSnack(
-          this.snackBar,
-          this.formMode === 'editar' ? 'Equipo actualizado.' : 'Equipo registrado.',
-          'success'
-        );
+        this.feedback.success(this.formMode === 'editar' ? 'Equipo actualizado' : 'Equipo registrado');
         this.cerrarFormulario();
         this.cargar();
       },
@@ -204,15 +200,11 @@ export class ClienteEquiposPanelComponent implements OnChanges {
       }
       this.equipoService.desactivar(equipo.id).subscribe({
         next: () => {
-          showSolvixSnack(this.snackBar, 'Equipo desactivado.', 'warning');
+          this.feedback.warning('Equipo actualizado');
           this.cargar();
         },
         error: error => {
-          showSolvixSnack(
-            this.snackBar,
-            mensajeErrorServicio(error, 'No pudimos desactivar el equipo.'),
-            'error'
-          );
+          this.feedback.error(mensajeErrorServicio(error, 'No pudimos desactivar el equipo.'));
         }
       });
     });
@@ -234,15 +226,11 @@ export class ClienteEquiposPanelComponent implements OnChanges {
     };
     this.equipoService.actualizar(equipo.id, request).subscribe({
       next: () => {
-        showSolvixSnack(this.snackBar, 'Equipo activo de nuevo.', 'success');
+        this.feedback.success('Equipo actualizado');
         this.cargar();
       },
       error: error => {
-        showSolvixSnack(
-          this.snackBar,
-          mensajeErrorServicio(error, 'No pudimos activar el equipo.'),
-          'error'
-        );
+        this.feedback.error(mensajeErrorServicio(error, 'No pudimos activar el equipo.'));
       }
     });
   }

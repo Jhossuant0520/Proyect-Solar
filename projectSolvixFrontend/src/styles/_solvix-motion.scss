@@ -1,0 +1,245 @@
+// SOLVIX C.8 — Motion tokens + utilidades de microinteracción
+// Preferir: transform + opacity. Duraciones cortas. Reduced-motion obligatorio.
+
+:root {
+  --motion-fast: 140ms;
+  --motion-normal: 200ms;
+  --motion-slow: 280ms;
+  /* C.8.1 — duraciones justificadas (count-up / chart / highlight de estado) */
+  --motion-count: 560ms;
+  --motion-chart: 700ms;
+  --motion-highlight: 560ms;
+  --motion-stagger: 50ms;
+
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* —— Page enter (sutil) —— */
+@keyframes solvix-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes solvix-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes solvix-highlight-pulse {
+  0% {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--solvix-primary) 45%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--solvix-primary) 28%, transparent),
+      0 8px 24px color-mix(in srgb, var(--solvix-primary) 12%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--solvix-primary) 22%, transparent);
+  }
+}
+
+/* D.1 — highlight contextual breve tras acción (localizar resultado, no toast). */
+.solvix-context-highlight {
+  animation: solvix-highlight-pulse var(--motion-highlight, 560ms) var(--ease-emphasized) both;
+  border-color: color-mix(in srgb, var(--solvix-primary) 55%, transparent);
+  background-color: color-mix(
+    in srgb,
+    var(--solvix-primary-soft, rgba(79, 209, 255, 0.08)) 70%,
+    transparent
+  );
+  transition:
+    border-color var(--motion-normal, 200ms) var(--ease-standard),
+    background-color var(--motion-normal, 200ms) var(--ease-standard),
+    box-shadow var(--motion-normal, 200ms) var(--ease-standard);
+}
+
+@keyframes solvix-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes solvix-kpi-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes solvix-phase-flash {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--solvix-primary) 0%, transparent);
+  }
+  35% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--solvix-primary) 28%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--solvix-primary) 0%, transparent);
+  }
+}
+
+@keyframes solvix-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.admin-shell__content > *:not(router-outlet) {
+  animation: solvix-page-enter var(--motion-normal) var(--ease-enter) both;
+}
+
+/* —— Cards interactivas (solo hover en puntero fino) —— */
+.solvix-card-interactive,
+a.solvix-card-interactive,
+button.solvix-card-interactive {
+  transition:
+    transform var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .solvix-card-interactive:hover,
+  a.solvix-card-interactive:hover,
+  button.solvix-card-interactive:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--solvix-shadow-sm);
+    border-color: var(--color-border, var(--solvix-border));
+  }
+}
+
+.solvix-card-interactive:active {
+  transform: translateY(0);
+}
+
+/* —— Filas de tabla —— */
+.solvix-table tbody tr,
+.venta-table tbody tr,
+.svc-table tbody tr,
+.producto-table tbody tr,
+.prod-table tbody tr,
+.compra-table tbody tr,
+.cli-table tbody tr,
+.inv-table tbody tr,
+.cot-table tbody tr,
+.dash-table tbody tr {
+  transition: background-color var(--motion-fast) var(--ease-standard);
+}
+
+/* —— Paginación —— */
+.page-btn {
+  transition:
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard),
+    opacity var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .page-btn:hover:not(:disabled) {
+    background: var(--color-primary-soft, var(--solvix-primary-soft));
+    border-color: var(--color-border, var(--solvix-border));
+  }
+}
+
+.page-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* —— Icon buttons (listados) —— */
+.icon-btn {
+  transition:
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard),
+    opacity var(--motion-fast) var(--ease-standard);
+}
+
+/* —— Snackbars (entrada sutil; Material ya gestiona salida) —— */
+.mat-mdc-snack-bar-container.solvix-snack {
+  animation: solvix-page-enter var(--motion-normal) var(--ease-enter) both;
+}
+
+/* —— Estado enter (empty / error panels) —— */
+.solvix-state {
+  animation: solvix-page-enter var(--motion-normal) var(--ease-enter) both;
+}
+
+/* —— Autocomplete resultados —— */
+.solvix-results-enter,
+.resultados {
+  animation: solvix-fade-in var(--motion-fast) var(--ease-enter) both;
+}
+
+/* —— Dialog surface (refuerzo sutil sobre Material) —— */
+.mat-mdc-dialog-container .mat-mdc-dialog-surface {
+  transition:
+    opacity var(--motion-normal) var(--ease-enter),
+    transform var(--motion-normal) var(--ease-enter),
+    background-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard);
+}
+
+/* —— Reduced motion —— */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 1ms;
+    --motion-normal: 1ms;
+    --motion-slow: 1ms;
+    --motion-count: 1ms;
+    --motion-chart: 1ms;
+    --motion-highlight: 1ms;
+    --motion-stagger: 0ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .admin-shell__content > *:not(router-outlet),
+  .solvix-state,
+  .resultados,
+  .solvix-results-enter,
+  .mat-mdc-snack-bar-container.solvix-snack,
+  .card-doc.is-nuevo,
+  .seccion-body,
+  .fila {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .solvix-card-interactive:hover,
+  a.solvix-card-interactive:hover,
+  button.solvix-card-interactive:hover,
+  .page-btn:active:not(:disabled) {
+    transform: none !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
