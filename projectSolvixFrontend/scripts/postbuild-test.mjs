@@ -37,6 +37,10 @@ if (!hasMain || !hasPolyfills || !hasStyles) {
   throw new Error('El index.html generado por Angular no referencia los assets requeridos del build de TEST.');
 }
 
+if (!/<base\s+href="\/"\s*\/?>/i.test(content)) {
+  throw new Error('index.html TEST debe usar <base href="/"> para rutas profundas (/consulta/ot/:token).');
+}
+
 const html = fs.readFileSync(indexFile, 'utf8');
 const cacheBlock = `
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -49,7 +53,50 @@ if (!/meta http-equiv="Cache-Control"/i.test(html)) {
   fs.writeFileSync(indexFile, updated);
 }
 
+/**
+ * .htaccess TEST — conserva cache de assets + añade SPA fallback.
+ * Sin el rewrite, Apache responde 404 al documento /consulta/ot/:token
+ * (antes de que Angular pueda arrancar). D.12.
+ */
 const htaccess = `# Cache policy for TEST frontend
 # HTML must always be revalidated
-<IfModule mod_headers.c>\n  <FilesMatch "^index\\.html$">\n    Header set Cache-Control "no-cache, no-store, must-revalidate"\n    Header set Pragma "no-cache"\n    Header set Expires "0"\n  </FilesMatch>\n\n  <FilesMatch "\\.(js|css)$">\n    Header set Cache-Control "public, max-age=31536000, immutable"\n  </FilesMatch>\n\n  <FilesMatch "\\.(png|jpg|jpeg|gif|svg|ico|webp|woff|woff2|ttf|eot)$">\n    Header set Cache-Control "public, max-age=31536000, immutable"\n  </FilesMatch>\n</IfModule>\n`;
-fs.writeFileSync(path.join(browserDir, '.htaccess'), htaccess, 'utf8');
+<IfModule mod_headers.c>
+  <FilesMatch "^index\\.html$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+
+  <FilesMatch "\\.(js|css)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  <FilesMatch "\\.(png|jpg|jpeg|gif|svg|ico|webp|woff|woff2|ttf|eot)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>
+
+# SPA fallback (D.12) - deep links / F5 / QR -> index.html
+# Archivos y directorios reales (js, css, assets, imagenes) se sirven tal cual.
+# Solo rutas inexistentes (p. ej. /consulta/ot/:token) caen a index.html.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  RewriteRule ^ index.html [L]
+</IfModule>
+`;
+
+const htaccessPath = path.join(browserDir, '.htaccess');
+fs.writeFileSync(htaccessPath, htaccess, 'utf8');
+
+const written = fs.readFileSync(htaccessPath, 'utf8');
+if (!written.includes('RewriteEngine On') || !written.includes('index.html')) {
+  throw new Error('postbuild-test: .htaccess SPA fallback no se escribió correctamente.');
+}
+
+console.log('postbuild-test: OK (cache headers + SPA fallback → .htaccess)');

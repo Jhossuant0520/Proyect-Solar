@@ -194,4 +194,41 @@ describe('ConsultaOtPublicaComponent (FASE C.2)', () => {
     expect(component.state).toBe('error');
     expect(fixture.nativeElement.textContent).toContain('No pudimos mostrar la orden');
   }));
+
+  it('D.12: carga pública con token válido sin auth (navegación directa equivalente)', fakeAsync(() => {
+    documentoService.consultaOtPublica.and.returnValue(
+      of(dtoBase({ numero: 'OS-2026-000018', estadoCodigo: 'RECEPCIONADO' }))
+    );
+    fixture.detectChanges();
+    tick();
+    fixture.detectChanges();
+
+    expect(component.token).toBe('token-abc');
+    expect(component.state).toBe('ready');
+    expect(documentoService.consultaOtPublica).toHaveBeenCalledWith('token-abc');
+    expect(fixture.nativeElement.textContent).toContain('OS-2026-000018');
+  }));
+
+  it('D.12: token vacío → sin-token (enlace inválido)', async () => {
+    TestBed.resetTestingModule();
+    const emptyTokenService = jasmine.createSpyObj('DocumentoOrdenServicioService', [
+      'consultaOtPublica',
+      'consultaCotizacionOtPublica'
+    ]);
+    await TestBed.configureTestingModule({
+      imports: [ConsultaOtPublicaComponent],
+      providers: [
+        { provide: DocumentoOrdenServicioService, useValue: emptyTokenService },
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { paramMap: { get: () => '' } } }
+        }
+      ]
+    }).compileComponents();
+
+    const emptyFixture = TestBed.createComponent(ConsultaOtPublicaComponent);
+    emptyFixture.detectChanges();
+    expect(emptyFixture.componentInstance.state).toBe('sin-token');
+    expect(emptyTokenService.consultaOtPublica).not.toHaveBeenCalled();
+  });
 });
