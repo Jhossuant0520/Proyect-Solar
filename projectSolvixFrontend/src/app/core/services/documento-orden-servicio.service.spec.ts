@@ -103,4 +103,50 @@ describe('DocumentoOrdenServicioService', () => {
       observaciones: null
     });
   });
+
+  it('aprueba cotización OT pública', () => {
+    service
+      .aprobarCotizacionOtPublica('abc123', {
+        numeroDocumento: '1098765432',
+        telefono: '3001234567'
+      })
+      .subscribe(r => expect(r.cotizacionEstado).toBe('APROBADA'));
+    const req = http.expectOne(
+      `${environment.apiBaseUrl}/v1/consulta/ot/abc123/cotizacion/aprobar`
+    );
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
+      numeroDocumento: '1098765432',
+      telefono: '3001234567'
+    });
+    req.flush({
+      ordenNumero: 'OS-1',
+      ordenEstado: 'APROBADO',
+      cotizacionNumero: 'COT-1',
+      cotizacionTipo: 'INICIAL',
+      cotizacionEstado: 'APROBADA',
+      mensaje: 'ok'
+    });
+  });
+
+  it('rechaza cotización OT pública', () => {
+    service
+      .rechazarCotizacionOtPublica('abc123', {
+        numeroDocumento: '1098765432',
+        telefono: '3001234567'
+      })
+      .subscribe(r => expect(r.cotizacionEstado).toBe('RECHAZADA'));
+    const req = http.expectOne(
+      `${environment.apiBaseUrl}/v1/consulta/ot/abc123/cotizacion/rechazar`
+    );
+    expect(req.request.method).toBe('POST');
+    req.flush({
+      ordenNumero: 'OS-1',
+      ordenEstado: 'COTIZADO',
+      cotizacionNumero: 'COT-1',
+      cotizacionTipo: 'INICIAL',
+      cotizacionEstado: 'RECHAZADA',
+      mensaje: 'ok'
+    });
+  });
 });

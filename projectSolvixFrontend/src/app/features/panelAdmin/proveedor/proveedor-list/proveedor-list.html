@@ -1,0 +1,130 @@
+<section class="proveedores-page">
+  <solvix-page-header
+    kicker="Comercial"
+    title="Proveedores"
+    subtitle="Empresas a las que SOLVIX les compra productos."
+  >
+    <solvix-button family="tech" rank="primary" icon="local_shipping" (click)="nuevo()">
+      Nuevo proveedor
+    </solvix-button>
+  </solvix-page-header>
+
+  <div class="filter-bar">
+    <label class="search">
+      <span class="material-symbols-outlined" aria-hidden="true">search</span>
+      <input
+        type="search"
+        [value]="search"
+        placeholder="Razón social, NIT, correo, teléfono o ciudad"
+        (input)="onSearch($event)"
+      />
+    </label>
+    <select [value]="filtroActivo" (change)="onActivo($event)" aria-label="Estado">
+      <option value="">Activos e inactivos</option>
+      <option value="true">Activos</option>
+      <option value="false">Inactivos</option>
+    </select>
+    @if (hayFiltros) {
+      <button type="button" class="clear" (click)="limpiar()">Limpiar</button>
+    }
+  </div>
+
+  @if (state === 'loading') {
+    <solvix-loading-state label="Cargando proveedores." />
+  } @else if (state === 'error') {
+    <solvix-error-state
+      title="No pudimos cargar los proveedores."
+      message="Revisa la conexión e inténtalo de nuevo."
+      (retry)="cargar()"
+    />
+  } @else if (state === 'empty') {
+    <solvix-empty-state
+      icon="local_shipping"
+      title="No hay proveedores registrados."
+      message="Cuando registres uno, aparecerá aquí."
+      actionLabel="Nuevo proveedor"
+      actionIcon="local_shipping"
+      (action)="nuevo()"
+    />
+  } @else if (visibles.length === 0) {
+    <solvix-empty-state
+      icon="search_off"
+      title="No encontramos proveedores que coincidan."
+      message="Prueba con otra razón social, NIT o ciudad."
+      actionLabel="Limpiar búsqueda"
+      (action)="limpiar()"
+    />
+  } @else {
+    <div class="table-panel">
+      <div class="table-wrap desktop-table">
+        <table class="prov-table">
+          <thead>
+            <tr>
+              <th>Razón social</th>
+              <th>NIT</th>
+              <th>Ciudad</th>
+              <th>Teléfono</th>
+              <th>Condición</th>
+              <th>Estado</th>
+              <th><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (proveedor of visibles; track proveedor.id) {
+              <tr>
+                <td>
+                  <button type="button" class="name-btn" (click)="ver(proveedor)">
+                    <strong>{{ razon(proveedor) }}</strong>
+                    <span class="sub">{{ proveedor.nombreComercial || ('ID ' + proveedor.id) }}</span>
+                  </button>
+                </td>
+                <td>{{ documento(proveedor) }}</td>
+                <td>{{ proveedor.ciudad || '—' }}</td>
+                <td>{{ proveedor.telefono || '—' }}</td>
+                <td>{{ condicion(proveedor.condicionPago) }}</td>
+                <td>
+                  <solvix-badge [tone]="proveedor.activo ? 'success' : 'neutral'">
+                    {{ proveedor.activo ? 'Activo' : 'Inactivo' }}
+                  </solvix-badge>
+                </td>
+                <td class="actions">
+                  <button type="button" class="icon-btn" aria-label="Ver proveedor" (click)="ver(proveedor)">
+                    <span class="material-symbols-outlined">visibility</span>
+                  </button>
+                  <button type="button" class="icon-btn" aria-label="Editar proveedor" (click)="editar(proveedor)">
+                    <span class="material-symbols-outlined">edit</span>
+                  </button>
+                  @if (puedeDesactivar(proveedor)) {
+                    <button type="button" class="icon-btn" aria-label="Desactivar proveedor" (click)="desactivar(proveedor)">
+                      <span class="material-symbols-outlined">block</span>
+                    </button>
+                  } @else {
+                    <button type="button" class="icon-btn" aria-label="Activar proveedor" (click)="activar(proveedor)">
+                      <span class="material-symbols-outlined">check_circle</span>
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <ul class="mobile-list">
+        @for (proveedor of visibles; track proveedor.id) {
+          <li>
+            <button type="button" class="card-main" (click)="ver(proveedor)">
+              <strong>{{ razon(proveedor) }}</strong>
+              <span class="sub">{{ documento(proveedor) }} · {{ proveedor.ciudad || 'Sin ciudad' }}</span>
+            </button>
+            <div class="card-meta">
+              <solvix-badge [tone]="proveedor.activo ? 'success' : 'neutral'">
+                {{ proveedor.activo ? 'Activo' : 'Inactivo' }}
+              </solvix-badge>
+            </div>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</section>

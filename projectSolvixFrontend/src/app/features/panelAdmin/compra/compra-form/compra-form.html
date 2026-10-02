@@ -25,7 +25,7 @@
           <div class="form-grid">
             <label>
               Proveedor
-              <select formControlName="proveedorId">
+              <select formControlName="proveedorId" (change)="onProveedorChange()">
                 <option [ngValue]="null" disabled>Selecciona un proveedor</option>
                 @for (proveedor of proveedores; track proveedor.id) {
                   <option [ngValue]="proveedor.id">{{ proveedor.nombre }}</option>
@@ -36,6 +36,15 @@
               }
             </label>
             <label>
+              Contacto comercial
+              <select formControlName="contactoProveedorId">
+                <option [ngValue]="null">Sin contacto</option>
+                @for (contacto of contactosProveedor; track contacto.id) {
+                  <option [ngValue]="contacto.id">{{ contacto.nombre }}</option>
+                }
+              </select>
+            </label>
+            <label>
               Descuento de la compra
               <input type="number" formControlName="descuento" min="0" step="0.01" />
               <span class="hint">Monto, no porcentaje. El sistema no acepta un descuento mayor al subtotal.</span>
@@ -43,6 +52,78 @@
             <label class="full">
               Observaciones
               <textarea formControlName="observaciones" rows="3" maxlength="1000"></textarea>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel">
+          <solvix-section-header
+            kicker="Documento"
+            title="Documento de compra"
+            subtitle="Referencias del proveedor. El número interno C-aaaa-seq lo asigna SOLVIX."
+          />
+          <div class="form-grid">
+            <label>
+              Tipo documento externo
+              <select formControlName="tipoDocumentoExterno">
+                <option value="">Sin documento</option>
+                @for (tipo of tiposDocumento; track tipo.id) {
+                  <option [value]="tipo.id">{{ tipo.label }}</option>
+                }
+              </select>
+            </label>
+            <label>
+              Número documento externo
+              <input type="text" formControlName="numeroDocumentoExterno" maxlength="80" placeholder="F-123456" />
+            </label>
+            <label>
+              Número orden de compra
+              <input type="text" formControlName="numeroOrdenCompra" maxlength="80" placeholder="OC-123" />
+            </label>
+            <label>
+              Número cotización proveedor
+              <input type="text" formControlName="numeroCotizacionProveedor" maxlength="80" placeholder="CDV-123" />
+            </label>
+          </div>
+        </section>
+
+        <section class="panel">
+          <solvix-section-header kicker="Agenda" title="Fechas" />
+          <div class="form-grid">
+            <label>
+              Fecha documento proveedor
+              <input type="date" formControlName="fechaDocumentoProveedor" />
+            </label>
+            <label>
+              Fecha entrega
+              <input type="date" formControlName="fechaEntrega" />
+            </label>
+            <label>
+              Fecha vencimiento
+              <input type="date" formControlName="fechaVencimiento" />
+              <span class="hint">En crédito, si la dejas vacía el sistema calcula fecha + días.</span>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel">
+          <solvix-section-header
+            kicker="Pago"
+            title="Condiciones"
+            subtitle="Se congelan en la compra. Cambios futuros del proveedor no las alteran."
+          />
+          <div class="form-grid">
+            <label>
+              Condición de pago
+              <select formControlName="condicionPagoAplicada" (change)="onCondicionChange()">
+                <option value="">Usar default del proveedor</option>
+                <option value="CONTADO">Contado</option>
+                <option value="CREDITO">Crédito</option>
+              </select>
+            </label>
+            <label>
+              Días de crédito
+              <input type="number" formControlName="diasCreditoAplicados" min="0" step="1" />
             </label>
           </div>
         </section>
@@ -114,7 +195,7 @@
                       <span class="material-symbols-outlined">close</span>
                     </button>
                   </header>
-                  <div class="linea-grid">
+                  <div class="linea-grid linea-grid-4">
                     <label>
                       Cantidad
                       <input type="number" formControlName="cantidad" min="1" step="1" />
@@ -122,6 +203,19 @@
                     <label>
                       Costo unitario
                       <input type="number" formControlName="costoUnitario" min="0" step="0.01" />
+                    </label>
+                    <label>
+                      Ref. proveedor
+                      <input type="text" formControlName="referenciaProveedor" maxlength="80" placeholder="ABC-7781" />
+                    </label>
+                    <label>
+                      IVA
+                      <select formControlName="porcentajeImpuesto">
+                        @for (tasa of tasasIva; track tasa.valor) {
+                          <option [ngValue]="tasa.valor">{{ tasa.label }}</option>
+                        }
+                      </select>
+                      <span class="hint">El valor monetario lo calcula SOLVIX.</span>
                     </label>
                   </div>
                 </article>
@@ -135,8 +229,8 @@
         <section class="panel sticky">
           <solvix-section-header
             kicker="Resumen"
-            title="Valores a enviar"
-            subtitle="El sistema calcula subtotal y total al registrar."
+            title="Valores estimados"
+            subtitle="El total oficial lo confirma el sistema al registrar."
           />
           <dl class="facts">
             <div>
@@ -144,12 +238,28 @@
               <dd>{{ detalles.length }}</dd>
             </div>
             <div>
-              <dt>Descuento de cabecera</dt>
-              <dd>{{ money(form.get('descuento')?.value) }}</dd>
+              <dt>Subtotal</dt>
+              <dd>{{ money(subtotalEstimado) }}</dd>
+            </div>
+            <div>
+              <dt>Descuento</dt>
+              <dd>{{ money(descuentoValor) }}</dd>
+            </div>
+            <div>
+              <dt>Impuesto</dt>
+              <dd>{{ money(impuestoEstimado) }}</dd>
+            </div>
+            <div>
+              <dt>Total estimado</dt>
+              <dd>{{ money(totalEstimado) }}</dd>
+            </div>
+            <div>
+              <dt>Moneda</dt>
+              <dd>COP</dd>
             </div>
           </dl>
           <p class="hint">
-            No mostramos un total estimado. El total oficial llega cuando el sistema registra la compra.
+            Fórmula: subtotal − descuento + impuesto. El inventario no se mueve hasta completar.
           </p>
 
           @if (submitState === 'error' && submitError) {

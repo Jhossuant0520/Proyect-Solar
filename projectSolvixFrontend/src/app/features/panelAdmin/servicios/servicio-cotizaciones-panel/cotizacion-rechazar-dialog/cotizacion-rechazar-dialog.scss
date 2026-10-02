@@ -1,20 +1,20 @@
 .cotizacion-rechazar-dialog {
   min-width: min(420px, 92vw);
   padding: 1.25rem 1.35rem 1.1rem;
-  color: var(--solvix-text, #fff);
-  background: var(--solvix-surface, #0f172a);
-  border-top: 3px solid #ef4444;
+  color: var(--color-text-primary, var(--solvix-text));
+  background: var(--color-surface-1, var(--solvix-surface));
+  border-top: 3px solid var(--color-danger, var(--solvix-error));
 }
 
 .dlg-head h2 {
   margin: 0 0 0.35rem;
   font-size: 1.15rem;
-  color: var(--solvix-primary, #4fd1ff);
+  color: var(--color-primary, var(--solvix-primary));
 }
 
 .dlg-head p {
   margin: 0;
-  color: var(--solvix-text-secondary, #cfe9ff);
+  color: var(--color-text-secondary, var(--solvix-text-secondary));
   font-size: 0.92rem;
   line-height: 1.4;
 }
@@ -29,18 +29,29 @@
   display: grid;
   gap: 0.35rem;
   font-size: 0.85rem;
-  color: var(--solvix-text-muted, #94a3b8);
+  color: var(--color-text-muted, var(--solvix-text-muted));
 }
 
 textarea {
   width: 100%;
   resize: vertical;
   border-radius: 8px;
-  border: 1px solid rgba(79, 209, 255, 0.25);
-  background: var(--solvix-panel-inset);
-  color: var(--solvix-text, #fff);
+  border: 1px solid var(--color-border, rgba(79, 209, 255, 0.25));
+  background: var(--color-panel-inset, var(--solvix-panel-inset));
+  color: var(--color-text-primary, var(--solvix-text));
+  caret-color: var(--color-primary, var(--solvix-primary));
   padding: 0.55rem 0.65rem;
   font: inherit;
+}
+
+textarea::placeholder {
+  color: var(--color-text-muted, var(--solvix-text-muted));
+  opacity: 0.9;
+}
+
+textarea:focus-visible {
+  outline: 2px solid var(--color-focus, var(--solvix-primary));
+  outline-offset: 1px;
 }
 
 .dlg-actions {

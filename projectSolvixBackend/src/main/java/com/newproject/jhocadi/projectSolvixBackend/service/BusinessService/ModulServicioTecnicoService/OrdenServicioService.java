@@ -48,6 +48,8 @@ import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.Modul
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.OrdenServicioRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.RecepcionOrdenServicioRepository;
 import com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.ModulComercialService.SecuenciaDocumentoService;
+import com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.ModulNotificacion.NotificationEventBridge;
+import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulNotificacion.TipoEventoNotificacion;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -75,6 +77,7 @@ public class OrdenServicioService {
     private final SecuenciaDocumentoService secuenciaDocumentoService;
     private final ObjectProvider<DocumentoOrdenServicioService> documentoOrdenServicioService;
     private final PlatformTransactionManager transactionManager;
+    private final NotificationEventBridge notificationEventBridge;
 
     /**
      * Crea OT en RECEPCIONADO con firma digital de recepción (BLOQUE D.2).
@@ -126,6 +129,7 @@ public class OrdenServicioService {
         Long ordenId = guardada.getId();
         String usuarioDoc = responsable;
         registrarGeneracionTrasCommit(() -> tryGenerarComprobanteRecepcion(ordenId, usuarioDoc));
+        notificationEventBridge.solicitar(TipoEventoNotificacion.ORDEN_RECIBIDA, ordenId);
         return OrdenServicioResponseDTO.fromEntity(guardada);
     }
 
@@ -316,7 +320,12 @@ public class OrdenServicioService {
     }
 
     /**
-     * Guarda ficha técnica y avanza EN_DIAGNOSTICO → DIAGNOSTICADO en una sola transacción.
+     * Guarda ficha técnica y avanza a DIAGNOSTICADO en una sola transacción.
+     * <ul>
+     *   <li>RECEPCIONADO → EN_DIAGNOSTICO → DIAGNOSTICADO (historial de ambos pasos)</li>
+     *   <li>EN_DIAGNOSTICO → DIAGNOSTICADO</li>
+     * </ul>
+     * No salta cotización/aprobación ni pasa a EN_REPARACION aunque venga trabajo realizado.
      */
     @Transactional
     public TransicionOrdenServicioResponseDTO completarDiagnostico(
@@ -325,18 +334,33 @@ public class OrdenServicioService {
             String usuario) {
         validarUsuario(usuario);
         OrdenServicio orden = buscarOFallar(id);
-        if (orden.getEstado() != EstadoOrdenServicio.EN_DIAGNOSTICO) {
+        EstadoOrdenServicio estado = orden.getEstado();
+        if (estado != EstadoOrdenServicio.RECEPCIONADO
+                && estado != EstadoOrdenServicio.EN_DIAGNOSTICO) {
             throw new BusinessException(
-                "Solo se puede completar el diagnóstico desde EN_DIAGNOSTICO.");
+                "Solo se puede completar el diagnóstico desde RECEPCIONADO o EN_DIAGNOSTICO.");
         }
 
         String diagnostico = textoRequerido(
             request.getDiagnostico(),
             "Completa el diagnóstico técnico para continuar.");
+
+        if (estado == EstadoOrdenServicio.RECEPCIONADO) {
+            String motivoInicio = EstadoOrdenServicio.motivoAutomatico(
+                EstadoOrdenServicio.RECEPCIONADO, EstadoOrdenServicio.EN_DIAGNOSTICO);
+            aplicarTransicion(
+                orden, EstadoOrdenServicio.EN_DIAGNOSTICO, motivoInicio, null, usuario.trim());
+            orden = buscarOFallar(id);
+        }
+
         if (request.getProblemaReportado() != null) {
             orden.setProblemaReportado(textoOpcional(request.getProblemaReportado()));
         }
         orden.setDiagnostico(diagnostico);
+        if (request.getTrabajoRealizado() != null) {
+            // Persistencia anticipada permitida; el workflow no avanza a reparación aquí.
+            orden.setTrabajoRealizado(textoOpcional(request.getTrabajoRealizado()));
+        }
         if (request.getObservaciones() != null) {
             orden.setObservaciones(textoOpcional(request.getObservaciones()));
         }
@@ -344,8 +368,10 @@ public class OrdenServicioService {
 
         String motivo = EstadoOrdenServicio.motivoAutomatico(
             EstadoOrdenServicio.EN_DIAGNOSTICO, EstadoOrdenServicio.DIAGNOSTICADO);
-        return aplicarTransicion(
+        TransicionOrdenServicioResponseDTO transicion = aplicarTransicion(
             orden, EstadoOrdenServicio.DIAGNOSTICADO, motivo, null, usuario.trim());
+        notificationEventBridge.solicitar(TipoEventoNotificacion.DIAGNOSTICO_COMPLETADO, id);
+        return transicion;
     }
 
     /**
@@ -374,7 +400,10 @@ public class OrdenServicioService {
 
         String motivo = EstadoOrdenServicio.motivoAutomatico(
             EstadoOrdenServicio.EN_REPARACION, EstadoOrdenServicio.LISTO);
-        return aplicarTransicion(orden, EstadoOrdenServicio.LISTO, motivo, null, usuario.trim());
+        TransicionOrdenServicioResponseDTO transicion = aplicarTransicion(
+            orden, EstadoOrdenServicio.LISTO, motivo, null, usuario.trim());
+        notificationEventBridge.solicitar(TipoEventoNotificacion.EQUIPO_LISTO, id);
+        return transicion;
     }
 
     /**
@@ -461,6 +490,7 @@ public class OrdenServicioService {
             "Se registró la entrega del equipo.",
             null,
             responsable);
+        notificationEventBridge.solicitar(TipoEventoNotificacion.EQUIPO_ENTREGADO, id);
         TransicionOrdenServicioResponseDTO cierre = aplicarTransicion(
             orden,
             EstadoOrdenServicio.CERRADO,
@@ -655,6 +685,14 @@ public class OrdenServicioService {
         if (cliente.esConsumidorFinal()) {
             throw new BusinessException(
                 "El consumidor final del sistema no se usa como cliente de taller. Registra un cliente real.");
+        }
+        if (cliente.getNumeroDocumento() == null || cliente.getNumeroDocumento().isBlank()) {
+            throw new BusinessException(
+                "El cliente de la orden debe tener número de documento registrado.");
+        }
+        if (cliente.getTelefono() == null || cliente.getTelefono().isBlank()) {
+            throw new BusinessException(
+                "El cliente de la orden debe tener teléfono registrado.");
         }
         return cliente;
     }

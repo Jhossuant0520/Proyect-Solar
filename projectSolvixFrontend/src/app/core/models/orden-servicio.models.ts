@@ -25,6 +25,10 @@ export interface OrdenServicioResponseDTO {
   numero: string;
   clienteId: number;
   clienteNombre: string;
+  /** Solo panel ADMIN. No aparece en consulta pública. */
+  clienteTelefono?: string | null;
+  /** Solo panel ADMIN. Mismo token del QR / portal. */
+  tokenConsulta?: string | null;
   equipoId: number;
   equipoTipo: TipoEquipo;
   equipoMarca: string | null;
@@ -83,6 +87,8 @@ export interface CambiarEstadoOrdenServicioRequestDTO {
 export interface CompletarDiagnosticoRequestDTO {
   problemaReportado?: string | null;
   diagnostico: string;
+  /** Opcional: se persiste sin saltar a reparación. */
+  trabajoRealizado?: string | null;
   observaciones?: string | null;
 }
 

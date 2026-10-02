@@ -5,7 +5,10 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 /**
- * Completar diagnóstico de forma atómica (EN_DIAGNOSTICO → DIAGNOSTICADO).
+ * Completar diagnóstico de forma atómica.
+ * Origen permitido: RECEPCIONADO o EN_DIAGNOSTICO → DIAGNOSTICADO.
+ * Desde RECEPCIONADO se registra también el paso intermedio EN_DIAGNOSTICO (historial).
+ * No avanza a cotización/reparación: el trabajo realizado opcional solo se persiste.
  */
 @Data
 public class CompletarDiagnosticoRequestDTO {
@@ -16,6 +19,9 @@ public class CompletarDiagnosticoRequestDTO {
     @NotBlank(message = "El diagnóstico técnico es obligatorio.")
     @Size(max = 2000, message = "El diagnóstico no puede superar 2000 caracteres.")
     private String diagnostico;
+
+    @Size(max = 2000, message = "El trabajo realizado no puede superar 2000 caracteres.")
+    private String trabajoRealizado;
 
     @Size(max = 1000, message = "Las observaciones no pueden superar 1000 caracteres.")
     private String observaciones;

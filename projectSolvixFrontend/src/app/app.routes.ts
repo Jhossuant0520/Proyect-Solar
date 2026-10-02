@@ -30,6 +30,9 @@ import { InventarioComponent } from './features/panelAdmin/inventario/inventario
 import { ClienteListComponent } from './features/panelAdmin/cliente/cliente-list/cliente-list';
 import { ClienteFormComponent } from './features/panelAdmin/cliente/cliente-form/cliente-form';
 import { ClienteDetailComponent } from './features/panelAdmin/cliente/cliente-detail/cliente-detail';
+import { ProveedorListComponent } from './features/panelAdmin/proveedor/proveedor-list/proveedor-list';
+import { ProveedorFormComponent } from './features/panelAdmin/proveedor/proveedor-form/proveedor-form';
+import { ProveedorDetailComponent } from './features/panelAdmin/proveedor/proveedor-detail/proveedor-detail';
 import { ServicioListComponent } from './features/panelAdmin/servicios/servicio-list/servicio-list';
 import { ServicioFormComponent } from './features/panelAdmin/servicios/servicio-form/servicio-form';
 import { ServicioDetailComponent } from './features/panelAdmin/servicios/servicio-detail/servicio-detail';
@@ -142,13 +145,14 @@ export const routes: Routes = [
       { path: 'clientes/:id/editar', component: ClienteFormComponent, canActivate: [adminGuard] },
       { path: 'clientes/:id', component: ClienteDetailComponent, canActivate: [adminGuard] },
 
+      { path: 'proveedores', component: ProveedorListComponent, canActivate: [adminGuard] },
+      { path: 'proveedores/nuevo', component: ProveedorFormComponent, canActivate: [adminGuard] },
+      { path: 'proveedores/:id/editar', component: ProveedorFormComponent, canActivate: [adminGuard] },
+      { path: 'proveedores/:id', component: ProveedorDetailComponent, canActivate: [adminGuard] },
+
       { path: 'servicios', component: ServicioListComponent, canActivate: [adminGuard] },
       { path: 'servicios/nueva', component: ServicioFormComponent, canActivate: [adminGuard] },
       { path: 'servicios/:id', component: ServicioDetailComponent, canActivate: [adminGuard] },
-
-      comingSoon('proveedores', 'Proveedores', moduloPendiente),
-      comingSoon('proveedores/nuevo', 'Nuevo proveedor', moduloPendiente),
-      comingSoon('proveedores/:id', 'Detalle de proveedor', moduloPendiente),
 
       { path: 'inventario', component: InventarioComponent, canActivate: [adminGuard] },
       comingSoon('reportes', 'Reportes', moduloPendiente),

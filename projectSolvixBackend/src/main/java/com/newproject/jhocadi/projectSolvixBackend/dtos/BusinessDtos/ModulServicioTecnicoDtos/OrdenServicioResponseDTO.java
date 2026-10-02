@@ -17,6 +17,10 @@ public class OrdenServicioResponseDTO {
     private String numero;
     private Long clienteId;
     private String clienteNombre;
+    /** Teléfono del cliente (solo API ADMIN). No exponer en DTOs públicos. */
+    private String clienteTelefono;
+    /** Token de consulta pública / QR (solo API ADMIN). */
+    private String tokenConsulta;
     private Long equipoId;
     private TipoEquipo equipoTipo;
     private String equipoMarca;
@@ -38,6 +42,8 @@ public class OrdenServicioResponseDTO {
             .numero(orden.getNumero())
             .clienteId(orden.getCliente() != null ? orden.getCliente().getId() : null)
             .clienteNombre(orden.getCliente() != null ? orden.getCliente().getNombre() : null)
+            .clienteTelefono(orden.getCliente() != null ? orden.getCliente().getTelefono() : null)
+            .tokenConsulta(orden.getTokenConsulta())
             .equipoId(orden.getEquipo() != null ? orden.getEquipo().getId() : null)
             .equipoTipo(orden.getEquipo() != null ? orden.getEquipo().getTipoEquipo() : null)
             .equipoMarca(orden.getEquipo() != null ? orden.getEquipo().getMarca() : null)

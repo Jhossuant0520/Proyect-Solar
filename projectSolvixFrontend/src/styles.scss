@@ -58,10 +58,24 @@ option {
   font-family: inherit;
 }
 
+/* D.14 — color de valor tipado según tema (dark: claro / light: oscuro). */
+input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='submit']):not([type='button']):not([type='reset']):not([type='file']):not([type='image']),
+textarea,
+select {
+  color: var(--color-text-primary, var(--solvix-text));
+  caret-color: var(--color-primary, var(--solvix-primary));
+}
+
 input::placeholder,
 textarea::placeholder {
   color: var(--color-text-muted, var(--solvix-text-muted));
   opacity: 0.9;
+}
+
+option,
+optgroup {
+  color: var(--color-text-primary, var(--solvix-text));
+  background: var(--color-surface-elevated, var(--solvix-surface-elevated));
 }
 
 /* Compatibilidad con Angular Material dialogs */

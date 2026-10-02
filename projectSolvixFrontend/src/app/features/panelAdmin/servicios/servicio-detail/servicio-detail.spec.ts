@@ -14,6 +14,10 @@ import {
   OrdenServicioResponseDTO,
   TransicionOrdenServicioResponseDTO
 } from '../../../../core/models/orden-servicio.models';
+import { SolvixFeedbackService } from '../../../../shared/services/solvix-feedback.service';
+import { SolvixActionRevealService } from '../../../../shared/services/solvix-action-reveal.service';
+import { environment } from '../../../../../environments/environment';
+import { MSG_TELEFONO_INVALIDO_WHATSAPP } from '../whatsapp-asistido.util';
 
 function ordenBase(parcial: Partial<OrdenServicioResponseDTO> = {}): OrdenServicioResponseDTO {
   return {
@@ -21,6 +25,8 @@ function ordenBase(parcial: Partial<OrdenServicioResponseDTO> = {}): OrdenServic
     numero: 'OS-2026-000012',
     clienteId: 4,
     clienteNombre: 'Ana Ruiz',
+    clienteTelefono: '3001234567',
+    tokenConsulta: 'tokendeprueba1234567890abcdef12',
     equipoId: 9,
     equipoTipo: 'PORTATIL',
     equipoMarca: 'Dell',
@@ -63,6 +69,7 @@ describe('ServicioDetailComponent — workflow', () => {
   let cotizacionService: jasmine.SpyObj<CotizacionServicioService>;
   let documentoService: jasmine.SpyObj<DocumentoOrdenServicioService>;
   let dialog: jasmine.SpyObj<MatDialog>;
+  let feedback: jasmine.SpyObj<SolvixFeedbackService>;
   let router: Router;
 
   beforeEach(async () => {
@@ -98,6 +105,17 @@ describe('ServicioDetailComponent — workflow', () => {
       'descargarBlobComoArchivo'
     ]);
     dialog = jasmine.createSpyObj('MatDialog', ['open']);
+    feedback = jasmine.createSpyObj('SolvixFeedbackService', [
+      'success',
+      'error',
+      'info',
+      'warning'
+    ]);
+    const actionReveal = jasmine.createSpyObj('SolvixActionRevealService', [
+      'success',
+      'reveal',
+      'error'
+    ]);
     ordenService.obtenerPorId.and.returnValue(of(ordenBase()));
     ordenService.listarHistorial.and.returnValue(of([]));
     ordenService.listarRepuestos.and.returnValue(of([]));
@@ -160,7 +178,9 @@ describe('ServicioDetailComponent — workflow', () => {
         { provide: CotizacionServicioService, useValue: cotizacionService },
         { provide: DocumentoOrdenServicioService, useValue: documentoService },
         { provide: MatDialog, useValue: dialog },
-        { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open']) }
+        { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open']) },
+        { provide: SolvixFeedbackService, useValue: feedback },
+        { provide: SolvixActionRevealService, useValue: actionReveal }
       ]
     }).compileComponents();
 
@@ -229,6 +249,7 @@ describe('ServicioDetailComponent — workflow', () => {
     expect(ordenService.completarDiagnostico).toHaveBeenCalledWith(12, {
       problemaReportado: 'No enciende',
       diagnostico: 'Fuente dañada',
+      trabajoRealizado: null,
       observaciones: 'Urgente'
     });
     expect(ordenService.cambiarEstado).not.toHaveBeenCalled();
@@ -361,14 +382,46 @@ describe('ServicioDetailComponent — workflow', () => {
   }));
 
   it('permite editar y guardar textos fuera de diagnóstico', fakeAsync(() => {
+    ordenService.obtenerPorId.and.returnValue(
+      of(ordenBase({ estado: 'COTIZADO', diagnostico: 'Fuente dañada' }))
+    );
+    ordenService.actualizar.and.returnValue(
+      of(ordenBase({ estado: 'COTIZADO', diagnostico: 'Fuente dañada', observaciones: 'Nota taller' }))
+    );
     fixture.detectChanges();
     tick();
     component.iniciarEdicion();
-    component.form.controls.diagnostico.setValue('Fuente dañada');
+    component.form.controls.observaciones.setValue('Nota taller');
     component.guardarTextos();
     tick();
     expect(ordenService.actualizar).toHaveBeenCalled();
     expect(ordenService.completarDiagnostico).not.toHaveBeenCalled();
+  }));
+
+  it('D.13: RECEPCIONADO + diagnóstico al guardar llama completarDiagnostico (no actualizar)', fakeAsync(() => {
+    ordenService.completarDiagnostico.and.returnValue(
+      of(
+        transicion(ordenBase({ estado: 'DIAGNOSTICADO', diagnostico: 'Fuente dañada' }), {
+          estadoAnterior: 'EN_DIAGNOSTICO',
+          estadoNuevo: 'DIAGNOSTICADO'
+        })
+      )
+    );
+    fixture.detectChanges();
+    tick();
+    component.iniciarEdicion();
+    component.form.controls.diagnostico.setValue('Fuente dañada');
+    component.form.controls.trabajoRealizado.setValue('Cambio de fuente');
+    component.guardarTextos();
+    tick();
+    expect(ordenService.completarDiagnostico).toHaveBeenCalledWith(12, {
+      problemaReportado: 'No enciende',
+      diagnostico: 'Fuente dañada',
+      trabajoRealizado: 'Cambio de fuente',
+      observaciones: 'Urgente'
+    });
+    expect(ordenService.actualizar).not.toHaveBeenCalled();
+    expect(component.orden?.estado).toBe('DIAGNOSTICADO');
   }));
 
   it('modo lectura en CERRADO', fakeAsync(() => {
@@ -382,6 +435,9 @@ describe('ServicioDetailComponent — workflow', () => {
   }));
 
   it('muestra error humano al fallar el guardado', fakeAsync(() => {
+    ordenService.obtenerPorId.and.returnValue(
+      of(ordenBase({ estado: 'COTIZADO', diagnostico: 'Fuente dañada' }))
+    );
     ordenService.actualizar.and.returnValue(
       throwError(
         () =>
@@ -394,7 +450,7 @@ describe('ServicioDetailComponent — workflow', () => {
     fixture.detectChanges();
     tick();
     component.iniciarEdicion();
-    component.form.controls.diagnostico.setValue('Nuevo');
+    component.form.controls.observaciones.setValue('Nuevo');
     component.guardarTextos();
     tick();
     expect(component.editError).toContain('cerrada o cancelada');
@@ -416,4 +472,198 @@ describe('ServicioDetailComponent — workflow', () => {
       'Acción principal'
     );
   }));
+
+  describe('WhatsApp asistido', () => {
+    it('muestra botón WhatsApp en RECEPCIONADO', fakeAsync(() => {
+      fixture.detectChanges();
+      tick();
+      expect(component.mostrarWhatsAppRecepcion).toBeTrue();
+      expect(component.puedePrepararWhatsApp).toBeTrue();
+      expect(fixture.nativeElement.querySelector('.btn-whatsapp')).toBeTruthy();
+      expect(fixture.nativeElement.textContent).toContain('WhatsApp');
+    }));
+
+    it('sin teléfono válido no abre wa.me y avisa', fakeAsync(() => {
+      ordenService.obtenerPorId.and.returnValue(
+        of(ordenBase({ clienteTelefono: null }))
+      );
+      const open = spyOn(window, 'open');
+      fixture.detectChanges();
+      tick();
+      expect(component.puedePrepararWhatsApp).toBeFalse();
+      component.prepararWhatsApp('recepcion');
+      expect(open).not.toHaveBeenCalled();
+      expect(feedback.warning).toHaveBeenCalledWith(MSG_TELEFONO_INVALIDO_WHATSAPP);
+    }));
+
+    it('abre recepción con URL pública y número CO', fakeAsync(() => {
+      const open = spyOn(window, 'open');
+      fixture.detectChanges();
+      tick();
+      const estadoAntes = component.orden?.estado;
+      component.prepararWhatsApp('recepcion');
+      expect(open).toHaveBeenCalled();
+      const href = open.calls.mostRecent().args[0] as string;
+      expect(href.startsWith('https://wa.me/573001234567?text=')).toBeTrue();
+      const texto = decodeURIComponent(href.split('text=')[1]);
+      expect(texto).toContain('Ana Ruiz');
+      expect(texto).toContain('OS-2026-000012');
+      expect(texto).toContain(
+        `${environment.publicWebBaseUrl}/consulta/ot/tokendeprueba1234567890abcdef12`
+      );
+      expect(component.orden?.estado).toBe(estadoAntes);
+      expect(cotizacionService.listar).not.toHaveBeenCalled();
+    }));
+
+    it('cotización solo en PENDIENTE_APROBACION y usa número de cotización', fakeAsync(() => {
+      ordenService.obtenerPorId.and.returnValue(
+        of(ordenBase({ estado: 'PENDIENTE_APROBACION' }))
+      );
+      cotizacionService.listar.and.returnValue(
+        of([
+          {
+            id: 7,
+            ordenServicioId: 12,
+            numero: 'COT-2026-000099',
+            tipo: 'INICIAL',
+            estado: 'PENDIENTE_APROBACION',
+            total: 100000,
+            puedePresentar: false,
+            puedeAprobar: true,
+            puedeEditar: true
+          } as never
+        ])
+      );
+      const open = spyOn(window, 'open');
+      fixture.detectChanges();
+      tick();
+      expect(component.mostrarWhatsAppCotizacion).toBeTrue();
+      expect(component.mostrarWhatsAppEquipoListo).toBeFalse();
+      component.prepararWhatsApp('cotizacion');
+      tick();
+      expect(cotizacionService.listar).toHaveBeenCalledWith(12);
+      const href = open.calls.mostRecent().args[0] as string;
+      const texto = decodeURIComponent(href.split('text=')[1]);
+      expect(texto).toContain('COT-2026-000099');
+      expect(texto).toContain('Tu cotización ya está disponible');
+    }));
+
+    it('equipo listo en LISTO; no disponible en RECEPCIONADO', fakeAsync(() => {
+      fixture.detectChanges();
+      tick();
+      expect(component.mostrarWhatsAppEquipoListo).toBeFalse();
+
+      ordenService.obtenerPorId.and.returnValue(of(ordenBase({ estado: 'LISTO' })));
+      fixture.detectChanges();
+      component.cargar();
+      tick();
+      expect(component.mostrarWhatsAppEquipoListo).toBeTrue();
+      const open = spyOn(window, 'open');
+      component.prepararWhatsApp('equipoListo');
+      const texto = decodeURIComponent((open.calls.mostRecent().args[0] as string).split('text=')[1]);
+      expect(texto).toContain('listo para entrega');
+      expect(texto).not.toContain('recogerlo hoy');
+    }));
+
+    it('CANCELADO no muestra opciones WhatsApp', fakeAsync(() => {
+      ordenService.obtenerPorId.and.returnValue(of(ordenBase({ estado: 'CANCELADO' })));
+      fixture.detectChanges();
+      tick();
+      expect(component.hayOpcionesWhatsApp).toBeFalse();
+      expect(fixture.nativeElement.querySelector('.btn-whatsapp')).toBeFalsy();
+    }));
+
+    it('sin tokenConsulta no abre wa.me', fakeAsync(() => {
+      ordenService.obtenerPorId.and.returnValue(of(ordenBase({ tokenConsulta: null })));
+      const open = spyOn(window, 'open');
+      fixture.detectChanges();
+      tick();
+      component.prepararWhatsApp('recepcion');
+      expect(open).not.toHaveBeenCalled();
+      expect(feedback.warning).toHaveBeenCalled();
+    }));
+
+    it('avisarWhatsAppSiNoListo al abrir menú sin teléfono', fakeAsync(() => {
+      ordenService.obtenerPorId.and.returnValue(of(ordenBase({ clienteTelefono: '' })));
+      fixture.detectChanges();
+      tick();
+      component.avisarWhatsAppSiNoListo();
+      expect(feedback.warning).toHaveBeenCalledWith(MSG_TELEFONO_INVALIDO_WHATSAPP);
+    }));
+
+    it('elige la última cotización PENDIENTE_APROBACION e ignora otras', fakeAsync(() => {
+      ordenService.obtenerPorId.and.returnValue(
+        of(ordenBase({ estado: 'PENDIENTE_APROBACION' }))
+      );
+      cotizacionService.listar.and.returnValue(
+        of([
+          {
+            id: 1,
+            ordenServicioId: 12,
+            numero: 'COT-OLD-APROBADA',
+            tipo: 'INICIAL',
+            estado: 'APROBADA',
+            total: 1,
+            puedePresentar: false,
+            puedeAprobar: false,
+            puedeEditar: false
+          } as never,
+          {
+            id: 2,
+            ordenServicioId: 12,
+            numero: 'COT-BORRADOR',
+            tipo: 'ADICIONAL',
+            estado: 'BORRADOR',
+            total: 1,
+            puedePresentar: true,
+            puedeAprobar: false,
+            puedeEditar: true
+          } as never,
+          {
+            id: 3,
+            ordenServicioId: 12,
+            numero: 'COT-PEND-1',
+            tipo: 'ADICIONAL',
+            estado: 'PENDIENTE_APROBACION',
+            total: 1,
+            puedePresentar: false,
+            puedeAprobar: true,
+            puedeEditar: true
+          } as never,
+          {
+            id: 4,
+            ordenServicioId: 12,
+            numero: 'COT-PEND-2',
+            tipo: 'ADICIONAL',
+            estado: 'PENDIENTE_APROBACION',
+            total: 1,
+            puedePresentar: false,
+            puedeAprobar: true,
+            puedeEditar: true
+          } as never,
+          {
+            id: 5,
+            ordenServicioId: 12,
+            numero: 'COT-RECHAZADA',
+            tipo: 'ADICIONAL',
+            estado: 'RECHAZADA',
+            total: 1,
+            puedePresentar: false,
+            puedeAprobar: false,
+            puedeEditar: false
+          } as never
+        ])
+      );
+      const open = spyOn(window, 'open');
+      fixture.detectChanges();
+      tick();
+      component.prepararWhatsApp('cotizacion');
+      tick();
+      const texto = decodeURIComponent((open.calls.mostRecent().args[0] as string).split('text=')[1]);
+      expect(texto).toContain('COT-PEND-2');
+      expect(texto).not.toContain('COT-OLD-APROBADA');
+      expect(texto).not.toContain('COT-BORRADOR');
+      expect(texto).not.toContain('COT-RECHAZADA');
+    }));
+  });
 });

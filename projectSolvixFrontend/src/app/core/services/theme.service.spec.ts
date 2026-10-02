@@ -56,6 +56,26 @@ describe('ThemeService', () => {
     expect(localStorage.getItem(SOLVIX_THEME_STORAGE_KEY)).toBe('light');
   });
 
+  it('D.14: tokens de texto cambian entre dark y light (contraste de campos)', () => {
+    service.init();
+    service.select('dark');
+    const darkText = getComputedStyle(document.documentElement)
+      .getPropertyValue('--solvix-text')
+      .trim()
+      .toLowerCase();
+    service.select('light');
+    const lightText = getComputedStyle(document.documentElement)
+      .getPropertyValue('--solvix-text')
+      .trim()
+      .toLowerCase();
+    expect(darkText).toBeTruthy();
+    expect(lightText).toBeTruthy();
+    expect(lightText).not.toBe(darkText);
+    // Light debe ser oscuro (slate-900); dark debe ser claro.
+    expect(lightText).toBe('#0f172a');
+    expect(darkText).toBe('#ffffff');
+  });
+
   it('seleccionar dark aplica data-theme=dark y persiste', () => {
     service.init();
     service.select('light');

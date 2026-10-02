@@ -15,8 +15,10 @@ import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulComerc
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulComercialDtos.CompraResponseDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulComercialDtos.DetalleCompraRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.exception.BusinessException;
+import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.CondicionPagoProveedor;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.EstadoCompra;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.Proveedor;
+import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.TipoDocumentoExternoCompra;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.TipoMovimientoInventario;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulProductoModel.Producto;
 
@@ -110,6 +112,169 @@ class CompraServiceTest extends ComercialTestSupport {
         assertThatThrownBy(() -> compraService.crear(request, USUARIO_TEST))
             .isInstanceOf(BusinessException.class)
             .hasMessageContaining("descuento no puede superar");
+    }
+
+    @Test
+    @DisplayName("Documento externo, OC, cotización y condiciones se congelan al crear")
+    void compraEnriquecidaCongelaDocumentoYCondiciones() {
+        Producto producto = crearProducto("Producto Enriq", new BigDecimal("100.00"), null, 0);
+        Proveedor proveedor = crearProveedor("Prov Condiciones");
+        proveedor.setCondicionPago(CondicionPagoProveedor.CREDITO);
+        proveedor.setDiasCredito(30);
+        proveedorRepository.save(proveedor);
+
+        CompraRequestDTO request = requestCompra(
+            proveedor.getId(), producto.getId(), 2, new BigDecimal("100.00"), null);
+        request.setTipoDocumentoExterno(TipoDocumentoExternoCompra.FACTURA);
+        request.setNumeroDocumentoExterno("F-9001");
+        request.setNumeroOrdenCompra("OC-55");
+        request.setNumeroCotizacionProveedor("CDV-12");
+        request.setFechaDocumentoProveedor(LocalDateTime.of(2026, 3, 1, 10, 0));
+        request.setFechaEntrega(LocalDateTime.of(2026, 3, 10, 0, 0));
+        request.setContactoNombreSnapshot("Ana Comercial");
+
+        CompraResponseDTO compra = compraService.crear(request, USUARIO_TEST);
+
+        assertThat(compra.getTipoDocumentoExterno()).isEqualTo(TipoDocumentoExternoCompra.FACTURA);
+        assertThat(compra.getNumeroDocumentoExterno()).isEqualTo("F-9001");
+        assertThat(compra.getNumeroOrdenCompra()).isEqualTo("OC-55");
+        assertThat(compra.getNumeroCotizacionProveedor()).isEqualTo("CDV-12");
+        assertThat(compra.getCondicionPagoAplicada()).isEqualTo(CondicionPagoProveedor.CREDITO);
+        assertThat(compra.getDiasCreditoAplicados()).isEqualTo(30);
+        assertThat(compra.getFechaVencimiento()).isEqualTo(compra.getFecha().plusDays(30));
+        assertThat(compra.getMoneda()).isEqualTo("COP");
+        assertThat(compra.getContactoNombreSnapshot()).isEqualTo("Ana Comercial");
+        assertThat(compra.getImpuestoTotal()).isEqualByComparingTo("0.00");
+
+        proveedor.setCondicionPago(CondicionPagoProveedor.CONTADO);
+        proveedor.setDiasCredito(0);
+        proveedor.setNombre("Prov Renombrado");
+        proveedorRepository.save(proveedor);
+
+        CompraResponseDTO historica = compraService.obtenerPorId(compra.getId());
+        assertThat(historica.getCondicionPagoAplicada()).isEqualTo(CondicionPagoProveedor.CREDITO);
+        assertThat(historica.getDiasCreditoAplicados()).isEqualTo(30);
+        assertThat(historica.getProveedorNombre()).isEqualTo("Prov Condiciones");
+        assertThat(historica.getContactoNombreSnapshot()).isEqualTo("Ana Comercial");
+    }
+
+    @Test
+    @DisplayName("IVA mínimo: total = subtotal - descuento + impuesto")
+    void totalConImpuestoYReferenciaProveedor() {
+        Producto producto = crearProducto("Producto IVA", new BigDecimal("100.00"), null, 0);
+        Proveedor proveedor = crearProveedor("Prov IVA");
+
+        DetalleCompraRequestDTO detalle = new DetalleCompraRequestDTO();
+        detalle.setProductoId(producto.getId());
+        detalle.setCantidad(2);
+        detalle.setCostoUnitario(new BigDecimal("100.00"));
+        detalle.setPorcentajeImpuesto(new BigDecimal("19.00"));
+        detalle.setReferenciaProveedor("ABC-7781");
+
+        CompraRequestDTO request = new CompraRequestDTO();
+        request.setProveedorId(proveedor.getId());
+        request.setDescuento(new BigDecimal("10.00"));
+        request.setDetalles(List.of(detalle));
+
+        CompraResponseDTO compra = compraService.crear(request, USUARIO_TEST);
+
+        assertThat(compra.getSubtotal()).isEqualByComparingTo("200.00");
+        assertThat(compra.getDescuento()).isEqualByComparingTo("10.00");
+        assertThat(compra.getImpuestoTotal()).isEqualByComparingTo("38.00");
+        assertThat(compra.getTotal()).isEqualByComparingTo("228.00");
+        assertThat(compra.getDetalles().get(0).getReferenciaProveedor()).isEqualTo("ABC-7781");
+        assertThat(compra.getDetalles().get(0).getValorImpuesto()).isEqualByComparingTo("38.00");
+    }
+
+    @Test
+    @DisplayName("Tipo documento externo exige número")
+    void tipoDocumentoExternoSinNumeroRechaza() {
+        Producto producto = crearProducto("Producto Doc", new BigDecimal("50.00"), null, 0);
+        Proveedor proveedor = crearProveedor("Prov Doc");
+
+        CompraRequestDTO request = requestCompra(
+            proveedor.getId(), producto.getId(), 1, new BigDecimal("50.00"), null);
+        request.setTipoDocumentoExterno(TipoDocumentoExternoCompra.PEDIDO);
+
+        assertThatThrownBy(() -> compraService.crear(request, USUARIO_TEST))
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("número de documento");
+    }
+
+    @Test
+    @DisplayName("Backend ignora valorImpuesto e impuestoTotal manipulados en el request")
+    void backendRecalculaIvaIgnorandoValorManipulado() {
+        Producto producto = crearProducto("Producto AntiManip", new BigDecimal("100.00"), null, 0);
+        Proveedor proveedor = crearProveedor("Prov AntiManip");
+
+        DetalleCompraRequestDTO detalle = new DetalleCompraRequestDTO();
+        detalle.setProductoId(producto.getId());
+        detalle.setCantidad(10);
+        detalle.setCostoUnitario(new BigDecimal("100000.00"));
+        detalle.setPorcentajeImpuesto(new BigDecimal("19.00"));
+        detalle.setValorImpuesto(new BigDecimal("1.00")); // manipulación
+
+        CompraRequestDTO request = new CompraRequestDTO();
+        request.setProveedorId(proveedor.getId());
+        request.setDescuento(BigDecimal.ZERO);
+        request.setImpuestoTotal(new BigDecimal("999.00")); // manipulación
+        request.setDetalles(List.of(detalle));
+
+        CompraResponseDTO compra = compraService.crear(request, USUARIO_TEST);
+
+        assertThat(compra.getSubtotal()).isEqualByComparingTo("1000000.00");
+        assertThat(compra.getImpuestoTotal()).isEqualByComparingTo("190000.00");
+        assertThat(compra.getTotal()).isEqualByComparingTo("1190000.00");
+        assertThat(compra.getDetalles().get(0).getValorImpuesto()).isEqualByComparingTo("190000.00");
+        assertThat(compra.getDetalles().get(0).getPorcentajeImpuesto()).isEqualByComparingTo("19.00");
+    }
+
+    @Test
+    @DisplayName("IVA 0% no genera impuesto y total = subtotal - descuento")
+    void ivaCeroNoGeneraImpuesto() {
+        Producto producto = crearProducto("Producto SinIVA", new BigDecimal("50.00"), null, 0);
+        Proveedor proveedor = crearProveedor("Prov SinIVA");
+
+        DetalleCompraRequestDTO detalle = new DetalleCompraRequestDTO();
+        detalle.setProductoId(producto.getId());
+        detalle.setCantidad(4);
+        detalle.setCostoUnitario(new BigDecimal("50.00"));
+        detalle.setPorcentajeImpuesto(BigDecimal.ZERO);
+
+        CompraRequestDTO request = new CompraRequestDTO();
+        request.setProveedorId(proveedor.getId());
+        request.setDescuento(new BigDecimal("20.00"));
+        request.setDetalles(List.of(detalle));
+
+        CompraResponseDTO compra = compraService.crear(request, USUARIO_TEST);
+
+        assertThat(compra.getSubtotal()).isEqualByComparingTo("200.00");
+        assertThat(compra.getImpuestoTotal()).isEqualByComparingTo("0.00");
+        assertThat(compra.getTotal()).isEqualByComparingTo("180.00");
+        assertThat(compra.getDetalles().get(0).getValorImpuesto()).isEqualByComparingTo("0.00");
+    }
+
+    @Test
+    @DisplayName("CONTADO congela días 0 y vencimiento null; CREDITO calcula vencimiento")
+    void condicionesContadoYCredito() {
+        Producto producto = crearProducto("Producto Cond", new BigDecimal("10.00"), null, 0);
+        Proveedor proveedor = crearProveedor("Prov ContadoCredito");
+
+        CompraRequestDTO contado = requestCompra(
+            proveedor.getId(), producto.getId(), 1, new BigDecimal("10.00"), null);
+        contado.setCondicionPagoAplicada(CondicionPagoProveedor.CONTADO);
+        CompraResponseDTO c1 = compraService.crear(contado, USUARIO_TEST);
+        assertThat(c1.getCondicionPagoAplicada()).isEqualTo(CondicionPagoProveedor.CONTADO);
+        assertThat(c1.getDiasCreditoAplicados()).isEqualTo(0);
+        assertThat(c1.getFechaVencimiento()).isNull();
+
+        CompraRequestDTO credito = requestCompra(
+            proveedor.getId(), producto.getId(), 1, new BigDecimal("10.00"), null);
+        credito.setCondicionPagoAplicada(CondicionPagoProveedor.CREDITO);
+        credito.setDiasCreditoAplicados(15);
+        CompraResponseDTO c2 = compraService.crear(credito, USUARIO_TEST);
+        assertThat(c2.getDiasCreditoAplicados()).isEqualTo(15);
+        assertThat(c2.getFechaVencimiento()).isEqualTo(c2.getFecha().plusDays(15));
     }
 
     private CompraRequestDTO requestCompra(

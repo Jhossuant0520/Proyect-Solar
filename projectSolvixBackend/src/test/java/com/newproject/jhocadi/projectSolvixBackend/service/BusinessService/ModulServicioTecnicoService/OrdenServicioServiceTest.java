@@ -157,6 +157,55 @@ class OrdenServicioServiceTest extends ComercialTestSupport {
     }
 
     @Test
+    @DisplayName("D.13: completarDiagnostico desde RECEPCIONADO → DIAGNOSTICADO con historial intermedio")
+    void completarDiagnosticoDesdeRecepcionado() {
+        OrdenServicioResponseDTO orden = crearOrdenBasica();
+        assertThat(orden.getEstado()).isEqualTo(EstadoOrdenServicio.RECEPCIONADO);
+
+        CompletarDiagnosticoRequestDTO req = new CompletarDiagnosticoRequestDTO();
+        req.setProblemaReportado("No enciende");
+        req.setDiagnostico("Fuente dañada");
+        req.setTrabajoRealizado("Cambio de fuente (anticipado)");
+        req.setObservaciones("Todo en una sola operación");
+
+        TransicionOrdenServicioResponseDTO res =
+            ordenServicioService.completarDiagnostico(orden.getId(), req, USUARIO_TEST);
+
+        assertThat(res.getEstadoNuevo()).isEqualTo(EstadoOrdenServicio.DIAGNOSTICADO);
+        assertThat(res.getOrden().getDiagnostico()).isEqualTo("Fuente dañada");
+        assertThat(res.getOrden().getTrabajoRealizado()).isEqualTo("Cambio de fuente (anticipado)");
+        assertThat(res.getOrden().getEstado()).isEqualTo(EstadoOrdenServicio.DIAGNOSTICADO);
+
+        var historial = ordenServicioService.listarHistorial(orden.getId());
+        assertThat(historial).hasSizeGreaterThanOrEqualTo(2);
+        assertThat(historial).anySatisfy(h -> {
+            assertThat(h.getEstadoAnterior()).isEqualTo(EstadoOrdenServicio.RECEPCIONADO);
+            assertThat(h.getEstadoNuevo()).isEqualTo(EstadoOrdenServicio.EN_DIAGNOSTICO);
+        });
+        assertThat(historial).anySatisfy(h -> {
+            assertThat(h.getEstadoAnterior()).isEqualTo(EstadoOrdenServicio.EN_DIAGNOSTICO);
+            assertThat(h.getEstadoNuevo()).isEqualTo(EstadoOrdenServicio.DIAGNOSTICADO);
+        });
+    }
+
+    @Test
+    @DisplayName("D.13: completarDiagnostico con trabajo no salta a EN_REPARACION sin aprobación")
+    void completarDiagnosticoConTrabajoNoSaltaReparacion() {
+        OrdenServicioResponseDTO orden = crearOrdenBasica();
+        CompletarDiagnosticoRequestDTO req = new CompletarDiagnosticoRequestDTO();
+        req.setDiagnostico("Board OK");
+        req.setTrabajoRealizado("Soldadura ya hecha");
+
+        TransicionOrdenServicioResponseDTO res =
+            ordenServicioService.completarDiagnostico(orden.getId(), req, USUARIO_TEST);
+
+        assertThat(res.getEstadoNuevo()).isEqualTo(EstadoOrdenServicio.DIAGNOSTICADO);
+        assertThat(res.getOrden().getTrabajoRealizado()).isEqualTo("Soldadura ya hecha");
+        assertThat(res.getOrden().getEstado()).isNotEqualTo(EstadoOrdenServicio.EN_REPARACION);
+        assertThat(res.getOrden().getEstado()).isNotEqualTo(EstadoOrdenServicio.LISTO);
+    }
+
+    @Test
     @DisplayName("completarDiagnostico rechaza diagnóstico vacío")
     void completarDiagnosticoVacio() {
         OrdenServicioResponseDTO orden = crearOrdenBasica();

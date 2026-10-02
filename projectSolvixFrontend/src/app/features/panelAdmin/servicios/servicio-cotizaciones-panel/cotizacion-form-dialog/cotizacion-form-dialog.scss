@@ -4,8 +4,8 @@
   max-height: min(92vh, 940px);
   overflow: auto;
   padding: 1.4rem 1.5rem 1.3rem;
-  color: #f8fafc;
-  background: var(--solvix-surface);
+  color: var(--color-text-primary, var(--solvix-text));
+  background: var(--color-surface-1, var(--solvix-surface));
 }
 
 .dlg-head {
@@ -20,13 +20,13 @@
   font-size: 0.68rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--color-text-muted, var(--solvix-text-muted));
 }
 
 .dlg-head h2 {
   margin: 0;
   font-size: 1.2rem;
-  color: #4fd1ff;
+  color: var(--color-primary, var(--solvix-primary));
 }
 
 .tipo-pill {
@@ -42,14 +42,14 @@
 }
 
 .pill-label {
-  color: #94a3b8;
+  color: var(--color-text-muted, var(--solvix-text-muted));
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-size: 0.68rem;
 }
 
 .pill-value {
-  color: #4fd1ff;
+  color: var(--color-primary, var(--solvix-primary));
   font-weight: 600;
 }
 
@@ -59,7 +59,7 @@
   border-radius: 8px;
   border: 1px solid rgba(251, 191, 36, 0.35);
   background: rgba(251, 191, 36, 0.08);
-  color: #fcd34d;
+  color: var(--color-warning, var(--solvix-warning));
   font-size: 0.82rem;
   line-height: 1.4;
 }
@@ -79,7 +79,7 @@
   margin: 0 0 0.6rem;
   font-size: 0.92rem;
   font-weight: 600;
-  color: #38bdf8;
+  color: var(--color-primary, var(--solvix-secondary));
 }
 
 .sec-head {
@@ -102,33 +102,56 @@
 }
 
 .req {
-  color: #4fd1ff;
+  color: var(--color-primary, var(--solvix-primary));
   font-size: 0.7rem;
   font-weight: 400;
 }
 
 .opt {
-  color: #64748b;
+  color: var(--color-text-muted, var(--solvix-text-muted));
   font-size: 0.7rem;
   font-weight: 400;
 }
 
 input,
-textarea {
+textarea,
+select {
   width: 100%;
   border-radius: 8px;
-  border: 1px solid rgba(79, 209, 255, 0.28);
-  background: var(--solvix-bg);
-  color: #f8fafc;
+  border: 1px solid var(--color-border, rgba(79, 209, 255, 0.28));
+  background: var(--color-bg, var(--solvix-bg));
+  color: var(--color-text-primary, var(--solvix-text));
+  caret-color: var(--color-primary, var(--solvix-primary));
   padding: 0.55rem 0.7rem;
   font: inherit;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-muted, var(--solvix-text-muted));
+  opacity: 0.9;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--color-focus, var(--solvix-primary));
+  outline-offset: 1px;
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+  color: var(--color-text-muted, var(--solvix-text-muted));
+  opacity: 0.75;
+  cursor: not-allowed;
 }
 
 label {
   display: grid;
   gap: 0.35rem;
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--color-text-muted, var(--solvix-text-muted));
 }
 
 label > span {
@@ -154,7 +177,7 @@ label > span {
   border-radius: 999px;
   border: 1px solid rgba(148, 163, 184, 0.3);
   background: var(--solvix-panel-inset);
-  color: #cbd5e1;
+  color: var(--color-text-secondary, var(--solvix-text-secondary));
   font: inherit;
   font-size: 0.78rem;
   cursor: pointer;
@@ -162,7 +185,7 @@ label > span {
 
 .chip .material-symbols-outlined {
   font-size: 0.95rem;
-  color: #4fd1ff;
+  color: var(--color-primary, var(--solvix-primary));
 }
 
 .chip:hover {
@@ -174,7 +197,7 @@ label > span {
   padding: 0.9rem;
   border-radius: 8px;
   border: 1px dashed rgba(148, 163, 184, 0.25);
-  color: #94a3b8;
+  color: var(--color-text-muted, var(--solvix-text-muted));
   font-size: 0.85rem;
   text-align: center;
 }
@@ -206,7 +229,7 @@ label > span {
 .fila.cabecera {
   animation: none;
   background: var(--solvix-panel-inset);
-  color: #64748b;
+  color: var(--color-text-muted, var(--solvix-text-muted));
   font-size: 0.66rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -219,7 +242,7 @@ label > span {
 }
 
 .fila.con-error {
-  box-shadow: inset 3px 0 0 #f87171;
+  box-shadow: inset 3px 0 0 var(--color-danger, var(--solvix-error));
 }
 
 .num {
@@ -227,7 +250,7 @@ label > span {
 }
 
 .subtotal {
-  color: #38bdf8;
+  color: var(--color-primary, var(--solvix-secondary));
 }
 
 .concepto {
@@ -249,18 +272,18 @@ label > span {
 }
 
 .concepto-texto small {
-  color: #94a3b8;
+  color: var(--color-text-muted, var(--solvix-text-muted));
   font-size: 0.74rem;
 }
 
 .concepto-texto small.problema {
-  color: #f87171;
+  color: var(--color-danger, var(--solvix-error));
 }
 
 .tipo-tag {
   flex-shrink: 0;
   font-size: 0.62rem;
-  color: #4fd1ff;
+  color: var(--color-primary, var(--solvix-primary));
   text-transform: uppercase;
   letter-spacing: 0.05em;
   padding: 0.16rem 0.45rem;
@@ -275,7 +298,7 @@ label > span {
 }
 
 .tipo-tag[data-tipo='OTRO'] {
-  color: #94a3b8;
+  color: var(--color-text-muted, var(--solvix-text-muted));
   border-color: rgba(148, 163, 184, 0.35);
 }
 
@@ -293,7 +316,7 @@ label > span {
   border-radius: 6px;
   border: 1px solid transparent;
   background: transparent;
-  color: #94a3b8;
+  color: var(--color-text-muted, var(--solvix-text-muted));
   cursor: pointer;
 }
 
@@ -303,12 +326,12 @@ label > span {
 
 .icon-btn:hover:not(:disabled) {
   border-color: rgba(79, 209, 255, 0.35);
-  color: #4fd1ff;
+  color: var(--color-primary, var(--solvix-primary));
 }
 
 .icon-btn.danger:hover:not(:disabled) {
   border-color: rgba(248, 113, 113, 0.4);
-  color: #f87171;
+  color: var(--color-danger, var(--solvix-error));
 }
 
 .icon-btn:disabled {
@@ -364,7 +387,7 @@ label > span {
   padding: 0;
   border: 0;
   background: none;
-  color: #38bdf8;
+  color: var(--color-primary, var(--solvix-secondary));
   font: inherit;
   font-size: 0.8rem;
   text-decoration: underline;
@@ -386,7 +409,7 @@ label > span {
 
 .editor-nums > label span {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--color-text-muted, var(--solvix-text-muted));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -402,7 +425,7 @@ label > span {
   display: grid;
   gap: 0.35rem;
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--color-text-muted, var(--solvix-text-muted));
   text-align: left;
   min-width: 0;
 }
@@ -419,7 +442,7 @@ label > span {
   border-radius: 8px;
   border: 1px solid rgba(148, 163, 184, 0.2);
   background: var(--solvix-panel-inset);
-  color: #38bdf8;
+  color: var(--color-primary, var(--solvix-secondary));
   font-size: 0.95rem;
   box-sizing: border-box;
 }
@@ -451,12 +474,12 @@ label > span {
 
 .totales dt {
   font-size: 0.78rem;
-  color: #94a3b8;
+  color: var(--color-text-muted, var(--solvix-text-muted));
 }
 
 .totales dd {
   margin: 0;
-  color: #e2e8f0;
+  color: var(--color-text-primary, var(--solvix-text));
 }
 
 .totales .total {
@@ -466,14 +489,14 @@ label > span {
 }
 
 .totales .total dt {
-  color: #f8fafc;
+  color: var(--color-text-primary, var(--solvix-text));
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .totales .total dd {
-  color: #4fd1ff;
+  color: var(--color-primary, var(--solvix-primary));
   font-size: 1.08rem;
   font-weight: 600;
 }
@@ -485,7 +508,7 @@ label > span {
 .hint-inline {
   margin: 0.5rem 0 0;
   font-size: 0.76rem;
-  color: #64748b;
+  color: var(--color-text-muted, var(--solvix-text-muted));
   line-height: 1.4;
 }
 
@@ -496,7 +519,7 @@ label > span {
 
 .form-error {
   margin: 0.9rem 0 0;
-  color: #f87171;
+  color: var(--color-danger, var(--solvix-error));
   font-size: 0.85rem;
 }
 

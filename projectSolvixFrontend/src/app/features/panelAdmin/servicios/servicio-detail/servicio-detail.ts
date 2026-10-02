@@ -71,6 +71,19 @@ import {
   EsperarDocumentoOpts,
   ServicioDocumentosPanelComponent
 } from '../servicio-documentos-panel/servicio-documentos-panel';
+import { CotizacionServicioService } from '../../../../core/services/cotizacion-servicio.service';
+import { environment } from '../../../../../environments/environment';
+import {
+  MSG_TELEFONO_INVALIDO_WHATSAPP,
+  PlantillaWhatsAppAsistido,
+  construirMensajeWhatsAppAsistido,
+  enlaceClickToChat,
+  normalizarTelefonoWa,
+  puedePlantillaCotizacion,
+  puedePlantillaEquipoListo,
+  puedePlantillaRecepcion,
+  urlConsultaOtPublica
+} from '../whatsapp-asistido.util';
 
 @Component({
   selector: 'app-servicio-detail',
@@ -139,6 +152,7 @@ export class ServicioDetailComponent implements OnInit {
     private router: Router,
     private dialog: MatDialog,
     private ordenServicioService: OrdenServicioService,
+    private cotizacionServicioService: CotizacionServicioService,
     private feedback: SolvixFeedbackService,
     private actionReveal: SolvixActionRevealService
   ) {
@@ -272,6 +286,35 @@ export class ServicioDetailComponent implements OnInit {
     return !!(this.accionCancelar || this.accionEspera || this.accionFalla);
   }
 
+  /** WhatsApp asistido: requiere token + teléfono válidos (panel ADMIN). */
+  get puedePrepararWhatsApp(): boolean {
+    if (!this.orden) {
+      return false;
+    }
+    const token = (this.orden.tokenConsulta ?? '').trim();
+    return !!token && !!normalizarTelefonoWa(this.orden.clienteTelefono);
+  }
+
+  get mostrarWhatsAppRecepcion(): boolean {
+    return puedePlantillaRecepcion(this.orden?.estado);
+  }
+
+  get mostrarWhatsAppCotizacion(): boolean {
+    return puedePlantillaCotizacion(this.orden?.estado);
+  }
+
+  get mostrarWhatsAppEquipoListo(): boolean {
+    return puedePlantillaEquipoListo(this.orden?.estado);
+  }
+
+  get hayOpcionesWhatsApp(): boolean {
+    return (
+      this.mostrarWhatsAppRecepcion ||
+      this.mostrarWhatsAppCotizacion ||
+      this.mostrarWhatsAppEquipoListo
+    );
+  }
+
   cargar(): void {
     const id = this.ordenId;
     if (id == null) {
@@ -319,6 +362,88 @@ export class ServicioDetailComponent implements OnInit {
     this.router.navigate(['/servicios']);
   }
 
+  /**
+   * Prepara Click-to-Chat. No envía; no toca NotificationDispatcher.
+   */
+  prepararWhatsApp(plantilla: PlantillaWhatsAppAsistido): void {
+    if (!this.orden) {
+      return;
+    }
+    const telefono = normalizarTelefonoWa(this.orden.clienteTelefono);
+    if (!telefono) {
+      this.feedback.warning(MSG_TELEFONO_INVALIDO_WHATSAPP);
+      return;
+    }
+    const token = (this.orden.tokenConsulta ?? '').trim();
+    if (!token) {
+      this.feedback.warning('No hay enlace de consulta pública para esta orden.');
+      return;
+    }
+
+    if (plantilla === 'cotizacion') {
+      this.prepararWhatsAppCotizacion(telefono, token);
+      return;
+    }
+
+    this.abrirClickToChat(plantilla, telefono, token, null);
+  }
+
+  /** Feedback al abrir el menú si faltan datos (ítems disabled no disparan click). */
+  avisarWhatsAppSiNoListo(): void {
+    if (!this.orden || this.puedePrepararWhatsApp) {
+      return;
+    }
+    if (!normalizarTelefonoWa(this.orden.clienteTelefono)) {
+      this.feedback.warning(MSG_TELEFONO_INVALIDO_WHATSAPP);
+      return;
+    }
+    if (!(this.orden.tokenConsulta ?? '').trim()) {
+      this.feedback.warning('No hay enlace de consulta pública para esta orden.');
+    }
+  }
+
+  private prepararWhatsAppCotizacion(telefono: string, token: string): void {
+    const ordenId = this.orden?.id;
+    if (ordenId == null) {
+      return;
+    }
+    this.cotizacionServicioService.listar(ordenId).subscribe({
+      next: lista => {
+        const pendiente = [...lista]
+          .reverse()
+          .find(c => c.estado === 'PENDIENTE_APROBACION');
+        if (!pendiente?.numero) {
+          this.feedback.warning('No hay una cotización pendiente para avisar al cliente.');
+          return;
+        }
+        this.abrirClickToChat('cotizacion', telefono, token, pendiente.numero);
+      },
+      error: () => {
+        this.feedback.error('No pudimos cargar la cotización para preparar WhatsApp.');
+      }
+    });
+  }
+
+  private abrirClickToChat(
+    plantilla: PlantillaWhatsAppAsistido,
+    telefono: string,
+    token: string,
+    cotizacionNumero: string | null
+  ): void {
+    if (!this.orden) {
+      return;
+    }
+    const urlConsulta = urlConsultaOtPublica(environment.publicWebBaseUrl, token);
+    const mensaje = construirMensajeWhatsAppAsistido(plantilla, {
+      nombre: this.orden.clienteNombre,
+      ordenNumero: this.orden.numero,
+      urlConsulta,
+      cotizacionNumero
+    });
+    const href = enlaceClickToChat(telefono, mensaje);
+    window.open(href, '_blank', 'noopener,noreferrer');
+  }
+
   toggleSeccion(id: SeccionDetalleId): void {
     this.secciones = { ...this.secciones, [id]: !this.secciones[id] };
   }
@@ -364,7 +489,8 @@ export class ServicioDetailComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    if (this.enDiagnostico) {
+    // D.13: diagnóstico completo sincroniza workflow (RECEPCIONADO|EN_DIAGNOSTICO → DIAGNOSTICADO).
+    if (this.debeCompletarDiagnosticoAlGuardar()) {
       this.guardarDiagnosticoCompleto();
       return;
     }
@@ -393,6 +519,21 @@ export class ServicioDetailComponent implements OnInit {
     });
   }
 
+  /**
+   * True cuando guardar la ficha debe usar completarDiagnostico (no PUT actualizar).
+   * Evita datos técnicos con OT aún en RECEPCIONADO / EN_DIAGNOSTICO.
+   */
+  private debeCompletarDiagnosticoAlGuardar(): boolean {
+    if (!this.orden) {
+      return false;
+    }
+    const estado = this.orden.estado;
+    if (estado !== 'RECEPCIONADO' && estado !== 'EN_DIAGNOSTICO') {
+      return false;
+    }
+    return !!(this.form.controls.diagnostico.value ?? '').trim();
+  }
+
   guardarDiagnosticoCompleto(): void {
     if (!this.orden || this.cambiandoEstado || this.guardando) {
       return;
@@ -407,10 +548,12 @@ export class ServicioDetailComponent implements OnInit {
     this.guardando = true;
     this.estadoError = '';
     this.guiaTecnica = '';
+    const trabajo = (this.form.controls.trabajoRealizado.value ?? '').trim();
     this.ordenServicioService
       .completarDiagnostico(this.orden.id, {
         problemaReportado: this.form.controls.problemaReportado.value ?? null,
         diagnostico,
+        trabajoRealizado: trabajo || null,
         observaciones: this.form.controls.observaciones.value ?? null
       })
       .subscribe({

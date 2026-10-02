@@ -55,6 +55,7 @@
                   <th class="is-num">Cantidad</th>
                   <th class="is-num">Costo histórico</th>
                   <th class="is-num">Subtotal</th>
+                  <th class="is-num">IVA</th>
                   <th class="is-num">Costo actual</th>
                   <th class="is-num">Devuelto</th>
                 </tr>
@@ -67,10 +68,19 @@
                       @if (linea.categoriaCodigo) {
                         <span class="sub">{{ linea.categoriaCodigo }}</span>
                       }
+                      @if (linea.referenciaProveedor) {
+                        <span class="sub">Ref. prov. {{ linea.referenciaProveedor }}</span>
+                      }
                     </td>
                     <td class="is-num">{{ linea.cantidad }}</td>
                     <td class="is-num">{{ money(linea.costoUnitario) }}</td>
                     <td class="is-num">{{ money(linea.subtotal) }}</td>
+                    <td class="is-num">
+                      {{ money(linea.valorImpuesto ?? 0) }}
+                      @if (linea.porcentajeImpuesto) {
+                        <span class="sub">({{ linea.porcentajeImpuesto }}%)</span>
+                      }
+                    </td>
                     <td class="is-num">{{ costoCatalogo(linea.productoId) }}</td>
                     <td class="is-num">{{ linea.cantidadDevuelta }}</td>
                   </tr>
@@ -84,7 +94,10 @@
               <li>
                 <strong>{{ linea.productoNombre }}</strong>
                 <span>{{ linea.cantidad }} u. · Costo histórico {{ money(linea.costoUnitario) }}</span>
-                <span>Subtotal {{ money(linea.subtotal) }}</span>
+                <span>Subtotal {{ money(linea.subtotal) }} · IVA {{ money(linea.valorImpuesto ?? 0) }}</span>
+                @if (linea.referenciaProveedor) {
+                  <span>Ref. proveedor {{ linea.referenciaProveedor }}</span>
+                }
                 <span>Costo actual {{ costoCatalogo(linea.productoId) }} · Devuelto {{ linea.cantidadDevuelta }}</span>
               </li>
             }
@@ -128,6 +141,79 @@
 
       <aside class="col">
         <section class="panel">
+          <solvix-section-header kicker="Documento" title="Identificación" />
+          <dl class="facts">
+            <div>
+              <dt>Compra SOLVIX</dt>
+              <dd class="solvix-mono">{{ compra.numero }}</dd>
+            </div>
+            <div>
+              <dt>Documento proveedor</dt>
+              <dd>
+                @if (compra.tipoDocumentoExterno || compra.numeroDocumentoExterno) {
+                  {{ labelTipo(compra.tipoDocumentoExterno) }}
+                  @if (compra.numeroDocumentoExterno) {
+                    <span class="solvix-mono"> {{ compra.numeroDocumentoExterno }}</span>
+                  }
+                } @else {
+                  —
+                }
+              </dd>
+            </div>
+            <div>
+              <dt>OC</dt>
+              <dd class="solvix-mono">{{ compra.numeroOrdenCompra || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Cotización</dt>
+              <dd class="solvix-mono">{{ compra.numeroCotizacionProveedor || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Moneda</dt>
+              <dd>{{ compra.moneda || 'COP' }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="panel">
+          <solvix-section-header kicker="Agenda" title="Fechas" />
+          <dl class="facts">
+            <div>
+              <dt>Documento</dt>
+              <dd>{{ fecha(compra.fechaDocumentoProveedor) }}</dd>
+            </div>
+            <div>
+              <dt>Compra</dt>
+              <dd>{{ fecha(compra.fecha) }}</dd>
+            </div>
+            <div>
+              <dt>Entrega</dt>
+              <dd>{{ fecha(compra.fechaEntrega) }}</dd>
+            </div>
+            <div>
+              <dt>Vencimiento</dt>
+              <dd>{{ fecha(compra.fechaVencimiento) }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="panel">
+          <solvix-section-header kicker="Pago" title="Condiciones" />
+          <dl class="facts">
+            <div>
+              <dt>Condición</dt>
+              <dd>{{ labelCondicion(compra.condicionPagoAplicada, compra.diasCreditoAplicados) }}</dd>
+            </div>
+            @if (compra.contactoNombreSnapshot) {
+              <div>
+                <dt>Contacto</dt>
+                <dd>{{ compra.contactoNombreSnapshot }}</dd>
+              </div>
+            }
+          </dl>
+        </section>
+
+        <section class="panel">
           <solvix-section-header kicker="Totales" title="Resumen de la compra" />
           <dl class="totales">
             <div>
@@ -137,6 +223,10 @@
             <div>
               <dt>Descuento</dt>
               <dd>{{ money(compra.descuento) }}</dd>
+            </div>
+            <div>
+              <dt>Impuesto</dt>
+              <dd>{{ money(compra.impuestoTotal ?? 0) }}</dd>
             </div>
             <div class="total">
               <dt>Total</dt>
@@ -152,6 +242,12 @@
               <dt>Proveedor</dt>
               <dd>{{ proveedor(compra) }}</dd>
             </div>
+            @if (compra.proveedorDocumento) {
+              <div>
+                <dt>Documento fiscal</dt>
+                <dd class="solvix-mono">{{ compra.proveedorDocumento }}</dd>
+              </div>
+            }
             <div>
               <dt>Registrada por</dt>
               <dd>{{ compra.createdBy || '—' }}</dd>

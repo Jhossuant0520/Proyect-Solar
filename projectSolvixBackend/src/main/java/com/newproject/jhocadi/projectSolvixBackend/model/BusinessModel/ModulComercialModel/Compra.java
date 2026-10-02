@@ -50,6 +50,54 @@ public class Compra {
     @JoinColumn(name = "proveedor_id", nullable = false)
     private Proveedor proveedor;
 
+    /** Nombre/razón social congelada al crear la compra. */
+    @Column(name = "proveedor_nombre_snapshot", length = 150)
+    private String proveedorNombreSnapshot;
+
+    /** Documento fiscal congelado al crear la compra. */
+    @Column(name = "proveedor_documento_snapshot", length = 40)
+    private String proveedorDocumentoSnapshot;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_documento_externo", length = 20)
+    private TipoDocumentoExternoCompra tipoDocumentoExterno;
+
+    @Column(name = "numero_documento_externo", length = 80)
+    private String numeroDocumentoExterno;
+
+    @Column(name = "numero_orden_compra", length = 80)
+    private String numeroOrdenCompra;
+
+    @Column(name = "numero_cotizacion_proveedor", length = 80)
+    private String numeroCotizacionProveedor;
+
+    @Column(name = "fecha_documento_proveedor")
+    private LocalDateTime fechaDocumentoProveedor;
+
+    @Column(name = "fecha_entrega")
+    private LocalDateTime fechaEntrega;
+
+    @Column(name = "fecha_vencimiento")
+    private LocalDateTime fechaVencimiento;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "condicion_pago_aplicada", length = 20)
+    private CondicionPagoProveedor condicionPagoAplicada;
+
+    @Column(name = "dias_credito_aplicados")
+    private Integer diasCreditoAplicados;
+
+    /** Moneda funcional de compras. FASE 3.15.11-B: siempre COP. */
+    @Column(length = 3, nullable = false)
+    @Builder.Default
+    private String moneda = "COP";
+
+    @Column(name = "contacto_proveedor_id")
+    private Long contactoProveedorId;
+
+    @Column(name = "contacto_nombre_snapshot", length = 150)
+    private String contactoNombreSnapshot;
+
     @Column(nullable = false, precision = 14, scale = 2)
     @Builder.Default
     private BigDecimal subtotal = BigDecimal.ZERO;
@@ -57,6 +105,11 @@ public class Compra {
     @Column(nullable = false, precision = 14, scale = 2)
     @Builder.Default
     private BigDecimal descuento = BigDecimal.ZERO;
+
+    /** Impuesto total de la compra. 0 en compras sin IVA / legacy. */
+    @Column(name = "impuesto_total", nullable = false, precision = 14, scale = 2)
+    @Builder.Default
+    private BigDecimal impuestoTotal = BigDecimal.ZERO;
 
     @Column(nullable = false, precision = 14, scale = 2)
     @Builder.Default

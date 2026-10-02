@@ -20,6 +20,60 @@
             <solvix-button family="tech" rank="tertiary" icon="arrow_back" (click)="volver()">
               Volver
             </solvix-button>
+            @if (hayOpcionesWhatsApp) {
+              <button
+                type="button"
+                class="btn-mas-acciones btn-whatsapp"
+                [matMenuTriggerFor]="menuWhatsApp"
+                (menuOpened)="avisarWhatsAppSiNoListo()"
+                [disabled]="editando"
+                aria-label="Preparar mensaje de WhatsApp"
+                [attr.title]="
+                  puedePrepararWhatsApp
+                    ? 'Preparar mensaje de WhatsApp'
+                    : 'Registra un teléfono válido en la ficha del cliente.'
+                "
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">chat</span>
+                WhatsApp
+              </button>
+              <mat-menu #menuWhatsApp="matMenu" class="solvix-menu menu-whatsapp">
+                <div class="menu-whatsapp-ayuda" role="note">
+                  Elige el mensaje que deseas preparar. Se abrirá WhatsApp para que lo revises y
+                  envíes.
+                </div>
+                @if (mostrarWhatsAppRecepcion) {
+                  <button
+                    mat-menu-item
+                    type="button"
+                    [disabled]="!puedePrepararWhatsApp"
+                    (click)="prepararWhatsApp('recepcion')"
+                  >
+                    Recepción — Abrir WhatsApp
+                  </button>
+                }
+                @if (mostrarWhatsAppCotizacion) {
+                  <button
+                    mat-menu-item
+                    type="button"
+                    [disabled]="!puedePrepararWhatsApp"
+                    (click)="prepararWhatsApp('cotizacion')"
+                  >
+                    Cotización — Abrir WhatsApp
+                  </button>
+                }
+                @if (mostrarWhatsAppEquipoListo) {
+                  <button
+                    mat-menu-item
+                    type="button"
+                    [disabled]="!puedePrepararWhatsApp"
+                    (click)="prepararWhatsApp('equipoListo')"
+                  >
+                    Equipo listo — Abrir WhatsApp
+                  </button>
+                }
+              </mat-menu>
+            }
             @if (hayMenuMasAcciones) {
               <button
                 type="button"

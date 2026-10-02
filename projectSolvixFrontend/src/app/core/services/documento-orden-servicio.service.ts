@@ -3,6 +3,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   AsegurarComprobanteRecepcionResponseDTO,
+  AccionPublicaCotizacionRequestDTO,
+  AccionPublicaCotizacionResponseDTO,
   ConsultaCotizacionOtPublicaDTO,
   ConsultaDocumentoPublicoDTO,
   ConsultaOtPublicaDTO,
@@ -18,6 +20,10 @@ export class DocumentoOrdenServicioService {
 
   private base(ordenId: number): string {
     return `${environment.apiBaseUrl}/v1/ordenes-servicio/${ordenId}/documentos`;
+  }
+
+  private consultaOtBase(token: string): string {
+    return `${environment.apiBaseUrl}/v1/consulta/ot/${encodeURIComponent(token)}`;
   }
 
   listar(ordenId: number): Observable<DocumentoOrdenServicioResponseDTO[]> {
@@ -90,15 +96,33 @@ export class DocumentoOrdenServicioService {
 
   /** Consulta pública OT (sin auth). */
   consultaOtPublica(token: string): Observable<ConsultaOtPublicaDTO> {
-    return this.http.get<ConsultaOtPublicaDTO>(
-      `${environment.apiBaseUrl}/v1/consulta/ot/${encodeURIComponent(token)}`
-    );
+    return this.http.get<ConsultaOtPublicaDTO>(this.consultaOtBase(token));
   }
 
   /** Cotización OT en solo lectura (sin auth). */
   consultaCotizacionOtPublica(token: string): Observable<ConsultaCotizacionOtPublicaDTO> {
-    return this.http.get<ConsultaCotizacionOtPublicaDTO>(
-      `${environment.apiBaseUrl}/v1/consulta/ot/${encodeURIComponent(token)}/cotizacion`
+    return this.http.get<ConsultaCotizacionOtPublicaDTO>(`${this.consultaOtBase(token)}/cotizacion`);
+  }
+
+  /** Aprobar cotización pendiente (identidad documento + teléfono). */
+  aprobarCotizacionOtPublica(
+    token: string,
+    body: AccionPublicaCotizacionRequestDTO
+  ): Observable<AccionPublicaCotizacionResponseDTO> {
+    return this.http.post<AccionPublicaCotizacionResponseDTO>(
+      `${this.consultaOtBase(token)}/cotizacion/aprobar`,
+      body
+    );
+  }
+
+  /** Rechazar cotización pendiente (identidad documento + teléfono). */
+  rechazarCotizacionOtPublica(
+    token: string,
+    body: AccionPublicaCotizacionRequestDTO
+  ): Observable<AccionPublicaCotizacionResponseDTO> {
+    return this.http.post<AccionPublicaCotizacionResponseDTO>(
+      `${this.consultaOtBase(token)}/cotizacion/rechazar`,
+      body
     );
   }
 

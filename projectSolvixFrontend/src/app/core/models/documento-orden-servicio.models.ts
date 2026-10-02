@@ -72,6 +72,23 @@ export interface ConsultaCotizacionOtPublicaDTO {
   observaciones: string | null;
 }
 
+/** Request de acción pública (identidad). Backend normaliza. */
+export interface AccionPublicaCotizacionRequestDTO {
+  numeroDocumento: string;
+  telefono: string;
+  observacion?: string | null;
+}
+
+/** Respuesta tras aprobar/rechazar en portal público. */
+export interface AccionPublicaCotizacionResponseDTO {
+  ordenNumero: string | null;
+  ordenEstado: string | null;
+  cotizacionNumero: string | null;
+  cotizacionTipo: string | null;
+  cotizacionEstado: string | null;
+  mensaje: string | null;
+}
+
 export interface ConsultaCotizacionOtLineaPublicaDTO {
   descripcion: string;
   cantidad: number | string | null;

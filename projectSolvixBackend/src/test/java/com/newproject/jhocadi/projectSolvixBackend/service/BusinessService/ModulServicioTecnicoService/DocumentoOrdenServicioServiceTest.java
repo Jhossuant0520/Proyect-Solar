@@ -329,6 +329,26 @@ class DocumentoOrdenServicioServiceTest extends ComercialTestSupport {
     }
 
     @Test
+    @DisplayName("D.13: consulta pública tras completarDiagnostico desde RECEPCIONADO refleja DIAGNOSTICO")
+    void consultaPublicaTrasCompletarDesdeRecepcionado() {
+        OrdenServicioResponseDTO orden = crearOrdenBasica();
+        CompletarDiagnosticoRequestDTO req = new CompletarDiagnosticoRequestDTO();
+        req.setDiagnostico("Fuente dañada");
+        req.setTrabajoRealizado("Cambio anticipado");
+        ordenServicioService.completarDiagnostico(orden.getId(), req, USUARIO_TEST);
+
+        OrdenServicio entity = ordenServicioRepository.findById(orden.getId()).orElseThrow();
+        assertThat(entity.getEstado()).isEqualTo(EstadoOrdenServicio.DIAGNOSTICADO);
+
+        ConsultaOtPublicaDTO pub = documentoService.consultaOtPublica(entity.getTokenConsulta());
+        assertThat(pub.getEstadoCodigo()).isEqualTo("DIAGNOSTICADO");
+        assertThat(pub.getEtapaPublica()).isEqualTo("DIAGNOSTICO");
+        assertThat(pub.getEtapaPublicaNumero()).isEqualTo(2);
+        assertThat(pub.getEstadoPublico()).isNotBlank();
+        assertThat(pub.getEstadoPublico()).doesNotContainIgnoringCase("disponible en el taller");
+    }
+
+    @Test
     @DisplayName("C.2: consulta pública expone estadoCodigo y etapa, no depende de etiqueta")
     void consultaPublicaExponeCodigoYEtapa() {
         OrdenServicioResponseDTO orden = avanzarADiagnosticado(crearOrdenBasica());

@@ -51,6 +51,29 @@
   --mdc-filled-text-field-active-indicator-color: var(--color-primary, var(--solvix-primary));
 }
 
+/* Controles nativos en diálogos / overlays: contraste según tema (D.14). */
+.mat-mdc-dialog-surface,
+.cdk-overlay-pane {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  textarea,
+  select {
+    color: var(--color-text-primary, var(--solvix-text));
+    caret-color: var(--color-primary, var(--solvix-primary));
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-text-muted, var(--solvix-text-muted));
+    opacity: 0.9;
+  }
+
+  option,
+  optgroup {
+    color: var(--color-text-primary, var(--solvix-text));
+    background: var(--color-surface-elevated, var(--solvix-surface-elevated));
+  }
+}
+
 .mat-mdc-checkbox {
   --mdc-checkbox-selected-icon-color: var(--color-primary, var(--solvix-primary));
   --mdc-checkbox-selected-focus-icon-color: var(--color-primary, var(--solvix-primary));

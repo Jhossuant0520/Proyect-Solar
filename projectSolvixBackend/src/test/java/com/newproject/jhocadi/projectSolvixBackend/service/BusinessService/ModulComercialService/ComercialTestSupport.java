@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.Cliente;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.Proveedor;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.TipoCliente;
+import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.TipoDocumento;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulProductoModel.CategoriaProducto;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulProductoModel.Producto;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulComercialRepo.AjusteCostoProductoRepository;
@@ -103,6 +104,9 @@ public abstract class ComercialTestSupport {
     @Autowired
     protected com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulComercialRepo.CotizacionComercialRepository cotizacionComercialRepository;
 
+    @Autowired
+    protected com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulNotificacion.NotificacionRepository notificacionRepository;
+
     @BeforeEach
     protected void limpiarDatos() {
         documentoCotizacionComercialRepository.deleteAll();
@@ -121,6 +125,7 @@ public abstract class ComercialTestSupport {
         historialEstadoOrdenServicioRepository.deleteAll();
         entregaOrdenServicioRepository.deleteAll();
         recepcionOrdenServicioRepository.deleteAll();
+        notificacionRepository.deleteAll();
         ordenServicioRepository.deleteAll();
         equipoRepository.deleteAll();
         productoRepository.deleteAll();
@@ -154,18 +159,25 @@ public abstract class ComercialTestSupport {
     }
 
     protected Cliente crearCliente(String nombre) {
+        long sufijo = System.nanoTime() % 1_000_000_000L;
         return clienteRepository.save(
             Cliente.builder()
                 .nombre(nombre)
                 .tipoCliente(TipoCliente.PERSONA)
+                .tipoDocumento(TipoDocumento.CC)
+                .numeroDocumento(String.valueOf(1_000_000_000L + (sufijo % 800_000_000L)))
+                .telefono("300" + String.format("%07d", sufijo % 10_000_000L))
                 .activo(true)
                 .build());
     }
 
     protected Proveedor crearProveedor(String nombre) {
+        long sufijo = System.nanoTime() % 1_000_000_000L;
         return proveedorRepository.save(
             Proveedor.builder()
                 .nombre(nombre)
+                .tipoDocumento(TipoDocumento.NIT)
+                .documento(String.valueOf(900_000_000L + (sufijo % 90_000_000L)))
                 .activo(true)
                 .build());
     }

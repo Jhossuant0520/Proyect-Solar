@@ -1,0 +1,192 @@
+<section class="proveedor-form-page">
+  <solvix-page-header
+    kicker="Comercial"
+    [title]="modoEdicion ? 'Editar proveedor' : 'Nuevo proveedor'"
+    [subtitle]="modoEdicion
+      ? 'Actualiza la ficha. Las compras históricas conservan el nombre congelado.'
+      : 'Registra la empresa proveedora con NIT y razón social.'"
+  />
+
+  @if (loadState === 'loading') {
+    <solvix-loading-state label="Cargando proveedor." />
+  } @else if (loadState === 'error') {
+    <solvix-error-state
+      title="No pudimos cargar este proveedor."
+      message="Puede que no exista o que no tengas permiso."
+      (retry)="cargar()"
+    />
+  } @else {
+    <form class="form-panel" [formGroup]="form" (ngSubmit)="guardar()">
+      <solvix-section-header kicker="1" title="Información empresarial" />
+      <div class="form-grid">
+        <label class="full">
+          <span class="label-row">Razón social <span class="req">Obligatorio</span></span>
+          <input type="text" formControlName="razonSocial" maxlength="150" />
+        </label>
+        <label>
+          <span class="label-row">NIT <span class="req">Obligatorio</span></span>
+          <input type="text" formControlName="numeroDocumento" maxlength="40" placeholder="Ej. 900.123.456-7" />
+        </label>
+        <label>
+          Nombre comercial
+          <input type="text" formControlName="nombreComercial" maxlength="150" />
+        </label>
+      </div>
+
+      <solvix-section-header kicker="2" title="Contacto de la empresa" />
+      <div class="form-grid">
+        <label>
+          Teléfono
+          <input type="text" formControlName="telefono" maxlength="40" />
+        </label>
+        <label>
+          Teléfono alternativo
+          <input type="text" formControlName="telefonoAlternativo" maxlength="40" />
+        </label>
+        <label class="full">
+          Correo
+          <input type="email" formControlName="email" maxlength="150" />
+        </label>
+        <label class="full">
+          Sitio web
+          <input type="text" formControlName="web" maxlength="200" placeholder="https://" />
+        </label>
+      </div>
+
+      <solvix-section-header kicker="3" title="Ubicación" />
+      <div class="form-grid">
+        <label class="full">
+          Dirección
+          <input type="text" formControlName="direccion" maxlength="255" />
+        </label>
+        <label>
+          Ciudad
+          <input type="text" formControlName="ciudad" maxlength="100" />
+        </label>
+        <label>
+          Departamento
+          <input type="text" formControlName="departamento" maxlength="100" />
+        </label>
+      </div>
+
+      <solvix-section-header
+        kicker="4"
+        title="Condiciones comerciales habituales"
+        subtitle="Son preferencias del maestro. No congelan una compra concreta."
+      />
+      <div class="form-grid">
+        <label>
+          Condición de pago
+          <select formControlName="condicionPago">
+            <option value="">Sin definir</option>
+            @for (item of condiciones; track item.id) {
+              <option [value]="item.id">{{ item.label }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Días de crédito
+          <input
+            type="number"
+            formControlName="diasCredito"
+            min="0"
+            [placeholder]="esCredito ? 'Obligatorio si es crédito' : '0 si es contado'"
+          />
+        </label>
+      </div>
+
+      <solvix-section-header
+        kicker="5"
+        title="Contactos externos"
+        subtitle="Personas del proveedor. No son usuarios SOLVIX."
+      />
+      <div class="contactos" formArrayName="contactos">
+        @for (grupo of contactos.controls; track $index; let i = $index) {
+          <div class="contacto-card" [formGroupName]="i">
+            <div class="contacto-head">
+              <strong>Contacto {{ i + 1 }}</strong>
+              <div class="contacto-actions">
+                <label class="inline">
+                  <input type="checkbox" formControlName="principal" (change)="marcarPrincipal(i)" />
+                  Principal
+                </label>
+                <label class="inline">
+                  <input type="checkbox" formControlName="activo" />
+                  Activo
+                </label>
+                <button type="button" class="link-btn" (click)="quitarContacto(i)">Quitar</button>
+              </div>
+            </div>
+            <div class="form-grid">
+              <label>
+                Nombre
+                <input type="text" formControlName="nombre" maxlength="150" />
+              </label>
+              <label>
+                Cargo
+                <input type="text" formControlName="cargo" maxlength="100" />
+              </label>
+              <label>
+                Tipo
+                <select formControlName="tipoContacto">
+                  @for (tipo of tiposContacto; track tipo.id) {
+                    <option [value]="tipo.id">{{ tipo.label }}</option>
+                  }
+                </select>
+              </label>
+              <label>
+                Teléfono
+                <input type="text" formControlName="telefono" maxlength="40" />
+              </label>
+              <label>
+                Celular
+                <input type="text" formControlName="celular" maxlength="40" />
+              </label>
+              <label>
+                Correo
+                <input type="email" formControlName="email" maxlength="150" />
+              </label>
+            </div>
+          </div>
+        }
+        <solvix-button family="tech" rank="secondary" type="button" icon="person_add" (click)="agregarContacto()">
+          Agregar contacto
+        </solvix-button>
+      </div>
+
+      <solvix-section-header kicker="6" title="Estado y notas" />
+      <div class="form-grid">
+        <label class="full">
+          Notas
+          <textarea formControlName="notas" rows="3" maxlength="500"></textarea>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" formControlName="activo" />
+          Activo
+        </label>
+      </div>
+
+      @if (form.controls.razonSocial.touched && form.controls.razonSocial.invalid) {
+        <p class="field-error">La razón social es obligatoria.</p>
+      }
+      @if (form.controls.numeroDocumento.touched && form.controls.numeroDocumento.invalid) {
+        <p class="field-error">El NIT es obligatorio.</p>
+      }
+      @if (form.controls.email.touched && form.controls.email.invalid) {
+        <p class="field-error">El correo no es válido.</p>
+      }
+      @if (error) {
+        <p class="form-error" role="alert">{{ error }}</p>
+      }
+
+      <div class="form-actions">
+        <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
+          Cancelar
+        </solvix-button>
+        <solvix-button family="tech" rank="primary" type="submit" [disabled]="enviando">
+          {{ modoEdicion ? 'Guardar cambios' : 'Crear proveedor' }}
+        </solvix-button>
+      </div>
+    </form>
+  }
+</section>

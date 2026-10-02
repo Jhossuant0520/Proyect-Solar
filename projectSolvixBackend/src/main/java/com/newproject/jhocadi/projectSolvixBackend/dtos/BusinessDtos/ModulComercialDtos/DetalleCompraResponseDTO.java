@@ -18,6 +18,9 @@ public class DetalleCompraResponseDTO {
     private Integer cantidad;
     private BigDecimal costoUnitario;
     private BigDecimal subtotal;
+    private String referenciaProveedor;
+    private BigDecimal porcentajeImpuesto;
+    private BigDecimal valorImpuesto;
     private Integer cantidadDevuelta;
 
     public static DetalleCompraResponseDTO fromEntity(DetalleCompra detalle) {
@@ -29,6 +32,11 @@ public class DetalleCompraResponseDTO {
             .cantidad(detalle.getCantidad())
             .costoUnitario(detalle.getCostoUnitario())
             .subtotal(detalle.getSubtotal())
+            .referenciaProveedor(detalle.getReferenciaProveedor())
+            .porcentajeImpuesto(detalle.getPorcentajeImpuesto() != null
+                ? detalle.getPorcentajeImpuesto() : BigDecimal.ZERO)
+            .valorImpuesto(detalle.getValorImpuesto() != null
+                ? detalle.getValorImpuesto() : BigDecimal.ZERO)
             .cantidadDevuelta(detalle.getCantidadDevuelta())
             .build();
     }

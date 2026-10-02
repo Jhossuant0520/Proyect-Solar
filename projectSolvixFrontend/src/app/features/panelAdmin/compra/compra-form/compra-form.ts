@@ -12,8 +12,12 @@ import { SolvixSectionHeaderComponent } from '../../../../shared/components/solv
 import { CompraService } from '../../../../core/services/compra.service';
 import { ProductoService } from '../../../../core/services/producto.service';
 import { ProveedorService } from '../../../../core/services/proveedor.service';
-import { CompraRequestDTO, DetalleCompraRequestDTO } from '../../../../core/models/compra.models';
-import { ProveedorResponseDTO } from '../../../../core/models/proveedor.models';
+import {
+  CompraRequestDTO,
+  DetalleCompraRequestDTO,
+  TipoDocumentoExternoCompra
+} from '../../../../core/models/compra.models';
+import { CondicionPagoProveedor, ProveedorResponseDTO } from '../../../../core/models/proveedor.models';
 import { ProductoModel } from '../../producto/productoClase';
 import {
   mensajeErrorLookupCodigoBarras,
@@ -26,6 +30,11 @@ import {
   productoCoincideBusqueda
 } from '../../producto/producto-ui';
 import { formatImporte, mapHttpError } from '../../venta/venta-ui';
+import {
+  TIPOS_DOCUMENTO_EXTERNO,
+  dateInputToIso,
+  roundMoney
+} from '../compra-ui';
 
 type FormEstado = 'loading' | 'ready' | 'error';
 type SubmitEstado = 'idle' | 'processing' | 'error';
@@ -58,6 +67,13 @@ export class CompraFormComponent implements OnInit {
   submitError = '';
   readonly money = formatImporte;
   readonly labelCodigo = labelCodigoBarras;
+  readonly tiposDocumento = TIPOS_DOCUMENTO_EXTERNO;
+  /** Tasas de IVA soportadas en el flujo normal (sin régimen fiscal completo). */
+  readonly tasasIva = [
+    { valor: 19, label: '19%' },
+    { valor: 0, label: '0%' }
+  ];
+  readonly ivaPredeterminado = 19;
 
   constructor(
     private fb: FormBuilder,
@@ -69,6 +85,16 @@ export class CompraFormComponent implements OnInit {
   ) {
     this.form = this.fb.group({
       proveedorId: [null as number | null, Validators.required],
+      tipoDocumentoExterno: ['' as '' | TipoDocumentoExternoCompra],
+      numeroDocumentoExterno: [''],
+      numeroOrdenCompra: [''],
+      numeroCotizacionProveedor: [''],
+      fechaDocumentoProveedor: [''],
+      fechaEntrega: [''],
+      fechaVencimiento: [''],
+      condicionPagoAplicada: ['' as '' | CondicionPagoProveedor],
+      diasCreditoAplicados: [null as number | null],
+      contactoProveedorId: [null as number | null],
       descuento: [0, [Validators.min(0)]],
       observaciones: [''],
       detalles: this.fb.array([])
@@ -83,6 +109,16 @@ export class CompraFormComponent implements OnInit {
     return this.form.get('detalles') as FormArray;
   }
 
+  get esCredito(): boolean {
+    return this.form.get('condicionPagoAplicada')?.value === 'CREDITO';
+  }
+
+  get contactosProveedor(): ProveedorResponseDTO['contactos'] {
+    const id = this.form.get('proveedorId')?.value;
+    const proveedor = this.proveedores.find(item => item.id === id);
+    return (proveedor?.contactos ?? []).filter(c => c.activo);
+  }
+
   get productosFiltrados(): ProductoModel[] {
     const query = this.busquedaProducto.trim();
     const usados = idsProductosEnLineas(this.detalles.controls);
@@ -90,6 +126,32 @@ export class CompraFormComponent implements OnInit {
       .filter(producto => producto.id != null && !usados.has(producto.id))
       .filter(producto => productoCoincideBusqueda(producto, query))
       .slice(0, 8);
+  }
+
+  get subtotalEstimado(): number {
+    return roundMoney(this.detalles.controls.reduce((acc, control) => {
+      const cantidad = Number(control.get('cantidad')?.value ?? 0);
+      const costo = Number(control.get('costoUnitario')?.value ?? 0);
+      return acc + cantidad * costo;
+    }, 0));
+  }
+
+  get impuestoEstimado(): number {
+    return roundMoney(this.detalles.controls.reduce((acc, control) => {
+      const cantidad = Number(control.get('cantidad')?.value ?? 0);
+      const costo = Number(control.get('costoUnitario')?.value ?? 0);
+      const pct = Number(control.get('porcentajeImpuesto')?.value ?? 0);
+      const base = cantidad * costo;
+      return acc + (base * pct) / 100;
+    }, 0));
+  }
+
+  get descuentoValor(): number {
+    return roundMoney(Number(this.form.get('descuento')?.value ?? 0));
+  }
+
+  get totalEstimado(): number {
+    return roundMoney(this.subtotalEstimado - this.descuentoValor + this.impuestoEstimado);
   }
 
   cargarCatalogo(): void {
@@ -105,6 +167,35 @@ export class CompraFormComponent implements OnInit {
       },
       error: error => this.marcarErrorCarga(error)
     });
+  }
+
+  onProveedorChange(): void {
+    const id = this.form.get('proveedorId')?.value;
+    const proveedor = this.proveedores.find(item => item.id === id);
+    if (!proveedor) {
+      this.form.patchValue({
+        condicionPagoAplicada: '',
+        diasCreditoAplicados: null,
+        contactoProveedorId: null
+      });
+      return;
+    }
+    const condicion = proveedor.condicionPago ?? '';
+    this.form.patchValue({
+      condicionPagoAplicada: condicion,
+      diasCreditoAplicados: condicion === 'CREDITO' ? (proveedor.diasCredito ?? null) : 0,
+      contactoProveedorId: proveedor.contactos?.find(c => c.principal && c.activo)?.id ?? null
+    });
+  }
+
+  onCondicionChange(): void {
+    if (!this.esCredito) {
+      this.form.patchValue({ diasCreditoAplicados: 0, fechaVencimiento: '' });
+    } else if (!this.form.get('diasCreditoAplicados')?.value) {
+      const id = this.form.get('proveedorId')?.value;
+      const proveedor = this.proveedores.find(item => item.id === id);
+      this.form.patchValue({ diasCreditoAplicados: proveedor?.diasCredito ?? 30 });
+    }
   }
 
   onBuscarProducto(event: Event): void {
@@ -163,7 +254,9 @@ export class CompraFormComponent implements OnInit {
       costoUnitario: [
         producto.costoConocido ? producto.costoActual : null,
         [Validators.required, Validators.min(0)]
-      ]
+      ],
+      referenciaProveedor: [''],
+      porcentajeImpuesto: [this.ivaPredeterminado, [Validators.min(0)]]
     }));
     this.busquedaProducto = '';
     this.feedback.success('Producto agregado');
@@ -184,19 +277,59 @@ export class CompraFormComponent implements OnInit {
       return;
     }
 
+    if (this.descuentoValor > this.subtotalEstimado) {
+      this.submitState = 'error';
+      this.submitError = 'El descuento no puede superar el subtotal.';
+      return;
+    }
+
+    const tipo = this.form.get('tipoDocumentoExterno')?.value as '' | TipoDocumentoExternoCompra;
+    const numeroDoc = (this.form.get('numeroDocumentoExterno')?.value as string)?.trim();
+    if (tipo && !numeroDoc) {
+      this.submitState = 'error';
+      this.submitError = 'Si eliges un tipo de documento externo, el número es obligatorio.';
+      return;
+    }
+
+    const condicion = this.form.get('condicionPagoAplicada')?.value as '' | CondicionPagoProveedor;
+    const dias = this.form.get('diasCreditoAplicados')?.value;
+    if (condicion === 'CREDITO' && (!dias || Number(dias) <= 0)) {
+      this.submitState = 'error';
+      this.submitError = 'Para crédito, los días de crédito deben ser mayores que cero.';
+      return;
+    }
+
     const valores = this.form.getRawValue();
     const request: CompraRequestDTO = {
       proveedorId: Number(valores.proveedorId),
+      tipoDocumentoExterno: tipo || null,
+      numeroDocumentoExterno: numeroDoc || null,
+      numeroOrdenCompra: valores.numeroOrdenCompra?.trim() || null,
+      numeroCotizacionProveedor: valores.numeroCotizacionProveedor?.trim() || null,
+      fechaDocumentoProveedor: dateInputToIso(valores.fechaDocumentoProveedor),
+      fechaEntrega: dateInputToIso(valores.fechaEntrega),
+      fechaVencimiento: dateInputToIso(valores.fechaVencimiento),
+      condicionPagoAplicada: condicion || null,
+      diasCreditoAplicados: condicion === 'CONTADO'
+        ? 0
+        : (valores.diasCreditoAplicados != null ? Number(valores.diasCreditoAplicados) : null),
+      contactoProveedorId: valores.contactoProveedorId != null
+        ? Number(valores.contactoProveedorId)
+        : null,
       descuento: Number(valores.descuento ?? 0),
       observaciones: valores.observaciones?.trim() ? valores.observaciones.trim() : null,
       detalles: (valores.detalles as Array<{
         productoId: number;
         cantidad: number;
         costoUnitario: number;
+        referenciaProveedor?: string;
+        porcentajeImpuesto?: number;
       }>).map((linea): DetalleCompraRequestDTO => ({
         productoId: Number(linea.productoId),
         cantidad: Number(linea.cantidad),
-        costoUnitario: Number(linea.costoUnitario)
+        costoUnitario: Number(linea.costoUnitario),
+        referenciaProveedor: linea.referenciaProveedor?.trim() || null,
+        porcentajeImpuesto: Number(linea.porcentajeImpuesto ?? 0)
       }))
     };
 

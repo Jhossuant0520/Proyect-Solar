@@ -1,7 +1,9 @@
 /**
  * Contratos de compra y devolución a proveedor. Nombres iguales a los DTO de Java.
+ * FASE 3.15.11-B: compras enriquecidas (documento externo, fechas, condiciones, IVA mínimo).
  */
 
+import { CondicionPagoProveedor } from './proveedor.models';
 import { MetodoReembolso } from './venta.models';
 
 export type EstadoCompra =
@@ -10,6 +12,8 @@ export type EstadoCompra =
   | 'CANCELADA'
   | 'DEVUELTA'
   | 'PARCIALMENTE_DEVUELTA';
+
+export type TipoDocumentoExternoCompra = 'PEDIDO' | 'FACTURA' | 'OTRO';
 
 export type MotivoDevolucionCompra =
   | 'PRODUCTO_DEFECTUOSO'
@@ -26,11 +30,25 @@ export interface DetalleCompraRequestDTO {
   productoId: number;
   cantidad: number;
   costoUnitario: number;
+  referenciaProveedor?: string | null;
+  /** Tasa seleccionada (UI default 19). El valor monetario lo calcula el backend. */
+  porcentajeImpuesto?: number | null;
 }
 
 export interface CompraRequestDTO {
   proveedorId: number;
   fecha?: string | null;
+  tipoDocumentoExterno?: TipoDocumentoExternoCompra | null;
+  numeroDocumentoExterno?: string | null;
+  numeroOrdenCompra?: string | null;
+  numeroCotizacionProveedor?: string | null;
+  fechaDocumentoProveedor?: string | null;
+  fechaEntrega?: string | null;
+  fechaVencimiento?: string | null;
+  condicionPagoAplicada?: CondicionPagoProveedor | null;
+  diasCreditoAplicados?: number | null;
+  contactoProveedorId?: number | null;
+  contactoNombreSnapshot?: string | null;
   descuento?: number | null;
   observaciones?: string | null;
   detalles: DetalleCompraRequestDTO[];
@@ -44,6 +62,9 @@ export interface DetalleCompraResponseDTO {
   cantidad: number;
   costoUnitario: number;
   subtotal: number;
+  referenciaProveedor?: string | null;
+  porcentajeImpuesto?: number | null;
+  valorImpuesto?: number | null;
   cantidadDevuelta: number;
 }
 
@@ -53,8 +74,22 @@ export interface CompraResponseDTO {
   fecha: string | number[] | null;
   proveedorId: number | null;
   proveedorNombre: string | null;
+  proveedorDocumento?: string | null;
+  tipoDocumentoExterno?: TipoDocumentoExternoCompra | null;
+  numeroDocumentoExterno?: string | null;
+  numeroOrdenCompra?: string | null;
+  numeroCotizacionProveedor?: string | null;
+  fechaDocumentoProveedor?: string | number[] | null;
+  fechaEntrega?: string | number[] | null;
+  fechaVencimiento?: string | number[] | null;
+  condicionPagoAplicada?: CondicionPagoProveedor | null;
+  diasCreditoAplicados?: number | null;
+  moneda?: string | null;
+  contactoProveedorId?: number | null;
+  contactoNombreSnapshot?: string | null;
   subtotal: number;
   descuento: number;
+  impuestoTotal?: number | null;
   total: number;
   estado: EstadoCompra;
   observaciones: string | null;

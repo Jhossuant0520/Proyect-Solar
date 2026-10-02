@@ -42,6 +42,8 @@ import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.Modul
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.CotizacionServicioRepository;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulServicioTecnicoRepo.OrdenServicioRepuestoRepository;
 import com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.ModulComercialService.SecuenciaDocumentoService;
+import com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.ModulNotificacion.NotificationEventBridge;
+import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulNotificacion.TipoEventoNotificacion;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -78,6 +80,7 @@ public class CotizacionServicioService {
     private final ProductoRepository productoRepository;
     private final ObjectProvider<DocumentoOrdenServicioService> documentoOrdenServicioService;
     private final PlatformTransactionManager transactionManager;
+    private final NotificationEventBridge notificationEventBridge;
 
     @Transactional(readOnly = true)
     public List<CotizacionServicioResponseDTO> listar(Long ordenId) {
@@ -325,6 +328,12 @@ public class CotizacionServicioService {
             tryGenerarCotizacionPdf(ordenId, cotId, usuarioPdf);
         }
 
+        TipoEventoNotificacion eventoCot = guardada.getTipo() == TipoCotizacionServicio.ADICIONAL
+            ? TipoEventoNotificacion.COTIZACION_ADICIONAL_DISPONIBLE
+            : TipoEventoNotificacion.COTIZACION_DISPONIBLE;
+        notificationEventBridge.solicitarCotizacion(
+            eventoCot, ordenId, guardada.getId(), guardada.getNumero());
+
         return toResponse(buscarCotizacion(ordenId, guardada.getId()));
     }
 
@@ -342,7 +351,7 @@ public class CotizacionServicioService {
     public CotizacionServicioResponseDTO aprobar(Long ordenId, Long cotizacionId, String usuario) {
         String responsable = validarUsuario(usuario);
         ordenServicioService.buscarOFallar(ordenId);
-        CotizacionServicio cotizacion = buscarCotizacion(ordenId, cotizacionId);
+        CotizacionServicio cotizacion = buscarCotizacionParaTransicion(ordenId, cotizacionId);
 
         if (cotizacion.getEstado() != EstadoCotizacionServicio.PENDIENTE_APROBACION) {
             throw new BusinessException(
@@ -382,7 +391,7 @@ public class CotizacionServicioService {
             String usuario) {
         String responsable = validarUsuario(usuario);
         OrdenServicio orden = ordenServicioService.buscarOFallar(ordenId);
-        CotizacionServicio cotizacion = buscarCotizacion(ordenId, cotizacionId);
+        CotizacionServicio cotizacion = buscarCotizacionParaTransicion(ordenId, cotizacionId);
 
         if (cotizacion.getEstado() != EstadoCotizacionServicio.PENDIENTE_APROBACION) {
             throw new BusinessException(
@@ -615,6 +624,14 @@ public class CotizacionServicioService {
     private CotizacionServicio buscarCotizacion(Long ordenId, Long cotizacionId) {
         ordenServicioService.buscarOFallar(ordenId);
         return cotizacionRepository.findByIdAndOrdenServicioId(cotizacionId, ordenId)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Cotización no encontrada en esta orden de servicio."));
+    }
+
+    /** Aprobar/rechazar: bloqueo pesimista para evitar doble transición concurrente. */
+    private CotizacionServicio buscarCotizacionParaTransicion(Long ordenId, Long cotizacionId) {
+        ordenServicioService.buscarOFallar(ordenId);
+        return cotizacionRepository.findByIdAndOrdenServicioIdForUpdate(cotizacionId, ordenId)
             .orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "Cotización no encontrada en esta orden de servicio."));
     }

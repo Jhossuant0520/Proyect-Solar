@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DocumentoOrdenServicioService } from '../../../core/services/documento-orden-servicio.service';
 import {
+  AccionPublicaCotizacionResponseDTO,
   ConsultaCotizacionOtPublicaDTO,
   ConsultaOtPublicaDTO,
   ContactoTallerPublicoDTO
@@ -9,6 +11,8 @@ import {
 import { SolvixLoadingStateComponent } from '../../../shared/components/solvix-loading-state/solvix-loading-state';
 import { SolvixErrorStateComponent } from '../../../shared/components/solvix-error-state/solvix-error-state';
 import { SolvixThemeToggleComponent } from '../../../shared/components/solvix-theme-toggle/solvix-theme-toggle';
+import { SolvixActionRevealService } from '../../../shared/services/solvix-action-reveal.service';
+import { SolvixFeedbackService } from '../../../shared/services/solvix-feedback.service';
 import { formatFechaOrden, labelTipoEquipo } from '../../panelAdmin/servicios/servicio-ui';
 import {
   destacarContactoPublico,
@@ -17,15 +21,18 @@ import {
   EstadoOrdenUx
 } from '../../panelAdmin/servicios/estado-orden-ux';
 import { formatMoney } from '../../panelAdmin/dashboard/utils/dashboard-format';
+import { mensajeErrorAccionPublicaCotizacion } from './consulta-ot-publica-accion.util';
 
 type Estado = 'loading' | 'ready' | 'error' | 'sin-token';
 type VistaCotizacion = 'cerrada' | 'cargando' | 'lista' | 'error';
+type PanelAccion = 'cerrado' | 'aprobar' | 'rechazar';
 
 @Component({
   selector: 'app-consulta-ot-publica',
   standalone: true,
   imports: [
     RouterLink,
+    ReactiveFormsModule,
     SolvixLoadingStateComponent,
     SolvixErrorStateComponent,
     SolvixThemeToggleComponent
@@ -45,6 +52,13 @@ export class ConsultaOtPublicaComponent implements OnInit {
   cotizacionError = '';
   mostrarIndicacionesEntrega = false;
 
+  panelAccion: PanelAccion = 'cerrado';
+  enviandoAccion = false;
+  errorAccion = '';
+  resultadoAccion: AccionPublicaCotizacionResponseDTO | null = null;
+
+  readonly identidadForm;
+
   readonly fecha = formatFechaOrden;
   readonly tipoEquipo = labelTipoEquipo;
 
@@ -60,8 +74,16 @@ export class ConsultaOtPublicaComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private documentoService: DocumentoOrdenServicioService
-  ) {}
+    private documentoService: DocumentoOrdenServicioService,
+    private fb: FormBuilder,
+    private feedback: SolvixFeedbackService,
+    private actionReveal: SolvixActionRevealService
+  ) {
+    this.identidadForm = this.fb.nonNullable.group({
+      numeroDocumento: ['', [Validators.required, Validators.maxLength(40)]],
+      telefono: ['', [Validators.required, Validators.maxLength(40)]]
+    });
+  }
 
   ngOnInit(): void {
     const token = this.route.snapshot.paramMap.get('token')?.trim();
@@ -71,18 +93,7 @@ export class ConsultaOtPublicaComponent implements OnInit {
       return;
     }
     this.token = token;
-    this.documentoService.consultaOtPublica(token).subscribe({
-      next: dto => {
-        this.data = dto;
-        // Siempre por código; nunca por estadoPublico / etiqueta.
-        this.ux = estadoOrdenUx(dto.estadoCodigo);
-        this.state = 'ready';
-      },
-      error: () => {
-        this.state = 'error';
-        this.errorMessage = 'No encontramos esta orden o el enlace ya no es válido.';
-      }
-    });
+    this.cargarConsulta();
   }
 
   equipoResumen(): string {
@@ -117,6 +128,21 @@ export class ConsultaOtPublicaComponent implements OnInit {
     return !!this.data?.cotizacionDisponible && this.data?.estadoCodigo === 'PENDIENTE_APROBACION';
   }
 
+  /** Acciones sensibles solo cuando la consulta indica cotización pendiente. */
+  get puedeAccionarCotizacion(): boolean {
+    return this.puedeVerCotizacion && this.vistaCotizacion === 'lista' && !!this.cotizacion;
+  }
+
+  get tituloPanelAccion(): string {
+    return this.panelAccion === 'aprobar'
+      ? '¿Deseas aprobar esta cotización?'
+      : '¿Deseas rechazar esta cotización?';
+  }
+
+  get etiquetaConfirmarAccion(): string {
+    return this.panelAccion === 'aprobar' ? 'Confirmar aprobación' : 'Confirmar rechazo';
+  }
+
   get accionPrimaria(): string | null {
     if (this.puedeVerCotizacion) {
       return 'Ver cotización';
@@ -125,7 +151,7 @@ export class ConsultaOtPublicaComponent implements OnInit {
       return this.ux.accionCliente;
     }
     if (this.data?.estadoCodigo === 'REQUIERE_APROBACION_ADICIONAL') {
-      return null; // el contacto es la acción
+      return null;
     }
     return this.ux.requiereAccionCliente ? this.ux.accionCliente : null;
   }
@@ -146,10 +172,12 @@ export class ConsultaOtPublicaComponent implements OnInit {
     }
     if (this.vistaCotizacion === 'lista' && this.cotizacion) {
       this.vistaCotizacion = 'cerrada';
+      this.cerrarPanelAccion();
       return;
     }
     this.vistaCotizacion = 'cargando';
     this.cotizacionError = '';
+    this.resultadoAccion = null;
     this.documentoService.consultaCotizacionOtPublica(this.token).subscribe({
       next: dto => {
         this.cotizacion = dto;
@@ -165,6 +193,67 @@ export class ConsultaOtPublicaComponent implements OnInit {
 
   cerrarCotizacion(): void {
     this.vistaCotizacion = 'cerrada';
+    this.cerrarPanelAccion();
+  }
+
+  iniciarAprobar(): void {
+    if (!this.puedeAccionarCotizacion || this.enviandoAccion) {
+      return;
+    }
+    this.abrirPanel('aprobar');
+  }
+
+  iniciarRechazar(): void {
+    if (!this.puedeAccionarCotizacion || this.enviandoAccion) {
+      return;
+    }
+    this.abrirPanel('rechazar');
+  }
+
+  cancelarPanelAccion(): void {
+    if (this.enviandoAccion) {
+      return;
+    }
+    this.cerrarPanelAccion();
+  }
+
+  confirmarAccion(): void {
+    if (this.enviandoAccion || this.panelAccion === 'cerrado' || !this.token) {
+      return;
+    }
+    this.identidadForm.markAllAsTouched();
+    if (this.identidadForm.invalid) {
+      this.errorAccion = 'Completa documento y teléfono para continuar.';
+      return;
+    }
+
+    const body = {
+      numeroDocumento: this.identidadForm.controls.numeroDocumento.value.trim(),
+      telefono: this.identidadForm.controls.telefono.value.trim()
+    };
+    if (!body.numeroDocumento || !body.telefono) {
+      this.errorAccion = 'Completa documento y teléfono para continuar.';
+      return;
+    }
+
+    this.enviandoAccion = true;
+    this.errorAccion = '';
+    this.identidadForm.disable({ emitEvent: false });
+    const accion = this.panelAccion;
+    const request$ =
+      accion === 'aprobar'
+        ? this.documentoService.aprobarCotizacionOtPublica(this.token, body)
+        : this.documentoService.rechazarCotizacionOtPublica(this.token, body);
+
+    request$.subscribe({
+      next: resp => this.onAccionExitosa(resp, accion),
+      error: err => {
+        this.enviandoAccion = false;
+        this.identidadForm.enable({ emitEvent: false });
+        this.errorAccion = mensajeErrorAccionPublicaCotizacion(err);
+        this.feedback.error(this.errorAccion);
+      }
+    });
   }
 
   telHref(valor: string | null | undefined): string | null {
@@ -181,5 +270,68 @@ export class ConsultaOtPublicaComponent implements OnInit {
     }
     const digits = valor.replace(/\D/g, '');
     return digits ? `https://wa.me/${digits}` : null;
+  }
+
+  private abrirPanel(modo: 'aprobar' | 'rechazar'): void {
+    this.panelAccion = modo;
+    this.errorAccion = '';
+    this.identidadForm.reset({ numeroDocumento: '', telefono: '' });
+    this.actionReveal.reveal('#panel-identidad-cotizacion', {
+      scroll: true,
+      highlight: true
+    });
+  }
+
+  private cerrarPanelAccion(): void {
+    this.panelAccion = 'cerrado';
+    this.errorAccion = '';
+    this.identidadForm.reset({ numeroDocumento: '', telefono: '' });
+  }
+
+  private onAccionExitosa(
+    resp: AccionPublicaCotizacionResponseDTO,
+    accion: 'aprobar' | 'rechazar'
+  ): void {
+    this.enviandoAccion = false;
+    this.identidadForm.enable({ emitEvent: false });
+    this.resultadoAccion = resp;
+    this.cerrarPanelAccion();
+    this.vistaCotizacion = 'cerrada';
+    this.cotizacion = null;
+
+    const mensaje =
+      (resp.mensaje && resp.mensaje.trim()) ||
+      (accion === 'aprobar'
+        ? 'Tu cotización fue aprobada correctamente.'
+        : 'Tu cotización fue rechazada.');
+
+    this.cargarConsulta(() => {
+      this.actionReveal.success({
+        message: mensaje,
+        target: '#bloque-estado-publico',
+        scroll: true,
+        highlight: true
+      });
+    });
+  }
+
+  private cargarConsulta(after?: () => void): void {
+    this.documentoService.consultaOtPublica(this.token).subscribe({
+      next: dto => {
+        this.data = dto;
+        this.ux = estadoOrdenUx(dto.estadoCodigo);
+        this.state = 'ready';
+        if (!this.puedeVerCotizacion) {
+          this.vistaCotizacion = 'cerrada';
+          this.cotizacion = null;
+          this.cerrarPanelAccion();
+        }
+        after?.();
+      },
+      error: () => {
+        this.state = 'error';
+        this.errorMessage = 'No encontramos esta orden o el enlace ya no es válido.';
+      }
+    });
   }
 }

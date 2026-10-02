@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.Compra;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.DevolucionCompra;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.EstadoCompra;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.EstadoDevolucionCompra;
@@ -50,8 +51,7 @@ public class DevolucionCompraResponseDTO {
             .compraTotalOriginal(compra != null ? compra.getTotal() : null)
             .compraEstado(compra != null ? compra.getEstado() : null)
             .proveedorId(compra != null && compra.getProveedor() != null ? compra.getProveedor().getId() : null)
-            .proveedorNombre(
-                compra != null && compra.getProveedor() != null ? compra.getProveedor().getNombre() : null)
+            .proveedorNombre(resolverProveedorNombre(compra))
             .motivo(devolucion.getMotivo())
             .estado(devolucion.getEstado())
             .metodoReembolso(devolucion.getMetodoReembolso())
@@ -65,5 +65,15 @@ public class DevolucionCompraResponseDTO {
                 .map(DetalleDevolucionCompraResponseDTO::fromEntity)
                 .toList())
             .build();
+    }
+
+    private static String resolverProveedorNombre(Compra compra) {
+        if (compra == null) {
+            return null;
+        }
+        if (compra.getProveedorNombreSnapshot() != null && !compra.getProveedorNombreSnapshot().isBlank()) {
+            return compra.getProveedorNombreSnapshot();
+        }
+        return compra.getProveedor() != null ? compra.getProveedor().getNombre() : null;
     }
 }

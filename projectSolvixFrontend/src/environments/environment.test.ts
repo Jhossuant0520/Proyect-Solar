@@ -4,5 +4,6 @@
 export const environment = {
   production: false,
   apiOrigin: 'https://api-test.computerelectroniccentersas.com',
-  apiBaseUrl: 'https://api-test.computerelectroniccentersas.com/api'
+  apiBaseUrl: 'https://api-test.computerelectroniccentersas.com/api',
+  publicWebBaseUrl: 'https://test.computerelectroniccentersas.com'
 };

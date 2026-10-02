@@ -34,9 +34,14 @@ import lombok.RequiredArgsConstructor;
 /**
  * Devoluciones a proveedor como documento económico propio.
  *
- * <p>La compra original nunca se recalcula: conserva su subtotal, descuento y total
+ * <p>La compra original nunca se recalcula: conserva su subtotal, descuento, impuestoTotal y total
  * históricos, y cada línea conserva su costo unitario. La devolución guarda su propio
  * importe, de modo que compras netas = compras brutas - devoluciones de compra.
+ *
+ * <p>FASE 3.15.11-B: el monto económico prorratea sobre {@code Compra.total}
+ * ({@code subtotal - descuento + impuestoTotal}). Así el IVA de la compra enriquecida
+ * queda incluido en el reembolso económico sin recalcular tasas. El costo revertido
+ * sigue siendo {@code DetalleCompra.costoUnitario} (sin IVA de línea).
  *
  * <p>El costo revertido proviene siempre de {@code DetalleCompra}, nunca de
  * {@code Producto.costoActual}: una compra pasada no se reinterpreta con el costo de hoy.

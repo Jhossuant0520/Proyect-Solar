@@ -15,10 +15,13 @@ import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulComerc
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulComercialDtos.DetalleCompraRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.exception.BusinessException;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.Compra;
+import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.CondicionPagoProveedor;
+import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.ContactoProveedor;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.DetalleCompra;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.EstadoCompra;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.Proveedor;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.ReferenciaMovimiento;
+import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.TipoDocumentoExternoCompra;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.TipoMovimientoInventario;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulComercialModel.TipoSecuencia;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulProductoModel.Producto;
@@ -32,10 +35,18 @@ import lombok.RequiredArgsConstructor;
 /**
  * Reglas de compra. Los costos aplicados quedan congelados en cada línea y son la
  * fuente de verdad para recalcular políticas de costeo sin tocar el historial.
+ *
+ * <p>Total enriquecido (3.15.11-B/C): {@code total = subtotal - descuento + impuestoTotal}.
+ * El IVA monetario ({@code valorImpuesto} / {@code impuestoTotal}) lo calcula el backend
+ * desde la tasa de línea; valores enviados en el request se ignoran.
+ * Compras legacy sin impuesto tienen {@code impuestoTotal = 0} y el total conserva
+ * la semántica histórica (subtotal − descuento).
  */
 @Service
 @RequiredArgsConstructor
 public class CompraService {
+
+    private static final BigDecimal CIEN = BigDecimal.valueOf(100);
 
     private final CompraRepository compraRepository;
     private final ProductoRepository productoRepository;
@@ -46,17 +57,43 @@ public class CompraService {
 
     @Transactional
     public CompraResponseDTO crear(CompraRequestDTO request, String usuario) {
-        Proveedor proveedor = proveedorService.buscarOFallar(request.getProveedorId());
+        Proveedor proveedor = proveedorService.buscarActivoParaCompra(request.getProveedorId());
         LocalDateTime fecha = request.getFecha() != null ? request.getFecha() : LocalDateTime.now();
+
+        validarDocumentoExterno(request.getTipoDocumentoExterno(), request.getNumeroDocumentoExterno());
+
+        CondicionPagoProveedor condicion = request.getCondicionPagoAplicada() != null
+            ? request.getCondicionPagoAplicada()
+            : proveedor.getCondicionPago();
+        Integer diasCredito = resolverDiasCredito(condicion, request.getDiasCreditoAplicados(), proveedor);
+        validarCondicionPago(condicion, diasCredito);
+
+        ContactoSnapshot contacto = resolverContacto(proveedor, request);
 
         Compra compra = Compra.builder()
             .numero(secuenciaService.siguienteNumero(TipoSecuencia.COMPRA, fecha))
             .fecha(fecha)
             .proveedor(proveedor)
+            .proveedorNombreSnapshot(proveedor.getNombre())
+            .proveedorDocumentoSnapshot(proveedor.getDocumento())
+            .tipoDocumentoExterno(request.getTipoDocumentoExterno())
+            .numeroDocumentoExterno(normalizar(request.getNumeroDocumentoExterno()))
+            .numeroOrdenCompra(normalizar(request.getNumeroOrdenCompra()))
+            .numeroCotizacionProveedor(normalizar(request.getNumeroCotizacionProveedor()))
+            .fechaDocumentoProveedor(request.getFechaDocumentoProveedor())
+            .fechaEntrega(request.getFechaEntrega())
+            .condicionPagoAplicada(condicion)
+            .diasCreditoAplicados(diasCredito)
+            .moneda("COP")
+            .contactoProveedorId(contacto.id())
+            .contactoNombreSnapshot(contacto.nombre())
             .estado(EstadoCompra.PENDIENTE)
             .observaciones(request.getObservaciones())
             .createdBy(usuario)
             .build();
+
+        compra.setFechaVencimiento(resolverFechaVencimiento(
+            condicion, diasCredito, fecha, request.getFechaVencimiento()));
 
         for (DetalleCompraRequestDTO linea : request.getDetalles()) {
             compra.agregarDetalle(construirDetalle(linea));
@@ -67,10 +104,6 @@ public class CompraService {
         return CompraResponseDTO.fromEntity(compraRepository.save(compra));
     }
 
-    /**
-     * Completa la compra: ingresa stock con trazabilidad y actualiza el costo vigente
-     * del producto según la política de costeo configurada.
-     */
     @Transactional
     public CompraResponseDTO completar(Long id, String usuario) {
         Compra compra = buscarOFallar(id);
@@ -84,8 +117,6 @@ public class CompraService {
             Producto producto = detalle.getProducto();
             int stockAntes = producto.getStockActual() != null ? producto.getStockActual() : 0;
 
-            // La política se aplica antes del movimiento para que el libro de inventario
-            // registre el costo que queda vigente, no el que regía antes de la compra.
             BigDecimal nuevoCosto = politicaCosteo.calcularCostoActual(
                 producto, detalle.getCostoUnitario(), detalle.getCantidad(), stockAntes);
             producto.setCostoActual(nuevoCosto);
@@ -150,6 +181,19 @@ public class CompraService {
 
         BigDecimal costoUnitario = escalar(linea.getCostoUnitario());
         BigDecimal subtotal = escalar(costoUnitario.multiply(BigDecimal.valueOf(linea.getCantidad())));
+        // Tasa de negocio. Omitida → 0 (compat. clientes legacy). La UI envía 19% por defecto.
+        BigDecimal porcentaje = linea.getPorcentajeImpuesto() != null
+            ? escalar(linea.getPorcentajeImpuesto())
+            : BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+
+        if (porcentaje.signum() < 0) {
+            throw new BusinessException("El porcentaje de impuesto no puede ser negativo.");
+        }
+
+        // valorImpuesto siempre lo calcula SOLVIX. Se ignora cualquier valor enviado en el request.
+        BigDecimal valorImpuesto = porcentaje.signum() == 0
+            ? BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP)
+            : escalar(subtotal.multiply(porcentaje).divide(CIEN, 8, RoundingMode.HALF_UP));
 
         return DetalleCompra.builder()
             .producto(producto)
@@ -158,24 +202,99 @@ public class CompraService {
             .cantidad(linea.getCantidad())
             .costoUnitario(costoUnitario)
             .subtotal(subtotal)
+            .referenciaProveedor(normalizar(linea.getReferenciaProveedor()))
+            .porcentajeImpuesto(porcentaje)
+            .valorImpuesto(valorImpuesto)
             .cantidadDevuelta(0)
             .build();
     }
 
+    /**
+     * {@code total = subtotal - descuento + impuestoTotal},
+     * con {@code impuestoTotal = Σ valorImpuesto de líneas} (calculado por backend).
+     */
     private void aplicarTotales(Compra compra, BigDecimal descuentoCabecera) {
         BigDecimal subtotal = compra.getDetalles().stream()
             .map(DetalleCompra::getSubtotal)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal descuento = escalar(descuentoCabecera != null ? descuentoCabecera : BigDecimal.ZERO);
-
         if (descuento.compareTo(subtotal) > 0) {
             throw new BusinessException("El descuento no puede superar el subtotal de la compra.");
         }
 
+        BigDecimal impuestoTotal = escalar(compra.getDetalles().stream()
+            .map(d -> d.getValorImpuesto() != null ? d.getValorImpuesto() : BigDecimal.ZERO)
+            .reduce(BigDecimal.ZERO, BigDecimal::add));
+
         compra.setSubtotal(escalar(subtotal));
         compra.setDescuento(descuento);
-        compra.setTotal(escalar(subtotal.subtract(descuento)));
+        compra.setImpuestoTotal(impuestoTotal);
+        compra.setTotal(escalar(subtotal.subtract(descuento).add(impuestoTotal)));
+    }
+
+    private void validarDocumentoExterno(TipoDocumentoExternoCompra tipo, String numero) {
+        String limpio = normalizar(numero);
+        if (tipo != null && limpio == null) {
+            throw new BusinessException(
+                "Si indica el tipo de documento externo, el número de documento es obligatorio.");
+        }
+    }
+
+    private Integer resolverDiasCredito(
+            CondicionPagoProveedor condicion, Integer requestDias, Proveedor proveedor) {
+        if (condicion == CondicionPagoProveedor.CONTADO) {
+            return 0;
+        }
+        if (requestDias != null) {
+            return requestDias;
+        }
+        if (condicion == CondicionPagoProveedor.CREDITO) {
+            return proveedor.getDiasCredito();
+        }
+        return requestDias != null ? requestDias : proveedor.getDiasCredito();
+    }
+
+    private void validarCondicionPago(CondicionPagoProveedor condicion, Integer diasCredito) {
+        if (condicion == CondicionPagoProveedor.CREDITO) {
+            if (diasCredito == null || diasCredito <= 0) {
+                throw new BusinessException(
+                    "Para crédito, los días de crédito aplicados deben ser mayores que cero.");
+            }
+        }
+    }
+
+    private LocalDateTime resolverFechaVencimiento(
+            CondicionPagoProveedor condicion,
+            Integer diasCredito,
+            LocalDateTime fechaNegocio,
+            LocalDateTime fechaVencimientoRequest) {
+
+        if (fechaVencimientoRequest != null) {
+            return fechaVencimientoRequest;
+        }
+        if (condicion == CondicionPagoProveedor.CREDITO && diasCredito != null && diasCredito > 0) {
+            return fechaNegocio.plusDays(diasCredito);
+        }
+        // CONTADO / sin condición: no forzar vencimiento.
+        return null;
+    }
+
+    private ContactoSnapshot resolverContacto(Proveedor proveedor, CompraRequestDTO request) {
+        if (request.getContactoProveedorId() != null) {
+            Proveedor conContactos = proveedorService.obtenerEntidadConContactos(proveedor.getId());
+            ContactoProveedor contacto = conContactos.getContactos().stream()
+                .filter(c -> request.getContactoProveedorId().equals(c.getId()))
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(
+                    "El contacto no pertenece al proveedor seleccionado."));
+            if (!contacto.isActivo()) {
+                throw new BusinessException("El contacto del proveedor está inactivo.");
+            }
+            return new ContactoSnapshot(contacto.getId(), contacto.getNombre());
+        }
+        String nombre = normalizar(request.getContactoNombreSnapshot());
+        return new ContactoSnapshot(null, nombre);
     }
 
     private Compra buscarOFallar(Long id) {
@@ -186,4 +305,14 @@ public class CompraService {
     private BigDecimal escalar(BigDecimal valor) {
         return valor.setScale(2, RoundingMode.HALF_UP);
     }
+
+    private String normalizar(String valor) {
+        if (valor == null) {
+            return null;
+        }
+        String limpio = valor.trim();
+        return limpio.isEmpty() ? null : limpio;
+    }
+
+    private record ContactoSnapshot(Long id, String nombre) {}
 }

@@ -60,6 +60,18 @@ public class DetalleCompra {
     @Builder.Default
     private BigDecimal subtotal = BigDecimal.ZERO;
 
+    /** SKU/código del proveedor. No reemplaza el código interno del producto. */
+    @Column(name = "referencia_proveedor", length = 80)
+    private String referenciaProveedor;
+
+    @Column(name = "porcentaje_impuesto", nullable = false, precision = 7, scale = 2)
+    @Builder.Default
+    private BigDecimal porcentajeImpuesto = BigDecimal.ZERO;
+
+    @Column(name = "valor_impuesto", nullable = false, precision = 14, scale = 2)
+    @Builder.Default
+    private BigDecimal valorImpuesto = BigDecimal.ZERO;
+
     @Column(name = "cantidad_devuelta", nullable = false)
     @Builder.Default
     private Integer cantidadDevuelta = 0;

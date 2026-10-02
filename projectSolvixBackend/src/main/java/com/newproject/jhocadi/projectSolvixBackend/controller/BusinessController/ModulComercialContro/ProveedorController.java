@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,8 +37,22 @@ public class ProveedorController {
 
     @GetMapping
     public ResponseEntity<List<ProveedorResponseDTO>> listar(
-            @RequestParam(required = false, defaultValue = "false") Boolean soloActivos) {
+            @RequestParam(required = false, defaultValue = "false") Boolean soloActivos,
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Integer limite) {
+        if (limite != null || q != null) {
+            return ResponseEntity.ok(proveedorService.buscar(q, limite, soloActivos));
+        }
         return ResponseEntity.ok(proveedorService.listar(soloActivos));
+    }
+
+    /** Paridad explícita con el brief 3.15.10-B; misma semántica que {@code GET ?q=&limite=}. */
+    @GetMapping("/buscar")
+    public ResponseEntity<List<ProveedorResponseDTO>> buscar(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Integer limite,
+            @RequestParam(required = false, defaultValue = "true") Boolean soloActivos) {
+        return ResponseEntity.ok(proveedorService.buscar(q, limite, soloActivos));
     }
 
     @GetMapping("/{id}")

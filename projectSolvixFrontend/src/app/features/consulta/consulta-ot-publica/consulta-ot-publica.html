@@ -47,7 +47,11 @@
         </dl>
       </section>
 
-      <section class="bloque bloque-estado" aria-labelledby="estado-titulo">
+      <section
+        id="bloque-estado-publico"
+        class="bloque bloque-estado"
+        aria-labelledby="estado-titulo"
+      >
         <p class="kicker">Estado actual</p>
         <h2 id="estado-titulo" class="titulo-estado tono-{{ ux.tono }}">
           {{ ux.tituloCliente }}
@@ -88,7 +92,7 @@
           <p class="seccion-texto seccion-texto--accion">
             Sí. {{
               data.estadoCodigo === 'PENDIENTE_APROBACION'
-                ? 'Revisa la cotización y contáctanos para aprobar o rechazar.'
+                ? 'Revisa la cotización y apruébala o recházala desde aquí.'
                 : data.estadoCodigo === 'LISTO'
                   ? 'Puedes acercarte al taller a retirar tu equipo.'
                   : data.estadoCodigo === 'REQUIERE_APROBACION_ADICIONAL'
@@ -131,6 +135,20 @@
         </section>
       }
 
+      @if (resultadoAccion) {
+        <section class="bloque bloque-resultado" aria-live="polite">
+          <h3 class="seccion-titulo">Resultado</h3>
+          <p class="seccion-texto seccion-texto--accion">
+            {{
+              resultadoAccion.mensaje ||
+                (resultadoAccion.cotizacionEstado === 'APROBADA'
+                  ? 'Tu cotización fue aprobada correctamente.'
+                  : 'Tu cotización fue rechazada.')
+            }}
+          </p>
+        </section>
+      }
+
       @if (vistaCotizacion === 'cargando') {
         <div class="bloque">
           <solvix-loading-state label="Cargando cotización." />
@@ -145,7 +163,7 @@
         <section class="bloque bloque-cotizacion" aria-labelledby="cotizacion-titulo">
           <div class="cotizacion-head">
             <div>
-              <p class="kicker">Cotización</p>
+              <p class="kicker">Cotización pendiente</p>
               <h3 id="cotizacion-titulo" class="solvix-mono">{{ cotizacion.numero }}</h3>
             </div>
             <button type="button" class="btn-link" (click)="cerrarCotizacion()">Cerrar</button>
@@ -192,10 +210,87 @@
             </p>
           }
 
-          <p class="hint-aprobacion">
-            Esta consulta solo te permite ver la cotización. Para aprobar o rechazar,
-            contacta al taller.
-          </p>
+          @if (puedeAccionarCotizacion) {
+            <div class="acciones-cotizacion" role="group" aria-label="Decisión sobre la cotización">
+              <button
+                type="button"
+                class="btn btn-approve"
+                [disabled]="enviandoAccion"
+                (click)="iniciarAprobar()"
+              >
+                Aprobar
+              </button>
+              <button
+                type="button"
+                class="btn btn-reject"
+                [disabled]="enviandoAccion"
+                (click)="iniciarRechazar()"
+              >
+                Rechazar
+              </button>
+            </div>
+          }
+
+          @if (panelAccion !== 'cerrado') {
+            <section
+              id="panel-identidad-cotizacion"
+              class="panel-identidad"
+              [attr.aria-label]="tituloPanelAccion"
+            >
+              <h4 class="panel-identidad-titulo">{{ tituloPanelAccion }}</h4>
+              <p class="panel-identidad-ayuda">
+                Para confirmar, ingresa el documento de identidad y el teléfono registrados en el
+                taller.
+              </p>
+
+              <form class="identidad-form" [formGroup]="identidadForm" (ngSubmit)="confirmarAccion()">
+                <label class="campo">
+                  <span>Documento de identidad</span>
+                  <input
+                    type="text"
+                    formControlName="numeroDocumento"
+                    autocomplete="off"
+                    inputmode="text"
+                    maxlength="40"
+                    placeholder="Ej. 1098765432"
+                  />
+                </label>
+                <label class="campo">
+                  <span>Teléfono registrado</span>
+                  <input
+                    type="tel"
+                    formControlName="telefono"
+                    autocomplete="tel"
+                    inputmode="tel"
+                    maxlength="40"
+                    placeholder="Ej. 300 123 4567"
+                  />
+                </label>
+
+                @if (errorAccion) {
+                  <p class="aviso-error" role="alert">{{ errorAccion }}</p>
+                }
+
+                <div class="acciones-panel">
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    [disabled]="enviandoAccion || identidadForm.invalid"
+                  >
+                    {{ enviandoAccion ? 'Validando…' : etiquetaConfirmarAccion }}
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-ghost"
+                    [disabled]="enviandoAccion"
+                    (click)="cancelarPanelAccion()"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </section>
+          }
         </section>
       }
 

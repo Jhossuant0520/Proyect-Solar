@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -11,11 +12,25 @@ import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServ
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.EstadoCotizacionServicio;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.TipoCotizacionServicio;
 
+import jakarta.persistence.LockModeType;
+
 public interface CotizacionServicioRepository extends JpaRepository<CotizacionServicio, Long> {
 
     List<CotizacionServicio> findByOrdenServicioIdOrderByFechaCreacionAsc(Long ordenServicioId);
 
     Optional<CotizacionServicio> findByIdAndOrdenServicioId(Long id, Long ordenServicioId);
+
+    /**
+     * Lectura exclusiva para aprobar/rechazar (anti carrera concurrente).
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        SELECT c FROM CotizacionServicio c
+        WHERE c.id = :id AND c.ordenServicio.id = :ordenId
+        """)
+    Optional<CotizacionServicio> findByIdAndOrdenServicioIdForUpdate(
+        @Param("id") Long id,
+        @Param("ordenId") Long ordenId);
 
     boolean existsByOrdenServicioIdAndTipoAndEstadoIn(
         Long ordenServicioId,

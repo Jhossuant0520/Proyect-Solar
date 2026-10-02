@@ -103,6 +103,20 @@ h1 {
   outline-offset: 2px;
 }
 
+.btn-whatsapp:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.menu-whatsapp-ayuda {
+  max-width: min(280px, 86vw);
+  padding: 0.65rem 1rem 0.35rem;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--color-text-secondary, var(--solvix-text-secondary));
+  white-space: normal;
+}
+
 .head-facts {
   margin: 1rem 0 0;
   display: grid;

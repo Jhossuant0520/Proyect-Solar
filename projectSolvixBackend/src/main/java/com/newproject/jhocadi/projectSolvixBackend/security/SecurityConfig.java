@@ -59,8 +59,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/catalogo", "/api/v1/catalogo/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/cuenta/avatares/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/productos/imagenes/**").permitAll()
-                // Consulta pública por QR (sin auth)
+                // Consulta pública por QR (GET lectura + POST acciones sensibles con identidad)
                 .requestMatchers(HttpMethod.GET, "/api/v1/consulta", "/api/v1/consulta/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/consulta/**").permitAll()
                 // Documentación OpenAPI / Swagger (si se habilita a futuro)
                 .requestMatchers(
                     "/v3/api-docs/**",

@@ -17,7 +17,14 @@ import { CompraResponseDTO, DevolucionCompraResponseDTO } from '../../../../core
 import { ProductoModel } from '../../producto/productoClase';
 import { formatFechaVenta, formatImporte, labelEstadoDevolucion, labelMetodoReembolso, mapHttpError, toneEstadoDevolucion } from '../../venta/venta-ui';
 import { proveedorVisible } from '../compra-mapper';
-import { labelEstadoCompra, labelMotivoDevolucionCompra, permiteDevolucionCompra, toneEstadoCompra } from '../compra-ui';
+import {
+  labelCondicionPagoCompra,
+  labelEstadoCompra,
+  labelMotivoDevolucionCompra,
+  labelTipoDocumentoExterno,
+  permiteDevolucionCompra,
+  toneEstadoCompra
+} from '../compra-ui';
 
 @Component({
   selector: 'app-compra-detail',
@@ -55,6 +62,8 @@ export class CompraDetailComponent implements OnInit {
   readonly toneDevolucion = toneEstadoDevolucion;
   readonly proveedor = proveedorVisible;
   readonly puedeDevolver = permiteDevolucionCompra;
+  readonly labelTipo = labelTipoDocumentoExterno;
+  readonly labelCondicion = labelCondicionPagoCompra;
 
   constructor(
     private route: ActivatedRoute,

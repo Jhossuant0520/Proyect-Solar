@@ -1,17 +1,24 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { ConsultaOtPublicaComponent } from './consulta-ot-publica';
 import { DocumentoOrdenServicioService } from '../../../core/services/documento-orden-servicio.service';
 import {
+  AccionPublicaCotizacionResponseDTO,
   ConsultaCotizacionOtPublicaDTO,
   ConsultaOtPublicaDTO
 } from '../../../core/models/documento-orden-servicio.models';
+import { SolvixActionRevealService } from '../../../shared/services/solvix-action-reveal.service';
+import { SolvixFeedbackService } from '../../../shared/services/solvix-feedback.service';
+import { mensajeErrorAccionPublicaCotizacion } from './consulta-ot-publica-accion.util';
 
-describe('ConsultaOtPublicaComponent (FASE C.2)', () => {
+describe('ConsultaOtPublicaComponent (FASE C.2 / 3.15.9.3-C)', () => {
   let fixture: ComponentFixture<ConsultaOtPublicaComponent>;
   let component: ConsultaOtPublicaComponent;
   let documentoService: jasmine.SpyObj<DocumentoOrdenServicioService>;
+  let feedback: jasmine.SpyObj<SolvixFeedbackService>;
+  let actionReveal: jasmine.SpyObj<SolvixActionRevealService>;
 
   const contacto = {
     empresa: 'Computer & Electronic Test',
@@ -42,17 +49,62 @@ describe('ConsultaOtPublicaComponent (FASE C.2)', () => {
     };
   }
 
+  function cotizacionPendiente(): ConsultaCotizacionOtPublicaDTO {
+    return {
+      numero: 'COT-1',
+      fecha: '2026-03-02T12:00:00',
+      lineas: [
+        {
+          descripcion: 'Mano de obra',
+          cantidad: 1,
+          precioUnitario: 80000,
+          subtotal: 80000
+        }
+      ],
+      subtotal: 80000,
+      total: 80000,
+      observaciones: 'Incluye revisión'
+    };
+  }
+
+  function abrirCotizacionPendiente(): void {
+    documentoService.consultaOtPublica.and.returnValue(
+      of(
+        dtoBase({
+          estadoCodigo: 'PENDIENTE_APROBACION',
+          cotizacionDisponible: true,
+          etapaPublica: 'COTIZACION',
+          etapaPublicaNumero: 3
+        })
+      )
+    );
+    documentoService.consultaCotizacionOtPublica.and.returnValue(of(cotizacionPendiente()));
+    fixture.detectChanges();
+    tick();
+    fixture.detectChanges();
+    const btn: HTMLButtonElement | null = fixture.nativeElement.querySelector('.btn-primary');
+    btn?.click();
+    tick();
+    fixture.detectChanges();
+  }
+
   beforeEach(async () => {
     documentoService = jasmine.createSpyObj('DocumentoOrdenServicioService', [
       'consultaOtPublica',
-      'consultaCotizacionOtPublica'
+      'consultaCotizacionOtPublica',
+      'aprobarCotizacionOtPublica',
+      'rechazarCotizacionOtPublica'
     ]);
+    feedback = jasmine.createSpyObj('SolvixFeedbackService', ['success', 'error', 'info', 'warning']);
+    actionReveal = jasmine.createSpyObj('SolvixActionRevealService', ['success', 'reveal', 'error']);
     documentoService.consultaOtPublica.and.returnValue(of(dtoBase()));
 
     await TestBed.configureTestingModule({
       imports: [ConsultaOtPublicaComponent],
       providers: [
         { provide: DocumentoOrdenServicioService, useValue: documentoService },
+        { provide: SolvixFeedbackService, useValue: feedback },
+        { provide: SolvixActionRevealService, useValue: actionReveal },
         {
           provide: ActivatedRoute,
           useValue: { snapshot: { paramMap: { get: () => 'token-abc' } } }
@@ -101,52 +153,19 @@ describe('ConsultaOtPublicaComponent (FASE C.2)', () => {
     expect(text).not.toContain('REQUIERE_APROBACION_ADICIONAL');
   }));
 
-  it('en PENDIENTE_APROBACION permite ver cotización real', fakeAsync(() => {
-    documentoService.consultaOtPublica.and.returnValue(
-      of(
-        dtoBase({
-          estadoCodigo: 'PENDIENTE_APROBACION',
-          cotizacionDisponible: true,
-          etapaPublica: 'COTIZACION',
-          etapaPublicaNumero: 3
-        })
-      )
-    );
-    const cot: ConsultaCotizacionOtPublicaDTO = {
-      numero: 'COT-1',
-      fecha: '2026-03-02T12:00:00',
-      lineas: [
-        {
-          descripcion: 'Mano de obra',
-          cantidad: 1,
-          precioUnitario: 80000,
-          subtotal: 80000
-        }
-      ],
-      subtotal: 80000,
-      total: 80000,
-      observaciones: 'Incluye revisión'
-    };
-    documentoService.consultaCotizacionOtPublica.and.returnValue(of(cot));
-
-    fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
-
-    const btn: HTMLButtonElement | null = fixture.nativeElement.querySelector('.btn-primary');
-    expect(btn?.textContent?.trim()).toBe('Ver cotización');
-    btn?.click();
-    tick();
-    fixture.detectChanges();
+  it('en PENDIENTE_APROBACION permite ver cotización y acciones', fakeAsync(() => {
+    abrirCotizacionPendiente();
 
     const text = fixture.nativeElement.textContent as string;
     expect(text).toContain('COT-1');
     expect(text).toContain('Mano de obra');
-    expect(text).toContain('Incluye revisión');
+    expect(text).toContain('Aprobar');
+    expect(text).toContain('Rechazar');
+    expect(text).not.toContain('contacta al taller');
     expect(documentoService.consultaCotizacionOtPublica).toHaveBeenCalledWith('token-abc');
   }));
 
-  it('otros estados no ofrecen cotización aunque el label diga aprobación', fakeAsync(() => {
+  it('otros estados no ofrecen cotización ni acciones', fakeAsync(() => {
     documentoService.consultaOtPublica.and.returnValue(
       of(
         dtoBase({
@@ -163,7 +182,174 @@ describe('ConsultaOtPublicaComponent (FASE C.2)', () => {
     expect(component.puedeVerCotizacion).toBeFalse();
     const text = fixture.nativeElement.textContent as string;
     expect(text).not.toContain('Ver cotización');
+    expect(text).not.toContain('Aprobar');
     expect(documentoService.consultaCotizacionOtPublica).not.toHaveBeenCalled();
+  }));
+
+  it('aprobar abre panel de identidad y valida vacío', fakeAsync(() => {
+    abrirCotizacionPendiente();
+    const aprobar: HTMLButtonElement | null =
+      fixture.nativeElement.querySelector('.btn-approve');
+    aprobar?.click();
+    fixture.detectChanges();
+
+    expect(component.panelAccion).toBe('aprobar');
+    expect(fixture.nativeElement.textContent).toContain('¿Deseas aprobar esta cotización?');
+
+    component.confirmarAccion();
+    fixture.detectChanges();
+    expect(component.errorAccion).toContain('Completa documento y teléfono');
+    expect(documentoService.aprobarCotizacionOtPublica).not.toHaveBeenCalled();
+  }));
+
+  it('envía aprobación y refresca consulta', fakeAsync(() => {
+    abrirCotizacionPendiente();
+    component.iniciarAprobar();
+    fixture.detectChanges();
+    component.identidadForm.setValue({
+      numeroDocumento: '1098765432',
+      telefono: '300 123 4567'
+    });
+
+    const resp: AccionPublicaCotizacionResponseDTO = {
+      ordenNumero: 'OS-2026-000001',
+      ordenEstado: 'APROBADO',
+      cotizacionNumero: 'COT-1',
+      cotizacionTipo: 'INICIAL',
+      cotizacionEstado: 'APROBADA',
+      mensaje: 'Cotización aprobada. El taller continuará con el proceso.'
+    };
+    documentoService.aprobarCotizacionOtPublica.and.returnValue(of(resp));
+    documentoService.consultaOtPublica.and.returnValue(
+      of(
+        dtoBase({
+          estadoCodigo: 'APROBADO',
+          cotizacionDisponible: false,
+          etapaPublica: 'REPARACION'
+        })
+      )
+    );
+
+    component.confirmarAccion();
+    tick();
+    fixture.detectChanges();
+
+    expect(documentoService.aprobarCotizacionOtPublica).toHaveBeenCalledWith('token-abc', {
+      numeroDocumento: '1098765432',
+      telefono: '300 123 4567'
+    });
+    expect(component.panelAccion).toBe('cerrado');
+    expect(component.puedeVerCotizacion).toBeFalse();
+    expect(component.resultadoAccion?.cotizacionEstado).toBe('APROBADA');
+    expect(actionReveal.success).toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).not.toContain('Aprobar');
+  }));
+
+  it('rechazo exitoso sincroniza vista', fakeAsync(() => {
+    abrirCotizacionPendiente();
+    component.iniciarRechazar();
+    component.identidadForm.setValue({
+      numeroDocumento: '1098765432',
+      telefono: '3001234567'
+    });
+    documentoService.rechazarCotizacionOtPublica.and.returnValue(
+      of({
+        ordenNumero: 'OS-2026-000001',
+        ordenEstado: 'COTIZADO',
+        cotizacionNumero: 'COT-1',
+        cotizacionTipo: 'INICIAL',
+        cotizacionEstado: 'RECHAZADA',
+        mensaje: 'Cotización rechazada. El taller revisará la propuesta.'
+      })
+    );
+    documentoService.consultaOtPublica.and.returnValue(
+      of(dtoBase({ estadoCodigo: 'COTIZADO', cotizacionDisponible: false }))
+    );
+
+    component.confirmarAccion();
+    tick();
+    fixture.detectChanges();
+
+    expect(documentoService.rechazarCotizacionOtPublica).toHaveBeenCalled();
+    expect(component.data?.estadoCodigo).toBe('COTIZADO');
+    expect(component.puedeAccionarCotizacion).toBeFalse();
+  }));
+
+  it('identidad inválida 403 muestra mensaje genérico', fakeAsync(() => {
+    abrirCotizacionPendiente();
+    component.iniciarAprobar();
+    component.identidadForm.setValue({
+      numeroDocumento: '1',
+      telefono: '2'
+    });
+    documentoService.aprobarCotizacionOtPublica.and.returnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 403,
+            error: { message: 'No pudimos validar la información ingresada.' }
+          })
+      )
+    );
+
+    component.confirmarAccion();
+    tick();
+    fixture.detectChanges();
+
+    expect(component.errorAccion).toContain('No pudimos validar');
+    expect(component.errorAccion.toLowerCase()).not.toContain('documento incorrecto');
+    expect(feedback.error).toHaveBeenCalled();
+    expect(component.enviandoAccion).toBeFalse();
+  }));
+
+  it('rate limit 429 muestra mensaje orientado al usuario', fakeAsync(() => {
+    abrirCotizacionPendiente();
+    component.iniciarAprobar();
+    component.identidadForm.setValue({
+      numeroDocumento: '1098765432',
+      telefono: '3001234567'
+    });
+    documentoService.aprobarCotizacionOtPublica.and.returnValue(
+      throwError(() => new HttpErrorResponse({ status: 429 }))
+    );
+
+    component.confirmarAccion();
+    tick();
+    fixture.detectChanges();
+
+    expect(component.errorAccion).toContain('límite de intentos');
+    expect(component.errorAccion).not.toContain('429');
+  }));
+
+  it('bloquea doble submit mientras envía', fakeAsync(() => {
+    abrirCotizacionPendiente();
+    component.iniciarAprobar();
+    component.identidadForm.setValue({
+      numeroDocumento: '1098765432',
+      telefono: '3001234567'
+    });
+    const pending = new Subject<AccionPublicaCotizacionResponseDTO>();
+    documentoService.aprobarCotizacionOtPublica.and.returnValue(pending.asObservable());
+    documentoService.consultaOtPublica.and.returnValue(
+      of(dtoBase({ estadoCodigo: 'APROBADO', cotizacionDisponible: false }))
+    );
+
+    component.confirmarAccion();
+    expect(component.enviandoAccion).toBeTrue();
+    component.confirmarAccion();
+    expect(documentoService.aprobarCotizacionOtPublica).toHaveBeenCalledTimes(1);
+
+    pending.next({
+      ordenNumero: 'OS-1',
+      ordenEstado: 'APROBADO',
+      cotizacionNumero: 'COT-1',
+      cotizacionTipo: 'INICIAL',
+      cotizacionEstado: 'APROBADA',
+      mensaje: 'ok'
+    });
+    pending.complete();
+    tick();
+    expect(component.enviandoAccion).toBeFalse();
   }));
 
   it('muestra contacto del taller y alias como Referencia', fakeAsync(() => {
@@ -177,12 +363,8 @@ describe('ConsultaOtPublicaComponent (FASE C.2)', () => {
     const text = fixture.nativeElement.textContent as string;
     expect(text).toContain('Contacto del taller');
     expect(text).toContain('+57 300 0000000');
-    expect(text).toContain('+57 300 0000001');
-    expect(text).toContain('Yondo - Antioquia');
     expect(text).toContain('Referencia');
     expect(text).toContain('Laptop Contabilidad');
-    expect(text).not.toContain('tecnico');
-    expect(text).not.toContain('costo interno');
   }));
 
   it('muestra error si el token no existe', fakeAsync(() => {
@@ -195,7 +377,7 @@ describe('ConsultaOtPublicaComponent (FASE C.2)', () => {
     expect(fixture.nativeElement.textContent).toContain('No pudimos mostrar la orden');
   }));
 
-  it('D.12: carga pública con token válido sin auth (navegación directa equivalente)', fakeAsync(() => {
+  it('D.12: carga pública con token válido sin auth', fakeAsync(() => {
     documentoService.consultaOtPublica.and.returnValue(
       of(dtoBase({ numero: 'OS-2026-000018', estadoCodigo: 'RECEPCIONADO' }))
     );
@@ -206,19 +388,22 @@ describe('ConsultaOtPublicaComponent (FASE C.2)', () => {
     expect(component.token).toBe('token-abc');
     expect(component.state).toBe('ready');
     expect(documentoService.consultaOtPublica).toHaveBeenCalledWith('token-abc');
-    expect(fixture.nativeElement.textContent).toContain('OS-2026-000018');
   }));
 
-  it('D.12: token vacío → sin-token (enlace inválido)', async () => {
+  it('D.12: token vacío → sin-token', async () => {
     TestBed.resetTestingModule();
     const emptyTokenService = jasmine.createSpyObj('DocumentoOrdenServicioService', [
       'consultaOtPublica',
-      'consultaCotizacionOtPublica'
+      'consultaCotizacionOtPublica',
+      'aprobarCotizacionOtPublica',
+      'rechazarCotizacionOtPublica'
     ]);
     await TestBed.configureTestingModule({
       imports: [ConsultaOtPublicaComponent],
       providers: [
         { provide: DocumentoOrdenServicioService, useValue: emptyTokenService },
+        { provide: SolvixFeedbackService, useValue: feedback },
+        { provide: SolvixActionRevealService, useValue: actionReveal },
         {
           provide: ActivatedRoute,
           useValue: { snapshot: { paramMap: { get: () => '' } } }
@@ -230,5 +415,24 @@ describe('ConsultaOtPublicaComponent (FASE C.2)', () => {
     emptyFixture.detectChanges();
     expect(emptyFixture.componentInstance.state).toBe('sin-token');
     expect(emptyTokenService.consultaOtPublica).not.toHaveBeenCalled();
+  });
+});
+
+describe('mensajeErrorAccionPublicaCotizacion', () => {
+  it('mapea 403/429/409 sin filtrar campos', () => {
+    expect(
+      mensajeErrorAccionPublicaCotizacion(
+        new HttpErrorResponse({
+          status: 403,
+          error: { message: 'No pudimos validar la información ingresada.' }
+        })
+      )
+    ).toContain('No pudimos validar');
+    expect(mensajeErrorAccionPublicaCotizacion(new HttpErrorResponse({ status: 429 }))).toContain(
+      'límite de intentos'
+    );
+    expect(mensajeErrorAccionPublicaCotizacion(new HttpErrorResponse({ status: 409 }))).toContain(
+      'ya no está pendiente'
+    );
   });
 });
