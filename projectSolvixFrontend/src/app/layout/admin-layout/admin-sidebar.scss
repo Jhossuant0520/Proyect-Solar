@@ -39,6 +39,30 @@
   overflow: visible;
 }
 
+.admin-sidebar__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.admin-sidebar__group:not(:first-child) {
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid color-mix(in srgb, var(--solvix-border-subtle) 80%, transparent);
+}
+
+.admin-sidebar__group-label {
+  padding: 0.15rem 1rem 0.35rem;
+  color: var(--solvix-text-muted);
+  opacity: 0.72;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  user-select: none;
+}
+
 .admin-sidebar__indicator {
   position: absolute;
   left: 0;

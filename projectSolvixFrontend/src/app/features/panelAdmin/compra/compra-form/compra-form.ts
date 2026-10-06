@@ -6,6 +6,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { SolvixFeedbackService } from '../../../../shared/services/solvix-feedback.service';
 import { SolvixButtonComponent } from '../../../../shared/components/solvix-button/solvix-button';
 import { SolvixErrorStateComponent } from '../../../../shared/components/solvix-error-state/solvix-error-state';
+import { SolvixFieldHelpComponent } from '../../../../shared/components/solvix-field-help/solvix-field-help';
 import { SolvixLoadingStateComponent } from '../../../../shared/components/solvix-loading-state/solvix-loading-state';
 import { SolvixPageHeaderComponent } from '../../../../shared/components/solvix-page-header/solvix-page-header';
 import { SolvixSectionHeaderComponent } from '../../../../shared/components/solvix-section-header/solvix-section-header';
@@ -50,6 +51,7 @@ type SubmitEstado = 'idle' | 'processing' | 'error';
     SolvixPageHeaderComponent,
     SolvixButtonComponent,
     SolvixSectionHeaderComponent,
+    SolvixFieldHelpComponent,
     SolvixLoadingStateComponent,
     SolvixErrorStateComponent
   ]
@@ -74,6 +76,19 @@ export class CompraFormComponent implements OnInit {
     { valor: 0, label: '0%' }
   ];
   readonly ivaPredeterminado = 19;
+
+  readonly helpTipoDocumento =
+    '¿Qué tipo de soporte físico o digital te entregó el proveedor? (Ej: Factura Electrónica, Cuenta de Cobro, Remisión).';
+  readonly helpNumeroDocumento =
+    'El número o consecutivo impreso en la factura del proveedor. Vital para hacer valer garantías y cruzar pagos.';
+  readonly helpOrdenCompra =
+    'Si en tu taller generaste una Orden de Compra interna previa para solicitar esta mercancía, anota aquí tu número de control.';
+  readonly helpCotizacion =
+    'Si el proveedor te entregó una cotización formal con validez de precios antes de hacer esta compra, ingresa ese código aquí.';
+  readonly helpFechaDocumentoProveedor =
+    'Fecha de emisión impresa en la factura del proveedor.';
+  readonly helpFechaEntrega =
+    'Fecha real en la que la mercancía fue recibida físicamente en el inventario.';
 
   constructor(
     private fb: FormBuilder,
@@ -109,8 +124,21 @@ export class CompraFormComponent implements OnInit {
     return this.form.get('detalles') as FormArray;
   }
 
+  /**
+   * Crédito efectivo: valor del formulario, o el default del proveedor si el campo está vacío.
+   * CONTADO oculta días/vencimiento; CREDITO los muestra.
+   */
   get esCredito(): boolean {
-    return this.form.get('condicionPagoAplicada')?.value === 'CREDITO';
+    const seleccion = this.form.get('condicionPagoAplicada')?.value as '' | CondicionPagoProveedor;
+    if (seleccion === 'CREDITO') {
+      return true;
+    }
+    if (seleccion === 'CONTADO') {
+      return false;
+    }
+    const id = this.form.get('proveedorId')?.value;
+    const proveedor = this.proveedores.find(item => item.id === id);
+    return proveedor?.condicionPago === 'CREDITO';
   }
 
   get contactosProveedor(): ProveedorResponseDTO['contactos'] {

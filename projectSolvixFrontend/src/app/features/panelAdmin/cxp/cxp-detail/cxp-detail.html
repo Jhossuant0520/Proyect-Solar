@@ -1,0 +1,171 @@
+<section class="detalle-page">
+  @if (state === 'loading') {
+    <solvix-loading-state label="Cargando cuenta por pagar." />
+  } @else if (state === 'error' || !cuenta) {
+    <solvix-error-state
+      [title]="errorTitle"
+      [message]="errorMessage"
+      (retry)="cargar()"
+    />
+  } @else {
+    <header class="detalle-head">
+      <div>
+        <div class="head-meta">
+          <solvix-badge [tone]="estadoTone(cuenta.estado, cuenta.vencida)">
+            {{ badgeLabel }}
+          </solvix-badge>
+          <span class="solvix-mono id">{{ cuenta.compraNumero }}</span>
+        </div>
+        <h1>{{ cuenta.proveedorNombre }}</h1>
+        <p class="meta">
+          Vence {{ fecha(cuenta.fechaVencimiento) }} · {{ cuenta.moneda || 'COP' }}
+        </p>
+      </div>
+      <div class="head-actions">
+        <solvix-button family="tech" rank="tertiary" icon="arrow_back" (click)="volver()">
+          Listado
+        </solvix-button>
+        <solvix-button family="tech" rank="secondary" icon="shopping_cart" (click)="verCompra()">
+          Ver compra
+        </solvix-button>
+      </div>
+    </header>
+
+    <div class="kpi-grid">
+      <solvix-metric-card label="Saldo inicial" [value]="money(cuenta.saldoInicial)" icon="receipt_long" />
+      <solvix-metric-card label="Total pagado" [value]="money(cuenta.totalPagado)" icon="payments" tone="success" />
+      <solvix-metric-card
+        label="Total devoluciones"
+        [value]="money(cuenta.totalDevoluciones)"
+        icon="assignment_return"
+      />
+      <solvix-metric-card
+        label="Saldo pendiente"
+        [value]="money(cuenta.saldoPendiente)"
+        icon="account_balance_wallet"
+        [tone]="cuenta.vencida ? 'error' : cuenta.saldoPendiente > 0 ? 'warning' : 'success'"
+      />
+    </div>
+
+    <div class="detalle-grid">
+      <section class="panel">
+        <solvix-section-header
+          kicker="Movimientos"
+          title="Historial de pagos"
+          subtitle="Abonos registrados contra esta obligación."
+        />
+        @if (pagos.length === 0) {
+          <solvix-empty-state
+            icon="payments"
+            title="Sin pagos todavía"
+            message="Registra el primer abono con el formulario de la derecha."
+          />
+        } @else {
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Método</th>
+                  <th>Referencia</th>
+                  <th class="is-num">Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of pagos; track p.id) {
+                  <tr [class.is-anulado]="p.anuladoAt">
+                    <td>{{ fecha(p.fecha) }}</td>
+                    <td>{{ metodoLabel(p.metodoPago) }}</td>
+                    <td>
+                      <span class="solvix-mono">{{ p.referencia || '—' }}</span>
+                      @if (p.observacion) {
+                        <span class="sub">{{ p.observacion }}</span>
+                      }
+                    </td>
+                    <td class="is-num">{{ money(p.valor) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+
+      <aside class="panel pago-panel">
+        <solvix-section-header
+          kicker="Abono"
+          title="Registrar pago"
+          subtitle="El valor no puede superar el saldo pendiente."
+        />
+
+        @if (!puedePagar) {
+          <p class="obs">
+            @if (cuenta.estado === 'PAGADA') {
+              Esta cuenta ya está pagada. No se aceptan más abonos.
+            } @else if (cuenta.estado === 'ANULADA') {
+              Esta cuenta está anulada.
+            } @else {
+              No hay saldo pendiente por pagar.
+            }
+          </p>
+        } @else {
+          <form class="pago-form" (ngSubmit)="registrarPago()">
+            <label>
+              Valor
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                [attr.max]="cuenta.saldoPendiente"
+                [(ngModel)]="valorPago"
+                name="valorPago"
+                required
+                placeholder="0.00"
+              />
+            </label>
+            <label>
+              Método
+              <select [(ngModel)]="metodoPago" name="metodoPago" required>
+                @for (m of metodos; track m.id) {
+                  <option [ngValue]="m.id">{{ m.label }}</option>
+                }
+              </select>
+            </label>
+            <label>
+              Fecha
+              <input type="date" [(ngModel)]="fechaPago" name="fechaPago" required />
+            </label>
+            <label>
+              Referencia
+              <input type="text" [(ngModel)]="referencia" name="referencia" maxlength="120" />
+            </label>
+            <label>
+              Observación
+              <textarea [(ngModel)]="observacion" name="observacion" rows="3" maxlength="1000"></textarea>
+            </label>
+
+            @if (valorPago != null && pagoFormInvalido) {
+              <p class="form-error" role="alert">
+                @if (valorPago <= 0) {
+                  El valor debe ser mayor que cero.
+                } @else {
+                  El valor no puede superar el saldo pendiente ({{ money(cuenta.saldoPendiente) }}).
+                }
+              </p>
+            }
+
+            <solvix-button
+              family="tech"
+              rank="primary"
+              icon="payments"
+              type="submit"
+              [disabled]="pagoFormInvalido || guardando"
+            >
+              {{ guardando ? 'Registrando…' : 'Registrar pago' }}
+            </solvix-button>
+          </form>
+        }
+      </aside>
+    </div>
+  }
+</section>

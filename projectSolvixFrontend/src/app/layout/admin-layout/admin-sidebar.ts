@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Subscription, filter } from 'rxjs';
-import { AdminNavItem } from './admin-nav';
+import { AdminNavGroup } from './admin-nav';
 
 @Component({
   selector: 'solvix-admin-sidebar',
@@ -19,7 +19,7 @@ import { AdminNavItem } from './admin-nav';
   styleUrl: './admin-sidebar.scss'
 })
 export class AdminSidebarComponent implements AfterViewInit, OnDestroy {
-  @Input() items: AdminNavItem[] = [];
+  @Input() groups: AdminNavGroup[] = [];
 
   @ViewChild('nav') nav?: ElementRef<HTMLElement>;
 

@@ -4,7 +4,7 @@ import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth.service';
 import { CuentaService } from '../../core/services/cuenta.service';
-import { ADMIN_NAV, AdminNavItem } from './admin-nav';
+import { ADMIN_NAV, AdminNavGroup } from './admin-nav';
 import { AdminSidebarComponent } from './admin-sidebar';
 import { AdminTopbarComponent } from './admin-topbar';
 
@@ -43,9 +43,14 @@ export class AdminLayoutComponent {
     return this.cuentaService.fotoUrl();
   }
 
-  get navItems(): AdminNavItem[] {
+  get navGroups(): AdminNavGroup[] {
     const isAdmin = this.authService.esAdmin();
-    return ADMIN_NAV.filter(item => !item.adminOnly || isAdmin);
+    return ADMIN_NAV
+      .map(group => ({
+        label: group.label,
+        items: group.items.filter(item => !item.adminOnly || isAdmin)
+      }))
+      .filter(group => group.items.length > 0);
   }
 
   toggleSidebar(): void {

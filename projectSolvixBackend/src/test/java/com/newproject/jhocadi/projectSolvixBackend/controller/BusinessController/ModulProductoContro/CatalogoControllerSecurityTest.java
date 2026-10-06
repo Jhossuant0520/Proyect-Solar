@@ -67,39 +67,39 @@ class CatalogoControllerSecurityTest extends ComercialTestSupport {
     }
 
     @Test
-    @DisplayName("GET /api/v1/productos sin JWT queda protegido")
+    @DisplayName("GET /api/v1/productos sin JWT queda protegido → 401")
     void productosAdminSinJwtRechazado() throws Exception {
         mockMvc.perform(get("/api/v1/productos"))
-            .andExpect(status().isForbidden());
+            .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @DisplayName("GET /api/v1/productos/{id} sin JWT queda protegido")
+    @DisplayName("GET /api/v1/productos/{id} sin JWT queda protegido → 401")
     void productoPorIdSinJwtRechazado() throws Exception {
         Producto producto = crearProducto("Admin", new BigDecimal("10"), new BigDecimal("4"), 1);
 
         mockMvc.perform(get("/api/v1/productos/{id}", producto.getId()))
-            .andExpect(status().isForbidden());
+            .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @DisplayName("GET /api/v1/productos/codigo-barras/{codigo} sin JWT queda protegido")
+    @DisplayName("GET /api/v1/productos/codigo-barras/{codigo} sin JWT queda protegido → 401")
     void codigoBarrasSinJwtRechazado() throws Exception {
         Producto producto = crearProducto("Con código", new BigDecimal("10"), new BigDecimal("4"), 1);
         producto.setCodigoBarras("7709998887776");
         productoRepository.save(producto);
 
         mockMvc.perform(get("/api/v1/productos/codigo-barras/{codigo}", "7709998887776"))
-            .andExpect(status().isForbidden());
+            .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @DisplayName("POST /api/v1/productos sin JWT queda protegido")
+    @DisplayName("POST /api/v1/productos sin JWT queda protegido → 401")
     void crearProductoSinJwtRechazado() throws Exception {
         mockMvc.perform(post("/api/v1/productos")
                 .contentType("application/json")
                 .content("{}"))
-            .andExpect(status().isForbidden());
+            .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -110,8 +110,9 @@ class CatalogoControllerSecurityTest extends ComercialTestSupport {
 
         mockMvc.perform(get("/api/v1/productos"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].costoActual").exists())
-            .andExpect(jsonPath("$[0].stockActual").exists());
+            // Listado admin resumido: stock sí, costo solo en GET /{id}
+            .andExpect(jsonPath("$[0].stockActual").exists())
+            .andExpect(jsonPath("$[0].costoActual").doesNotExist());
     }
 
     @Test

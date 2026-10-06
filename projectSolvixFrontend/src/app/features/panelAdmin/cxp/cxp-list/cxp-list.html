@@ -1,0 +1,116 @@
+<section class="cxp-page">
+  <solvix-page-header
+    kicker="Abastecimiento"
+    title="Cuentas por pagar"
+    subtitle="Obligaciones con proveedores por compras a crédito, vencimientos y abonos."
+  />
+
+  <div class="filter-bar">
+    <label>
+      Estado
+      <select [(ngModel)]="filtroEstado" (ngModelChange)="aplicarFiltros()">
+        <option value="">Todos</option>
+        @for (e of estados; track e.id) {
+          <option [ngValue]="e.id">{{ e.label }}</option>
+        }
+      </select>
+    </label>
+    <label class="toggle">
+      <input type="checkbox" [(ngModel)]="filtroVencida" (ngModelChange)="aplicarFiltros()" />
+      Solo vencidas
+    </label>
+    @if (hayFiltros) {
+      <button type="button" class="clear" (click)="limpiarFiltros()">Limpiar filtros</button>
+    }
+  </div>
+
+  @if (state === 'loading') {
+    <solvix-loading-state label="Cargando cuentas por pagar." />
+  } @else if (state === 'error') {
+    <solvix-error-state [title]="errorTitle" [message]="errorMessage" (retry)="cargar()" />
+  } @else if (state === 'empty') {
+    <solvix-empty-state
+      icon="account_balance_wallet"
+      title="Sin cuentas por pagar"
+      [message]="hayFiltros
+        ? 'No hay resultados con estos filtros.'
+        : 'Las CxP nacen al completar compras a crédito.'"
+    />
+  } @else {
+    <div class="table-wrap desktop-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Proveedor</th>
+            <th># Compra</th>
+            <th>Vencimiento</th>
+            <th class="is-num">Saldo inicial</th>
+            <th class="is-num">Saldo pendiente</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items; track item.id) {
+            <tr (click)="abrir(item)">
+              <td>
+                <strong>{{ item.proveedorNombre }}</strong>
+              </td>
+              <td class="solvix-mono">{{ item.compraNumero }}</td>
+              <td>{{ fecha(item.fechaVencimiento) }}</td>
+              <td class="is-num">{{ money(item.saldoInicial) }}</td>
+              <td class="is-num">{{ money(item.saldoPendiente) }}</td>
+              <td>
+                <solvix-badge [tone]="estadoTone(item.estado, item.vencida)">
+                  {{ badgeLabel(item) }}
+                </solvix-badge>
+              </td>
+              <td class="is-actions">
+                <solvix-button family="tech" rank="tertiary" icon="chevron_right" (click)="abrir(item)">
+                  Ver
+                </solvix-button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <ul class="mobile-cards">
+      @for (item of items; track item.id) {
+        <li>
+          <button type="button" (click)="abrir(item)">
+            <div class="card-head">
+              <strong>{{ item.proveedorNombre }}</strong>
+              <solvix-badge [tone]="estadoTone(item.estado, item.vencida)">
+                {{ badgeLabel(item) }}
+              </solvix-badge>
+            </div>
+            <span class="solvix-mono">{{ item.compraNumero }}</span>
+            <span>Vence {{ fecha(item.fechaVencimiento) }}</span>
+            <span>Pendiente {{ money(item.saldoPendiente) }} / Inicial {{ money(item.saldoInicial) }}</span>
+          </button>
+        </li>
+      }
+    </ul>
+
+    <div class="pager">
+      <span class="pager-meta">
+        {{ totalElements }} cuenta(s) · Página {{ page + 1 }} de {{ totalPages || 1 }}
+      </span>
+      <div class="pager-actions">
+        <solvix-button family="tech" rank="tertiary" [disabled]="page <= 0" (click)="paginaAnterior()">
+          Anterior
+        </solvix-button>
+        <solvix-button
+          family="tech"
+          rank="tertiary"
+          [disabled]="page + 1 >= totalPages"
+          (click)="paginaSiguiente()"
+        >
+          Siguiente
+        </solvix-button>
+      </div>
+    </div>
+  }
+</section>

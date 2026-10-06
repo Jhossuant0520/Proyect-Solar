@@ -64,7 +64,10 @@
           />
           <div class="form-grid">
             <label>
-              Tipo documento externo
+              <span class="label-row">
+                Tipo documento externo
+                <solvix-field-help [text]="helpTipoDocumento" ariaLabel="Ayuda: tipo de documento" />
+              </span>
               <select formControlName="tipoDocumentoExterno">
                 <option value="">Sin documento</option>
                 @for (tipo of tiposDocumento; track tipo.id) {
@@ -73,15 +76,24 @@
               </select>
             </label>
             <label>
-              Número documento externo
+              <span class="label-row">
+                Número documento externo
+                <solvix-field-help [text]="helpNumeroDocumento" ariaLabel="Ayuda: número de documento" />
+              </span>
               <input type="text" formControlName="numeroDocumentoExterno" maxlength="80" placeholder="F-123456" />
             </label>
             <label>
-              Número orden de compra
+              <span class="label-row">
+                Número orden de compra
+                <solvix-field-help [text]="helpOrdenCompra" ariaLabel="Ayuda: orden de compra" />
+              </span>
               <input type="text" formControlName="numeroOrdenCompra" maxlength="80" placeholder="OC-123" />
             </label>
             <label>
-              Número cotización proveedor
+              <span class="label-row">
+                Número cotización proveedor
+                <solvix-field-help [text]="helpCotizacion" ariaLabel="Ayuda: cotización" />
+              </span>
               <input type="text" formControlName="numeroCotizacionProveedor" maxlength="80" placeholder="CDV-123" />
             </label>
           </div>
@@ -91,17 +103,21 @@
           <solvix-section-header kicker="Agenda" title="Fechas" />
           <div class="form-grid">
             <label>
-              Fecha documento proveedor
+              <span class="label-row">
+                Fecha documento proveedor
+                <solvix-field-help
+                  [text]="helpFechaDocumentoProveedor"
+                  ariaLabel="Ayuda: fecha documento proveedor"
+                />
+              </span>
               <input type="date" formControlName="fechaDocumentoProveedor" />
             </label>
             <label>
-              Fecha entrega
+              <span class="label-row">
+                Fecha entrega
+                <solvix-field-help [text]="helpFechaEntrega" ariaLabel="Ayuda: fecha entrega" />
+              </span>
               <input type="date" formControlName="fechaEntrega" />
-            </label>
-            <label>
-              Fecha vencimiento
-              <input type="date" formControlName="fechaVencimiento" />
-              <span class="hint">En crédito, si la dejas vacía el sistema calcula fecha + días.</span>
             </label>
           </div>
         </section>
@@ -121,11 +137,21 @@
                 <option value="CREDITO">Crédito</option>
               </select>
             </label>
-            <label>
-              Días de crédito
-              <input type="number" formControlName="diasCreditoAplicados" min="0" step="1" />
-            </label>
           </div>
+
+          @if (esCredito) {
+            <div class="credito-fields form-grid" role="group" aria-label="Campos de crédito">
+              <label>
+                Días de crédito
+                <input type="number" formControlName="diasCreditoAplicados" min="0" step="1" />
+              </label>
+              <label>
+                Fecha vencimiento
+                <input type="date" formControlName="fechaVencimiento" />
+                <span class="hint">Si la dejas vacía el sistema calcula fecha + días.</span>
+              </label>
+            </div>
+          }
         </section>
 
         <section class="panel">

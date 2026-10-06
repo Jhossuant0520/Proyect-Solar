@@ -4,6 +4,7 @@ import { of } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { CompraDetailComponent } from './compra-detail';
 import { CompraService } from '../../../../core/services/compra.service';
+import { CxpService } from '../../../../core/services/cxp.service';
 import { ProductoService } from '../../../../core/services/producto.service';
 import { SolvixFeedbackService } from '../../../../shared/services/solvix-feedback.service';
 import { CompraResponseDTO } from '../../../../core/models/compra.models';
@@ -98,11 +99,12 @@ describe('CompraDetailComponent enriquecido', () => {
             listarDevoluciones: () => of([])
           }
         },
+        { provide: CxpService, useValue: { obtenerPorCompra: () => of({ id: 99 }) } },
         { provide: ProductoService, useValue: { listar: () => of([]) } },
         { provide: MatDialog, useValue: { open: () => ({ afterClosed: () => of(false) }) } },
         {
           provide: SolvixFeedbackService,
-          useValue: { success: () => undefined, error: () => undefined, warning: () => undefined }
+          useValue: { success: () => undefined, error: () => undefined, warning: () => undefined, info: () => undefined }
         }
       ]
     }).compileComponents();
@@ -120,6 +122,7 @@ describe('CompraDetailComponent enriquecido', () => {
     expect(html).toContain('Crédito 30 días');
     expect(html).toContain('Impuesto');
     expect(html).toContain('Ana Comercial');
+    expect(html).not.toContain('Ver Cuenta por Pagar');
   });
 
   it('soporta compra legacy sin campos nuevos', async () => {
@@ -139,11 +142,12 @@ describe('CompraDetailComponent enriquecido', () => {
             listarDevoluciones: () => of([])
           }
         },
+        { provide: CxpService, useValue: { obtenerPorCompra: () => of({ id: 99 }) } },
         { provide: ProductoService, useValue: { listar: () => of([]) } },
         { provide: MatDialog, useValue: { open: () => ({ afterClosed: () => of(false) }) } },
         {
           provide: SolvixFeedbackService,
-          useValue: { success: () => undefined, error: () => undefined }
+          useValue: { success: () => undefined, error: () => undefined, info: () => undefined }
         }
       ]
     }).compileComponents();
@@ -153,5 +157,38 @@ describe('CompraDetailComponent enriquecido', () => {
     const html = (legacyFixture.nativeElement as HTMLElement).textContent ?? '';
     expect(html).toContain('C-2025-000001');
     expect(html).toContain('Impuesto');
+  });
+
+  it('muestra enlace CxP cuando la compra CREDITO ya está completada', async () => {
+    const completada: CompraResponseDTO = { ...compra, estado: 'COMPLETADA' };
+    await TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [CompraDetailComponent],
+      providers: [
+        provideRouter([]),
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { paramMap: { get: () => '1' } } }
+        },
+        {
+          provide: CompraService,
+          useValue: {
+            obtenerPorId: () => of(completada),
+            listarDevoluciones: () => of([])
+          }
+        },
+        { provide: CxpService, useValue: { obtenerPorCompra: () => of({ id: 99 }) } },
+        { provide: ProductoService, useValue: { obtenerPorId: () => of({ id: 1, costoConocido: true, costoActual: 100 }) } },
+        { provide: MatDialog, useValue: { open: () => ({ afterClosed: () => of(false) }) } },
+        {
+          provide: SolvixFeedbackService,
+          useValue: { success: () => undefined, error: () => undefined, info: () => undefined }
+        }
+      ]
+    }).compileComponents();
+
+    const fx = TestBed.createComponent(CompraDetailComponent);
+    fx.detectChanges();
+    expect((fx.nativeElement as HTMLElement).textContent).toContain('Ver Cuenta por Pagar');
   });
 });

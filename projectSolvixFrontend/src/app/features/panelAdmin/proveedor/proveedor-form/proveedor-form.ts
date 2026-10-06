@@ -9,6 +9,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { SolvixButtonComponent } from '../../../../shared/components/solvix-button/solvix-button';
 import { SolvixErrorStateComponent } from '../../../../shared/components/solvix-error-state/solvix-error-state';
+import { SolvixFieldHelpComponent } from '../../../../shared/components/solvix-field-help/solvix-field-help';
 import { SolvixLoadingStateComponent } from '../../../../shared/components/solvix-loading-state/solvix-loading-state';
 import { SolvixPageHeaderComponent } from '../../../../shared/components/solvix-page-header/solvix-page-header';
 import { SolvixSectionHeaderComponent } from '../../../../shared/components/solvix-section-header/solvix-section-header';
@@ -39,6 +40,7 @@ type CargaEstado = 'loading' | 'ready' | 'error';
     SolvixPageHeaderComponent,
     SolvixSectionHeaderComponent,
     SolvixButtonComponent,
+    SolvixFieldHelpComponent,
     SolvixLoadingStateComponent,
     SolvixErrorStateComponent
   ]
@@ -46,6 +48,15 @@ type CargaEstado = 'loading' | 'ready' | 'error';
 export class ProveedorFormComponent implements OnInit {
   readonly condiciones = CONDICIONES_PAGO;
   readonly tiposContacto = TIPOS_CONTACTO;
+
+  readonly helpRazonSocial =
+    'Nombre legal exacto registrado en el RUT para fines de facturación.';
+  readonly helpNombreComercial =
+    'Nombre de la marca o letrero del establecimiento comercial.';
+  readonly helpDepartamento =
+    'Requerido para cálculos futuros de impuestos territoriales o logística.';
+  readonly helpCondicionesHabituales =
+    'Preferencias por defecto. Se cargarán automáticamente al hacer una compra a este proveedor, pero podrán modificarse.';
   loadState: CargaEstado = 'ready';
   enviando = false;
   error = '';

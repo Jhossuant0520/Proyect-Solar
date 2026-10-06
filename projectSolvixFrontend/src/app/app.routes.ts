@@ -27,6 +27,8 @@ import { CompraDetailComponent } from './features/panelAdmin/compra/compra-detai
 import { CompraDevolucionFormComponent } from './features/panelAdmin/compra/compra-devolucion-form/compra-devolucion-form';
 import { CompraDevolucionDetailComponent } from './features/panelAdmin/compra/compra-devolucion-detail/compra-devolucion-detail';
 import { InventarioComponent } from './features/panelAdmin/inventario/inventario';
+import { CxpListComponent } from './features/panelAdmin/cxp/cxp-list/cxp-list';
+import { CxpDetailComponent } from './features/panelAdmin/cxp/cxp-detail/cxp-detail';
 import { ClienteListComponent } from './features/panelAdmin/cliente/cliente-list/cliente-list';
 import { ClienteFormComponent } from './features/panelAdmin/cliente/cliente-form/cliente-form';
 import { ClienteDetailComponent } from './features/panelAdmin/cliente/cliente-detail/cliente-detail';
@@ -36,21 +38,6 @@ import { ProveedorDetailComponent } from './features/panelAdmin/proveedor/provee
 import { ServicioListComponent } from './features/panelAdmin/servicios/servicio-list/servicio-list';
 import { ServicioFormComponent } from './features/panelAdmin/servicios/servicio-form/servicio-form';
 import { ServicioDetailComponent } from './features/panelAdmin/servicios/servicio-detail/servicio-detail';
-
-const comingSoon = (
-  path: string,
-  titulo: string,
-  descripcion: string
-): NonNullable<Routes[number]['children']>[number] => ({
-  path,
-  loadComponent: () =>
-    import('./features/admin/coming-soon/coming-soon').then(m => m.ComingSoonPage),
-  canActivate: [adminGuard],
-  data: { titulo, descripcion }
-});
-
-const moduloPendiente =
-  'Este módulo ya tiene ruta. La pantalla y los datos se conectan más adelante.';
 
 export const routes: Routes = [
   { path: '', component: HomePage },
@@ -140,6 +127,9 @@ export const routes: Routes = [
       { path: 'compras/:id/devoluciones/:devolucionId', component: CompraDevolucionDetailComponent, canActivate: [adminGuard] },
       { path: 'compras/:id', component: CompraDetailComponent, canActivate: [adminGuard] },
 
+      { path: 'cxp', component: CxpListComponent, canActivate: [adminGuard] },
+      { path: 'cxp/:id', component: CxpDetailComponent, canActivate: [adminGuard] },
+
       { path: 'clientes', component: ClienteListComponent, canActivate: [adminGuard] },
       { path: 'clientes/nuevo', component: ClienteFormComponent, canActivate: [adminGuard] },
       { path: 'clientes/:id/editar', component: ClienteFormComponent, canActivate: [adminGuard] },
@@ -155,7 +145,39 @@ export const routes: Routes = [
       { path: 'servicios/:id', component: ServicioDetailComponent, canActivate: [adminGuard] },
 
       { path: 'inventario', component: InventarioComponent, canActivate: [adminGuard] },
-      comingSoon('reportes', 'Reportes', moduloPendiente),
+
+      {
+        path: 'reportes',
+        loadComponent: () =>
+          import('./features/panelAdmin/reportes/reportes-hub/reportes-hub').then(
+            m => m.ReportesHubComponent
+          ),
+        canActivate: [adminGuard]
+      },
+      {
+        path: 'reportes/ventas',
+        loadComponent: () =>
+          import('./features/panelAdmin/reportes/reporte-ventas/reporte-ventas').then(
+            m => m.ReporteVentasComponent
+          ),
+        canActivate: [adminGuard]
+      },
+      {
+        path: 'reportes/compras',
+        loadComponent: () =>
+          import('./features/panelAdmin/reportes/reporte-compras/reporte-compras').then(
+            m => m.ReporteComprasComponent
+          ),
+        canActivate: [adminGuard]
+      },
+      {
+        path: 'reportes/inventario',
+        loadComponent: () =>
+          import('./features/panelAdmin/reportes/reporte-inventario/reporte-inventario').then(
+            m => m.ReporteInventarioComponent
+          ),
+        canActivate: [adminGuard]
+      },
 
       { path: 'producto', redirectTo: 'productos/nuevo', pathMatch: 'full' },
       { path: 'listaproductos', redirectTo: 'productos', pathMatch: 'full' },

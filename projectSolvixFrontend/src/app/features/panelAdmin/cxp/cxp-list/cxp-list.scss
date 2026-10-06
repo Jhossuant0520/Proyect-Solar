@@ -1,0 +1,169 @@
+.cxp-page {
+  position: relative;
+  z-index: 1;
+  max-width: 80rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+  background: var(--solvix-panel);
+  border: 1px solid var(--solvix-border);
+  border-radius: var(--solvix-radius);
+  padding: 0.85rem;
+}
+
+.filter-bar label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--solvix-text-muted);
+}
+
+.filter-bar select {
+  background: var(--solvix-surface-low);
+  border: 1px solid var(--solvix-border-subtle);
+  color: var(--solvix-text);
+  border-radius: 0.125rem;
+  padding: 0.5rem 0.7rem;
+  font-family: var(--solvix-font-mono);
+  font-size: 0.78rem;
+  min-width: 12rem;
+}
+
+.toggle {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.5rem !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-size: 0.85rem !important;
+  color: var(--solvix-text) !important;
+  padding-bottom: 0.35rem;
+}
+
+.clear {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--solvix-border);
+  color: var(--solvix-text-secondary);
+  border-radius: 0.125rem;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+  font-size: 0.78rem;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  background: var(--solvix-panel);
+  border: 1px solid var(--solvix-border);
+  border-radius: var(--solvix-radius);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.75rem 0.9rem;
+  text-align: left;
+  border-bottom: 1px solid var(--solvix-border-subtle);
+  font-size: 0.85rem;
+}
+
+th {
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--solvix-text-muted);
+  font-weight: 700;
+}
+
+tbody tr {
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+tbody tr:hover {
+  background: color-mix(in srgb, var(--solvix-primary) 6%, transparent);
+}
+
+.is-num {
+  text-align: right;
+  font-family: var(--solvix-font-mono);
+}
+
+.is-actions {
+  text-align: right;
+  width: 5rem;
+}
+
+.mobile-cards {
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 0.75rem;
+}
+
+.mobile-cards button {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.9rem 1rem;
+  background: var(--solvix-panel);
+  border: 1px solid var(--solvix-border);
+  border-radius: var(--solvix-radius);
+  color: inherit;
+  cursor: pointer;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pager-meta {
+  font-size: 0.8rem;
+  color: var(--solvix-text-muted);
+  font-family: var(--solvix-font-mono);
+}
+
+.pager-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+@media (max-width: 860px) {
+  .desktop-table {
+    display: none;
+  }
+
+  .mobile-cards {
+    display: flex;
+    flex-direction: column;
+  }
+}

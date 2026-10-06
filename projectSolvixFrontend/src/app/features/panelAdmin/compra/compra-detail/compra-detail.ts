@@ -12,6 +12,7 @@ import { SolvixLoadingStateComponent } from '../../../../shared/components/solvi
 import { SolvixSectionHeaderComponent } from '../../../../shared/components/solvix-section-header/solvix-section-header';
 import { DialogoConfirmacionDelete } from '../../../../shared/components/dialogo-confirmacion-delete/dialogo-confirmacion-delete';
 import { CompraService } from '../../../../core/services/compra.service';
+import { CxpService } from '../../../../core/services/cxp.service';
 import { ProductoService } from '../../../../core/services/producto.service';
 import { CompraResponseDTO, DevolucionCompraResponseDTO } from '../../../../core/models/compra.models';
 import { ProductoModel } from '../../producto/productoClase';
@@ -49,6 +50,7 @@ export class CompraDetailComponent implements OnInit {
   state: 'loading' | 'ready' | 'error' = 'loading';
   devolucionesState: 'loading' | 'ready' | 'empty' | 'error' = 'loading';
   accionando = false;
+  navegandoCxp = false;
   errorTitle = 'No pudimos cargar esta compra.';
   errorMessage = 'La compra no existe o no está disponible.';
 
@@ -69,6 +71,7 @@ export class CompraDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private compraService: CompraService,
+    private cxpService: CxpService,
     private productoService: ProductoService,
     private dialog: MatDialog,
     private feedback: SolvixFeedbackService
@@ -81,6 +84,21 @@ export class CompraDetailComponent implements OnInit {
   get compraId(): number | null {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     return Number.isFinite(id) ? id : null;
+  }
+
+  /** CxP solo existe tras completar una compra a crédito. */
+  get muestraEnlaceCxp(): boolean {
+    if (!this.compra) {
+      return false;
+    }
+    if (this.compra.condicionPagoAplicada !== 'CREDITO') {
+      return false;
+    }
+    return (
+      this.compra.estado === 'COMPLETADA' ||
+      this.compra.estado === 'PARCIALMENTE_DEVUELTA' ||
+      this.compra.estado === 'DEVUELTA'
+    );
   }
 
   cargar(): void {
@@ -172,6 +190,26 @@ export class CompraDetailComponent implements OnInit {
     if (this.compra) {
       this.router.navigate(['/compras', this.compra.id, 'devolucion']);
     }
+  }
+
+  verCuentaPorPagar(): void {
+    if (!this.compra || !this.muestraEnlaceCxp || this.navegandoCxp) {
+      return;
+    }
+    this.navegandoCxp = true;
+    this.cxpService.obtenerPorCompra(this.compra.id).subscribe({
+      next: cxp => {
+        this.navegandoCxp = false;
+        this.router.navigate(['/cxp', cxp.id]);
+      },
+      error: error => {
+        this.navegandoCxp = false;
+        this.feedback.error(
+          mapHttpError(error, 'No encontramos la cuenta por pagar de esta compra.').message,
+          4500
+        );
+      }
+    });
   }
 
   verDevolucion(devolucion: DevolucionCompraResponseDTO): void {

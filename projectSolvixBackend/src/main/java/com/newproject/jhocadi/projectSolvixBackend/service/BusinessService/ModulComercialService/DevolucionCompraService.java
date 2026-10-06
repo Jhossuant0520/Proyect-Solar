@@ -54,6 +54,7 @@ public class DevolucionCompraService {
     private final CompraRepository compraRepository;
     private final InventarioService inventarioService;
     private final SecuenciaDocumentoService secuenciaService;
+    private final CxPService cxpService;
 
     /**
      * Registra una devolución completa: documento económico, movimientos de inventario,
@@ -154,7 +155,11 @@ public class DevolucionCompraService {
         compra.setEstado(estadoCompra);
         compraRepository.save(compra);
 
-        return DevolucionCompraResponseDTO.fromEntity(devolucionRepository.save(devolucion));
+        DevolucionCompra guardada = devolucionRepository.save(devolucion);
+        // Misma transacción: reduce obligación CxP si la compra fue a crédito.
+        cxpService.aplicarDevolucion(compra.getId(), guardada.getMontoTotalDevuelto());
+
+        return DevolucionCompraResponseDTO.fromEntity(guardada);
     }
 
     @Transactional

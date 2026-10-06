@@ -20,7 +20,11 @@
       <solvix-section-header kicker="1" title="Información empresarial" />
       <div class="form-grid">
         <label class="full">
-          <span class="label-row">Razón social <span class="req">Obligatorio</span></span>
+          <span class="label-row">
+            Razón social
+            <span class="req">Obligatorio</span>
+            <solvix-field-help [text]="helpRazonSocial" ariaLabel="Ayuda: razón social" />
+          </span>
           <input type="text" formControlName="razonSocial" maxlength="150" />
         </label>
         <label>
@@ -28,7 +32,10 @@
           <input type="text" formControlName="numeroDocumento" maxlength="40" placeholder="Ej. 900.123.456-7" />
         </label>
         <label>
-          Nombre comercial
+          <span class="label-row">
+            Nombre comercial
+            <solvix-field-help [text]="helpNombreComercial" ariaLabel="Ayuda: nombre comercial" />
+          </span>
           <input type="text" formControlName="nombreComercial" maxlength="150" />
         </label>
       </div>
@@ -64,7 +71,10 @@
           <input type="text" formControlName="ciudad" maxlength="100" />
         </label>
         <label>
-          Departamento
+          <span class="label-row">
+            Departamento
+            <solvix-field-help [text]="helpDepartamento" ariaLabel="Ayuda: departamento" />
+          </span>
           <input type="text" formControlName="departamento" maxlength="100" />
         </label>
       </div>
@@ -73,7 +83,13 @@
         kicker="4"
         title="Condiciones comerciales habituales"
         subtitle="Son preferencias del maestro. No congelan una compra concreta."
-      />
+      >
+        <solvix-field-help
+          [text]="helpCondicionesHabituales"
+          ariaLabel="Ayuda: condiciones comerciales habituales"
+          placement="bottom"
+        />
+      </solvix-section-header>
       <div class="form-grid">
         <label>
           Condición de pago

@@ -1,0 +1,150 @@
+<section class="reporte-page">
+  <solvix-page-header
+    kicker="Reportes"
+    title="Compras"
+    subtitle="Totales de documento, gasto por proveedor y productos. El IVA puede ir incluido en el total."
+  >
+    <solvix-button family="tech" rank="tertiary" icon="arrow_back" (click)="volver()">
+      Hub
+    </solvix-button>
+    <solvix-button
+      family="tech"
+      rank="primary"
+      icon="download"
+      [disabled]="exportando || state === 'loading'"
+      (click)="exportar()"
+    >
+      {{ exportando ? 'Exportando…' : 'Exportar CSV' }}
+    </solvix-button>
+  </solvix-page-header>
+
+  <div class="filtros">
+    <label>
+      Período
+      <select [ngModel]="periodo.preset" (ngModelChange)="onPreset($event)">
+        @for (p of presets; track p.id) {
+          <option [ngValue]="p.id">{{ p.label }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      Desde
+      <input type="date" [(ngModel)]="periodo.desde" (change)="marcarPersonalizado()" />
+    </label>
+    <label>
+      Hasta
+      <input type="date" [(ngModel)]="periodo.hasta" (change)="marcarPersonalizado()" />
+    </label>
+    <label>
+      Agrupación
+      <select [(ngModel)]="agrupacion">
+        @for (a of agrupaciones; track a.id) {
+          <option [ngValue]="a.id">{{ a.label }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      Proveedor
+      <select [(ngModel)]="proveedorId">
+        <option [ngValue]="null">Todos</option>
+        @for (p of proveedores; track p.id) {
+          <option [ngValue]="p.id">{{ p.nombre }}</option>
+        }
+      </select>
+    </label>
+    <div class="filtros-actions">
+      <solvix-button family="tech" rank="secondary" (click)="cargar()">Aplicar</solvix-button>
+    </div>
+  </div>
+
+  @if (state === 'loading') {
+    <solvix-loading-state label="Cargando reporte de compras." />
+  } @else if (state === 'error') {
+    <solvix-error-state [title]="errorTitle" [message]="errorMessage" (retry)="cargar()" />
+  } @else if (state === 'empty') {
+    <solvix-empty-state
+      icon="shopping_cart"
+      title="Sin compras en el período"
+      message="Completa compras o amplía el rango de fechas."
+    />
+  } @else if (reporte) {
+    <div class="kpi-grid">
+      <solvix-metric-card label="Compras brutas" [value]="money(reporte.comprasBrutas)" icon="shopping_bag" />
+      <solvix-metric-card label="Devoluciones" [value]="money(reporte.devolucionesCompra)" icon="assignment_return" />
+      <solvix-metric-card label="Compras netas" [value]="money(reporte.comprasNetas)" icon="account_balance_wallet" tone="success" />
+      <solvix-metric-card label="Órdenes" [value]="qty(reporte.ordenes)" icon="receipt_long" />
+    </div>
+
+    <section class="panel">
+      <solvix-section-header kicker="Proveedores" title="Gasto por proveedor" />
+      <div class="table-wrap desktop-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Proveedor</th>
+              <th class="is-num">Brutas</th>
+              <th class="is-num">Devoluciones</th>
+              <th class="is-num">Netas</th>
+              <th class="is-num">Órdenes</th>
+              <th class="is-num">Participación</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of gastoProveedor; track p.proveedorId) {
+              <tr>
+                <td>{{ p.nombre }}</td>
+                <td class="is-num">{{ money(p.comprasBrutas) }}</td>
+                <td class="is-num">{{ money(p.devoluciones) }}</td>
+                <td class="is-num">{{ money(p.comprasNetas) }}</td>
+                <td class="is-num">{{ p.ordenes }}</td>
+                <td class="is-num">{{ percent(p.participacion) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <ul class="mobile-lines">
+        @for (p of gastoProveedor; track p.proveedorId) {
+          <li>
+            <strong>{{ p.nombre }}</strong>
+            <span>Netas {{ money(p.comprasNetas) }} · {{ percent(p.participacion) }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <section class="panel">
+      <solvix-section-header kicker="Productos" title="Productos comprados" />
+      <div class="table-wrap desktop-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th class="is-num">Unidades</th>
+              <th class="is-num">Devueltas</th>
+              <th class="is-num">Costo neto</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of productos; track p.productoId) {
+              <tr>
+                <td>{{ p.nombre }}</td>
+                <td class="is-num">{{ p.unidades }}</td>
+                <td class="is-num">{{ p.unidadesDevueltas }}</td>
+                <td class="is-num">{{ money(p.costoNeto) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <ul class="mobile-lines">
+        @for (p of productos; track p.productoId) {
+          <li>
+            <strong>{{ p.nombre }}</strong>
+            <span>{{ p.unidades }} u. · Neto {{ money(p.costoNeto) }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</section>

@@ -1,0 +1,53 @@
+.reportes-hub {
+  position: relative;
+  z-index: 1;
+  max-width: 72rem;
+}
+
+.hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.hub-card {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.hub-card__body {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.85rem;
+  align-items: center;
+  padding: 0.35rem 0.15rem;
+}
+
+.hub-card__icon {
+  font-size: 1.75rem;
+  color: var(--solvix-secondary);
+}
+
+.hub-card__chevron {
+  color: var(--solvix-text-muted);
+}
+
+.hub-card h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-family: var(--solvix-font);
+}
+
+.hub-card p {
+  margin: 0.25rem 0 0;
+  color: var(--solvix-text-muted);
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.hub-card:hover .hub-card__chevron,
+.hub-card:focus-visible .hub-card__chevron {
+  color: var(--solvix-secondary);
+}

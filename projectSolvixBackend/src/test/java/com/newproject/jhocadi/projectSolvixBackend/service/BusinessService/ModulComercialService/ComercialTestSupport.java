@@ -107,6 +107,12 @@ public abstract class ComercialTestSupport {
     @Autowired
     protected com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulNotificacion.NotificacionRepository notificacionRepository;
 
+    @Autowired
+    protected com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulComercialRepo.PagoCxPRepository pagoCxPRepository;
+
+    @Autowired
+    protected com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulComercialRepo.CuentaPorPagarRepository cuentaPorPagarRepository;
+
     @BeforeEach
     protected void limpiarDatos() {
         documentoCotizacionComercialRepository.deleteAll();
@@ -117,6 +123,9 @@ public abstract class ComercialTestSupport {
         devolucionVentaRepository.deleteAll();
         ventaRepository.deleteAll();
         devolucionCompraRepository.deleteAll();
+        // CxP referencia compras: borrar pagos y cuentas antes de compras.
+        pagoCxPRepository.deleteAll();
+        cuentaPorPagarRepository.deleteAll();
         compraRepository.deleteAll();
         ajusteCostoRepository.deleteAll();
         documentoOrdenServicioRepository.deleteAll();

@@ -36,6 +36,17 @@
             Registrar devolución
           </solvix-button>
         }
+        @if (muestraEnlaceCxp) {
+          <solvix-button
+            family="tech"
+            rank="secondary"
+            icon="account_balance_wallet"
+            [disabled]="navegandoCxp"
+            (click)="verCuentaPorPagar()"
+          >
+            {{ navegandoCxp ? 'Buscando CxP…' : 'Ver Cuenta por Pagar' }}
+          </solvix-button>
+        }
       </div>
     </header>
 
@@ -211,6 +222,17 @@
               </div>
             }
           </dl>
+          @if (muestraEnlaceCxp) {
+            <solvix-button
+              family="tech"
+              rank="secondary"
+              icon="account_balance_wallet"
+              [disabled]="navegandoCxp"
+              (click)="verCuentaPorPagar()"
+            >
+              {{ navegandoCxp ? 'Buscando CxP…' : 'Ver Cuenta por Pagar' }}
+            </solvix-button>
+          }
         </section>
 
         <section class="panel">

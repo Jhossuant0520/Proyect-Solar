@@ -54,6 +54,7 @@ public class CompraService {
     private final InventarioService inventarioService;
     private final SecuenciaDocumentoService secuenciaService;
     private final PoliticaCosteoInventario politicaCosteo;
+    private final CxPService cxpService;
 
     @Transactional
     public CompraResponseDTO crear(CompraRequestDTO request, String usuario) {
@@ -136,7 +137,11 @@ public class CompraService {
         compra.setEstado(EstadoCompra.COMPLETADA);
         compra.setFechaCompletada(LocalDateTime.now());
 
-        return CompraResponseDTO.fromEntity(compraRepository.save(compra));
+        Compra guardada = compraRepository.save(compra);
+        // Misma transacción: si falla CxP, no se confirma el inventario.
+        cxpService.crearDesdeCompraCompletada(guardada, usuario);
+
+        return CompraResponseDTO.fromEntity(guardada);
     }
 
     @Transactional

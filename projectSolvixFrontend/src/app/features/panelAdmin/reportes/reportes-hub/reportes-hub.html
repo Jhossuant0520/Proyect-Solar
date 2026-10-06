@@ -1,0 +1,30 @@
+<section class="reportes-hub">
+  <solvix-page-header
+    kicker="Analítica"
+    title="Reportes"
+    subtitle="Consulta resúmenes operativos y exporta CSV. Las métricas las calcula el backend."
+  />
+
+  <solvix-section-header
+    kicker="Catálogo"
+    title="Elige un reporte"
+    subtitle="Cada vista permite filtrar por período y descargar el archivo CSV con tu sesión."
+  />
+
+  <div class="hub-grid">
+    @for (card of cards; track card.id) {
+      <a class="hub-card" [routerLink]="card.path">
+        <solvix-card>
+          <div class="hub-card__body">
+            <span class="material-symbols-outlined hub-card__icon" aria-hidden="true">{{ card.icon }}</span>
+            <div>
+              <h2>{{ card.title }}</h2>
+              <p>{{ card.subtitle }}</p>
+            </div>
+            <span class="material-symbols-outlined hub-card__chevron" aria-hidden="true">chevron_right</span>
+          </div>
+        </solvix-card>
+      </a>
+    }
+  </div>
+</section>

@@ -74,13 +74,13 @@ class ProductoImagenControllerTest extends ComercialTestSupport {
     }
 
     @Test
-    @DisplayName("subida sin JWT queda protegida")
+    @DisplayName("subida sin JWT queda protegida → 401")
     void subidaSinJwt() throws Exception {
         Producto producto = crearProducto("Anon", new BigDecimal("10"), new BigDecimal("4"), 1);
 
         mockMvc.perform(multipart("/api/v1/productos/{id}/imagen", producto.getId())
                 .file(ProductoImagenServiceTest.jpegFile("a.jpg")))
-            .andExpect(status().isForbidden());
+            .andExpect(status().isUnauthorized());
     }
 
     @Test
