@@ -38,6 +38,8 @@ import {
   mapHttpError,
   mensajeErrorServicio,
   puedeEditarTextos,
+  puedeEditarCampoTecnico,
+  hintCampoBloqueado,
   tipoAccionWorkflow,
   toneEstadoOrden,
   valorTextoTecnico,
@@ -240,6 +242,14 @@ export class ServicioDetailComponent implements OnInit {
 
   get diagnosticoYaDiligenciado(): boolean {
     return !!(this.orden?.diagnostico ?? '').trim();
+  }
+
+  puedeEditarCampo(campoId: CampoTecnicoId): boolean {
+    return this.orden ? puedeEditarCampoTecnico(this.orden.estado, campoId) : false;
+  }
+
+  hintBloqueado(campoId: CampoTecnicoId): string | null {
+    return this.orden ? hintCampoBloqueado(this.orden.estado, campoId) : null;
   }
 
   get historialReciente(): HistorialEstadoOrdenServicioResponseDTO[] {

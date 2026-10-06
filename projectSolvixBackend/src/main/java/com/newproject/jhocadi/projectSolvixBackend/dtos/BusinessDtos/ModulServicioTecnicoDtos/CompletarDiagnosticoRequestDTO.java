@@ -6,9 +6,9 @@ import lombok.Data;
 
 /**
  * Completar diagnóstico de forma atómica.
- * Origen permitido: RECEPCIONADO o EN_DIAGNOSTICO → DIAGNOSTICADO.
- * Desde RECEPCIONADO se registra también el paso intermedio EN_DIAGNOSTICO (historial).
- * No avanza a cotización/reparación: el trabajo realizado opcional solo se persiste.
+ * Origen permitido: EN_DIAGNOSTICO → DIAGNOSTICADO.
+ * RECEPCIONADO se rechaza: primero debe ejecutarse "Iniciar diagnóstico" (RECEPCIONADO → EN_DIAGNOSTICO).
+ * El trabajo realizado no se acepta en esta operación (pertenece a EN_REPARACION); si llega con texto se rechaza.
  */
 @Data
 public class CompletarDiagnosticoRequestDTO {

@@ -46,9 +46,9 @@ export function urlConsultaOtPublica(publicWebBaseUrl: string, tokenConsulta: st
   return `${base}/consulta/ot/${token}`;
 }
 
+// Función auxiliar opcional para manejar el saludo según si hay nombre o no
 function nombreSaludo(nombre: string | null | undefined): string {
-  const n = (nombre ?? '').trim();
-  return n || 'cliente';
+  return nombre && nombre.trim() !== '' ? nombre.trim() : 'Estimado/a cliente';
 }
 
 export function mensajeRecepcion(params: {
@@ -57,15 +57,16 @@ export function mensajeRecepcion(params: {
   urlConsulta: string;
 }): string {
   return [
-    `Hola ${nombreSaludo(params.nombre)} 👋`,
+    `¡Hola *${nombreSaludo(params.nombre)}*! 👋`,
     '',
-    'Recibimos tu equipo en Computer & Electronic Center.',
+    'Hemos recibido tu equipo exitosamente en *Computer & Electronic Center*. 🛠️',
     '',
-    `Orden de servicio: ${params.ordenNumero}`,
+    `📄 *Orden de servicio:* #${params.ordenNumero}`,
     '',
-    'Puedes consultar el estado de tu equipo aquí:',
+    'Puedes consultar el estado de tu equipo en tiempo real aquí:',
+    params.urlConsulta,
     '',
-    params.urlConsulta
+    'Te estaremos notificando cualquier novedad. ¡Gracias por confiar en nosotros! 🙌'
   ].join('\n');
 }
 
@@ -76,16 +77,17 @@ export function mensajeCotizacion(params: {
   urlConsulta: string;
 }): string {
   return [
-    `Hola ${nombreSaludo(params.nombre)} 👋`,
+    `¡Hola *${nombreSaludo(params.nombre)}*! 👋`,
     '',
-    'Tu cotización ya está disponible.',
+    'Te informamos que la cotización de tu equipo ya se encuentra disponible. 📋✨',
     '',
-    `Cotización: ${params.cotizacionNumero}`,
-    `Orden de servicio: ${params.ordenNumero}`,
+    `💰 *Cotización:* #${params.cotizacionNumero}`,
+    `📄 *Orden de servicio:* #${params.ordenNumero}`,
     '',
-    'Puedes revisarla y aprobarla o rechazarla desde este enlace:',
+    'Puedes revisarla en detalle y aprobarla o rechazarla desde el siguiente enlace:',
+    params.urlConsulta,
     '',
-    params.urlConsulta
+    'Quedamos atentos a tu confirmación para proceder con el servicio. ¡Quedamos a tu disposición! ⚙️'
   ].join('\n');
 }
 
@@ -95,15 +97,16 @@ export function mensajeEquipoListo(params: {
   urlConsulta: string;
 }): string {
   return [
-    `Hola ${nombreSaludo(params.nombre)} 👋`,
+    `¡Hola *${nombreSaludo(params.nombre)}*! 🎉`,
     '',
-    'Tu equipo ya está listo para entrega.',
+    '¡Buenas noticias! Tu equipo ya está reparado y *listo para entrega* en *Computer & Electronic Center*. ✅',
     '',
-    `Orden de servicio: ${params.ordenNumero}`,
+    `📄 *Orden de servicio:* #${params.ordenNumero}`,
     '',
-    'Consulta los detalles aquí:',
+    'Puedes consultar todos los detalles, garantía o información de recogida aquí:',
+    params.urlConsulta,
     '',
-    params.urlConsulta
+    'Te esperamos por él en nuestro horario habitual. ¡Ha sido un gusto atenderte! 🚀'
   ].join('\n');
 }
 

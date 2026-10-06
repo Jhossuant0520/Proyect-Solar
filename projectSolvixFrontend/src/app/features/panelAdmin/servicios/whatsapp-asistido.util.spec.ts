@@ -65,7 +65,7 @@ describe('whatsapp-asistido.util', () => {
         ordenNumero: 'OS-1',
         urlConsulta: url
       });
-      expect(msg).toContain('Hola Ana');
+      expect(msg).toContain('Ana');
       expect(msg).toContain('👋');
       expect(msg).toContain('OS-1');
       expect(msg).toContain(url);
@@ -95,7 +95,7 @@ describe('whatsapp-asistido.util', () => {
         ordenNumero: 'OS-1',
         urlConsulta: url
       });
-      expect(listo).toContain('Hola cliente');
+      expect(listo).toContain('Estimado/a cliente');
       expect(listo).not.toContain('recogerlo hoy');
       expect(listo).not.toContain('undefined');
     });

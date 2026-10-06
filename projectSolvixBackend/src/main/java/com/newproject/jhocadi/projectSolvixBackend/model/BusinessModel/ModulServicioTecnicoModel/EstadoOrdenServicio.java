@@ -42,11 +42,31 @@ public enum EstadoOrdenServicio {
         Map.entry(CANCELADO, EnumSet.noneOf(EstadoOrdenServicio.class))
     );
 
+    /**
+     * Estados donde "trabajo realizado" pertenece a la ficha técnica:
+     * reparación y etapas posteriores. Nunca antes de EN_REPARACION.
+     */
+    private static final Set<EstadoOrdenServicio> ESTADOS_CON_TRABAJO_REALIZADO = EnumSet.of(
+        EN_REPARACION, ESPERA_REPUESTO, REQUIERE_APROBACION_ADICIONAL, LISTO, ENTREGADO);
+
     public boolean puedeTransicionarA(EstadoOrdenServicio destino) {
         if (destino == null || destino == this) {
             return false;
         }
         return TRANSICIONES.getOrDefault(this, Set.of()).contains(destino);
+    }
+
+    /**
+     * El diagnóstico solo se registra una vez iniciado el diagnóstico formal
+     * (RECEPCIONADO → EN_DIAGNOSTICO). En RECEPCIONADO no se admite.
+     */
+    public boolean permiteDiagnostico() {
+        return this != RECEPCIONADO;
+    }
+
+    /** "Trabajo realizado" solo existe desde EN_REPARACION en adelante. */
+    public boolean permiteTrabajoRealizado() {
+        return ESTADOS_CON_TRABAJO_REALIZADO.contains(this);
     }
 
     public boolean esTerminal() {

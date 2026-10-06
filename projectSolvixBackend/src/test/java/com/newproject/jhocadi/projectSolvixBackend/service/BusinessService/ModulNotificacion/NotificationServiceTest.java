@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.CambiarEstadoOrdenServicioRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.CompletarDiagnosticoRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.EquipoRequestDTO;
 import com.newproject.jhocadi.projectSolvixBackend.dtos.BusinessDtos.ModulServicioTecnicoDtos.EquipoResponseDTO;
@@ -22,6 +23,7 @@ import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulNoti
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulNotificacion.EstadoNotificacion;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulNotificacion.Notificacion;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulNotificacion.TipoEventoNotificacion;
+import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.EstadoOrdenServicio;
 import com.newproject.jhocadi.projectSolvixBackend.model.BusinessModel.ModulServicioTecnicoModel.TipoEquipo;
 import com.newproject.jhocadi.projectSolvixBackend.repository.BusinessRepo.ModulNotificacion.NotificacionRepository;
 import com.newproject.jhocadi.projectSolvixBackend.service.BusinessService.ModulComercialService.ComercialTestSupport;
@@ -164,6 +166,9 @@ class NotificationServiceTest extends ComercialTestSupport {
     @DisplayName("completarDiagnostico dispara DIAGNOSTICO_COMPLETADO")
     void diagnosticoDisparaEvento() {
         OrdenServicioResponseDTO orden = crearOrden();
+        CambiarEstadoOrdenServicioRequestDTO inicio = new CambiarEstadoOrdenServicioRequestDTO();
+        inicio.setNuevoEstado(EstadoOrdenServicio.EN_DIAGNOSTICO);
+        ordenServicioService.cambiarEstado(orden.getId(), inicio, USUARIO);
         CompletarDiagnosticoRequestDTO req = new CompletarDiagnosticoRequestDTO();
         req.setDiagnostico("Fuente dañada");
         ordenServicioService.completarDiagnostico(orden.getId(), req, USUARIO);

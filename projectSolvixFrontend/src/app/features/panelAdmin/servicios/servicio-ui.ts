@@ -454,6 +454,39 @@ export function puedeEditarTextos(estado: EstadoOrdenServicio | string): boolean
   return !esEstadoTerminal(estado);
 }
 
+export function puedeEditarCampoTecnico(estado: EstadoOrdenServicio | string, campoId: CampoTecnicoId): boolean {
+  if (esEstadoTerminal(estado)) return false;
+
+  switch (campoId) {
+    case 'diagnostico':
+      return estado === 'EN_DIAGNOSTICO';
+      
+    case 'trabajoRealizado':
+      return estado === 'EN_REPARACION' || estado === 'ESPERA_REPUESTO' || estado === 'REQUIERE_APROBACION_ADICIONAL';
+      
+    case 'problemaReportado':
+    case 'observaciones':
+      return true;
+      
+    default:
+      return false;
+  }
+}
+
+export function hintCampoBloqueado(estado: EstadoOrdenServicio | string, campoId: CampoTecnicoId): string | null {
+  if (campoId === 'diagnostico') {
+    if (estado === 'RECEPCIONADO') {
+      return 'El diagnóstico estará disponible cuando inicies el diagnóstico.';
+    }
+  }
+  if (campoId === 'trabajoRealizado') {
+    if (estado === 'RECEPCIONADO' || estado === 'EN_DIAGNOSTICO' || estado === 'DIAGNOSTICADO' || estado === 'COTIZADO' || estado === 'PENDIENTE_APROBACION' || estado === 'APROBADO') {
+      return 'El trabajo realizado se registra durante la reparación.';
+    }
+  }
+  return null;
+}
+
 export type CampoTecnicoId =
   | 'problemaReportado'
   | 'diagnostico'

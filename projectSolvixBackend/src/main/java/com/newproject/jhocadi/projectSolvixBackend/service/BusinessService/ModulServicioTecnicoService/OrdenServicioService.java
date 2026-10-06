@@ -87,6 +87,11 @@ public class OrdenServicioService {
     public OrdenServicioResponseDTO crear(OrdenServicioRequestDTO request, String usuario) {
         validarUsuario(usuario);
         validarFirmaRecepcion(request);
+        // La OT nace en RECEPCIONADO: sin diagnóstico ni trabajo realizado.
+        validarDisponibilidadCamposTecnicos(
+            EstadoOrdenServicio.RECEPCIONADO,
+            textoOpcional(request.getDiagnostico()), null,
+            textoOpcional(request.getTrabajoRealizado()), null);
 
         Cliente cliente = resolverClienteActivoParaTaller(request.getClienteId());
         Equipo equipo = equipoService.buscarOFallar(request.getEquipoId());
@@ -105,8 +110,8 @@ public class OrdenServicioService {
             .equipo(equipo)
             .estado(EstadoOrdenServicio.RECEPCIONADO)
             .problemaReportado(textoOpcional(request.getProblemaReportado()))
-            .diagnostico(textoOpcional(request.getDiagnostico()))
-            .trabajoRealizado(textoOpcional(request.getTrabajoRealizado()))
+            .diagnostico(null)
+            .trabajoRealizado(null)
             .observaciones(textoOpcional(request.getObservaciones()))
             .createdBy(responsable)
             .build();
@@ -243,9 +248,16 @@ public class OrdenServicioService {
                 "No se puede cambiar el cliente ni el equipo de una orden existente.");
         }
 
+        String diagnosticoNuevo = textoOpcional(request.getDiagnostico());
+        String trabajoNuevo = textoOpcional(request.getTrabajoRealizado());
+        validarDisponibilidadCamposTecnicos(
+            orden.getEstado(),
+            diagnosticoNuevo, textoOpcional(orden.getDiagnostico()),
+            trabajoNuevo, textoOpcional(orden.getTrabajoRealizado()));
+
         orden.setProblemaReportado(textoOpcional(request.getProblemaReportado()));
-        orden.setDiagnostico(textoOpcional(request.getDiagnostico()));
-        orden.setTrabajoRealizado(textoOpcional(request.getTrabajoRealizado()));
+        orden.setDiagnostico(diagnosticoNuevo);
+        orden.setTrabajoRealizado(trabajoNuevo);
         orden.setObservaciones(textoOpcional(request.getObservaciones()));
         return OrdenServicioResponseDTO.fromEntity(ordenServicioRepository.save(orden));
     }
@@ -320,12 +332,12 @@ public class OrdenServicioService {
     }
 
     /**
-     * Guarda ficha técnica y avanza a DIAGNOSTICADO en una sola transacción.
-     * <ul>
-     *   <li>RECEPCIONADO → EN_DIAGNOSTICO → DIAGNOSTICADO (historial de ambos pasos)</li>
-     *   <li>EN_DIAGNOSTICO → DIAGNOSTICADO</li>
-     * </ul>
-     * No salta cotización/aprobación ni pasa a EN_REPARACION aunque venga trabajo realizado.
+     * Guarda el diagnóstico y avanza EN_DIAGNOSTICO → DIAGNOSTICADO en una sola transacción.
+     * <p>
+     * Solo se admite con la orden en EN_DIAGNOSTICO. Desde RECEPCIONADO se rechaza: la puerta
+     * formal es la transición RECEPCIONADO → EN_DIAGNOSTICO ("Iniciar diagnóstico"), que debe
+     * quedar en historial y visible en la consulta pública.
+     * No persiste trabajo realizado (pertenece a EN_REPARACION) ni salta cotización/aprobación.
      */
     @Transactional
     public TransicionOrdenServicioResponseDTO completarDiagnostico(
@@ -335,32 +347,25 @@ public class OrdenServicioService {
         validarUsuario(usuario);
         OrdenServicio orden = buscarOFallar(id);
         EstadoOrdenServicio estado = orden.getEstado();
-        if (estado != EstadoOrdenServicio.RECEPCIONADO
-                && estado != EstadoOrdenServicio.EN_DIAGNOSTICO) {
+        if (estado != EstadoOrdenServicio.EN_DIAGNOSTICO) {
             throw new BusinessException(
-                "Solo se puede completar el diagnóstico desde RECEPCIONADO o EN_DIAGNOSTICO.");
+                estado == EstadoOrdenServicio.RECEPCIONADO
+                    ? "Inicia el diagnóstico antes de registrarlo: la orden debe estar en EN_DIAGNOSTICO."
+                    : "Solo se puede registrar el diagnóstico con la orden en EN_DIAGNOSTICO.");
         }
 
         String diagnostico = textoRequerido(
             request.getDiagnostico(),
             "Completa el diagnóstico técnico para continuar.");
-
-        if (estado == EstadoOrdenServicio.RECEPCIONADO) {
-            String motivoInicio = EstadoOrdenServicio.motivoAutomatico(
-                EstadoOrdenServicio.RECEPCIONADO, EstadoOrdenServicio.EN_DIAGNOSTICO);
-            aplicarTransicion(
-                orden, EstadoOrdenServicio.EN_DIAGNOSTICO, motivoInicio, null, usuario.trim());
-            orden = buscarOFallar(id);
+        if (!textoVacio(request.getTrabajoRealizado())) {
+            throw new BusinessException(
+                "El trabajo realizado no se registra durante el diagnóstico; corresponde a la etapa de reparación.");
         }
 
         if (request.getProblemaReportado() != null) {
             orden.setProblemaReportado(textoOpcional(request.getProblemaReportado()));
         }
         orden.setDiagnostico(diagnostico);
-        if (request.getTrabajoRealizado() != null) {
-            // Persistencia anticipada permitida; el workflow no avanza a reparación aquí.
-            orden.setTrabajoRealizado(textoOpcional(request.getTrabajoRealizado()));
-        }
         if (request.getObservaciones() != null) {
             orden.setObservaciones(textoOpcional(request.getObservaciones()));
         }
@@ -663,6 +668,31 @@ public class OrdenServicioService {
     private void validarUsuario(String usuario) {
         if (usuario == null || usuario.isBlank()) {
             throw new BusinessException("Se requiere un usuario autenticado para cambiar el estado.");
+        }
+    }
+
+    /**
+     * La disponibilidad de diagnóstico / trabajo realizado la decide el estado de la OT
+     * ({@link EstadoOrdenServicio#permiteDiagnostico()}, {@link EstadoOrdenServicio#permiteTrabajoRealizado()}).
+     * Solo rechaza cuando el valor cambia, para no romper PUT con la ficha completa sin modificaciones.
+     */
+    private void validarDisponibilidadCamposTecnicos(
+            EstadoOrdenServicio estado,
+            String diagnosticoNuevo,
+            String diagnosticoActual,
+            String trabajoNuevo,
+            String trabajoActual) {
+        if (!estado.permiteDiagnostico()
+                && !java.util.Objects.equals(diagnosticoNuevo, diagnosticoActual)) {
+            throw new BusinessException(
+                "El diagnóstico no se puede registrar con la orden en " + estado
+                    + ". Inicia primero el diagnóstico.");
+        }
+        if (!estado.permiteTrabajoRealizado()
+                && !java.util.Objects.equals(trabajoNuevo, trabajoActual)) {
+            throw new BusinessException(
+                "El trabajo realizado no se puede registrar con la orden en " + estado
+                    + ". Solo está disponible desde la reparación.");
         }
     }
 

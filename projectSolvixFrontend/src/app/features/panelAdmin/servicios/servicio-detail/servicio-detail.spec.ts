@@ -545,7 +545,7 @@ describe('ServicioDetailComponent — workflow', () => {
       const href = open.calls.mostRecent().args[0] as string;
       const texto = decodeURIComponent(href.split('text=')[1]);
       expect(texto).toContain('COT-2026-000099');
-      expect(texto).toContain('Tu cotización ya está disponible');
+      expect(texto).toContain('cotización de tu equipo ya se encuentra disponible');
     }));
 
     it('equipo listo en LISTO; no disponible en RECEPCIONADO', fakeAsync(() => {

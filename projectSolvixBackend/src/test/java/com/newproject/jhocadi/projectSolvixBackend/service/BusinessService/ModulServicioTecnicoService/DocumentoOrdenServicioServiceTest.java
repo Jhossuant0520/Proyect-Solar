@@ -329,12 +329,13 @@ class DocumentoOrdenServicioServiceTest extends ComercialTestSupport {
     }
 
     @Test
-    @DisplayName("D.13: consulta pública tras completarDiagnostico desde RECEPCIONADO refleja DIAGNOSTICO")
-    void consultaPublicaTrasCompletarDesdeRecepcionado() {
+    @DisplayName("D.13: consulta pública tras completarDiagnostico desde EN_DIAGNOSTICO refleja DIAGNOSTICO")
+    void consultaPublicaTrasCompletarDesdeDiagnostico() {
         OrdenServicioResponseDTO orden = crearOrdenBasica();
+        avanzar(orden.getId(), EstadoOrdenServicio.EN_DIAGNOSTICO);
+        
         CompletarDiagnosticoRequestDTO req = new CompletarDiagnosticoRequestDTO();
         req.setDiagnostico("Fuente dañada");
-        req.setTrabajoRealizado("Cambio anticipado");
         ordenServicioService.completarDiagnostico(orden.getId(), req, USUARIO_TEST);
 
         OrdenServicio entity = ordenServicioRepository.findById(orden.getId()).orElseThrow();

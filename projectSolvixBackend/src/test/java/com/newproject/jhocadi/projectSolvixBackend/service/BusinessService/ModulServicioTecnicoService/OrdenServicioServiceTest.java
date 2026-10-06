@@ -157,27 +157,46 @@ class OrdenServicioServiceTest extends ComercialTestSupport {
     }
 
     @Test
-    @DisplayName("D.13: completarDiagnostico desde RECEPCIONADO → DIAGNOSTICADO con historial intermedio")
-    void completarDiagnosticoDesdeRecepcionado() {
+    @DisplayName("Caso 1: RECEPCIONADO → guardar diagnóstico se rechaza; el estado no cambia ni se persiste nada")
+    void completarDiagnosticoDesdeRecepcionadoSeRechaza() {
         OrdenServicioResponseDTO orden = crearOrdenBasica();
         assertThat(orden.getEstado()).isEqualTo(EstadoOrdenServicio.RECEPCIONADO);
 
         CompletarDiagnosticoRequestDTO req = new CompletarDiagnosticoRequestDTO();
         req.setProblemaReportado("No enciende");
         req.setDiagnostico("Fuente dañada");
-        req.setTrabajoRealizado("Cambio de fuente (anticipado)");
-        req.setObservaciones("Todo en una sola operación");
+
+        assertThatThrownBy(() ->
+                ordenServicioService.completarDiagnostico(orden.getId(), req, USUARIO_TEST))
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("Inicia el diagnóstico");
+
+        OrdenServicioResponseDTO despues = ordenServicioService.obtenerPorId(orden.getId());
+        assertThat(despues.getEstado()).isEqualTo(EstadoOrdenServicio.RECEPCIONADO);
+        assertThat(despues.getDiagnostico()).isNull();
+        assertThat(ordenServicioService.listarHistorial(orden.getId())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Caso 3: EN_DIAGNOSTICO → guardar diagnóstico → DIAGNOSTICADO; historial conserva ambos pasos")
+    void historialConservaIniciarYCompletarDiagnostico() {
+        OrdenServicioResponseDTO orden = crearOrdenBasica();
+        avanzar(orden.getId(), EstadoOrdenServicio.EN_DIAGNOSTICO);
+
+        CompletarDiagnosticoRequestDTO req = new CompletarDiagnosticoRequestDTO();
+        req.setProblemaReportado("No enciende");
+        req.setDiagnostico("Fuente dañada");
+        req.setObservaciones("Dos pasos reales");
 
         TransicionOrdenServicioResponseDTO res =
             ordenServicioService.completarDiagnostico(orden.getId(), req, USUARIO_TEST);
 
+        assertThat(res.getEstadoAnterior()).isEqualTo(EstadoOrdenServicio.EN_DIAGNOSTICO);
         assertThat(res.getEstadoNuevo()).isEqualTo(EstadoOrdenServicio.DIAGNOSTICADO);
         assertThat(res.getOrden().getDiagnostico()).isEqualTo("Fuente dañada");
-        assertThat(res.getOrden().getTrabajoRealizado()).isEqualTo("Cambio de fuente (anticipado)");
-        assertThat(res.getOrden().getEstado()).isEqualTo(EstadoOrdenServicio.DIAGNOSTICADO);
 
         var historial = ordenServicioService.listarHistorial(orden.getId());
-        assertThat(historial).hasSizeGreaterThanOrEqualTo(2);
+        assertThat(historial).hasSize(2);
         assertThat(historial).anySatisfy(h -> {
             assertThat(h.getEstadoAnterior()).isEqualTo(EstadoOrdenServicio.RECEPCIONADO);
             assertThat(h.getEstadoNuevo()).isEqualTo(EstadoOrdenServicio.EN_DIAGNOSTICO);
@@ -189,20 +208,179 @@ class OrdenServicioServiceTest extends ComercialTestSupport {
     }
 
     @Test
-    @DisplayName("D.13: completarDiagnostico con trabajo no salta a EN_REPARACION sin aprobación")
-    void completarDiagnosticoConTrabajoNoSaltaReparacion() {
+    @DisplayName("completarDiagnostico solo admite EN_DIAGNOSTICO (rechaza DIAGNOSTICADO)")
+    void completarDiagnosticoFueraDeEnDiagnostico() {
         OrdenServicioResponseDTO orden = crearOrdenBasica();
+        avanzar(orden.getId(), EstadoOrdenServicio.EN_DIAGNOSTICO);
+        CompletarDiagnosticoRequestDTO req = new CompletarDiagnosticoRequestDTO();
+        req.setDiagnostico("Board OK");
+        ordenServicioService.completarDiagnostico(orden.getId(), req, USUARIO_TEST);
+
+        assertThatThrownBy(() ->
+                ordenServicioService.completarDiagnostico(orden.getId(), req, USUARIO_TEST))
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("EN_DIAGNOSTICO");
+        assertThat(ordenServicioService.obtenerPorId(orden.getId()).getEstado())
+            .isEqualTo(EstadoOrdenServicio.DIAGNOSTICADO);
+    }
+
+    @Test
+    @DisplayName("Caso 4: completarDiagnostico rechaza trabajo realizado (no se persiste anticipado)")
+    void completarDiagnosticoRechazaTrabajoRealizado() {
+        OrdenServicioResponseDTO orden = crearOrdenBasica();
+        avanzar(orden.getId(), EstadoOrdenServicio.EN_DIAGNOSTICO);
         CompletarDiagnosticoRequestDTO req = new CompletarDiagnosticoRequestDTO();
         req.setDiagnostico("Board OK");
         req.setTrabajoRealizado("Soldadura ya hecha");
 
-        TransicionOrdenServicioResponseDTO res =
-            ordenServicioService.completarDiagnostico(orden.getId(), req, USUARIO_TEST);
+        assertThatThrownBy(() ->
+                ordenServicioService.completarDiagnostico(orden.getId(), req, USUARIO_TEST))
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("trabajo realizado");
 
-        assertThat(res.getEstadoNuevo()).isEqualTo(EstadoOrdenServicio.DIAGNOSTICADO);
-        assertThat(res.getOrden().getTrabajoRealizado()).isEqualTo("Soldadura ya hecha");
-        assertThat(res.getOrden().getEstado()).isNotEqualTo(EstadoOrdenServicio.EN_REPARACION);
-        assertThat(res.getOrden().getEstado()).isNotEqualTo(EstadoOrdenServicio.LISTO);
+        OrdenServicioResponseDTO despues = ordenServicioService.obtenerPorId(orden.getId());
+        assertThat(despues.getEstado()).isEqualTo(EstadoOrdenServicio.EN_DIAGNOSTICO);
+        assertThat(despues.getTrabajoRealizado()).isNull();
+        assertThat(despues.getDiagnostico()).isNull();
+    }
+
+    @Test
+    @DisplayName("Caso 4: RECEPCIONADO → PUT con diagnóstico o trabajo realizado se rechaza")
+    void actualizarEnRecepcionadoRechazaDiagnosticoYTrabajo() {
+        OrdenServicioResponseDTO orden = crearOrdenBasica();
+
+        OrdenServicioRequestDTO conDiagnostico = requestActualizacion(orden);
+        conDiagnostico.setDiagnostico("Fuente dañada");
+        assertThatThrownBy(() -> ordenServicioService.actualizar(orden.getId(), conDiagnostico))
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("diagnóstico");
+
+        OrdenServicioRequestDTO conTrabajo = requestActualizacion(orden);
+        conTrabajo.setTrabajoRealizado("Cambio de fuente");
+        assertThatThrownBy(() -> ordenServicioService.actualizar(orden.getId(), conTrabajo))
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("trabajo realizado");
+
+        OrdenServicioResponseDTO despues = ordenServicioService.obtenerPorId(orden.getId());
+        assertThat(despues.getEstado()).isEqualTo(EstadoOrdenServicio.RECEPCIONADO);
+        assertThat(despues.getDiagnostico()).isNull();
+        assertThat(despues.getTrabajoRealizado()).isNull();
+    }
+
+    @Test
+    @DisplayName("RECEPCIONADO → PUT sin tocar diagnóstico/trabajo sigue permitido (problema y observaciones)")
+    void actualizarEnRecepcionadoPermiteCamposDeRecepcion() {
+        OrdenServicioResponseDTO orden = crearOrdenBasica();
+        OrdenServicioRequestDTO req = requestActualizacion(orden);
+        req.setProblemaReportado("No enciende ni da video");
+        req.setObservaciones("Trae cargador");
+
+        OrdenServicioResponseDTO actualizada = ordenServicioService.actualizar(orden.getId(), req);
+
+        assertThat(actualizada.getProblemaReportado()).isEqualTo("No enciende ni da video");
+        assertThat(actualizada.getObservaciones()).isEqualTo("Trae cargador");
+        assertThat(actualizada.getEstado()).isEqualTo(EstadoOrdenServicio.RECEPCIONADO);
+    }
+
+    @Test
+    @DisplayName("Caso 4: crear OT con diagnóstico o trabajo realizado se rechaza (nace en RECEPCIONADO)")
+    void crearConDiagnosticoOTrabajoSeRechaza() {
+        Cliente cliente = crearCliente("Cliente OT técnica");
+        EquipoResponseDTO equipo = crearEquipo(cliente.getId());
+
+        OrdenServicioRequestDTO conDiagnostico = new OrdenServicioRequestDTO();
+        conDiagnostico.setClienteId(cliente.getId());
+        conDiagnostico.setEquipoId(equipo.getId());
+        conDiagnostico.setDiagnostico("Fuente dañada");
+        FirmaRecepcionTestSupport.aplicarFirmaRecepcion(conDiagnostico);
+        assertThatThrownBy(() -> ordenServicioService.crear(conDiagnostico, USUARIO_TEST))
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("diagnóstico");
+
+        OrdenServicioRequestDTO conTrabajo = new OrdenServicioRequestDTO();
+        conTrabajo.setClienteId(cliente.getId());
+        conTrabajo.setEquipoId(equipo.getId());
+        conTrabajo.setTrabajoRealizado("Cambio de fuente");
+        FirmaRecepcionTestSupport.aplicarFirmaRecepcion(conTrabajo);
+        assertThatThrownBy(() -> ordenServicioService.crear(conTrabajo, USUARIO_TEST))
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("trabajo realizado");
+    }
+
+    @Test
+    @DisplayName("Trabajo realizado no es editable en EN_DIAGNOSTICO, DIAGNOSTICADO, COTIZADO ni PENDIENTE_APROBACION")
+    void trabajoRealizadoNoEditableAntesDeReparacion() {
+        OrdenServicioResponseDTO orden = crearOrdenBasica();
+        avanzar(orden.getId(), EstadoOrdenServicio.EN_DIAGNOSTICO);
+        assertTrabajoRechazado(orden);
+
+        CompletarDiagnosticoRequestDTO diag = new CompletarDiagnosticoRequestDTO();
+        diag.setDiagnostico("Board OK");
+        ordenServicioService.completarDiagnostico(orden.getId(), diag, USUARIO_TEST);
+        assertTrabajoRechazado(orden);
+
+        avanzarPorDominio(orden.getId(), EstadoOrdenServicio.COTIZADO);
+        assertTrabajoRechazado(orden);
+
+        avanzarPorDominio(orden.getId(), EstadoOrdenServicio.PENDIENTE_APROBACION);
+        assertTrabajoRechazado(orden);
+    }
+
+    @Test
+    @DisplayName("Caso 5: EN_REPARACION → guardar trabajo realizado (PUT) está permitido")
+    void trabajoRealizadoEditableEnReparacion() {
+        OrdenServicioResponseDTO orden = avanzarHastaReparacion();
+        OrdenServicioRequestDTO req = requestActualizacion(orden);
+        req.setTrabajoRealizado("Cambio parcial de fuente");
+
+        OrdenServicioResponseDTO actualizada = ordenServicioService.actualizar(orden.getId(), req);
+
+        assertThat(actualizada.getEstado()).isEqualTo(EstadoOrdenServicio.EN_REPARACION);
+        assertThat(actualizada.getTrabajoRealizado()).isEqualTo("Cambio parcial de fuente");
+    }
+
+    @Test
+    @DisplayName("Caso 6: no existe camino RECEPCIONADO → DIAGNOSTICADO sin pasar por EN_DIAGNOSTICO")
+    void noHaySaltoRecepcionadoADiagnosticado() {
+        assertThat(EstadoOrdenServicio.RECEPCIONADO.puedeTransicionarA(EstadoOrdenServicio.DIAGNOSTICADO))
+            .isFalse();
+
+        OrdenServicioResponseDTO orden = crearOrdenBasica();
+        assertThatThrownBy(() -> avanzar(orden.getId(), EstadoOrdenServicio.DIAGNOSTICADO))
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("no está permitida");
+        assertThatThrownBy(() -> ordenServicioService.transicionarPorDominio(
+                orden.getId(), EstadoOrdenServicio.DIAGNOSTICADO, null, null, USUARIO_TEST))
+            .isInstanceOf(BusinessException.class);
+
+        assertThat(ordenServicioService.obtenerPorId(orden.getId()).getEstado())
+            .isEqualTo(EstadoOrdenServicio.RECEPCIONADO);
+        assertThat(ordenServicioService.listarHistorial(orden.getId())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Reglas centralizadas: disponibilidad de diagnóstico y trabajo realizado por estado")
+    void disponibilidadCamposTecnicosPorEstado() {
+        assertThat(EstadoOrdenServicio.RECEPCIONADO.permiteDiagnostico()).isFalse();
+        assertThat(EstadoOrdenServicio.EN_DIAGNOSTICO.permiteDiagnostico()).isTrue();
+        assertThat(EstadoOrdenServicio.DIAGNOSTICADO.permiteDiagnostico()).isTrue();
+
+        for (EstadoOrdenServicio e : List.of(
+                EstadoOrdenServicio.RECEPCIONADO,
+                EstadoOrdenServicio.EN_DIAGNOSTICO,
+                EstadoOrdenServicio.DIAGNOSTICADO,
+                EstadoOrdenServicio.COTIZADO,
+                EstadoOrdenServicio.PENDIENTE_APROBACION,
+                EstadoOrdenServicio.APROBADO)) {
+            assertThat(e.permiteTrabajoRealizado()).as(e.name()).isFalse();
+        }
+        for (EstadoOrdenServicio e : List.of(
+                EstadoOrdenServicio.EN_REPARACION,
+                EstadoOrdenServicio.ESPERA_REPUESTO,
+                EstadoOrdenServicio.REQUIERE_APROBACION_ADICIONAL,
+                EstadoOrdenServicio.LISTO)) {
+            assertThat(e.permiteTrabajoRealizado()).as(e.name()).isTrue();
+        }
     }
 
     @Test
@@ -575,6 +753,29 @@ class OrdenServicioServiceTest extends ComercialTestSupport {
         cambio.setNuevoEstado(estado);
         cambio.setMotivo(motivo);
         return cambio;
+    }
+
+    /** Request de PUT que conserva la ficha actual; cada test cambia solo el campo que prueba. */
+    private OrdenServicioRequestDTO requestActualizacion(OrdenServicioResponseDTO orden) {
+        OrdenServicioRequestDTO req = new OrdenServicioRequestDTO();
+        req.setClienteId(orden.getClienteId());
+        req.setEquipoId(orden.getEquipoId());
+        req.setProblemaReportado(orden.getProblemaReportado());
+        req.setDiagnostico(orden.getDiagnostico());
+        req.setTrabajoRealizado(orden.getTrabajoRealizado());
+        req.setObservaciones(orden.getObservaciones());
+        return req;
+    }
+
+    private void assertTrabajoRechazado(OrdenServicioResponseDTO orden) {
+        OrdenServicioResponseDTO actual = ordenServicioService.obtenerPorId(orden.getId());
+        OrdenServicioRequestDTO req = requestActualizacion(actual);
+        req.setTrabajoRealizado("Trabajo anticipado");
+        assertThatThrownBy(() -> ordenServicioService.actualizar(orden.getId(), req))
+            .as("trabajo realizado en " + actual.getEstado())
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("trabajo realizado");
+        assertThat(ordenServicioService.obtenerPorId(orden.getId()).getTrabajoRealizado()).isNull();
     }
 
     private OrdenServicioResponseDTO crearOrdenBasica() {

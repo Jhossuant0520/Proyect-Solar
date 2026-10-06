@@ -299,21 +299,23 @@ class OrdenServicioRepuestoServiceTest extends ComercialTestSupport {
         CompletarDiagnosticoRequestDTO diag = new CompletarDiagnosticoRequestDTO();
         diag.setDiagnostico("Falla confirmada");
         ordenServicioService.completarDiagnostico(orden.getId(), diag, USUARIO_TEST);
-        OrdenServicioRequestDTO textos = new OrdenServicioRequestDTO();
-        textos.setClienteId(orden.getClienteId());
-        textos.setEquipoId(orden.getEquipoId());
-        textos.setDiagnostico("Falla confirmada");
-        textos.setTrabajoRealizado("En curso");
-        ordenServicioService.actualizar(orden.getId(), textos);
         ordenServicioService.transicionarPorDominio(
             orden.getId(), EstadoOrdenServicio.COTIZADO, null, null, USUARIO_TEST);
         ordenServicioService.transicionarPorDominio(
             orden.getId(), EstadoOrdenServicio.PENDIENTE_APROBACION, null, null, USUARIO_TEST);
         ordenServicioService.transicionarPorDominio(
             orden.getId(), EstadoOrdenServicio.APROBADO, null, null, USUARIO_TEST);
-        return ordenServicioService.cambiarEstado(
+        OrdenServicioResponseDTO enReparacion = ordenServicioService.cambiarEstado(
             orden.getId(), cambio(EstadoOrdenServicio.EN_REPARACION, "repara"), USUARIO_TEST)
             .getOrden();
+        // "Trabajo realizado" solo existe desde EN_REPARACION.
+        OrdenServicioRequestDTO textos = new OrdenServicioRequestDTO();
+        textos.setClienteId(orden.getClienteId());
+        textos.setEquipoId(orden.getEquipoId());
+        textos.setDiagnostico("Falla confirmada");
+        textos.setTrabajoRealizado("En curso");
+        ordenServicioService.actualizar(orden.getId(), textos);
+        return ordenServicioService.obtenerPorId(enReparacion.getId());
     }
 
     private CambiarEstadoOrdenServicioRequestDTO cambio(EstadoOrdenServicio estado, String motivo) {

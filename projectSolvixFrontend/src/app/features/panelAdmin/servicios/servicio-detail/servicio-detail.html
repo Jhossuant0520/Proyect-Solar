@@ -286,7 +286,7 @@
                       @if (tieneTexto(campo.id)) {
                         <p class="campo-hint">{{ campo.hint }}</p>
                         <p class="body-text">{{ valorCampo(orden, campo.id) }}</p>
-                      } @else if (puedeEditar(orden.estado)) {
+                      } @else if (puedeEditarCampo(campo.id)) {
                         <button
                           type="button"
                           class="btn-agregar-campo"
@@ -294,6 +294,11 @@
                         >
                           Agregar {{ campo.label.toLowerCase() }}
                         </button>
+                      } @else if (hintBloqueado(campo.id)) {
+                        <p class="hint bloqueado-hint" style="display: flex; gap: 4px; align-items: center; margin-top: 8px;">
+                          <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 16px;">lock</span>
+                          {{ hintBloqueado(campo.id) }}
+                        </p>
                       } @else {
                         <p class="hint">Sin información registrada.</p>
                       }
@@ -311,12 +316,12 @@
                   </p>
 
                   @for (campo of campos; track campo.id) {
-                    <label
+                    <div
                       class="campo-edit"
                       [class.is-destacado]="esCampoDestacado(campo.id)"
                       [attr.data-campo]="campo.id"
                     >
-                      <span class="label-row">
+                      <span class="label-row" style="display: block; font-weight: 500; margin-bottom: 4px;">
                         {{ campo.label }}
                         @if (campo.id === 'diagnostico' && enDiagnostico) {
                           <span class="req">requerido</span>
@@ -325,14 +330,30 @@
                           <span class="foco-tag">En foco</span>
                         }
                       </span>
-                      <span class="campo-hint">{{ campo.hint }}</span>
-                      <textarea
-                        [formControlName]="campo.id"
-                        [attr.maxlength]="campo.maxLength"
-                        [attr.rows]="campo.id === 'observaciones' ? 2 : 3"
-                        [attr.placeholder]="campo.hint"
-                      ></textarea>
-                    </label>
+                      <span class="campo-hint" style="display: block; margin-bottom: 8px;">{{ campo.hint }}</span>
+                      
+                      @if (puedeEditarCampo(campo.id)) {
+                        <textarea
+                          [formControlName]="campo.id"
+                          [attr.maxlength]="campo.maxLength"
+                          [attr.rows]="campo.id === 'observaciones' ? 2 : 3"
+                          [attr.placeholder]="campo.hint"
+                        ></textarea>
+                      } @else {
+                        @if (hintBloqueado(campo.id)) {
+                          <div class="bloqueo-inline" style="background: var(--surface-2); padding: 12px; border-radius: 6px; display: flex; gap: 8px; align-items: center; color: var(--text-secondary);">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">lock</span>
+                            <span style="font-size: 0.85rem;">{{ hintBloqueado(campo.id) }}</span>
+                          </div>
+                        } @else if (tieneTexto(campo.id)) {
+                          <div class="read-only-box" style="background: var(--surface-2); padding: 12px; border-radius: 6px; white-space: pre-wrap; font-size: 0.95rem;">
+                            {{ valorCampo(orden, campo.id) }}
+                          </div>
+                        } @else {
+                          <em class="hint">Sin información.</em>
+                        }
+                      }
+                    </div>
                   }
 
                   @if (guiaTecnica) {
