@@ -1,79 +1,74 @@
-import { Component, HostListener } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Component, HostListener, inject } from '@angular/core';
+import { CommonModule, ViewportScroller } from '@angular/common';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { filter } from 'rxjs';
+
+export interface HomepageNavLink {
+  label: string;
+  fragment?: string;
+  path?: string;
+}
 
 @Component({
   selector: 'app-navbar-homepage',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './navbar-homepage.html',
   styleUrls: ['./navbar-homepage.scss']
 })
 export class NavbarHomepage {
+  private readonly router = inject(Router);
+  private readonly viewport = inject(ViewportScroller);
 
   scrolled = false;
   activeSection = 'inicio';
   menuOpen = false;
 
-  indicatorLeft = 0;
+  /** Slot para el PNG oficial. Colocar el archivo en `public/LogoEmpresa1.png`. */
+  readonly logoSrc = '/LogoEmpresa1.png';
 
-  menu = [
-    { id: 'inicio', label: 'Inicio' },
-    { id: 'steps', label: 'Cómo funciona' },
-    { id: 'services', label: 'Servicios' },
-    { id: 'about', label: 'Nosotros' },
-    { id: 'faq', label: 'FAQ' },
-    { id: 'contact', label: 'Contacto' }
+  menu: HomepageNavLink[] = [
+    { label: 'Inicio', fragment: 'inicio' },
+    { label: 'Servicios', fragment: 'services' },
+    { label: 'Catálogo de Equipos', path: '/Catalogo' },
+    { label: 'Sobre Nosotros', fragment: 'about' },
+    { label: 'Testimonios', fragment: 'testimonials' },
+    { label: 'FAQ', fragment: 'faq' }
   ];
-  toggleMenu() {
+
+  constructor() {
+    this.viewport.setOffset([0, 100]);
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe(() => {
+        const fragment = this.router.parseUrl(this.router.url).fragment;
+        if (fragment) {
+          this.activeSection = fragment;
+        }
+        this.menuOpen = false;
+      });
+  }
+
+  toggleMenu(): void {
     this.menuOpen = !this.menuOpen;
   }
 
-  moveIndicator(event: any) {
-    this.indicatorLeft = event.target.offsetLeft;
+  goToFragment(event: Event, fragment: string): void {
+    event.preventDefault();
+    this.activeSection = fragment;
+    this.menuOpen = false;
+    void this.router.navigate(['/'], { fragment }).then(() => {
+      this.viewport.scrollToAnchor(fragment);
+    });
   }
 
-  /* 🔥 SCROLL SUAVE CORREGIDO */
-  scrollToSection(event: Event, id: string) {
-  event.preventDefault();
+  isActive(item: HomepageNavLink): boolean {
+    return !!item.fragment && this.activeSection === item.fragment;
+  }
 
-  this.activeSection = id;
-  this.menuOpen = false;
-
-  setTimeout(() => {
-    const el = document.getElementById(id);
-    if (!el) {
-      return;
-    }
-
-    const offset = 100; // altura del navbar
-
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-    setTimeout(() => {
-      window.scrollBy({ top: -offset, behavior: 'smooth' });
-    }, 50);
-
-  }, 50);
-}
-
-  /* 🔥 SCROLL SPY CORREGIDO */
   @HostListener('window:scroll', [])
-  onScroll() {
-    const currentScroll = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
-    this.scrolled = currentScroll > 60;
-
-    const sections = this.menu.map(m => m.id);
-
-    sections.forEach(sec => {
-      const el = document.getElementById(sec);
-      if (el) {
-        const rect = el.getBoundingClientRect();
-        const spyOffset = 120;
-        if (rect.top <= spyOffset && rect.bottom > spyOffset) {
-          this.activeSection = sec;
-        }
-      }
-    });
+  onScroll(): void {
+    const position = this.viewport.getScrollPosition();
+    this.scrolled = position[1] > 60;
   }
 }

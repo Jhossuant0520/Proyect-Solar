@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Portátil Core i7">
+  <rect width="640" height="360" fill="#eaedff"/>
+  <rect x="140" y="70" width="360" height="200" rx="12" fill="#006194"/>
+  <rect x="160" y="90" width="320" height="160" fill="#cce5ff"/>
+  <rect x="180" y="280" width="280" height="16" rx="8" fill="#3f4850"/>
+  <text x="320" y="330" text-anchor="middle" fill="#004b73" font-size="22" font-family="Arial, sans-serif">Portátil Core i7</text>
+</svg>

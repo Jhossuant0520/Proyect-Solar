@@ -11,6 +11,8 @@
 @use './styles/solvix-a11y';
 @use './styles/solvix-theme-light';
 
+@tailwind utilities;
+
 :root {
   --app-bg-color: var(--color-bg, var(--solvix-bg));
 }

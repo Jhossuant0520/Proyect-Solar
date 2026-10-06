@@ -1,17 +1,16 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-interface Testimonial {
+export interface Testimonial {
   quote: string;
   name: string;
   role: string;
   initials: string;
-  variant: 'primary' | 'neon' | 'secondary';
-  highlight?: boolean;
 }
 
 @Component({
   selector: 'app-testimonials-homepage',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './testimonials-homepage.html',
   styleUrl: './testimonials-homepage.scss'
@@ -19,26 +18,25 @@ interface Testimonial {
 export class TestimonialsHomepage {
   testimonials: Testimonial[] = [
     {
-      quote: 'Antes de usar SOLVIX, las cotizaciones eran confusas. Esta herramienta me dio la claridad exacta de cuántos paneles necesitaba basándose en mis recibos reales.',
-      name: 'Carlos M.',
-      role: 'Propietario residencial',
-      initials: 'CM',
-      variant: 'primary'
+      quote:
+        'Llevé mi portátil que no encendía y en Computer & Electronic le salvaron la vida y todos mis datos. El servicio fue rápido y muy profesional.',
+      name: 'María F.',
+      role: 'Cliente Particular',
+      initials: 'MF'
     },
     {
-      quote: 'La precisión del cálculo de horas solares para mi ubicación específica hizo que la decisión de inversión fuera mucho más segura. Excelente herramienta.',
-      name: 'Elena R.',
-      role: 'Negocio comercial',
-      initials: 'ER',
-      variant: 'neon',
-      highlight: true
+      quote:
+        'Nos instalaron el cableado estructurado y las cámaras en la oficina. Excelente trabajo. Llevan años siendo nuestros técnicos de confianza.',
+      name: 'Carlos R.',
+      role: 'Gerente de Operaciones',
+      initials: 'CR'
     },
     {
-      quote: 'Como instalador, recomiendo a mis clientes que pasen primero por SOLVIX. Simplifica el diseño inicial y genera confianza.',
-      name: 'Ing. Roberto G.',
-      role: 'Instalador solar',
-      initials: 'RG',
-      variant: 'secondary'
+      quote:
+        'Fui por un arreglo de mi impresora y terminé comprando accesorios a muy buen precio. La atención es impecable.',
+      name: 'Andrés G.',
+      role: 'Usuario Frecuente',
+      initials: 'AG'
     }
   ];
 }

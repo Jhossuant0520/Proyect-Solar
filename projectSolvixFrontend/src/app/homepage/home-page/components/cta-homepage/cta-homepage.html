@@ -1,22 +1,36 @@
-<section class="cta">
-  <div class="cta-glow" aria-hidden="true"></div>
+<section class="cta-homepage">
+  <div class="cta-homepage__container">
+    <div class="cta-homepage__panel">
+      <div class="cta-homepage__glow" aria-hidden="true"></div>
+      <div class="cta-homepage__glow cta-homepage__glow--accent" aria-hidden="true"></div>
 
-  <div class="cta-panel">
-    <span class="cta-badge">
-      <span class="cta-badge-dot" aria-hidden="true"></span>
-      Listo para calcular
-    </span>
+      <div class="cta-homepage__content">
+        <span class="cta-homepage__eyebrow">Atención Inmediata</span>
+        <h2 class="cta-homepage__title">
+          ¿Necesitas una reparación confiable o tecnología nueva?
+        </h2>
+        <p class="cta-homepage__subtitle">
+          Visítanos hoy mismo para que nuestros expertos revisen tu equipo, o escríbenos si tienes dudas sobre algún producto de nuestro catálogo.
+        </p>
 
-    <h2>Descubre cuántos paneles necesita tu hogar</h2>
+        <div class="cta-homepage__actions">
+          <a class="cta-homepage__btn cta-homepage__btn--primary" routerLink="/" fragment="contact">
+            <span class="material-symbols-outlined cta-homepage__btn-icon" aria-hidden="true">place</span>
+            <span>Ver Dirección y Horarios</span>
+          </a>
+          <a
+            class="cta-homepage__btn cta-homepage__btn--secondary"
+            [href]="whatsappUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="cta-homepage__pulse" aria-hidden="true"></span>
+            <span>Escribir al WhatsApp</span>
+          </a>
+        </div>
+      </div>
 
-    <p>
-      Ingresa tu consumo y obtén un dimensionamiento claro,
-      con la precisión de ingeniería detrás de cada resultado.
-    </p>
-
-    <div class="cta-actions">
-      <a class="btn-cyber-primary" routerLink="/register">Calcular gratis</a>
-      <a class="btn-cyber-secondary" href="#contact">Hablar con el equipo</a>
+      <span class="material-symbols-outlined cta-homepage__watermark" aria-hidden="true">memory</span>
     </div>
   </div>
 </section>

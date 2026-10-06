@@ -1,15 +1,70 @@
-<footer class="footer">
-  <div class="footer-inner">
-    <a class="footer-brand" href="#inicio" aria-label="SOLVIX">
-      <img src="LogoSolvix3.1.png" alt="SOLVIX" class="footer-logo">
-    </a>
+<footer class="footer-homepage">
+  <div class="footer-homepage__container">
+    <div class="footer-homepage__grid">
+      <div class="footer-homepage__brand">
+        <a class="footer-homepage__brand-link" routerLink="/" fragment="inicio" aria-label="Computer &amp; Electronic — Inicio">
+          <img
+            class="footer-homepage__logo"
+            [src]="logoSrc"
+            alt="Computer &amp; Electronic"
+            width="140"
+            height="40"
+          />
+          <span class="footer-homepage__identity">
+            <span class="footer-homepage__name">Computer &amp; Electronic</span>
+            <span class="footer-homepage__kicker">Tech &amp; Security</span>
+          </span>
+        </a>
+        <p class="footer-homepage__blurb">
+          Especialistas en servicio técnico de alta precisión, mantenimiento corporativo y venta de hardware informático y sistemas de seguridad electrónica de última generación.
+        </p>
+      </div>
 
-    <nav>
-      <a href="#faq">Privacidad</a>
-      <a href="#faq">Términos</a>
-      <a href="#contact">Soporte</a>
-    </nav>
+      <nav class="footer-homepage__column" aria-label="Navegación">
+        <h3 class="footer-homepage__heading">Navegación</h3>
+        <a class="footer-homepage__link" routerLink="/" fragment="inicio">Inicio</a>
+        <a class="footer-homepage__link" routerLink="/" fragment="services">Servicios</a>
+        <a class="footer-homepage__link" routerLink="/Catalogo">Catálogo</a>
+        <a class="footer-homepage__link" routerLink="/" fragment="testimonials">Testimonios</a>
+        <a class="footer-homepage__link" routerLink="/" fragment="faq">FAQ</a>
+      </nav>
 
-    <p>© {{ currentYear }} SOLVIX. Precisión solar para tu hogar.</p>
+      <nav class="footer-homepage__column" aria-label="Servicios y soporte">
+        <h3 class="footer-homepage__heading">Servicios &amp; Soporte</h3>
+        <a class="footer-homepage__link" routerLink="/" fragment="contact">Solicitar soporte</a>
+        <a class="footer-homepage__link" routerLink="/" fragment="services">Mantenimiento Preventivo</a>
+        <a class="footer-homepage__link" routerLink="/" fragment="services">Seguridad y Vigilancia</a>
+        <a class="footer-homepage__link" routerLink="/Catalogo">Garantías y Repuestos</a>
+        <a class="footer-homepage__link" routerLink="/login">Portal de clientes</a>
+      </nav>
+
+      <div class="footer-homepage__column">
+        <h3 class="footer-homepage__heading">Contacto</h3>
+        <a class="footer-homepage__contact-row" href="mailto:soporte@computerelectronic.com">
+          <span class="material-symbols-outlined footer-homepage__icon" aria-hidden="true">mail</span>
+          <span>soporte&#64;computerelectronic.com</span>
+        </a>
+        <a class="footer-homepage__contact-row" [href]="whatsappUrl" target="_blank" rel="noopener noreferrer">
+          <span class="material-symbols-outlined footer-homepage__icon" aria-hidden="true">call</span>
+          <span>{{ whatsappLabel }}</span>
+        </a>
+        <div class="footer-homepage__contact-row footer-homepage__contact-row--static">
+          <span class="material-symbols-outlined footer-homepage__icon" aria-hidden="true">location_on</span>
+          <span>Centro Comercial #45-12, Local 201 - Tech Zone</span>
+        </div>
+        <div class="footer-homepage__status">
+          <span class="footer-homepage__status-dot" aria-hidden="true"></span>
+          <span>Lab Operativo</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-homepage__bottom">
+      <p>© {{ currentYear }} Computer &amp; Electronic. Todos los derechos reservados.</p>
+      <div class="footer-homepage__legal">
+        <span>Políticas de Garantía</span>
+        <span>Términos de Servicio</span>
+      </div>
+    </div>
   </div>
 </footer>

@@ -1,40 +1,26 @@
 :host {
   display: block;
-  background: var(--app-bg-color);
+  background: #faf8ff;
+  color: #131b2e;
 }
 
-/* Unificar secciones sin divisiones visibles */
 section {
   margin: 0;
   padding: 0;
-  scroll-margin-top: 120px; /* Evita que el navbar fijo tape el inicio de la sección */
+  scroll-margin-top: 120px;
 }
 
-app-home-page,
 app-navbar-homepage,
 app-hero-homepage,
-app-about-homepage,
-app-services-homepage,
-app-catalog,
-app-footer-homepage,
-app-testimonials-homepage,
-app-steps-homepage,
-app-faq-homepage,
-app-catalog-preview,
-app-contact,
 app-stats-homepage,
-section#inicio,
-section#stats,
-section#steps,
-section#services,
-section#about,
-section#testimonials,
-section#faq,
-section#catalog-preview,
-section#cta,
-section#contact,
-section#footer {
+app-services-homepage,
+app-steps-homepage,
+app-catalog-preview,
+app-testimonials-homepage,
+app-faq-homepage,
+app-cta-homepage,
+app-contact,
+app-about-homepage,
+app-footer-homepage {
   display: block;
-  background: var(--app-bg-color) !important;
-  background-color: var(--app-bg-color) !important;
 }

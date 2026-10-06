@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-interface ServiceItem {
+export interface ServiceItem {
   title: string;
   description: string;
-  footer: string;
-  variant: 'primary' | 'neon' | 'secondary';
-  icon: 'bolt' | 'sun' | 'grid' | 'power';
+  badge: string;
+  icon: string;
+  wide?: boolean;
+  tags?: string[];
 }
 
 @Component({
@@ -19,32 +20,45 @@ interface ServiceItem {
 export class ServicesHomepage {
   servicios: ServiceItem[] = [
     {
-      title: 'Consumo energético',
-      description: 'Análisis detallado de tu historial para proyectar demanda.',
-      footer: 'Precisión del 99%',
-      variant: 'primary',
-      icon: 'bolt'
+      title: 'Mantenimiento y Reparación',
+      description:
+        'Especialistas en portátiles, equipos Todo en Uno, computadores de escritorio e impresoras multimarca con diagnóstico micrométrico.',
+      badge: 'Especialistas',
+      icon: 'build_circle',
+      tags: ['Soporte multimarca']
     },
     {
-      title: 'Análisis solar',
-      description: 'Mapeo de radiación solar basado en coordenadas exactas.',
-      footer: 'Datos climáticos reales',
-      variant: 'neon',
-      icon: 'sun'
+      title: 'Venta de Tecnología',
+      description:
+        'Computadores de última generación, periféricos, repuestos y accesorios de las mejores marcas para usuarios corporativos y domésticos.',
+      badge: 'Equipos Nuevos',
+      icon: 'laptop_mac',
+      tags: ['Hardware certificado']
     },
     {
-      title: 'Dimensionamiento',
-      description: 'Cálculo exacto del número y tipo de paneles necesarios.',
-      footer: 'Máxima eficiencia',
-      variant: 'secondary',
-      icon: 'grid'
+      title: 'Seguridad Electrónica',
+      description:
+        'Suministro, configuración e instalación profesional de cámaras de seguridad CCTV, alarmas de intrusión y sistemas de control de acceso.',
+      badge: 'Seguridad 24/7',
+      icon: 'security',
+      tags: ['Monitoreo en vivo']
     },
     {
-      title: 'Selección de inversor',
-      description: 'Recomendación del equipo óptimo para tu instalación.',
-      footer: 'Compatibilidad total',
-      variant: 'primary',
-      icon: 'power'
+      title: 'Redes y Conectividad',
+      description:
+        'Diseño e implementación de cableado estructurado categoría 6A, organización de racks, switches y redes WiFi de alto tráfico para oficinas y negocios.',
+      badge: 'Infraestructura',
+      icon: 'hub',
+      tags: ['Cableado certificado']
+    },
+    {
+      title: 'Centro de Impresión y Digitalización',
+      description:
+        'Servicios rápidos de fotocopiado e impresión de alta calidad. Asistencia en digitalización, escaneo de alta fidelidad y soluciones para documentos comerciales o personales.',
+      badge: 'Soluciones para Oficinas y Particulares',
+      icon: 'scanner',
+      wide: true,
+      tags: ['Láser & Color', 'Entrega Inmediata']
     }
   ];
 }

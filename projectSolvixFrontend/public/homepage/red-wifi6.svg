@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Combo periféricos y redes">
+  <rect width="640" height="360" fill="#eaedff"/>
+  <rect x="90" y="120" width="200" height="110" rx="12" fill="#006194"/>
+  <rect x="340" y="100" width="210" height="150" rx="18" fill="#cce5ff"/>
+  <circle cx="445" cy="175" r="28" fill="#fdc425"/>
+  <text x="320" y="310" text-anchor="middle" fill="#004b73" font-size="22" font-family="Arial, sans-serif">Wi-Fi 6 + Switch</text>
+</svg>

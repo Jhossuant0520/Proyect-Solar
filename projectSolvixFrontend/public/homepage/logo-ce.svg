@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Computer &amp; Electronic">
+  <rect width="64" height="64" rx="12" fill="#006194"/>
+  <rect x="12" y="16" width="40" height="26" rx="3" fill="#cce5ff"/>
+  <rect x="24" y="44" width="16" height="4" fill="#fdc425"/>
+  <text x="32" y="34" text-anchor="middle" fill="#004b73" font-size="11" font-family="Arial, sans-serif" font-weight="700">CE</text>
+</svg>

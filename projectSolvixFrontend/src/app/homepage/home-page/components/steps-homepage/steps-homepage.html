@@ -1,22 +1,27 @@
-<section class="steps-homepage">
-  <div class="steps-glow" aria-hidden="true"></div>
-
-  <div class="steps-inner">
-    <h2>De tu consumo a tu sistema solar</h2>
-
-    <div class="steps-track">
-      <div class="steps-line" aria-hidden="true">
-        <span class="steps-line-glow"></span>
-      </div>
-
+<!-- STEPS SECTION -->
+<section class="w-full py-space-xl bg-surface-container-lowest">
+  <div class="max-w-7xl mx-auto px-margin">
+    <div class="flex flex-col items-center text-center mb-space-lg">
+      <span class="font-code-spec text-code-spec text-primary font-bold uppercase tracking-wider">Flujo de Trabajo Claro</span>
+      <h2 class="font-headline-xl text-headline-xl text-on-surface font-bold mt-space-xs">¿Cómo funciona nuestro servicio técnico?</h2>
+      <p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl mt-space-xs">Proceso transparente y seguro para la revisión de tus equipos.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter relative">
       @for (step of steps; track step.number) {
-        <article class="step-item">
-          <div class="step-circle" [class]="'is-' + step.variant">
-            <span>{{ step.number }}</span>
+        <div class="p-space-lg rounded-2xl bg-surface-container-low flex flex-col gap-space-sm relative group hover:bg-surface-container transition-all">
+          <div class="flex items-center justify-between">
+            <span class="font-headline-2xl text-headline-2xl font-bold text-primary/30 group-hover:text-primary transition-colors">{{ step.number }}</span>
+            <div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary font-bold">
+              <span class="material-symbols-outlined text-[20px]" aria-hidden="true">{{ step.icon }}</span>
+            </div>
           </div>
-          <h3>{{ step.title }}</h3>
-          <p>{{ step.description }}</p>
-        </article>
+          <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">{{ step.title }}</h3>
+          <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">{{ step.description }}</p>
+          <div class="mt-auto pt-space-sm flex items-center gap-space-xs font-code-spec text-code-spec text-primary font-medium">
+            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">{{ step.noteIcon }}</span>
+            <span>{{ step.note }}</span>
+          </div>
+        </div>
       }
     </div>
   </div>

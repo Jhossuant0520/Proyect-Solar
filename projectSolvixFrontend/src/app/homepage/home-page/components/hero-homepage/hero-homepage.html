@@ -1,67 +1,127 @@
 <section class="hero">
-  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="hero__glow hero__glow--top" aria-hidden="true"></div>
+  <div class="hero__glow hero__glow--side" aria-hidden="true"></div>
 
-  <div class="hero-grid">
-    <aside class="hero-side">
-      <article class="holo-card">
-        <span class="holo-label">Radiación solar</span>
-        <strong class="holo-value">942 W/m²</strong>
-        <div class="holo-bar" aria-hidden="true">
-          <span class="holo-bar-fill"></span>
+  <div class="hero__container">
+    <div class="hero__grid">
+      <div class="hero__content">
+        <div class="hero__badge">
+          <span class="hero__badge-dot" aria-hidden="true"></span>
+          <span class="hero__badge-text">Servicio técnico &amp; seguridad electrónica | +20 años</span>
         </div>
-      </article>
 
-      <article class="holo-card">
-        <span class="holo-label holo-label-neon">Demanda energética</span>
-        <strong class="holo-value">4,2 kW</strong>
-        <div class="holo-ticks" aria-hidden="true">
-          <span></span><span></span><span class="is-on"></span><span></span>
+        <h1 class="hero__title">
+          Expertos en devolverle la vida a tu
+          <span class="hero__title-highlight">tecnología.</span>
+        </h1>
+
+        <p class="hero__subtitle">
+          Servicio técnico especializado, mantenimiento y venta de equipos informáticos con más de 20 años de experiencia. Trae tu equipo a nuestras instalaciones para un diagnóstico profesional o explora nuestros productos disponibles.
+        </p>
+
+        <div class="hero__actions">
+          <a class="hero__btn hero__btn--primary" routerLink="/Catalogo">
+            <span>Ver Catálogo de Productos</span>
+            <span class="material-symbols-outlined hero__btn-icon" aria-hidden="true">arrow_forward</span>
+          </a>
+          <a
+            class="hero__btn hero__btn--secondary"
+            routerLink="/"
+            fragment="contact"
+            (click)="goToContact($event)"
+          >
+            <span class="hero__btn-dot" aria-hidden="true"></span>
+            <span>Dónde Encontrarnos</span>
+          </a>
         </div>
-      </article>
-    </aside>
 
-    <div class="hero-center">
-      <span class="hero-badge">
-        <span class="hero-badge-dot" aria-hidden="true"></span>
-        Simulador inteligente
-      </span>
+        <div class="hero__trust">
+          <div class="hero__trust-item">
+            <span class="material-symbols-outlined" aria-hidden="true">verified</span>
+            <span>Laboratorio Técnico Certificado</span>
+          </div>
+          <div class="hero__trust-item hero__trust-item--desktop">
+            <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+            <span>Respuesta Inmediata</span>
+          </div>
+        </div>
+      </div>
 
-      <h1>Descubre cuántos paneles solares necesita tu hogar</h1>
+      <aside class="hero__aside" aria-label="Panel de operaciones">
+        <div class="hero-panel">
+          <header class="hero-panel__header">
+            <div class="hero-panel__status">
+              <span class="hero-panel__live" aria-hidden="true">
+                <span class="hero-panel__live-ping"></span>
+                <span class="hero-panel__live-dot"></span>
+              </span>
+              <span class="hero-panel__title">Panel de Operaciones Lab</span>
+            </div>
+            <span class="hero-panel__online">ONLINE</span>
+          </header>
 
-      <p>
-        Calcula tu sistema a partir de tu consumo energético real.
-        Precisión para tu independencia energética.
-      </p>
+          <ul class="hero-panel__list">
+            <li class="hero-panel__item">
+              <div class="hero-panel__item-main">
+                <div class="hero-panel__icon hero-panel__icon--primary">
+                  <span class="material-symbols-outlined" aria-hidden="true">speed</span>
+                </div>
+                <div class="hero-panel__copy">
+                  <h3 class="hero-panel__item-title">Diagnóstico Rápido</h3>
+                  <p class="hero-panel__item-desc">Optimización garantizada</p>
+                </div>
+              </div>
+              <span class="hero-panel__badge">24 - 48 h</span>
+            </li>
 
-      <a class="btn-cyber-primary" routerLink="/register">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M4 19V5h2v14H4zm4-8h3v8H8v-8zm5-4h3v12h-3V7zm5-3h3v15h-3V4z" fill="currentColor"/>
-        </svg>
-        Calcular mi sistema
-      </a>
+            <li class="hero-panel__item">
+              <div class="hero-panel__item-main">
+                <div class="hero-panel__icon hero-panel__icon--secondary">
+                  <span class="material-symbols-outlined" aria-hidden="true">verified_user</span>
+                </div>
+                <div class="hero-panel__copy">
+                  <h3 class="hero-panel__item-title">Garantía Certificada</h3>
+                  <p class="hero-panel__item-desc">Repuestos de alta calidad</p>
+                </div>
+              </div>
+              <span class="hero-panel__badge hero-panel__badge--secondary">100%</span>
+            </li>
 
-      <svg class="hero-wave" viewBox="0 0 400 100" aria-hidden="true">
-        <path d="M0 50 Q 50 10, 100 50 T 200 50 T 300 50 T 400 50" fill="none" stroke="#4fd1ff" stroke-width="1"/>
-        <circle cx="200" cy="50" r="3" fill="#4fd1ff"/>
-      </svg>
+            <li class="hero-panel__item">
+              <div class="hero-panel__item-main">
+                <div class="hero-panel__icon hero-panel__icon--neutral">
+                  <span class="material-symbols-outlined" aria-hidden="true">precision_manufacturing</span>
+                </div>
+                <div class="hero-panel__copy">
+                  <h3 class="hero-panel__item-title">Laboratorio Especializado</h3>
+                  <p class="hero-panel__item-desc">Técnicos certificados</p>
+                </div>
+              </div>
+              <span class="hero-panel__badge">Activo</span>
+            </li>
+
+            <li class="hero-panel__item">
+              <div class="hero-panel__item-main">
+                <div class="hero-panel__icon hero-panel__icon--dim">
+                  <span class="material-symbols-outlined" aria-hidden="true">videocam</span>
+                </div>
+                <div class="hero-panel__copy">
+                  <h3 class="hero-panel__item-title">Soporte CCTV &amp; Redes</h3>
+                  <p class="hero-panel__item-desc">Hogar y entornos corporativos</p>
+                </div>
+              </div>
+              <span class="hero-panel__badge">Disponible</span>
+            </li>
+          </ul>
+
+          <footer class="hero-panel__footer">
+            <span class="hero-panel__footer-live">
+              <span class="hero-panel__footer-dot" aria-hidden="true"></span>
+              Atención presencial activa
+            </span>
+          </footer>
+        </div>
+      </aside>
     </div>
-
-    <aside class="hero-side">
-      <article class="holo-card">
-        <span class="holo-label holo-label-secondary">Eficiencia del sistema</span>
-        <strong class="holo-value">98,4%</strong>
-        <div class="holo-bars" aria-hidden="true">
-          <span></span><span></span><span class="is-on"></span><span></span>
-        </div>
-      </article>
-
-      <article class="holo-card holo-card-accent">
-        <span class="holo-label">Estado del análisis</span>
-        <div class="holo-status">
-          <span class="holo-status-icon" aria-hidden="true"></span>
-          Calculando
-        </div>
-      </article>
-    </aside>
   </div>
 </section>

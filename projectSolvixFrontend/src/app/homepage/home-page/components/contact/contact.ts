@@ -10,21 +10,44 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./contact.scss']
 })
 export class Contact {
-  whatsappUrl = 'https://wa.me/573172901206?text=' + encodeURIComponent('Hola, quiero información sobre SOLVIX.');
-  sent = false;
+  readonly whatsappUrl = 'https://wa.me/573172901206';
+  readonly whatsappLabel = '+57 317 290 1206';
+  submitted = false;
+  invalid = false;
+  noBackend = false;
 
   form = {
     name: '',
-    email: '',
-    subject: 'calculation',
+    phone: '',
+    serviceType: 'reparacion',
     message: '',
     privacy: false
   };
 
-  onSubmit() {
-    if (!this.form.privacy) {
+  onSubmit(): void {
+    this.invalid = false;
+    this.noBackend = false;
+    this.submitted = false;
+
+    if (!this.form.name.trim() || !this.form.phone.trim() || !this.form.message.trim() || !this.form.privacy) {
+      this.invalid = true;
       return;
     }
-    this.sent = true;
+
+    this.submitted = true;
+    this.noBackend = true;
+
+    const texto = [
+      `Hola, soy ${this.form.name.trim()}.`,
+      `Teléfono: ${this.form.phone.trim()}.`,
+      `Servicio: ${this.form.serviceType}.`,
+      this.form.message.trim()
+    ].join(' ');
+
+    window.open(
+      `${this.whatsappUrl}?text=${encodeURIComponent(texto)}`,
+      '_blank',
+      'noopener,noreferrer'
+    );
   }
 }

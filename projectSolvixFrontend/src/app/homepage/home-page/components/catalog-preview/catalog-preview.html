@@ -1,21 +1,90 @@
 <section class="catalog-preview">
-  <h2>Soluciones para entender tu sistema solar</h2>
-
-  <div class="preview-grid">
-    <a class="preview-card is-home" routerLink="/Catalogo">
-      <span class="preview-icon" aria-hidden="true">⌂</span>
-      <div>
-        <h3>Módulo residencial</h3>
-        <p>Análisis pensado para el consumo de un hogar.</p>
+  <div class="catalog-preview__container">
+    <header class="catalog-preview__header">
+      <div class="catalog-preview__copy">
+        <span class="catalog-preview__eyebrow">Hardware &amp; Equipos</span>
+        <h2 class="catalog-preview__title">Explora nuestro catálogo de tecnología</h2>
+        <p class="catalog-preview__subtitle">
+          Descubre nuestra selección de computadores, repuestos, cámaras de seguridad y accesorios. Navega por nuestros productos y contáctanos para apartar el tuyo.
+          <span class="catalog-preview__note">(Próximamente: ¡Compras en línea habilitadas!)</span>
+        </p>
       </div>
-    </a>
+      <a class="catalog-preview__cta" routerLink="/Catalogo">
+        <span>Ver todo el catálogo</span>
+        <span class="material-symbols-outlined catalog-preview__cta-icon" aria-hidden="true">arrow_forward</span>
+      </a>
+    </header>
 
-    <a class="preview-card is-biz" routerLink="/Catalogo">
-      <span class="preview-icon" aria-hidden="true">▣</span>
-      <div>
-        <h3>Módulo comercial</h3>
-        <p>Dimensionamiento para negocios con mayor demanda.</p>
+    @if (viewState === 'LOADING') {
+      <div class="catalog-preview__grid" aria-busy="true">
+        @for (i of [1, 2, 3, 4]; track i) {
+          <div class="catalog-card catalog-card--skeleton" [style.--card-stagger]="i - 1"></div>
+        }
       </div>
-    </a>
+    }
+
+    @if (viewState === 'ERROR') {
+      <div class="catalog-preview__state">
+        <p>No pudimos cargar los productos en este momento.</p>
+        <div class="catalog-preview__state-actions">
+          <button type="button" class="catalog-preview__retry" (click)="cargar()">Reintentar</button>
+          <a class="catalog-preview__cta catalog-preview__cta--ghost" routerLink="/Catalogo">Ver catálogo</a>
+        </div>
+      </div>
+    }
+
+    @if (viewState === 'EMPTY') {
+      <div class="catalog-preview__state">
+        <p>No hay productos disponibles en este momento.</p>
+        <a class="catalog-preview__cta catalog-preview__cta--ghost" routerLink="/Catalogo">Ver catálogo</a>
+      </div>
+    }
+
+    @if (viewState === 'SUCCESS') {
+      <div class="catalog-preview__grid">
+        @for (product of products; track product.id; let i = $index) {
+          <article class="catalog-card" [style.--card-stagger]="i">
+            <div class="catalog-card__image-wrap">
+              @if (imagenDisponible(product)) {
+                <img
+                  class="catalog-card__image"
+                  [src]="urlImagen(product)"
+                  [alt]="product.nombre"
+                  (error)="onImagenError(product.id)"
+                />
+              } @else {
+                <div class="catalog-card__fallback" aria-hidden="true">
+                  <span class="material-symbols-outlined">inventory_2</span>
+                  <span>Sin imagen</span>
+                </div>
+              }
+              <span class="catalog-card__badge">{{ badge(product) }}</span>
+            </div>
+
+            <div class="catalog-card__content">
+              <div class="catalog-card__meta">
+                <span class="catalog-card__availability">{{ labelDisponibilidad(product.disponibilidad) }}</span>
+                @if (product.marca) {
+                  <span class="catalog-card__sep" aria-hidden="true">•</span>
+                  <span class="catalog-card__brand">{{ product.marca }}</span>
+                }
+              </div>
+              <h3 class="catalog-card__title">{{ product.nombre }}</h3>
+              @if (product.descripcion) {
+                <p class="catalog-card__description">{{ product.descripcion }}</p>
+              }
+            </div>
+
+            <div class="catalog-card__footer">
+              <span class="catalog-card__price">{{ formatMoney(product.precioVentaActual) }}</span>
+              <a class="catalog-card__link" [routerLink]="['/Catalogo', product.id]">
+                <span>Ver detalles</span>
+                <span class="material-symbols-outlined catalog-card__link-icon" aria-hidden="true">arrow_forward</span>
+              </a>
+            </div>
+          </article>
+        }
+      </div>
+    }
   </div>
 </section>

@@ -173,7 +173,43 @@
 @media (prefers-reduced-motion: reduce) {
   .services-glow,
   .stat-card,
-  .services-inner h2 {
+  .services-inner h2,
+  .svc-icon,
+  .svc-icon .material-symbols-outlined {
     animation: none;
+    transition: none;
+  }
+
+  .svc-card:hover .svc-icon,
+  .svc-card:hover .svc-icon .material-symbols-outlined {
+    transform: none;
+    box-shadow: none;
   }
 }
+
+/* Microinteracciones de iconos (encapsuladas en el componente) */
+.svc-icon {
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.svc-icon .material-symbols-outlined {
+  transition: transform 220ms ease;
+}
+
+.svc-card:hover .svc-icon {
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 0 0 5px color-mix(in srgb, #006194 14%, transparent);
+}
+
+.svc-card:hover .svc-icon .material-symbols-outlined {
+  transform: scale(1.05);
+}
+
+.svc-icon--lg {
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease;
+}
+

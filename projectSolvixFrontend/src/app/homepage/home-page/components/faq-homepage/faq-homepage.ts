@@ -1,6 +1,11 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+export interface FaqItem {
+  q: string;
+  a: string;
+}
+
 @Component({
   selector: 'app-faq-homepage',
   standalone: true,
@@ -9,48 +14,36 @@ import { CommonModule } from '@angular/common';
   styleUrl: './faq-homepage.scss'
 })
 export class FaqHomepage {
-
-  // 🔥 Estado del acordeón (solo uno abierto)
   activeIndex: number | null = 0;
-
-  // 🔥 Hover dinámico (para efectos visuales en SCSS)
   hoverIndex: number | null = null;
 
-  // 🚀 DATA estructurada (más profesional)
-  faq = [
+  faq: FaqItem[] = [
     {
-      q: '¿Por qué necesitan mi ubicación?',
-      a: 'Para conocer las horas sol pico exactas de tu región. Sin este dato, el cálculo sería genérico y poco confiable. Tu ubicación solo se usa para el cálculo y nunca se comparte con terceros.',
-      icon: 'assets/icons/map.png'
+      q: '¿Cuánto tiempo tarda el diagnóstico de un equipo?',
+      a: 'Generalmente, entregamos un diagnóstico completo en un plazo de 24 a 48 horas hábiles. En casos de urgencia corporativa, disponemos de protocolo prioritario.'
     },
     {
-      q: '¿Es realmente gratis?',
-      a: 'Sí, completamente. Solvix es una herramienta gratuita para hogares colombianos. No hay costos ocultos ni suscripciones.',
-      icon: 'assets/icons/money.png'
+      q: '¿Tienen garantía las reparaciones?',
+      a: 'Sí, todas nuestras reparaciones y repuestos instalados cuentan con garantía certificada por escrito para tu total tranquilidad.'
     },
     {
-      q: '¿Qué tan preciso es el cálculo?',
-      a: 'El algoritmo utiliza tu consumo real en kWh, las horas sol pico de tu municipio (datos de PVGIS/NASA), la eficiencia del panel seleccionado y los factores de pérdida del sistema. Los resultados son una estimación técnicamente sólida, equivalente a la que haría un profesional del sector.',
-      icon: 'assets/icons/chart.png'
+      q: '¿Reparan todas las marcas?',
+      a: 'Sí, trabajamos con marcas líderes como HP, Lenovo, Dell, Asus, Epson, Canon, entre otras, disponiendo de diagramas esquemáticos y componentes originales.'
     },
     {
-      q: '¿Mis datos están seguros?',
-      a: 'Sí. Usamos autenticación con verificación por correo y JWT para proteger tu sesión. Tu información de consumo y ubicación no se comparte con nadie y es solo tuya.',
-      icon: 'assets/icons/security.png'
+      q: '¿Hacen visitas a domicilio para empresas?',
+      a: 'Sí, ofrecemos soporte en sitio para empresas, mantenimiento preventivo de parques informáticos, mantenimiento de redes y revisión periódica de cámaras de seguridad.'
     }
   ];
 
-  // 🔁 Toggle inteligente
   toggle(index: number): void {
     this.activeIndex = this.activeIndex === index ? null : index;
   }
 
-  // ✨ Hover (para glow dinámico)
   setHover(index: number | null): void {
     this.hoverIndex = index;
   }
 
-  // 🎯 Helpers (más limpio para HTML)
   isActive(index: number): boolean {
     return this.activeIndex === index;
   }
@@ -58,5 +51,4 @@ export class FaqHomepage {
   isHovered(index: number): boolean {
     return this.hoverIndex === index;
   }
-
 }

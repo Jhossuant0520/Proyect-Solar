@@ -1,47 +1,110 @@
-<!-- navbar-homepage.html -->
-<div class="navbar-wrapper">
+<header
+  class="ce-nav"
+  [class.is-scrolled]="scrolled"
+  [class.is-open]="menuOpen"
+>
+  <div class="ce-nav__bar">
+    <a
+      class="ce-nav__brand"
+      routerLink="/"
+      fragment="inicio"
+      (click)="goToFragment($event, 'inicio')"
+      aria-label="Computer &amp; Electronic — Inicio"
+    >
+      <img
+        class="ce-nav__logo"
+        [src]="logoSrc"
+        alt="Computer &amp; Electronic"
+        width="140"
+        height="40"
+      />
+      <span class="ce-nav__identity">
+        <span class="ce-nav__name">Computer &amp; Electronic</span>
+        <span class="ce-nav__kicker">Tech &amp; Security</span>
+      </span>
+    </a>
 
-  <nav class="navbar" [class.scrolled]="scrolled">
-    <div class="logo">
-      <img src="LogoSolvix3.1.png" alt="Logo Solvix" class="logo-img">
-    </div>
+    <nav class="ce-nav__links" aria-label="Navegación principal">
+      @for (item of menu; track item.label) {
+        @if (item.path) {
+          <a class="ce-nav__link" [routerLink]="item.path">{{ item.label }}</a>
+        } @else if (item.fragment) {
+          <a
+            class="ce-nav__link"
+            [class.is-active]="isActive(item)"
+            routerLink="/"
+            [fragment]="item.fragment"
+            (click)="goToFragment($event, item.fragment)"
+          >
+            {{ item.label }}
+          </a>
+        }
+      }
+    </nav>
 
-    <div class="hamburger" (click)="toggleMenu()" [class.active]="menuOpen">
-      <span class="bar"></span>
-      <span class="bar"></span>
-      <span class="bar"></span>
-    </div>
-
-    <!-- Solo links de escritorio dentro del navbar -->
-    <ul class="nav-links desktop-nav">
-      <li><a class="nav-item" [class.active]="activeSection==='inicio'" (click)="scrollToSection($event, 'inicio')">Inicio</a></li>
-      <li><a class="nav-item" [class.active]="activeSection==='steps'" (click)="scrollToSection($event, 'steps')">Cómo funciona</a></li>
-      <li><a class="nav-item" [class.active]="activeSection==='services'" (click)="scrollToSection($event, 'services')">Servicios</a></li>
-      <li><a class="nav-item" [class.active]="activeSection==='about'" (click)="scrollToSection($event, 'about')">Nosotros</a></li>
-      <li><a class="nav-item" [class.active]="activeSection==='faq'" (click)="scrollToSection($event, 'faq')">FAQ</a></li>
-      <li><a class="nav-item" [class.active]="activeSection==='contact'" (click)="scrollToSection($event, 'contact')">Contacto</a></li>
-    </ul>
-
-    <div class="nav-actions desktop-actions">
-      <button class="btn-cyber-secondary" routerLink="/login">Iniciar sesión</button>
-      <button class="btn-cyber-primary" routerLink="/register">Calcular gratis</button>
-    </div>
-  </nav>
-
-  <!--  Menú móvil FUERA del navbar (mismo nivel) -->
-  <div class="mobile-menu" [class.active]="menuOpen">
-    <ul>
-      <li><a class="nav-item" (click)="scrollToSection($event, 'inicio')">Inicio</a></li>
-      <li><a class="nav-item" (click)="scrollToSection($event, 'steps')">Cómo funciona</a></li>
-      <li><a class="nav-item" (click)="scrollToSection($event, 'services')">Servicios</a></li>
-      <li><a class="nav-item" (click)="scrollToSection($event, 'about')">Nosotros</a></li>
-      <li><a class="nav-item" (click)="scrollToSection($event, 'faq')">FAQ</a></li>
-      <li><a class="nav-item" (click)="scrollToSection($event, 'contact')">Contacto</a></li>
-    </ul>
-    <div class="mobile-actions">
-      <button class="btn-cyber-secondary" routerLink="/login" (click)="toggleMenu()">Iniciar sesión</button>
-      <button class="btn-cyber-primary" routerLink="/register" (click)="toggleMenu()">Calcular gratis</button>
+    <div class="ce-nav__actions">
+      <a
+        class="ce-nav__cta ce-nav__cta--primary"
+        routerLink="/"
+        fragment="contact"
+        (click)="goToFragment($event, 'contact')"
+      >
+        Solicitar soporte
+      </a>
+      <a class="ce-nav__cta ce-nav__cta--secondary" routerLink="/login">
+        <span class="material-symbols-outlined ce-nav__cta-icon" aria-hidden="true">login</span>
+        <span class="ce-nav__cta-full">Portal de clientes</span>
+        <span class="ce-nav__cta-short">Acceso clientes</span>
+      </a>
+      <button
+        type="button"
+        class="ce-nav__toggle"
+        (click)="toggleMenu()"
+        [attr.aria-expanded]="menuOpen"
+        aria-controls="homepage-mobile-nav"
+        [attr.aria-label]="menuOpen ? 'Cerrar menú' : 'Abrir menú'"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">{{ menuOpen ? 'close' : 'menu' }}</span>
+      </button>
     </div>
   </div>
 
-</div>
+  <div
+    id="homepage-mobile-nav"
+    class="ce-nav__mobile"
+    [class.is-open]="menuOpen"
+    [attr.aria-hidden]="!menuOpen"
+  >
+    <nav class="ce-nav__mobile-links" aria-label="Navegación móvil">
+      @for (item of menu; track item.label) {
+        @if (item.path) {
+          <a class="ce-nav__link" [routerLink]="item.path" (click)="toggleMenu()">{{ item.label }}</a>
+        } @else if (item.fragment) {
+          <a
+            class="ce-nav__link"
+            [class.is-active]="isActive(item)"
+            routerLink="/"
+            [fragment]="item.fragment"
+            (click)="goToFragment($event, item.fragment)"
+          >
+            {{ item.label }}
+          </a>
+        }
+      }
+    </nav>
+    <div class="ce-nav__mobile-ctas">
+      <a
+        class="ce-nav__cta ce-nav__cta--primary"
+        routerLink="/"
+        fragment="contact"
+        (click)="goToFragment($event, 'contact')"
+      >
+        Solicitar soporte
+      </a>
+      <a class="ce-nav__cta ce-nav__cta--secondary" routerLink="/login" (click)="toggleMenu()">
+        <span class="material-symbols-outlined ce-nav__cta-icon" aria-hidden="true">login</span>
+        Portal de clientes
+      </a>
+    </div>
+  </div>
+</header>

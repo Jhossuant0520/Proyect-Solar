@@ -1,25 +1,45 @@
 <section class="faq">
-  <div class="faq-glow" aria-hidden="true"></div>
+  <div class="faq__container">
+    <header class="faq__header">
+      <span class="faq__eyebrow">Claridad &amp; Garantía</span>
+      <h2 class="faq__title">Preguntas Frecuentes</h2>
+    </header>
 
-  <div class="faq-inner">
-    <h2>Preguntas frecuentes</h2>
-
-    <div class="faq-list">
+    <div class="faq__list">
       @for (item of faq; track item.q; let i = $index) {
-        <article
-          class="faq-item"
-          [class.active]="isActive(i)"
-          [style.animation-delay]="(i * 0.1) + 's'"
-          (click)="toggle(i)"
-        >
-          <div class="faq-question">
-            <span>{{ item.q }}</span>
-            <span class="chevron" aria-hidden="true"></span>
+        <div class="faq-item" [class.is-open]="isActive(i)">
+          <button
+            class="faq-item__trigger"
+            type="button"
+            [id]="'faq-button-' + i"
+            [attr.aria-expanded]="isActive(i)"
+            [attr.aria-controls]="'faq-panel-' + i"
+            (click)="toggle(i)"
+            (mouseenter)="setHover(i)"
+            (mouseleave)="setHover(null)"
+          >
+            <span class="faq-item__question">{{ item.q }}</span>
+            <span
+              class="material-symbols-outlined faq-item__icon"
+              [class.is-open]="isActive(i)"
+              aria-hidden="true"
+            >
+              expand_more
+            </span>
+          </button>
+
+          <div
+            class="faq-item__panel"
+            [id]="'faq-panel-' + i"
+            role="region"
+            [attr.aria-labelledby]="'faq-button-' + i"
+            [attr.aria-hidden]="!isActive(i)"
+          >
+            <div class="faq-item__panel-inner">
+              <p class="faq-item__answer">{{ item.a }}</p>
+            </div>
           </div>
-          <div class="faq-answer">
-            <p>{{ item.a }}</p>
-          </div>
-        </article>
+        </div>
       }
     </div>
   </div>
