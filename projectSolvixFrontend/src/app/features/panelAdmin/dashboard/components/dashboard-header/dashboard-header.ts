@@ -1,39 +1,28 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  EventEmitter,
-  Input,
-  OnChanges,
-  Output,
-  SimpleChanges,
-  ViewChild
-} from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { SolvixButtonComponent } from '../../../../../shared/components/solvix-button/solvix-button';
 import { SolvixPageHeaderComponent } from '../../../../../shared/components/solvix-page-header/solvix-page-header';
 import { PeriodoFiltro, PeriodoPreset } from '../../models/dashboard.models';
 import { PERIODO_PRESETS, rangoDePreset } from '../../utils/dashboard-period';
+import { DashboardDateFieldComponent } from '../dashboard-date-field/dashboard-date-field';
 
 @Component({
   selector: 'solvix-dashboard-header',
   standalone: true,
-  imports: [SolvixPageHeaderComponent, SolvixButtonComponent],
+  imports: [
+    SolvixPageHeaderComponent,
+    SolvixButtonComponent,
+    DashboardDateFieldComponent
+  ],
   templateUrl: './dashboard-header.html',
   styleUrl: './dashboard-header.scss'
 })
-export class DashboardHeaderComponent implements AfterViewInit, OnChanges {
+export class DashboardHeaderComponent {
   @Input({ required: true }) periodo!: PeriodoFiltro;
   @Input() refreshing = false;
   @Output() periodoChange = new EventEmitter<PeriodoFiltro>();
   @Output() refresh = new EventEmitter<void>();
 
-  @ViewChild('periodChips') periodChips?: ElementRef<HTMLElement>;
-
   readonly presets = PERIODO_PRESETS;
-
-  indicatorX = 0;
-  indicatorW = 0;
-  indicatorReady = false;
 
   selectPreset(preset: PeriodoPreset): void {
     this.periodoChange.emit({
@@ -44,37 +33,21 @@ export class DashboardHeaderComponent implements AfterViewInit, OnChanges {
     });
   }
 
-  onCustomDate(campo: 'desde' | 'hasta', event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
+  /** Tipado explícito: evita que el template trate $event como DOM Event. */
+  onDesdeChange(value: string): void {
+    this.onCustomDateValue('desde', value);
+  }
+
+  onHastaChange(value: string): void {
+    this.onCustomDateValue('hasta', value);
+  }
+
+  onCustomDateValue(campo: 'desde' | 'hasta', value: string): void {
+    // '' = Borrar (como el datepicker nativo). Se conserva el otro extremo del rango.
     this.periodoChange.emit({
       ...this.periodo,
       preset: 'personalizado',
       [campo]: value
     });
-  }
-
-  ngAfterViewInit(): void {
-    Promise.resolve().then(() => this.syncIndicator());
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['periodo']) {
-      Promise.resolve().then(() => this.syncIndicator());
-    }
-  }
-
-  private syncIndicator(): void {
-    const root = this.periodChips?.nativeElement;
-    if (!root) {
-      return;
-    }
-    const active = root.querySelector<HTMLElement>('.dash-chip.is-active');
-    if (!active) {
-      this.indicatorReady = false;
-      return;
-    }
-    this.indicatorX = active.offsetLeft;
-    this.indicatorW = active.offsetWidth;
-    this.indicatorReady = true;
   }
 }

@@ -1,121 +1,143 @@
-<section class="catalog">
-
-  <div class="catalog-top">
-    <a routerLink="/" class="catalog-back">← Inicio</a>
+<section
+  class="catalog"
+  [class.is-motion-enabled]="motionEnabled"
+  [class.is-revealed]="revealed"
+>
+  <div class="catalog__ambient" aria-hidden="true">
+    <span class="catalog__wash"></span>
+    <span class="catalog__blob catalog__blob--a"></span>
+    <span class="catalog__blob catalog__blob--b"></span>
+    <span class="catalog__blob catalog__blob--c"></span>
+    <span class="catalog__blob catalog__blob--d"></span>
+    <span class="catalog__blob catalog__blob--e"></span>
   </div>
 
-  <div class="catalog-header">
-    <h1>Catálogo SOLVIX</h1>
-    <p>Equipos y productos disponibles para tu proyecto</p>
-  </div>
-
-  @if (viewState === 'LOADING') {
-    <div class="catalog-loading" aria-busy="true">
-      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
-        <div class="skeleton-card"></div>
-      }
-    </div>
-  }
-
-  @if (viewState === 'ERROR') {
-    <div class="catalog-state catalog-state--error">
-      <p>No pudimos cargar el catálogo.</p>
-      <button type="button" class="btn-cyber-primary" (click)="cargar()">Reintentar</button>
-    </div>
-  }
-
-  @if (viewState === 'EMPTY') {
-    <div class="catalog-state">
-      <p>No hay productos disponibles en este momento.</p>
-    </div>
-  }
-
-  @if (viewState === 'SUCCESS') {
-    <div class="catalog-toolbar">
-      <div class="filters" role="tablist" aria-label="Categorías">
-        <button
-          type="button"
-          [class.active]="categoriaSeleccionadaId === null"
-          (click)="seleccionarCategoria(null)"
-        >
-          Todos
-        </button>
-        @for (cat of categorias; track cat.id) {
-          <button
-            type="button"
-            [class.active]="categoriaSeleccionadaId === cat.id"
-            (click)="seleccionarCategoria(cat.id)"
-          >
-            {{ cat.nombre }}
-          </button>
-        }
-      </div>
-
-      <label class="search">
-        <span class="visually-hidden">Buscar productos</span>
-        <input
-          type="search"
-          [(ngModel)]="busqueda"
-          placeholder="Buscar por nombre, marca o descripción"
-          autocomplete="off"
-        />
-      </label>
+  <div class="catalog__content">
+    <div class="catalog-top">
+      <a routerLink="/" class="catalog-back">
+        <span class="catalog-back__icon-wrap" aria-hidden="true">
+          <span class="material-symbols-outlined catalog-back__icon">arrow_back</span>
+        </span>
+        <span class="catalog-back__label">Volver al inicio</span>
+      </a>
     </div>
 
-    @if (mostrarVacioFiltro) {
-      <div class="catalog-state catalog-state--filter">
-        <p>No hay productos con ese filtro.</p>
-      </div>
-    } @else {
-      <div class="catalog-grid">
-        @for (producto of productosFiltrados; track producto.id) {
-          <article class="card">
-            <div class="image-box">
-              @if (imagenDisponible(producto)) {
-                <img
-                  [src]="urlImagen(producto)"
-                  [alt]="producto.nombre"
-                  (error)="onImagenError(producto.id)"
-                />
-              } @else {
-                <div class="image-fallback" aria-hidden="true">
-                  <span>Sin imagen</span>
-                </div>
-              }
-              <div class="glow"></div>
-            </div>
+    <div class="catalog-header">
+      <span class="catalog-header__eyebrow">Hardware &amp; Equipos</span>
+      <h1>Catálogo de tecnología</h1>
+      <p>Explora computadores, repuestos, cámaras y accesorios disponibles en Computer &amp; Electronic.</p>
+    </div>
 
-            <div class="info">
-              <div class="info-meta">
-                <solvix-badge [tone]="tonoDisponibilidad(producto.disponibilidad)">
-                  {{ labelDisponibilidad(producto.disponibilidad) }}
-                </solvix-badge>
-                @if (producto.categoriaNombre) {
-                  <span class="categoria">{{ producto.categoriaNombre }}</span>
-                }
-              </div>
-
-              <h2>{{ producto.nombre }}</h2>
-              <p class="marca">{{ producto.marca }}</p>
-
-              @if (producto.descripcion) {
-                <p class="descripcion">{{ producto.descripcion }}</p>
-              }
-
-              <div class="bottom">
-                <span class="price">{{ formatMoney(producto.precioVentaActual) }}</span>
-                <a
-                  class="btn-cyber-secondary card-cta"
-                  [routerLink]="['/Catalogo', producto.id]"
-                >
-                  Ver detalles
-                </a>
-              </div>
-            </div>
-          </article>
+    @if (viewState === 'LOADING') {
+      <div class="catalog-loading" aria-busy="true">
+        @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+          <div class="skeleton-card"></div>
         }
       </div>
     }
-  }
 
+    @if (viewState === 'ERROR') {
+      <div class="catalog-state catalog-state--error">
+        <p>No pudimos cargar el catálogo.</p>
+        <button type="button" class="catalog-btn catalog-btn--primary" (click)="cargar()">Reintentar</button>
+      </div>
+    }
+
+    @if (viewState === 'EMPTY') {
+      <div class="catalog-state">
+        <p>No hay productos disponibles en este momento.</p>
+      </div>
+    }
+
+    @if (viewState === 'SUCCESS') {
+      <div class="catalog-toolbar">
+        <div class="filters" role="tablist" aria-label="Categorías">
+          <button
+            type="button"
+            [class.active]="categoriaSeleccionadaId === null"
+            (click)="seleccionarCategoria(null)"
+          >
+            Todos
+          </button>
+          @for (cat of categorias; track cat.id) {
+            <button
+              type="button"
+              [class.active]="categoriaSeleccionadaId === cat.id"
+              (click)="seleccionarCategoria(cat.id)"
+            >
+              {{ cat.nombre }}
+            </button>
+          }
+        </div>
+
+        <label class="search">
+          <span class="visually-hidden">Buscar productos</span>
+          <input
+            type="search"
+            [(ngModel)]="busqueda"
+            placeholder="Buscar por nombre, marca o descripción"
+            autocomplete="off"
+          />
+        </label>
+      </div>
+
+      @if (mostrarVacioFiltro) {
+        <div class="catalog-state catalog-state--filter">
+          <p>No hay productos con ese filtro.</p>
+        </div>
+      } @else {
+        <div class="catalog-grid">
+          @for (producto of productosFiltrados; track producto.id; let i = $index) {
+            <article class="card" [style.--card-i]="i">
+              <div class="image-box">
+                @if (imagenDisponible(producto)) {
+                  <img
+                    [src]="urlImagen(producto)"
+                    [alt]="producto.nombre"
+                    (error)="onImagenError(producto.id)"
+                  />
+                } @else {
+                  <div class="image-fallback" aria-hidden="true">
+                    <span class="material-symbols-outlined">inventory_2</span>
+                    <span>Sin imagen</span>
+                  </div>
+                }
+              </div>
+
+              <div class="info">
+                <div class="info-meta">
+                  <span
+                    class="stock-badge"
+                    [class.stock-badge--out]="producto.disponibilidad === 'AGOTADO'"
+                  >
+                    {{ labelDisponibilidad(producto.disponibilidad) }}
+                  </span>
+                  @if (producto.categoriaNombre) {
+                    <span class="categoria">{{ producto.categoriaNombre }}</span>
+                  }
+                </div>
+
+                <h2>{{ producto.nombre }}</h2>
+                <p class="marca">{{ producto.marca }}</p>
+
+                @if (producto.descripcion) {
+                  <p class="descripcion">{{ producto.descripcion }}</p>
+                }
+
+                <div class="bottom">
+                  <span class="price">{{ formatMoney(producto.precioVentaActual) }}</span>
+                  <a
+                    class="catalog-btn catalog-btn--soft card-cta"
+                    [routerLink]="['/Catalogo', producto.id]"
+                  >
+                    Ver detalles
+                  </a>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    }
+  </div>
 </section>

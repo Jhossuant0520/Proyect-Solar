@@ -1,0 +1,27 @@
+<section class="analisis-view">
+  <h2 class="analisis-view__heading">Abastecimiento y gastos</h2>
+  <div class="analisis-view__stack">
+    <div class="analisis-view__chart analisis-view__chart--tall">
+      <solvix-compra-gasto-evolution
+        [points]="serie()"
+        [metrica]="metrica()"
+        [agrupacion]="agrupacion()"
+        [state]="serieState()"
+        (metricaChange)="metrica.set($event)"
+        (agrupacionChange)="onAgrupacion($event)"
+        (retry)="retry()"
+      />
+    </div>
+    <solvix-compra-gasto-proveedor
+      [proveedores]="proveedores()"
+      [state]="proveedorState()"
+      (retry)="retry()"
+    />
+  </div>
+  <p class="analisis-view__note">
+    Órdenes de compra y proveedores se gestionan en
+    <a routerLink="/compras">Compras</a>.
+    Exportación CSV en
+    <a routerLink="/reportes/compras">Reportes · Compras</a>.
+  </p>
+</section>

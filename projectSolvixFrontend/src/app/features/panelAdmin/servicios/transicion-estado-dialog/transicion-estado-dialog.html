@@ -1,21 +1,32 @@
 <div
-  class="transicion-dialog"
+  class="ce-dlg"
   [class.is-danger]="esCancelacion"
-  [class.is-attention]="esNuevaFalla || esEspera"
+  [class.is-warning]="esNuevaFalla || esEspera"
 >
-  <header class="dlg-head">
-    <h2>{{ data.accion.titulo }}</h2>
-    <p>
-      @if (esConfirmacion && data.mensajeConfirmacion) {
-        {{ data.mensajeConfirmacion }}
-      } @else if (esEspera) {
-        Esta orden quedará en espera mientras existan repuestos pendientes.
-      } @else if (esNuevaFalla) {
-        Se detectó una nueva situación durante la reparación.
-      } @else {
-        {{ data.accion.descripcion }}
-      }
-    </p>
+  <header class="ce-dlg__head">
+    <div class="ce-dlg__lead">
+      <span class="ce-dlg__badge" aria-hidden="true">
+        <span class="material-symbols-outlined">{{ dlgIcon }}</span>
+      </span>
+      <div class="ce-dlg__copy">
+        <p class="ce-dlg__kicker">{{ dlgKicker }}</p>
+        <h2>{{ data.accion.titulo }}</h2>
+        <p class="ce-dlg__sub">
+          @if (esConfirmacion && data.mensajeConfirmacion) {
+            {{ data.mensajeConfirmacion }}
+          } @else if (esEspera) {
+            Esta orden quedará en espera mientras existan repuestos pendientes.
+          } @else if (esNuevaFalla) {
+            Se detectó una nueva situación durante la reparación.
+          } @else {
+            {{ data.accion.descripcion }}
+          }
+        </p>
+      </div>
+    </div>
+    <button type="button" class="ce-dlg__close" aria-label="Cerrar" (click)="cancelar()">
+      <span class="material-symbols-outlined" aria-hidden="true">close</span>
+    </button>
   </header>
 
   @if (esEspera && data.pendientesResumen?.length) {
@@ -26,11 +37,12 @@
     </ul>
   }
 
-  <form class="dlg-form" [formGroup]="form" (ngSubmit)="confirmar()">
+  <form class="ce-dlg__body" [formGroup]="form" (ngSubmit)="confirmar()">
     @if (esCancelacion) {
-      <label>
-        <span class="label-row">Motivo de cancelación <span class="req">requerido</span></span>
+      <label class="ce-field">
+        <span>Motivo de cancelación <span class="ce-req">requerido</span></span>
         <textarea
+          class="ce-input"
           formControlName="motivo"
           rows="3"
           maxlength="500"
@@ -40,9 +52,10 @@
     }
 
     @if (esNuevaFalla) {
-      <label>
-        <span class="label-row">Nueva falla / situación detectada <span class="req">requerido</span></span>
+      <label class="ce-field">
+        <span>Nueva falla / situación detectada <span class="ce-req">requerido</span></span>
         <textarea
+          class="ce-input"
           formControlName="nuevaFalla"
           rows="3"
           maxlength="500"
@@ -52,13 +65,14 @@
     }
 
     @if (esCancelacion || esNuevaFalla || esEspera) {
-      <label>
-        Observación
+      <label class="ce-field">
+        <span>Observación <span class="ce-opt">opcional</span></span>
         <textarea
+          class="ce-input"
           formControlName="observacion"
           rows="2"
           maxlength="1000"
-          placeholder="Opcional"
+          placeholder="Detalle adicional si hace falta"
         ></textarea>
       </label>
     }
@@ -67,14 +81,15 @@
       <p class="form-error">{{ error }}</p>
     }
 
-    <div class="dlg-actions">
-      <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
-        Cancelar
+    <div class="ce-dlg__actions">
+      <solvix-button family="tech" rank="tertiary" type="button" icon="close" (click)="cancelar()">
+        Cerrar
       </solvix-button>
       <solvix-button
         family="tech"
         [rank]="esCancelacion ? 'danger' : 'primary'"
         type="submit"
+        [icon]="dlgConfirmIcon"
       >
         @if (esConfirmacion && data.accion.destino === 'APROBADO') {
           Confirmar aprobación

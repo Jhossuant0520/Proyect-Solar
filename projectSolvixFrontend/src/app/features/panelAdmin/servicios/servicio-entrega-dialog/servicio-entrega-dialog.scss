@@ -1,73 +1,62 @@
+@use '../../../../../styles/solvix-dialog' as d;
+
+@include d.dialog;
+
 .entrega-dialog {
-  width: min(680px, 100%);
-  max-width: 100%;
   max-height: min(92vh, 900px);
   overflow: auto;
-  padding: 1.25rem 1.35rem 1.15rem;
-  background: var(--color-surface-elevated, var(--solvix-surface-elevated));
-  color: var(--color-text-primary, var(--solvix-text));
-  box-sizing: border-box;
 }
 
-.dlg-head .kicker {
-  margin: 0 0 0.2rem;
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-text-muted, var(--solvix-text-muted));
-}
-
-.dlg-head h2 {
-  margin: 0 0 0.35rem;
-  font-size: 1.2rem;
-  color: var(--color-primary, var(--solvix-primary));
-}
-
-.dlg-head p {
-  margin: 0;
-  color: var(--color-text-muted, var(--solvix-text-muted));
-  font-size: 0.88rem;
-  line-height: 1.45;
-}
-
-.bloque {
-  margin-top: 1.1rem;
-  padding-top: 0.95rem;
-  border-top: 1px solid var(--color-border-subtle, var(--solvix-border-subtle));
-}
-
-.bloque h3,
-.form-entrega h3 {
-  margin: 0 0 0.55rem;
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: var(--color-primary, var(--solvix-secondary));
-}
-
-.form-entrega h3.sep {
-  margin-top: 1.15rem;
+.resumen,
+.form-entrega {
+  margin-top: 0.95rem;
 }
 
 .facts {
   display: grid;
-  gap: 0.4rem;
-  margin: 0 0 0.65rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin: 0 0 0.7rem;
 }
 
-.facts div {
-  display: grid;
-  grid-template-columns: 6.5rem 1fr;
-  gap: 0.4rem;
-  font-size: 0.88rem;
+.facts__card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  min-width: 0;
+  padding: 0.6rem 0.7rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--solvix-border, #d7e3f0);
+  background: var(--solvix-surface-low, #eef4f9);
+}
+
+.facts__icon {
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 0.45rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--solvix-primary-soft, #cce5ff);
+  color: var(--solvix-primary, #006194);
+}
+
+.facts__icon .material-symbols-outlined {
+  font-size: 1.05rem;
 }
 
 .facts dt {
-  color: var(--color-text-muted, var(--solvix-text-muted));
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--solvix-text-muted, #5a6570);
 }
 
 .facts dd {
-  margin: 0;
-  color: var(--color-text-primary, var(--solvix-text));
+  margin: 0.1rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
 
@@ -75,41 +64,80 @@
   margin: 0 0 0.45rem;
   font-size: 0.86rem;
   line-height: 1.4;
-  color: var(--color-text-primary, var(--solvix-text));
 }
 
 .campo span:first-child {
   display: block;
-  color: var(--color-text-muted, var(--solvix-text-muted));
-  font-size: 0.78rem;
+  color: var(--solvix-text-muted, #5a6570);
+  font-size: 0.75rem;
   margin-bottom: 0.15rem;
 }
 
 .rep-item {
-  color: var(--color-text-secondary, var(--solvix-text-secondary));
+  color: var(--solvix-text-secondary, #3f4850);
+}
+
+.form-entrega h3 {
+  margin: 0 0 0.45rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--solvix-primary, #006194);
 }
 
 .aviso {
-  margin: 0 0 0.75rem;
-  font-size: 0.86rem;
-  color: var(--color-text-muted, var(--solvix-text-muted));
-  line-height: 1.4;
+  margin-bottom: 0.75rem;
 }
 
 .check {
+  position: relative;
   display: flex;
-  gap: 0.55rem;
-  align-items: flex-start;
+  gap: 0.65rem;
+  align-items: center;
   margin-bottom: 0.9rem;
-  font-size: 0.9rem;
-  color: var(--color-text-primary, var(--solvix-text));
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.65rem;
+  border: 1px solid var(--solvix-border, #d7e3f0);
+  background: var(--solvix-surface-low, #eef4f9);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .check input {
-  margin-top: 0.2rem;
-  width: auto;
-  min-width: 1.1rem;
-  min-height: 1.1rem;
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.check__box {
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 0.35rem;
+  border: 1.5px solid var(--solvix-border, #d7e3f0);
+  background: var(--solvix-surface, #fff);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+}
+
+.check__box .material-symbols-outlined {
+  font-size: 1rem;
+  font-variation-settings: 'wght' 700;
+}
+
+.check.is-checked {
+  background: color-mix(in srgb, var(--solvix-primary-soft, #cce5ff) 65%, #fff);
+  border-color: var(--solvix-primary, #006194);
+}
+
+.check.is-checked .check__box {
+  background: var(--solvix-primary, #006194);
+  border-color: var(--solvix-primary, #006194);
+  color: #fff;
 }
 
 .grid-2 {
@@ -118,135 +146,75 @@
   gap: 0.75rem;
 }
 
-label:not(.check) {
-  display: grid;
-  gap: 0.3rem;
-  font-size: 0.85rem;
-  color: var(--color-text-muted, var(--solvix-text-muted));
-}
-
 .label-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
-  align-items: baseline;
-}
-
-.req {
-  color: var(--color-primary, var(--solvix-primary));
-  font-size: 0.75rem;
-}
-
-.opt {
-  color: var(--color-text-muted, var(--solvix-text-muted));
-  font-size: 0.75rem;
-  font-weight: 400;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .hint {
-  font-size: 0.8rem;
-  color: var(--color-text-muted, var(--solvix-text-muted));
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--solvix-text-muted, #5a6570);
   line-height: 1.35;
 }
 
-input,
-textarea {
-  width: 100%;
-  border-radius: 8px;
-  border: 1px solid var(--color-border, var(--solvix-border));
-  background: var(--color-surface-2, var(--solvix-surface-low));
-  color: var(--color-text-primary, var(--solvix-text));
-  padding: 0.55rem 0.65rem;
-  font: inherit;
-  box-sizing: border-box;
+.firma-card {
+  margin: 1rem 0 0.9rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.65rem;
+  border: 1px solid var(--solvix-border, #d7e3f0);
+  background: var(--solvix-surface-low, #eef4f9);
 }
 
-input:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid var(--color-focus, var(--solvix-primary));
-  outline-offset: 1px;
+.firma-card.is-firmado {
+  border-color: var(--solvix-success, #047857);
+  background: color-mix(in srgb, var(--solvix-success, #047857) 6%, var(--solvix-surface-low, #eef4f9));
 }
 
-input[readonly] {
-  opacity: 0.9;
-  border-color: var(--color-border-subtle, var(--solvix-border-subtle));
-}
-
-/* Firma: estilos en solvix-signature-pad (D.7 fondo blanco / trazo negro). */
-
-.obs-label {
-  margin-bottom: 0;
+.firma-card h3 {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .resumen-final {
   margin-top: 1rem;
   padding: 0.75rem 0.85rem;
-  border-radius: 10px;
-  border: 1px solid var(--color-border, var(--solvix-border));
-  background: var(--color-surface-2, var(--solvix-surface-low));
-}
-
-.resumen-final h3 {
-  margin-bottom: 0.4rem;
+  border-radius: 0.65rem;
+  border: 1px solid var(--solvix-border, #d7e3f0);
+  background: var(--solvix-surface-low, #eef4f9);
 }
 
 .checklist {
-  margin: 0.35rem 0 0.55rem;
+  margin: 0.35rem 0 0.65rem;
   padding-left: 1.1rem;
-  font-size: 0.88rem;
-  color: var(--color-text-muted, var(--solvix-text-muted));
+  font-size: 0.875rem;
+  color: var(--solvix-text-muted, #5a6570);
 }
 
 .checklist .ok {
-  color: var(--color-success, var(--solvix-success));
-}
-
-.final-hint {
-  margin-bottom: 0;
+  color: var(--solvix-success, #047857);
 }
 
 .form-error {
-  margin: 0.85rem 0 0;
-  color: var(--color-danger, var(--solvix-error));
-  font-size: 0.88rem;
-}
-
-.dlg-actions {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.55rem;
-  margin-top: 1.1rem;
-  position: sticky;
-  bottom: 0;
-  padding-top: 0.75rem;
-  background: linear-gradient(
-    to top,
-    var(--color-surface-elevated, var(--solvix-surface-elevated)) 70%,
-    transparent
-  );
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.75rem 0 0;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--solvix-error, #ba1a1a) 35%, transparent);
+  background: color-mix(in srgb, var(--solvix-error, #ba1a1a) 9%, transparent);
+  color: var(--solvix-error, #ba1a1a);
+  font-size: 0.8125rem;
 }
 
 @media (max-width: 767px) {
-  .entrega-dialog {
-    min-width: 0;
-    padding: 1rem 0.95rem 1rem;
-    max-height: min(94vh, 960px);
-  }
-
   .grid-2,
-  .facts div {
+  .facts {
     grid-template-columns: 1fr;
-  }
-
-  .dlg-actions {
-    flex-direction: column-reverse;
-    align-items: stretch;
-  }
-
-  .dlg-actions solvix-button,
-  .dlg-actions button {
-    width: 100%;
-    min-height: var(--solvix-touch-min, 44px);
   }
 }

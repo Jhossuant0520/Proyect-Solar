@@ -1,0 +1,14 @@
+<section class="analisis-view">
+  <h2 class="analisis-view__heading">Evolución comercial</h2>
+  <div class="analisis-view__chart analisis-view__chart--tall">
+    <solvix-sales-evolution
+      [points]="serie()"
+      [metrica]="metrica()"
+      [agrupacion]="agrupacion()"
+      [state]="serieState()"
+      (metricaChange)="metrica.set($event)"
+      (agrupacionChange)="onAgrupacion($event)"
+      (retry)="retry()"
+    />
+  </div>
+</section>

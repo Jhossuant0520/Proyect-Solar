@@ -178,11 +178,14 @@ describe('ServicioDetailComponent — workflow', () => {
         { provide: CotizacionServicioService, useValue: cotizacionService },
         { provide: DocumentoOrdenServicioService, useValue: documentoService },
         { provide: MatDialog, useValue: dialog },
-        { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open']) },
+        { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open', 'openFromComponent']) },
         { provide: SolvixFeedbackService, useValue: feedback },
         { provide: SolvixActionRevealService, useValue: actionReveal }
       ]
-    }).compileComponents();
+    })
+      .overrideProvider(MatDialog, { useValue: dialog })
+      .overrideProvider(MatSnackBar, { useValue: jasmine.createSpyObj('MatSnackBar', ['open', 'openFromComponent']) })
+      .compileComponents();
 
     fixture = TestBed.createComponent(ServicioDetailComponent);
     component = fixture.componentInstance;
@@ -371,11 +374,13 @@ describe('ServicioDetailComponent — workflow', () => {
     expect(ordenService.listarHistorial).toHaveBeenCalledWith(12);
   }));
 
-  it('muestra Siguiente paso y progreso de 5 fases', fakeAsync(() => {
+  it('muestra Operación, paso recomendado y progreso de 5 fases', fakeAsync(() => {
     fixture.detectChanges();
     tick();
     const text = fixture.nativeElement.textContent as string;
-    expect(text).toContain('Siguiente paso');
+    expect(text).toContain('Operación');
+    expect(text).toContain('Próximo paso recomendado');
+    expect(text).not.toContain('Siguiente paso');
     expect(text).toContain('Recepción');
     expect(text).toContain('Iniciar diagnóstico');
     expect(text).not.toContain('Estado actual:');
@@ -473,13 +478,118 @@ describe('ServicioDetailComponent — workflow', () => {
     );
   }));
 
+  it('integra el diseño Stitch completo: trazabilidad de 5 etapas, prioridad por antigüedad, WhatsApp contextual y modal de decisión', fakeAsync(() => {
+    ordenService.obtenerPorId.and.returnValue(
+      of(
+        ordenBase({
+          estado: 'PENDIENTE_APROBACION',
+          diagnostico: 'Cortocircuito en etapa VRM',
+          fechaRecepcion: '2026-03-01T10:00:00'
+        })
+      )
+    );
+    cotizacionService.listar.and.returnValue(
+      of([
+        {
+          id: 42,
+          ordenServicioId: 12,
+          numero: 'COT-2026-0042',
+          tipo: 'INICIAL',
+          estado: 'PENDIENTE_APROBACION',
+          subtotal: 300000,
+          total: 357000,
+          subtotalRepuestos: 180000,
+          subtotalManoObra: 120000,
+          subtotalOtros: 0,
+          observaciones: 'Condición de pago taller',
+          motivoAmpliacion: null,
+          detalles: [
+            {
+              id: 1,
+              tipo: 'REPUESTO',
+              descripcion: 'Módulo VRM',
+              cantidad: 1,
+              precioUnitario: 180000,
+              subtotal: 180000,
+              productoId: 10,
+              productoNombreSnapshot: 'VRM Dell',
+              ordenServicioRepuestoId: null
+            }
+          ],
+          puedePresentar: false,
+          puedeAprobar: true,
+          puedeRechazar: true,
+          puedeEditar: true
+        } as never
+      ])
+    );
+
+    fixture.detectChanges();
+    tick();
+    flushMicrotasks();
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+    const text = root.textContent as string;
+
+    // A. Encabezado refinado (sin tarjeta superior de Portal ni botón WhatsApp en cabecera) + Prioridad por antigüedad
+    expect(root.querySelector('.service-portal-bar')).toBeNull();
+    expect(root.querySelector('.detalle-head .btn-whatsapp')).toBeNull();
+    expect(root.querySelector('.btn-volver-link')).toBeTruthy();
+    expect(root.querySelector('.head-estado-pill')).toBeTruthy();
+    expect(root.querySelector('.prioridad-pill')).toBeTruthy();
+    expect(component.prioridadOperativa?.activa).toBeTrue();
+
+    // Metadatos simplificados: Cliente, Equipo, Última modificación (sin Recepción repetida en la fila inferior)
+    const factsText = (root.querySelector('.head-facts')?.textContent ?? '') as string;
+    expect(factsText).toContain('Cliente');
+    expect(factsText).toContain('Equipo');
+    expect(factsText).toContain('Última modificación');
+    expect(factsText).not.toContain('Recepción');
+
+    // C. Trazabilidad Operativa (5 etapas conectadas)
+    const steps = root.querySelectorAll('.traza-step');
+    expect(steps.length).toBe(5);
+    expect(text).toContain('Trazabilidad Operativa');
+    expect(text).toContain('1. Recepción');
+    expect(text).toContain('2. Diagnóstico');
+    expect(text).toContain('3. Cotización y aprobación');
+    expect(text).toContain('4. Reparación');
+    expect(text).toContain('5. Entrega');
+
+    // F. Tabla de conceptos de cotización
+    expect(root.querySelector('.cot-table')).toBeTruthy();
+    expect(text).toContain('Módulo VRM');
+    expect(text).toContain('COT-2026-0042');
+
+    // I. Tarjeta de WhatsApp contextual con datos reales
+    expect(root.querySelector('.whatsapp-card')).toBeTruthy();
+    expect(text).toContain('Ana Ruiz');
+    expect(text).toContain('+57 300 123 4567');
+
+    // J. CTA principal abre el modal de decisión del cliente (aprobar / rechazar)
+    dialog.open.and.returnValue({
+      afterClosed: () => of({ decision: 'aprobar', observacion: null })
+    } as never);
+    cotizacionService.aprobar.and.returnValue(of({ id: 42 } as any));
+
+    component.ejecutarAccionPrincipal();
+    tick();
+    flushMicrotasks();
+
+    expect(dialog.open).toHaveBeenCalled();
+    expect(cotizacionService.aprobar).toHaveBeenCalledWith(12, 42);
+  }));
+
   describe('WhatsApp asistido', () => {
-    it('muestra botón WhatsApp en RECEPCIONADO', fakeAsync(() => {
+    it('muestra tarjeta WhatsApp contextual en RECEPCIONADO y no duplica botón en el encabezado', fakeAsync(() => {
       fixture.detectChanges();
       tick();
       expect(component.mostrarWhatsAppRecepcion).toBeTrue();
       expect(component.puedePrepararWhatsApp).toBeTrue();
-      expect(fixture.nativeElement.querySelector('.btn-whatsapp')).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('.detalle-head .btn-whatsapp')).toBeNull();
+      expect(fixture.nativeElement.querySelector('.whatsapp-card')).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('.btn-whatsapp-open')).toBeTruthy();
       expect(fixture.nativeElement.textContent).toContain('WhatsApp');
     }));
 

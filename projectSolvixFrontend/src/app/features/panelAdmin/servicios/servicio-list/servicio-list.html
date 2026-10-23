@@ -1,44 +1,120 @@
 <section class="servicios-page">
   <solvix-page-header
+    icon="handyman"
     kicker="Taller"
     title="Servicios técnicos"
-    subtitle="Órdenes de servicio: cliente, equipo y estado."
+    subtitle="Órdenes de taller: cliente, equipo, estado y seguimiento operativo."
   >
     <solvix-button family="tech" rank="primary" icon="add" (click)="nueva()">
       Nueva orden
     </solvix-button>
   </solvix-page-header>
 
-  <div class="filter-bar">
-    <label class="search">
-      <span class="material-symbols-outlined" aria-hidden="true">search</span>
-      <input
-        type="search"
-        [value]="search"
-        (input)="onSearch($event)"
-        placeholder="Buscar por número, cliente, documento o equipo"
-        aria-label="Buscar órdenes de servicio"
-      />
-    </label>
-    <div class="filtro-cliente">
-      <app-cliente-buscador
-        [seleccionado]="filtroCliente"
-        [limite]="8"
-        [mostrarHintSinSeleccion]="false"
-        etiquetaSinCliente="Cliente: todos"
-        placeholder="Filtrar por cliente…"
-        (seleccionadoChange)="onCliente($event)"
-      />
-    </div>
-    <select [value]="filtroEstado" (change)="onEstado($event)" aria-label="Estado">
-      <option value="">Estado: todos</option>
-      @for (estado of estados; track estado.id) {
-        <option [value]="estado.id">{{ estado.label }}</option>
+  <div class="kpi-grid" aria-label="Indicadores del taller">
+    <solvix-metric-card
+      label="Total en taller"
+      [value]="'' + totalActivas"
+      [countValue]="totalActivas"
+      formato="quantity"
+      icon="laptop_mac"
+      hint="Órdenes activas (sin entregadas, cerradas ni canceladas)"
+      [incomplete]="operativasError"
+    />
+    <solvix-metric-card
+      label="Pendientes de aprobación"
+      [value]="'' + pendientesAprobacion"
+      [countValue]="pendientesAprobacion"
+      formato="quantity"
+      icon="request_quote"
+      tone="warning"
+      [hint]="kpiPendientesHint"
+      [incomplete]="operativasError"
+    />
+    <solvix-metric-card
+      label="En reparación"
+      [value]="'' + enReparacion"
+      [countValue]="enReparacion"
+      formato="quantity"
+      icon="build"
+      [hint]="kpiReparacionHint"
+      [incomplete]="operativasError"
+    />
+    <solvix-metric-card
+      label="Tiempo promedio"
+      value="Sin dato"
+      icon="timer"
+      hint="El sistema no calcula aún un SLA promedio fiable"
+      [incomplete]="true"
+    />
+  </div>
+
+  <div class="filter-panel">
+    <div class="filter-bar">
+      <label class="search">
+        <span class="material-symbols-outlined" aria-hidden="true">search</span>
+        <input
+          type="search"
+          [value]="search"
+          (input)="onSearch($event)"
+          placeholder="Buscar por número, cliente, documento o equipo"
+          aria-label="Buscar órdenes de servicio"
+        />
+      </label>
+      <div class="filtro-cliente">
+        <app-cliente-buscador
+          [seleccionado]="filtroCliente"
+          [limite]="8"
+          [mostrarHintSinSeleccion]="false"
+          etiquetaSinCliente="Cliente: todos"
+          placeholder="Filtrar por cliente…"
+          (seleccionadoChange)="onCliente($event)"
+        />
+      </div>
+      <select
+        [value]="filtroPrioridad"
+        (change)="onPrioridad($event)"
+        aria-label="Prioridad por antigüedad"
+      >
+        @for (p of prioridades; track p.id) {
+          <option [value]="p.id">{{ p.label }}</option>
+        }
+      </select>
+      <select class="filtro-estado-select" [value]="filtroEstado" (change)="onEstado($event)" aria-label="Estado">
+        <option value="">Estado: todos</option>
+        @for (estado of estados; track estado.id) {
+          <option [value]="estado.id">{{ estado.label }}</option>
+        }
+      </select>
+      <button
+        type="button"
+        class="btn-refresh"
+        (click)="refrescar()"
+        title="Actualizar"
+        aria-label="Actualizar listado"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+      </button>
+      @if (hayFiltros) {
+        <button type="button" class="clear" (click)="limpiarFiltros()">Limpiar filtros</button>
       }
-    </select>
-    @if (hayFiltros) {
-      <button type="button" class="clear" (click)="limpiarFiltros()">Limpiar filtros</button>
-    }
+    </div>
+
+    <div class="estado-chips" role="group" aria-label="Filtrar por estado">
+      @for (chip of chipsEstado; track chip.id) {
+        <button
+          type="button"
+          class="estado-chip"
+          [class.is-active]="filtroEstado === chip.id"
+          [attr.aria-pressed]="filtroEstado === chip.id"
+          (click)="seleccionarChipEstado(chip.id)"
+        >
+          <span>{{ chip.label }}</span>
+          @if (chip.count != null) {
+            <span class="estado-chip__count">{{ chip.count }}</span>
+          }
+        </button>
+      }
+    </div>
   </div>
 
   @if (state === 'loading') {
@@ -62,22 +138,35 @@
     <solvix-empty-state
       icon="search_off"
       title="No encontramos órdenes con estos filtros."
-      message="Prueba con otro número, cliente o estado."
+      message="Prueba con otro número, cliente, estado o prioridad."
       actionLabel="Limpiar filtros"
       (action)="limpiarFiltros()"
     />
   } @else {
     <div class="table-panel">
-      <div class="table-wrap desktop-table">
+      @if (filtroPrioridad) {
+        <p class="table-note">
+          Filtrando por prioridad entre órdenes activas del taller.
+        </p>
+      }
+      <div class="table-wrap table-wrap--fit desktop-table">
         <table class="svc-table">
           <caption class="sr-only">Lista de órdenes de servicio</caption>
+          <colgroup>
+            <col class="col-ot" />
+            <col class="col-cliente" />
+            <col class="col-equipo" />
+            <col class="col-estado" />
+            <col class="col-prio" />
+            <col class="col-acc" />
+          </colgroup>
           <thead>
             <tr>
-              <th>Número</th>
+              <th>N.º orden</th>
               <th>Cliente</th>
-              <th>Equipo</th>
-              <th>Estado</th>
-              <th>Recepción</th>
+              <th>Equipo y falla</th>
+              <th>Estado taller</th>
+              <th>Prioridad</th>
               <th><span class="sr-only">Acciones</span></th>
             </tr>
           </thead>
@@ -85,20 +174,61 @@
             @for (orden of ordenes; track orden.id) {
               <tr>
                 <td>
-                  <strong class="solvix-mono">{{ orden.numero }}</strong>
+                  <strong class="solvix-mono ot-id">{{ orden.numero }}</strong>
                 </td>
-                <td>{{ orden.clienteNombre }}</td>
-                <td>{{ equipo(orden) }}</td>
+                <td>
+                  <span class="cell-main" [attr.title]="orden.clienteNombre">{{ orden.clienteNombre }}</span>
+                  @if (orden.clienteTelefono) {
+                    <span class="cell-sub solvix-mono">{{ orden.clienteTelefono }}</span>
+                  }
+                </td>
+                <td>
+                  <span class="cell-main" [attr.title]="equipo(orden)">{{ equipo(orden) }}</span>
+                  <span class="cell-sub" [attr.title]="falla(orden)">{{ falla(orden) }}</span>
+                </td>
                 <td>
                   <solvix-badge [tone]="estadoTone(orden.estado)">
                     {{ estadoLabel(orden.estado) }}
                   </solvix-badge>
                 </td>
-                <td class="solvix-mono">{{ fecha(orden.fechaRecepcion) }}</td>
+                <td>
+                  @if (prioridad(orden); as prio) {
+                    @if (prio.activa) {
+                      <span
+                        class="prio-chip"
+                        [attr.data-prio]="prio.codigo"
+                        [attr.title]="prio.label + ' · ' + prio.resumenEdad"
+                        [attr.aria-label]="prio.label + ', ' + prio.resumenEdad"
+                      >
+                        <span class="material-symbols-outlined prio-chip__icon" aria-hidden="true">
+                          {{ iconoPrioridad(prio.codigo) }}
+                        </span>
+                        <span class="solvix-mono prio-chip__days">{{ prio.dias }}d</span>
+                      </span>
+                    } @else {
+                      <span
+                        class="prio-chip prio-chip--closed"
+                        [attr.title]="prio.label + ' · ' + prio.resumenEdad"
+                        [attr.aria-label]="prio.label + ', ' + prio.resumenEdad"
+                      >
+                        <span class="material-symbols-outlined prio-chip__icon" aria-hidden="true">
+                          check_circle
+                        </span>
+                        <span class="solvix-mono prio-chip__days">{{ prio.dias }}d</span>
+                      </span>
+                    }
+                  } @else {
+                    <span class="muted">—</span>
+                  }
+                </td>
                 <td class="actions">
-                  <solvix-button family="tech" rank="secondary" icon="visibility" (click)="abrir(orden.id)">
-                    Ver
-                  </solvix-button>
+                  <solvix-button
+                    family="tech"
+                    rank="secondary"
+                    icon="visibility"
+                    ariaLabel="Ver detalle"
+                    (click)="abrir(orden.id)"
+                  />
                 </td>
               </tr>
             }
@@ -108,15 +238,39 @@
 
       <ul class="mobile-cards">
         @for (orden of ordenes; track orden.id) {
-          <li class="card solvix-card-interactive" (click)="abrir(orden.id)" (keyup.enter)="abrir(orden.id)" tabindex="0" role="button">
+          <li
+            class="card solvix-card-interactive"
+            (click)="abrir(orden.id)"
+            (keyup.enter)="abrir(orden.id)"
+            tabindex="0"
+            role="button"
+          >
             <div class="card-top">
               <strong class="solvix-mono">{{ orden.numero }}</strong>
-              <solvix-badge [tone]="estadoTone(orden.estado)">
-                {{ estadoLabel(orden.estado) }}
-              </solvix-badge>
+              <div class="card-badges">
+                @if (prioridad(orden); as prio) {
+                  @if (prio.activa) {
+                    <span
+                      class="prio-chip"
+                      [attr.data-prio]="prio.codigo"
+                      [attr.title]="prio.label + ' · ' + prio.resumenEdad"
+                      [attr.aria-label]="prio.label + ', ' + prio.resumenEdad"
+                    >
+                      <span class="material-symbols-outlined prio-chip__icon" aria-hidden="true">
+                        {{ iconoPrioridad(prio.codigo) }}
+                      </span>
+                      <span class="solvix-mono prio-chip__days">{{ prio.dias }}d</span>
+                    </span>
+                  }
+                }
+                <solvix-badge [tone]="estadoTone(orden.estado)">
+                  {{ estadoLabel(orden.estado) }}
+                </solvix-badge>
+              </div>
             </div>
             <p>{{ orden.clienteNombre }}</p>
             <p class="muted">{{ equipo(orden) }}</p>
+            <p class="muted">{{ falla(orden) }}</p>
             <p class="muted solvix-mono">{{ fecha(orden.fechaRecepcion) }}</p>
           </li>
         }
@@ -150,4 +304,126 @@
       </div>
     </div>
   }
+
+  <div class="ops-panels" aria-label="Paneles operativos del taller">
+    <article class="ops-panel ops-panel--age">
+      <header class="ops-panel__head">
+        <div>
+          <h2>Antigüedad de órdenes</h2>
+          <p>Distribución de órdenes activas por días desde la recepción.</p>
+        </div>
+        <span class="ops-panel__badge">
+          @if (operativasCargando) {
+            …
+          } @else {
+            {{ distribucion.totalActivas }} OT{{ distribucion.totalActivas === 1 ? '' : 's' }} activa{{ distribucion.totalActivas === 1 ? '' : 's' }}
+          }
+        </span>
+      </header>
+
+      @if (operativasCargando) {
+        <p class="ops-panel__empty">Calculando distribución…</p>
+      } @else if (operativasError) {
+        <p class="ops-panel__empty">No pudimos cargar la distribución. Usa Actualizar para reintentar.</p>
+      } @else if (distribucion.totalActivas === 0) {
+        <p class="ops-panel__empty">No hay órdenes activas para distribuir.</p>
+      } @else {
+        <ul class="age-bars">
+          @for (grupo of distribucion.grupos; track grupo.codigo) {
+            <li>
+              <button
+                type="button"
+                class="age-bar"
+                [attr.data-prio]="grupo.codigo"
+                [class.is-active]="filtroPrioridad === grupo.codigo"
+                [attr.aria-pressed]="filtroPrioridad === grupo.codigo"
+                (click)="filtrarPorGrupoAntiguedad(grupo.codigo)"
+              >
+                <div class="age-bar__meta">
+                  <span class="age-bar__label">
+                    <span class="age-bar__dot" aria-hidden="true"></span>
+                    {{ grupo.label }}
+                    <span class="age-bar__range">({{ grupo.rango }})</span>
+                  </span>
+                  <span class="age-bar__count solvix-mono">
+                    {{ grupo.cantidad }} · {{ grupo.porcentaje }}%
+                  </span>
+                </div>
+                <div class="age-bar__track" aria-hidden="true">
+                  <div class="age-bar__fill" [style.width]="anchoBarra(grupo)"></div>
+                </div>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+
+      <p class="ops-panel__foot">
+        <span class="material-symbols-outlined" aria-hidden="true">info</span>
+        Antigüedad calculada desde la fecha de recepción.
+        @if (operativasTruncadas) {
+          <span> El recuento de barras puede ser parcial si hay más de 500 órdenes por estado.</span>
+        }
+      </p>
+    </article>
+
+    <article class="ops-panel ops-panel--queue">
+      <header class="ops-panel__head">
+        <div>
+          <h2>Órdenes que requieren atención</h2>
+          <p>Hasta cinco órdenes activas con seguimiento prioritario.</p>
+        </div>
+        <span class="ops-panel__badge ops-panel__badge--alert">
+          @if (operativasCargando) {
+            …
+          } @else {
+            {{ colaAtencion.length }} en cola
+          }
+        </span>
+      </header>
+
+      @if (operativasCargando) {
+        <p class="ops-panel__empty">Preparando cola…</p>
+      } @else if (operativasError) {
+        <p class="ops-panel__empty">No pudimos armar la cola. Usa Actualizar para reintentar.</p>
+      } @else if (colaAtencion.length === 0) {
+        <p class="ops-panel__empty">No hay órdenes que requieran atención inmediata según las reglas actuales.</p>
+      } @else {
+        <ul class="attn-list">
+          @for (item of colaAtencion; track item.id) {
+            <li class="attn-item">
+              <div class="attn-item__body">
+                <div class="attn-item__top">
+                  <span class="solvix-mono attn-item__ot">{{ item.numero }}</span>
+                  <span class="attn-item__title">{{ item.titulo }}</span>
+                  <span
+                    class="prio-chip"
+                    [attr.data-prio]="item.prioridad.codigo"
+                    [attr.title]="item.prioridad.label + ' · ' + item.prioridad.resumenEdad"
+                    [attr.aria-label]="item.prioridad.label + ', ' + item.prioridad.resumenEdad"
+                  >
+                    <span class="material-symbols-outlined prio-chip__icon" aria-hidden="true">
+                      {{ iconoPrioridad(item.prioridad.codigo) }}
+                    </span>
+                    <span class="solvix-mono prio-chip__days">{{ item.dias }}d</span>
+                  </span>
+                </div>
+                <p class="attn-item__motivo">Motivo: {{ item.motivo }}</p>
+              </div>
+              <solvix-button family="tech" rank="tertiary" (click)="abrir(item.id)">
+                Ver orden
+              </solvix-button>
+            </li>
+          }
+        </ul>
+      }
+
+      <div class="ops-panel__actions">
+        <button type="button" class="link-urgencias" (click)="verUrgencias()">
+          Ver urgencias por antigüedad
+          <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+        </button>
+      </div>
+    </article>
+  </div>
 </section>

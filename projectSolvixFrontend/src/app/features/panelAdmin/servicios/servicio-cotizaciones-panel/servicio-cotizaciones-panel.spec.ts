@@ -77,11 +77,11 @@ describe('ServicioCotizacionesPanelComponent', () => {
         { provide: CotizacionServicioService, useValue: cotizacionService },
         { provide: DocumentoOrdenServicioService, useValue: documentoService },
         { provide: MatDialog, useValue: dialog },
-        { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open']) }
+        { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open', 'openFromComponent']) }
       ]
     })
       .overrideProvider(MatDialog, { useValue: dialog })
-      .overrideProvider(MatSnackBar, { useValue: jasmine.createSpyObj('MatSnackBar', ['open']) })
+      .overrideProvider(MatSnackBar, { useValue: jasmine.createSpyObj('MatSnackBar', ['open', 'openFromComponent']) })
       .compileComponents();
 
     fixture = TestBed.createComponent(ServicioCotizacionesPanelComponent);
@@ -226,9 +226,22 @@ describe('ServicioCotizacionesPanelComponent', () => {
     expect(botones).not.toContain('Editar');
   });
 
-  it('resumen compacto muestra Subtotal y Total de la vigente', async () => {
+  it('en detalle OT (compactResumen) no duplica Subtotal/Total del resumen', async () => {
     await montar([cot({ subtotal: 100000, total: 120000 })]);
+    fixture.componentRef.setInput('compactResumen', true);
+    fixture.detectChanges();
     const text = fixture.nativeElement.textContent as string;
+    // El resumen superior se oculta; los totales siguen en la card / pie de cotización
+    expect(fixture.nativeElement.querySelector('.resumen-economico')).toBeNull();
+    expect(text).toContain('COT-2026-000044');
+  });
+
+  it('sin compactResumen muestra resumen Subtotal y Total de la vigente', async () => {
+    await montar([cot({ subtotal: 100000, total: 120000 })]);
+    fixture.componentRef.setInput('compactResumen', false);
+    fixture.detectChanges();
+    const text = fixture.nativeElement.textContent as string;
+    expect(fixture.nativeElement.querySelector('.resumen-economico')).toBeTruthy();
     expect(text).toContain('Subtotal');
     expect(text).toContain('Total');
   });

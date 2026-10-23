@@ -1,87 +1,93 @@
 @use '../../dashboard-ui';
 
 .header-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.75rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'presets refresh'
+    'dates dates';
+  gap: 0.65rem 0.75rem;
+  width: 100%;
+  max-width: 100%;
+  align-items: end;
+  overflow: visible;
+}
+
+.dash-chips--period {
+  grid-area: presets;
+  min-width: 0;
+  /* Cada chip pinta su propio fondo activo; sin indicador absoluto que desborde filas. */
+}
+
+.dash-chips--period .dash-chip {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.dash-chips--period .dash-chip.is-active {
+  background: var(--solvix-primary-soft);
+  color: var(--solvix-primary-hover, var(--solvix-primary));
+  border-color: color-mix(in srgb, var(--solvix-primary) 35%, transparent);
+  font-weight: 700;
 }
 
 .header-dates {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
+  grid-area: dates;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem 0.75rem;
+  padding: 0.65rem 0.75rem;
+  background: var(--solvix-surface-low);
+  border: 1px solid var(--solvix-border);
+  border-radius: var(--solvix-radius-card, 0.75rem);
+  box-shadow: var(--solvix-shadow-sm);
+  min-width: 0;
+  overflow: visible;
 }
 
 .header-dates label {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.25rem;
   color: var(--solvix-text-muted);
   font-family: var(--solvix-font);
   font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-}
-
-.header-dates input {
-  background: var(--solvix-surface-low);
-  border: 1px solid var(--solvix-border);
-  color: var(--solvix-text);
-  border-radius: 0.5rem;
-  padding: 0.4rem 0.55rem;
-  font-family: var(--solvix-font);
-  font-size: 0.85rem;
-}
-
-.header-dates input:focus {
-  outline: 2px solid var(--solvix-primary);
-  outline-offset: 1px;
-  background: var(--solvix-surface);
-}
-
-.dash-chips--period {
+  min-width: 0;
   position: relative;
+  overflow: visible;
 }
 
-.dash-chips__indicator {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  border-radius: 0.5rem;
-  background: var(--solvix-primary-soft);
-  border: 1px solid color-mix(in srgb, var(--solvix-primary) 35%, transparent);
-  opacity: 0;
-  pointer-events: none;
-  transition:
-    transform var(--motion-normal) var(--ease-emphasized),
-    width var(--motion-normal) var(--ease-emphasized),
-    opacity var(--motion-fast) var(--ease-standard);
-  z-index: 0;
+.header-refresh {
+  grid-area: refresh;
+  flex: 0 0 auto;
+  justify-self: end;
 }
 
-.dash-chips__indicator.is-ready {
-  opacity: 1;
+@media (max-width: 1023px) {
+  .header-controls {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'presets'
+      'dates'
+      'refresh';
+  }
+
+  .header-refresh {
+    justify-self: stretch;
+  }
+
+  .header-refresh ::ng-deep button,
+  .header-refresh ::ng-deep .solvix-btn {
+    width: 100%;
+  }
 }
 
-.dash-chips--period .dash-chip {
-  position: relative;
-  z-index: 1;
-  background: transparent;
-  border-color: transparent;
-}
-
-.dash-chips--period .dash-chip.is-active {
-  background: transparent;
-  border-color: transparent;
-  color: var(--solvix-primary-hover, var(--solvix-primary));
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .dash-chips__indicator {
-    transition: none;
+@media (max-width: 480px) {
+  .header-dates {
+    grid-template-columns: 1fr;
   }
 }

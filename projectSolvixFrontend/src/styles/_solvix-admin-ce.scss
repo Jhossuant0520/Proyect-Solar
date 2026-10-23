@@ -1,0 +1,705 @@
+// Identidad C&E localizada al shell admin.
+// Respeta html[data-theme] (claro / oscuro / sistema → resuelto).
+// No altera tokens globales de homepage / login / catálogo público.
+
+@mixin ce-admin-semantic-aliases {
+  --color-bg: var(--solvix-bg);
+  --color-surface-1: var(--solvix-surface);
+  --color-surface-2: var(--solvix-surface-low);
+  --color-surface-elevated: var(--solvix-surface-elevated);
+  --color-panel: var(--solvix-panel);
+  --color-panel-inset: var(--solvix-panel-inset);
+  --color-row-hover: var(--solvix-row-hover);
+  --color-text-primary: var(--solvix-text);
+  --color-text-secondary: var(--solvix-text-secondary);
+  --color-text-muted: var(--solvix-text-muted);
+  --color-border: var(--solvix-border);
+  --color-border-subtle: var(--solvix-border-subtle);
+  --color-primary: var(--solvix-primary);
+  --color-primary-hover: var(--solvix-primary-hover);
+  --color-primary-soft: var(--solvix-primary-soft);
+  --color-success: var(--solvix-success);
+  --color-success-soft: var(--solvix-success-soft);
+  --color-warning: var(--solvix-warning);
+  --color-warning-soft: var(--solvix-warning-soft);
+  --color-danger: var(--solvix-error);
+  --color-danger-soft: var(--solvix-danger-soft);
+  --color-info: var(--solvix-info);
+  --color-info-soft: var(--solvix-info-soft);
+  --color-focus: var(--solvix-primary);
+  --color-overlay: var(--solvix-overlay);
+}
+
+/* —— Claro C&E —— */
+html[data-theme='light'] .admin-shell,
+.admin-shell {
+  color-scheme: light;
+
+  /* Tipografía operativa C&E (OS detail / consola) */
+  --solvix-font: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --solvix-font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+
+  --solvix-bg: #f4f8fc;
+  --solvix-surface: #ffffff;
+  --solvix-surface-low: #eef4f9;
+  --solvix-surface-high: #d7e3f0;
+  --solvix-surface-elevated: #ffffff;
+  --solvix-panel: #ffffff;
+  --solvix-panel-inset: #f4f8fc;
+  --solvix-row-hover: rgba(204, 229, 255, 0.45);
+
+  --solvix-primary: #006194;
+  --solvix-primary-hover: #007bb9;
+  --solvix-secondary: #007bb9;
+  --solvix-neon: #006194;
+  --solvix-deep: #004b73;
+
+  --solvix-text: #131b2e;
+  --solvix-text-secondary: #3f4850;
+  --solvix-text-muted: #5a6570;
+
+  --solvix-border: #d7e3f0;
+  --solvix-border-subtle: #e8eef5;
+
+  --solvix-success: #047857;
+  --solvix-warning: #b45309;
+  --solvix-error: #ba1a1a;
+  --solvix-error-bg: #ffdad6;
+  --solvix-info: #006194;
+  --solvix-on-primary: #ffffff;
+
+  --solvix-primary-soft: #cce5ff;
+  --solvix-success-soft: #ecfdf5;
+  --solvix-warning-soft: #fffbeb;
+  --solvix-danger-soft: #fef2f2;
+  --solvix-info-soft: #e8f4fc;
+  --solvix-neutral-soft: #eef4f9;
+
+  --solvix-overlay: rgba(19, 27, 46, 0.4);
+  --solvix-shadow: 0 1px 2px rgba(19, 27, 46, 0.05), 0 8px 24px rgba(0, 97, 148, 0.06);
+  --solvix-shadow-sm: 0 1px 2px rgba(19, 27, 46, 0.05);
+  --solvix-glow: none;
+
+  --solvix-scrollbar-track: #eef4f9;
+  --solvix-scrollbar-thumb: #b8c9d9;
+  --solvix-scrollbar-thumb-hover: #8aa3b8;
+
+  --solvix-topbar-bg: rgba(255, 255, 255, 0.92);
+  --solvix-snack-surface-from: rgba(255, 255, 255, 0.98);
+  --solvix-snack-surface-to: rgba(244, 248, 252, 0.98);
+  --solvix-select-panel-bg: #ffffff;
+
+  --solvix-btn-tech-primary-bg: #006194;
+  --solvix-btn-tech-primary-fg: #ffffff;
+  --solvix-btn-tech-primary-hover: #007bb9;
+  --solvix-btn-tech-secondary-bg: #ffffff;
+  --solvix-btn-tech-secondary-fg: #3f4850;
+  --solvix-btn-tech-secondary-hover: #eef4f9;
+  --solvix-btn-tech-tertiary-fg: #5a6570;
+  --solvix-btn-tech-tertiary-hover: #006194;
+
+  --solvix-radius: 0.5rem;
+  --solvix-radius-card: 0.75rem;
+
+  --ce-chart-primary: #006194;
+  --ce-chart-secondary: #007bb9;
+  --ce-chart-success: #047857;
+  --ce-chart-danger: #ba1a1a;
+  --ce-chart-fill: color-mix(in srgb, #006194 12%, transparent);
+  --ce-chart-crosshair: color-mix(in srgb, #006194 40%, transparent);
+
+  @include ce-admin-semantic-aliases;
+
+  background: var(--solvix-bg);
+  color: var(--solvix-text);
+}
+
+/* —— Oscuro C&E (corporativo, sin neón SOLVIX) —— */
+html[data-theme='dark'] .admin-shell {
+  color-scheme: dark;
+
+  --solvix-font: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --solvix-font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+
+  --solvix-bg: #0b1520;
+  --solvix-surface: #122233;
+  --solvix-surface-low: #0f1c2a;
+  --solvix-surface-high: #1a3144;
+  --solvix-surface-elevated: #173042;
+  --solvix-panel: #122233;
+  --solvix-panel-inset: #0b1520;
+  --solvix-row-hover: rgba(0, 97, 148, 0.22);
+
+  --solvix-primary: #5eb3e0;
+  --solvix-primary-hover: #7cc4e8;
+  --solvix-secondary: #4aa3d4;
+  --solvix-neon: #5eb3e0;
+  --solvix-deep: #9fd4f0;
+
+  --solvix-text: #e8f1f8;
+  --solvix-text-secondary: #c5d5e2;
+  --solvix-text-muted: #8fa3b5;
+
+  --solvix-border: rgba(94, 179, 224, 0.22);
+  --solvix-border-subtle: rgba(143, 163, 181, 0.16);
+
+  --solvix-success: #34d399;
+  --solvix-warning: #fbbf24;
+  --solvix-error: #f87171;
+  --solvix-error-bg: rgba(185, 28, 28, 0.35);
+  --solvix-info: #5eb3e0;
+  --solvix-on-primary: #0b1520;
+
+  --solvix-primary-soft: rgba(0, 97, 148, 0.35);
+  --solvix-success-soft: rgba(52, 211, 153, 0.14);
+  --solvix-warning-soft: rgba(251, 191, 36, 0.14);
+  --solvix-danger-soft: rgba(248, 113, 113, 0.14);
+  --solvix-info-soft: rgba(94, 179, 224, 0.14);
+  --solvix-neutral-soft: rgba(143, 163, 181, 0.12);
+
+  --solvix-overlay: rgba(5, 10, 16, 0.72);
+  --solvix-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.35);
+  --solvix-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.28);
+  --solvix-glow: none;
+
+  --solvix-scrollbar-track: #0f1c2a;
+  --solvix-scrollbar-thumb: #3a5568;
+  --solvix-scrollbar-thumb-hover: #5eb3e0;
+
+  --solvix-topbar-bg: rgba(18, 34, 51, 0.94);
+  --solvix-snack-surface-from: rgba(18, 34, 51, 0.98);
+  --solvix-snack-surface-to: rgba(15, 28, 42, 0.98);
+  --solvix-select-panel-bg: #173042;
+
+  /* Primary oscuro: azul cielo sólido (contraste claro), sin gradiente que “cambie” de color */
+  --solvix-btn-tech-primary-bg: #5eb3e0;
+  --solvix-btn-tech-primary-fg: #0b1520;
+  --solvix-btn-tech-primary-hover: #7cc4e8;
+  --solvix-btn-tech-secondary-bg: #0f1c2a;
+  --solvix-btn-tech-secondary-fg: #c5d5e2;
+  --solvix-btn-tech-secondary-hover: #1a3144;
+  --solvix-btn-tech-tertiary-fg: #8fa3b5;
+  --solvix-btn-tech-tertiary-hover: #5eb3e0;
+
+  --ce-chart-primary: #5eb3e0;
+  --ce-chart-secondary: #4aa3d4;
+  --ce-chart-success: #34d399;
+  --ce-chart-danger: #f87171;
+  --ce-chart-fill: color-mix(in srgb, #5eb3e0 16%, transparent);
+  --ce-chart-crosshair: color-mix(in srgb, #5eb3e0 45%, transparent);
+
+  @include ce-admin-semantic-aliases;
+
+  background: var(--solvix-bg);
+  color: var(--solvix-text);
+}
+
+/* —— Chrome compartido de listas / formularios dentro del admin —— */
+.admin-shell {
+  font-family: var(--solvix-font);
+
+  /* Jerarquía tipográfica operativa (misma escala que detalle OT) */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--solvix-font);
+  }
+
+  .solvix-mono,
+  code,
+  .mono {
+    font-family: var(--solvix-font-mono);
+  }
+
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+  }
+
+  /* Botones Tech compactos en todo el panel (sin uppercase legacy) */
+  .btn-tech-primary,
+  .btn-tech-secondary,
+  .btn-tech-tertiary,
+  .btn-tech-danger {
+    height: 40px;
+    min-height: 40px;
+    padding: 0 1.1rem;
+    gap: 0.35rem;
+    font-family: var(--solvix-font);
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    border-radius: 0.5rem;
+  }
+
+  .btn-tech-primary .material-symbols-outlined,
+  .btn-tech-secondary .material-symbols-outlined,
+  .btn-tech-tertiary .material-symbols-outlined,
+  .btn-tech-danger .material-symbols-outlined {
+    font-size: 1.05rem;
+    line-height: 1;
+    font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 20;
+  }
+
+  .btn-tech-primary:hover:not(:disabled):not(.is-loading),
+  .btn-tech-secondary:hover:not(:disabled):not(.is-loading),
+  .btn-tech-danger:hover:not(:disabled):not(.is-loading),
+  .btn-tech-primary:active:not(:disabled),
+  .btn-tech-secondary:active:not(:disabled),
+  .btn-tech-danger:active:not(:disabled) {
+    transform: none;
+  }
+
+  /* Utilidad de badge de icono (cards / secciones) */
+  .admin-icon-badge {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.55rem;
+    background: var(--solvix-primary-soft);
+    color: var(--solvix-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .admin-icon-badge .material-symbols-outlined {
+    font-size: 1.15rem;
+  }
+
+  .filter-bar,
+  .table-panel,
+  .table-wrap,
+  .dash-panel,
+  .panel,
+  .form-layout .panel,
+  .form-layout .col > .panel {
+    background: var(--solvix-panel);
+    border: 1px solid var(--solvix-border);
+    border-radius: var(--solvix-radius-card);
+    box-shadow: var(--solvix-shadow-sm);
+  }
+
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: flex-end;
+    padding: 0.85rem 1rem;
+  }
+
+  .filter-bar label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--solvix-text-muted);
+  }
+
+  .filter-bar input,
+  .filter-bar select,
+  .admin-topbar__search-input,
+  .search input {
+    background: var(--solvix-surface-low);
+    border: 1px solid var(--solvix-border);
+    border-radius: 0.5rem;
+    color: var(--solvix-text);
+    font-family: var(--solvix-font);
+  }
+
+  .filter-bar input:focus,
+  .filter-bar select:focus,
+  .admin-topbar__search-input:focus,
+  .search input:focus {
+    background: var(--solvix-surface);
+    border-color: var(--solvix-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--solvix-primary) 18%, transparent);
+  }
+
+  .filter-bar input::placeholder,
+  .admin-topbar__search-input::placeholder,
+  .search input::placeholder {
+    color: var(--solvix-text-muted);
+    opacity: 0.85;
+  }
+
+  thead,
+  .prod-table thead,
+  .venta-table thead,
+  .servicio-table thead,
+  .dash-table thead {
+    background: var(--solvix-surface-low);
+  }
+
+  .prod-table tbody tr:hover,
+  .venta-table tbody tr:hover,
+  .servicio-table tbody tr:hover,
+  .dash-table tbody tr:hover,
+  table tbody tr:hover {
+    background: var(--solvix-row-hover);
+  }
+
+  .btn-tech-primary {
+    /* Tema claro: azul C&E → azul claro (mismo diseño del CTA de OS) */
+    color: #ffffff;
+    background: linear-gradient(105deg, #006194 0%, #007bb9 52%, #2a9ad0 100%);
+    box-shadow: 0 4px 12px -6px color-mix(in srgb, #006194 42%, transparent);
+    transition:
+      background var(--motion-fast, 160ms) var(--ease-standard, ease),
+      box-shadow var(--motion-fast, 160ms) var(--ease-standard, ease),
+      filter var(--motion-fast, 160ms) var(--ease-standard, ease);
+  }
+
+  .btn-tech-primary::before {
+    display: none;
+  }
+
+  .btn-tech-primary:hover:not(:disabled):not(.is-loading) {
+    color: #ffffff;
+    background: linear-gradient(
+      105deg,
+      #007bb9 0%,
+      color-mix(in srgb, #007bb9 68%, #ffffff) 100%
+    );
+    box-shadow: 0 6px 14px -6px color-mix(in srgb, #007bb9 45%, transparent);
+  }
+
+  .btn-tech-secondary {
+    background-color: var(--solvix-btn-tech-secondary-bg);
+    color: var(--solvix-btn-tech-secondary-fg);
+    border: 1px solid var(--solvix-border);
+    border-radius: 0.5rem;
+  }
+
+  .btn-tech-secondary::after {
+    display: none;
+  }
+
+  .btn-tech-secondary:hover {
+    background-color: var(--solvix-btn-tech-secondary-hover);
+  }
+
+  .btn-tech-tertiary {
+    color: var(--solvix-btn-tech-tertiary-fg);
+  }
+
+  .btn-tech-tertiary:hover {
+    color: var(--solvix-btn-tech-tertiary-hover);
+  }
+
+  .metric {
+    background: var(--solvix-panel);
+    backdrop-filter: none;
+    border: 1px solid var(--solvix-border);
+    border-radius: var(--solvix-radius-card);
+    box-shadow: var(--solvix-shadow-sm);
+  }
+
+  .dash-panel {
+    backdrop-filter: none;
+  }
+
+  .dash-panel::before {
+    opacity: 0.35;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--solvix-primary) 55%, transparent),
+      transparent
+    );
+  }
+
+  .solvix-page-header h1 {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--solvix-text);
+  }
+
+  .solvix-page-header__kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--solvix-primary);
+  }
+
+  /* Tablas: labels densos + cuerpo legible */
+  thead th,
+  .prod-table thead th,
+  .venta-table thead th,
+  .servicio-table thead th,
+  .svc-table thead th,
+  .cli-table thead th,
+  .cot-table thead th,
+  .prov-table thead th,
+  .compra-table thead th,
+  .inv-table thead th,
+  .dash-table thead th {
+    font-family: var(--solvix-font);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--solvix-text-muted);
+  }
+
+  td,
+  .prod-table td,
+  .venta-table td,
+  .servicio-table td,
+  .svc-table td,
+  .cli-table td,
+  .cot-table td,
+  .prov-table td,
+  .compra-table td,
+  .inv-table td,
+  .dash-table td {
+    font-size: 0.875rem;
+    color: var(--solvix-text);
+  }
+
+  /* Cabeceras de detalle (venta / compra) alineadas a la jerarquía OT */
+  .detalle-head h1 {
+    margin: 0.35rem 0 0;
+    font-family: var(--solvix-font);
+    font-size: clamp(1.35rem, 1.15rem + 0.55vw, 1.65rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    color: var(--solvix-text);
+  }
+
+  .detalle-head .meta,
+  .detalle-head .head-meta {
+    font-family: var(--solvix-font);
+  }
+
+  .detalle-head .meta {
+    margin: 0.3rem 0 0;
+    font-size: 0.875rem;
+    color: var(--solvix-text-muted);
+  }
+
+  /* Hub reportes / cards con icono */
+  .hub-card__icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.55rem;
+    background: var(--solvix-primary-soft);
+    color: var(--solvix-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem !important;
+  }
+
+  .filter-bar .search {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: inherit;
+    font-weight: 400;
+    color: inherit;
+  }
+
+  .filter-bar .search .material-symbols-outlined {
+    color: var(--solvix-text-muted);
+    font-size: 1.15rem;
+  }
+
+  /* Paneles dashboard / métricas */
+  .dash-panel h2,
+  .dash-panel h3,
+  .metric .label,
+  .metric dt {
+    font-family: var(--solvix-font);
+  }
+
+  .metric .label,
+  .metric dt {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--solvix-text-muted);
+  }
+
+  .metric .value,
+  .metric dd {
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--solvix-text);
+  }
+
+  .cat,
+  solvix-badge {
+    border-radius: 0.3rem;
+    font-family: var(--solvix-font-mono, var(--solvix-font));
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .clear {
+    font-family: var(--solvix-font);
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  /* Menús ⋮ del admin (clase compartida) */
+  .btn-icon-menu,
+  .btn-mas-acciones {
+    font-family: var(--solvix-font);
+  }
+}
+
+/* Overlays (fuera del shell): tipografía C&E en menús / diálogos admin */
+.solvix-menu.mat-mdc-menu-panel,
+.menu-orden-acciones.mat-mdc-menu-panel,
+.menu-cot-acciones.mat-mdc-menu-panel {
+  font-family: var(--solvix-font, 'Space Grotesk', Inter, system-ui, sans-serif) !important;
+  border-radius: 0.75rem !important;
+}
+
+.solvix-dialog-panel .mat-mdc-dialog-surface,
+.cdk-overlay-pane.solvix-dialog-panel .mat-mdc-dialog-surface {
+  @include ce-admin-semantic-aliases;
+
+  --solvix-font: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --solvix-font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+
+  --solvix-bg: #f4f8fc;
+  --solvix-surface: #ffffff;
+  --solvix-surface-low: #eef4f9;
+  --solvix-surface-high: #d7e3f0;
+  --solvix-surface-elevated: #ffffff;
+  --solvix-panel: #ffffff;
+  --solvix-panel-inset: #f4f8fc;
+  --solvix-row-hover: rgba(204, 229, 255, 0.45);
+
+  --solvix-primary: #006194;
+  --solvix-primary-hover: #007bb9;
+  --solvix-secondary: #007bb9;
+  --solvix-neon: #006194;
+  --solvix-deep: #004b73;
+
+  --solvix-text: #131b2e;
+  --solvix-text-secondary: #3f4850;
+  --solvix-text-muted: #5a6570;
+
+  --solvix-border: #d7e3f0;
+  --solvix-border-subtle: #e8eef5;
+
+  --solvix-success: #047857;
+  --solvix-warning: #b45309;
+  --solvix-error: #ba1a1a;
+  --solvix-error-bg: #ffdad6;
+  --solvix-info: #006194;
+  --solvix-on-primary: #ffffff;
+
+  --solvix-primary-soft: #cce5ff;
+  --solvix-success-soft: #ecfdf5;
+  --solvix-warning-soft: #fffbeb;
+  --solvix-danger-soft: #fef2f2;
+  --solvix-info-soft: #e8f4fc;
+  --solvix-neutral-soft: #eef4f9;
+
+  --solvix-btn-tech-primary-bg: #006194;
+  --solvix-btn-tech-primary-fg: #ffffff;
+  --solvix-btn-tech-primary-hover: #007bb9;
+  --solvix-btn-tech-secondary-bg: #ffffff;
+  --solvix-btn-tech-secondary-fg: #3f4850;
+  --solvix-btn-tech-secondary-hover: #eef4f9;
+  --solvix-btn-tech-tertiary-fg: #5a6570;
+  --solvix-btn-tech-tertiary-hover: #006194;
+
+  font-family: var(--solvix-font);
+  border-radius: 0.875rem !important;
+  background: var(--solvix-surface-elevated) !important;
+  color: var(--solvix-text) !important;
+  border: 1px solid var(--solvix-border) !important;
+  box-shadow:
+    0 24px 48px -12px rgba(19, 27, 46, 0.22),
+    0 4px 12px rgba(0, 97, 148, 0.08) !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+html[data-theme='dark'] .solvix-dialog-panel .mat-mdc-dialog-surface,
+html[data-theme='dark'] .cdk-overlay-pane.solvix-dialog-panel .mat-mdc-dialog-surface {
+  --solvix-bg: #0b1520;
+  --solvix-surface: #122233;
+  --solvix-surface-low: #0f1c2a;
+  --solvix-surface-high: #1a3144;
+  --solvix-surface-elevated: #173042;
+  --solvix-panel: #122233;
+  --solvix-panel-inset: #0b1520;
+  --solvix-row-hover: rgba(0, 97, 148, 0.22);
+
+  --solvix-primary: #5eb3e0;
+  --solvix-primary-hover: #7cc4e8;
+  --solvix-secondary: #4aa3d4;
+  --solvix-neon: #5eb3e0;
+  --solvix-deep: #9fd4f0;
+
+  --solvix-text: #e8f1f8;
+  --solvix-text-secondary: #c5d5e2;
+  --solvix-text-muted: #8fa3b5;
+
+  --solvix-border: rgba(94, 179, 224, 0.22);
+  --solvix-border-subtle: rgba(143, 163, 181, 0.16);
+
+  --solvix-success: #34d399;
+  --solvix-warning: #fbbf24;
+  --solvix-error: #f87171;
+  --solvix-error-bg: rgba(185, 28, 28, 0.35);
+  --solvix-info: #5eb3e0;
+  --solvix-on-primary: #0b1520;
+
+  --solvix-primary-soft: rgba(0, 97, 148, 0.35);
+  --solvix-success-soft: rgba(52, 211, 153, 0.14);
+  --solvix-warning-soft: rgba(251, 191, 36, 0.14);
+  --solvix-danger-soft: rgba(248, 113, 113, 0.14);
+  --solvix-info-soft: rgba(94, 179, 224, 0.14);
+  --solvix-neutral-soft: rgba(143, 163, 181, 0.12);
+
+  --solvix-btn-tech-primary-bg: #5eb3e0;
+  --solvix-btn-tech-primary-fg: #0b1520;
+  --solvix-btn-tech-primary-hover: #7cc4e8;
+  --solvix-btn-tech-secondary-bg: #0f1c2a;
+  --solvix-btn-tech-secondary-fg: #c5d5e2;
+  --solvix-btn-tech-secondary-hover: #1a3144;
+  --solvix-btn-tech-tertiary-fg: #8fa3b5;
+  --solvix-btn-tech-tertiary-hover: #5eb3e0;
+
+  box-shadow:
+    0 24px 48px -12px rgba(0, 0, 0, 0.6),
+    0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Oscuro: primary azul cielo sólido (contraste claro), hover discreto como Actualizar */
+html[data-theme='dark'] .admin-shell {
+  .btn-tech-primary {
+    color: var(--solvix-btn-tech-primary-fg);
+    background: var(--solvix-btn-tech-primary-bg);
+    background-image: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  }
+
+  .btn-tech-primary:hover:not(:disabled):not(.is-loading) {
+    color: var(--solvix-btn-tech-primary-fg);
+    background: var(--solvix-btn-tech-primary-hover);
+    background-image: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+    filter: none;
+  }
+}

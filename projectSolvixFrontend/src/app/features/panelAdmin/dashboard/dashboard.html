@@ -12,53 +12,19 @@
     (retry)="loadResumen()"
   />
 
-  <solvix-sales-evolution
-    [points]="serie()"
-    [metrica]="metrica()"
-    [agrupacion]="agrupacion()"
-    [state]="serieState()"
-    (metricaChange)="metrica.set($event)"
-    (agrupacionChange)="onAgrupacion($event)"
-    (retry)="loadVentas()"
-  />
-
-  <div class="dashboard-split">
-    <solvix-top-products
-      [products]="ranking()"
-      [criterio]="criterio()"
-      [state]="rankingState()"
-      (criterioChange)="onCriterio($event)"
-      (retry)="loadTop()"
-    />
-    <solvix-low-performance-products
-      [products]="revision()"
-      [state]="revisionState()"
-      (retry)="loadRevision()"
+  <div class="dashboard-primary">
+    <solvix-sales-evolution
+      [points]="serie()"
+      [metrica]="metrica()"
+      [agrupacion]="agrupacion()"
+      [state]="serieState()"
+      (metricaChange)="metrica.set($event)"
+      (agrupacionChange)="onAgrupacion($event)"
+      (retry)="loadVentas()"
     />
   </div>
 
-  <div class="dashboard-split">
-    <solvix-category-performance
-      [categories]="categorias()"
-      [state]="categoriaState()"
-      (retry)="loadCategorias()"
-    />
-    <solvix-abc-analysis
-      [classes]="abc()"
-      [state]="abcState()"
-      (retry)="loadAbc()"
-    />
-  </div>
-
-  <solvix-inventory-health
-    [data]="inventario()"
-    [state]="inventarioState()"
-    (retry)="loadInventario()"
-  />
-
-  <solvix-business-insights
-    [insights]="insights()"
-    [state]="insightsState()"
-    (retry)="loadAll()"
-  />
+  <p class="dashboard-more">
+    <a [routerLink]="['/dashboard/analisis']" [queryParams]="periodQuery">Ver análisis detallado</a>
+  </p>
 </section>

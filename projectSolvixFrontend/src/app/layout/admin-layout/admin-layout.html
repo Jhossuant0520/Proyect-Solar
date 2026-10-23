@@ -7,7 +7,12 @@
   ></div>
 
   <div id="admin-sidebar" class="admin-shell__sidebar">
-    <solvix-admin-sidebar [groups]="navGroups" />
+    <solvix-admin-sidebar
+      [groups]="navGroups"
+      [brandName]="brandName"
+      [brandKicker]="brandKicker"
+      [preserveQuery]="analisisMode"
+    />
   </div>
 
   <div class="admin-shell__main">

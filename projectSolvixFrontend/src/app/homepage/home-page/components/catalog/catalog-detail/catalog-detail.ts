@@ -5,12 +5,10 @@ import { Subject, switchMap, takeUntil } from 'rxjs';
 import { CatalogoProducto } from '../../../../../core/models/catalogo.models';
 import { CatalogoService } from '../../../../../core/services/catalogo.service';
 import { formatMoney } from '../../../../../features/panelAdmin/dashboard/utils/dashboard-format';
-import { SolvixBadgeComponent } from '../../../../../shared/components/solvix-badge/solvix-badge';
 import { resolverUrlMedia } from '../../../../../core/utils/media-url';
 import {
   enlaceWhatsAppProducto,
-  labelDisponibilidad,
-  tonoDisponibilidad
+  labelDisponibilidad
 } from '../catalogo-ui';
 
 type DetalleViewState = 'LOADING' | 'SUCCESS' | 'ERROR';
@@ -18,7 +16,7 @@ type DetalleViewState = 'LOADING' | 'SUCCESS' | 'ERROR';
 @Component({
   selector: 'app-catalog-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, SolvixBadgeComponent],
+  imports: [CommonModule, RouterLink],
   templateUrl: './catalog-detail.html',
   styleUrl: './catalog-detail.scss'
 })
@@ -32,7 +30,6 @@ export class CatalogDetail implements OnInit, OnDestroy {
 
   readonly formatMoney = formatMoney;
   readonly labelDisponibilidad = labelDisponibilidad;
-  readonly tonoDisponibilidad = tonoDisponibilidad;
 
   constructor(
     private route: ActivatedRoute,

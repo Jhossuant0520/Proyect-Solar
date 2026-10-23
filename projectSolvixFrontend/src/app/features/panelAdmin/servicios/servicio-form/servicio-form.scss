@@ -31,7 +31,7 @@
 
 .pasos span.is-done {
   color: var(--solvix-text-secondary);
-  border-color: rgba(79, 209, 255, 0.35);
+  border-color: color-mix(in srgb, var(--solvix-primary) 35%, transparent);
 }
 
 .contexto {
@@ -86,7 +86,7 @@
 
 .opcion-card.is-selected {
   border-color: var(--solvix-primary);
-  box-shadow: 0 0 0 1px rgba(79, 209, 255, 0.25);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--solvix-primary) 25%, transparent);
 }
 
 .opcion-card .meta {

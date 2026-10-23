@@ -4,6 +4,7 @@ import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth.service';
 import { CuentaService } from '../../core/services/cuenta.service';
+import { DASHBOARD_ANALISIS_NAV } from '../../features/panelAdmin/dashboard/analisis/analisis-nav';
 import { ADMIN_NAV, AdminNavGroup } from './admin-nav';
 import { AdminSidebarComponent } from './admin-sidebar';
 import { AdminTopbarComponent } from './admin-topbar';
@@ -21,14 +22,28 @@ export class AdminLayoutComponent {
   private readonly router = inject(Router);
 
   sidebarOpen = false;
+  /** true solo bajo `/dashboard/analisis` (sidebar contextual). */
+  analisisMode = false;
+
+  /**
+   * Referencia estable para el sidebar.
+   * Un getter que devolvía `.map()` nuevo en cada CD + `ngOnChanges` del sidebar
+   * provocaba un bucle infinito al entrar al panel tras el login.
+   */
+  navGroups: AdminNavGroup[] = [];
+  private navCacheKey = '';
 
   constructor() {
+    this.syncMode(this.router.url);
     this.router.events
       .pipe(
         filter((event): event is NavigationEnd => event instanceof NavigationEnd),
         takeUntilDestroyed()
       )
-      .subscribe(() => this.closeSidebar());
+      .subscribe(event => {
+        this.syncMode(event.urlAfterRedirects);
+        this.closeSidebar();
+      });
 
     if (this.authService.estaAutenticado()) {
       this.cuentaService.getMisDatos().subscribe({ error: () => undefined });
@@ -43,14 +58,12 @@ export class AdminLayoutComponent {
     return this.cuentaService.fotoUrl();
   }
 
-  get navGroups(): AdminNavGroup[] {
-    const isAdmin = this.authService.esAdmin();
-    return ADMIN_NAV
-      .map(group => ({
-        label: group.label,
-        items: group.items.filter(item => !item.adminOnly || isAdmin)
-      }))
-      .filter(group => group.items.length > 0);
+  get brandName(): string {
+    return this.analisisMode ? 'Análisis' : 'Computer & Electronic';
+  }
+
+  get brandKicker(): string {
+    return this.analisisMode ? 'Dashboard · detalle' : 'Panel administrativo';
   }
 
   toggleSidebar(): void {
@@ -65,5 +78,27 @@ export class AdminLayoutComponent {
     this.cuentaService.actualizarFotoVisible(null);
     this.authService.cerrarSesion();
     this.router.navigate(['/login']);
+  }
+
+  private syncMode(url: string): void {
+    const path = url.split('?')[0];
+    this.analisisMode = path === '/dashboard/analisis' || path.startsWith('/dashboard/analisis/');
+    this.refreshNavGroups();
+  }
+
+  private refreshNavGroups(): void {
+    const isAdmin = this.authService.esAdmin();
+    const key = `${this.analisisMode ? 'analisis' : 'admin'}|${isAdmin ? '1' : '0'}`;
+    if (key === this.navCacheKey && this.navGroups.length > 0) {
+      return;
+    }
+    this.navCacheKey = key;
+    const source = this.analisisMode ? DASHBOARD_ANALISIS_NAV : ADMIN_NAV;
+    this.navGroups = source
+      .map(group => ({
+        label: group.label,
+        items: group.items.filter(item => !item.adminOnly || isAdmin)
+      }))
+      .filter(group => group.items.length > 0);
   }
 }

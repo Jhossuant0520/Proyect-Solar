@@ -12,7 +12,8 @@
   padding: 1rem 1.1rem;
   background: var(--solvix-panel);
   border: 1px solid var(--solvix-border);
-  border-radius: var(--solvix-radius);
+  border-radius: var(--solvix-radius-card);
+  box-shadow: var(--solvix-shadow-sm);
 }
 
 .filtros label {
@@ -29,12 +30,20 @@
 .filtros input,
 .filtros select {
   background: var(--solvix-surface-low);
-  border: 1px solid var(--solvix-border-subtle);
+  border: 1px solid var(--solvix-border);
   color: var(--solvix-text);
-  border-radius: 0.125rem;
+  border-radius: 0.5rem;
   padding: 0.5rem 0.65rem;
-  font-family: var(--solvix-font-mono);
+  font-family: var(--solvix-font);
   font-size: 0.85rem;
+}
+
+.filtros input:focus,
+.filtros select:focus {
+  outline: none;
+  border-color: var(--solvix-primary);
+  background: var(--solvix-surface);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--solvix-primary) 18%, transparent);
 }
 
 .filtros-actions {
@@ -53,7 +62,8 @@
 .panel {
   background: var(--solvix-panel);
   border: 1px solid var(--solvix-border);
-  border-radius: var(--solvix-radius);
+  border-radius: var(--solvix-radius-card);
+  box-shadow: var(--solvix-shadow-sm);
   padding: 1.1rem 1.2rem;
   margin-bottom: 1.25rem;
 }

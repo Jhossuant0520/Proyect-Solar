@@ -99,7 +99,7 @@ describe('CotizacionFormDialogComponent', () => {
         { provide: ProductoService, useValue: jasmine.createSpyObj('ProductoService', ['buscar']) },
         { provide: MatDialog, useValue: dialog },
         { provide: MatDialogRef, useValue: dialogRef },
-        { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open']) },
+        { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open', 'openFromComponent']) },
         { provide: MAT_DIALOG_DATA, useValue: data }
       ]
     })

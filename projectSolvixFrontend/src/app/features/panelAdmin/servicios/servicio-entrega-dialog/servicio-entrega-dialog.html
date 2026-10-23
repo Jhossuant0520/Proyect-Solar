@@ -1,28 +1,59 @@
-<div class="entrega-dialog">
-  <header class="dlg-head">
-    <p class="kicker">Último paso del servicio</p>
-    <h2>Entrega de equipo</h2>
-    <p>Constancia digital de recepción. La firma es manuscrita en pantalla (no es firma electrónica avanzada).</p>
+<div class="ce-dlg entrega-dialog">
+  <header class="ce-dlg__head">
+    <div class="ce-dlg__lead">
+      <span class="ce-dlg__badge" aria-hidden="true">
+        <span class="material-symbols-outlined">handshake</span>
+      </span>
+      <div class="ce-dlg__copy">
+        <p class="ce-dlg__kicker">Último paso del servicio</p>
+        <h2>Entrega de equipo</h2>
+        <p class="ce-dlg__sub">
+          Constancia digital. La firma es manuscrita en pantalla (no es firma electrónica avanzada).
+        </p>
+      </div>
+    </div>
+    <button type="button" class="ce-dlg__close" aria-label="Cerrar" (click)="cancelar()">
+      <span class="material-symbols-outlined" aria-hidden="true">close</span>
+    </button>
   </header>
 
-  <section class="bloque resumen" aria-label="Resumen de la orden">
-    <h3>Orden</h3>
+  <section class="resumen" aria-label="Resumen de la orden">
     <dl class="facts">
-      <div>
-        <dt>Número</dt>
-        <dd class="solvix-mono">{{ orden.numero }}</dd>
+      <div class="facts__card">
+        <span class="facts__icon" aria-hidden="true">
+          <span class="material-symbols-outlined">tag</span>
+        </span>
+        <div>
+          <dt>Número</dt>
+          <dd class="solvix-mono">{{ orden.numero }}</dd>
+        </div>
       </div>
-      <div>
-        <dt>Cliente</dt>
-        <dd>{{ orden.clienteNombre || '—' }}</dd>
+      <div class="facts__card">
+        <span class="facts__icon" aria-hidden="true">
+          <span class="material-symbols-outlined">person</span>
+        </span>
+        <div>
+          <dt>Cliente</dt>
+          <dd>{{ orden.clienteNombre || '—' }}</dd>
+        </div>
       </div>
-      <div>
-        <dt>Equipo</dt>
-        <dd>{{ equipoLabel(orden) }}</dd>
+      <div class="facts__card">
+        <span class="facts__icon" aria-hidden="true">
+          <span class="material-symbols-outlined">devices</span>
+        </span>
+        <div>
+          <dt>Equipo</dt>
+          <dd>{{ equipoLabel(orden) }}</dd>
+        </div>
       </div>
-      <div>
-        <dt>Recepción</dt>
-        <dd class="solvix-mono">{{ fecha(orden.fechaRecepcion) }}</dd>
+      <div class="facts__card">
+        <span class="facts__icon" aria-hidden="true">
+          <span class="material-symbols-outlined">event</span>
+        </span>
+        <div>
+          <dt>Recepción</dt>
+          <dd class="solvix-mono">{{ fecha(orden.fechaRecepcion) }}</dd>
+        </div>
       </div>
     </dl>
     @if (orden.trabajoRealizado) {
@@ -41,33 +72,37 @@
     }
   </section>
 
-  <form class="bloque form-entrega" [formGroup]="form" (ngSubmit)="registrar()">
+  <form class="form-entrega" [formGroup]="form" (ngSubmit)="registrar()">
     <h3>Confirmación del cliente</h3>
-    <p class="aviso">
+    <p class="ce-dlg__text aviso">
       Quien recibe declara haber tomado el equipo y la información de esta orden.
     </p>
 
-    <label class="check">
+    <label class="check" [class.is-checked]="form.controls.clienteConfirmo.value">
       <input type="checkbox" formControlName="clienteConfirmo" />
+      <span class="check__box" aria-hidden="true">
+        <span class="material-symbols-outlined">check</span>
+      </span>
       <span>El cliente confirma la recepción del equipo.</span>
     </label>
 
     <div class="grid-2">
-      <label>
-        <span class="label-row">Nombre del firmante <span class="req">requerido</span></span>
-        <input formControlName="nombreFirmante" maxlength="150" autocomplete="name" />
+      <label class="ce-field">
+        <span class="label-row">Nombre del firmante <span class="ce-req">requerido</span></span>
+        <input class="ce-input" formControlName="nombreFirmante" maxlength="150" autocomplete="name" />
         <span class="hint">Puede ser el cliente o quien lo represente al retirar el equipo.</span>
       </label>
 
-      <label>
+      <label class="ce-field">
         <span class="label-row">
           @if (documentoClienteOrigen === 'cliente') {
             Documento del cliente
           } @else {
-            Documento del firmante <span class="opt">opcional</span>
+            Documento del firmante <span class="ce-opt">opcional</span>
           }
         </span>
         <input
+          class="ce-input"
           formControlName="documentoFirmante"
           maxlength="50"
           [readonly]="documentoClienteReadonly"
@@ -81,19 +116,24 @@
       </label>
     </div>
 
-    <h3 class="sep">Firma</h3>
-    <p class="aviso">Firma con mouse, dedo o stylus dentro del área.</p>
-    <solvix-signature-pad (firmadoChange)="onFirmadoChange($event)" />
+    <section class="firma-card" [class.is-firmado]="firmado" aria-label="Área de firma">
+      <h3>
+        <span class="material-symbols-outlined" aria-hidden="true">draw</span>
+        Firma
+      </h3>
+      <p class="hint">Firma con mouse, dedo o lápiz óptico dentro del área.</p>
+      <solvix-signature-pad (firmadoChange)="onFirmadoChange($event)" />
+    </section>
 
-    <h3 class="sep">Observaciones de entrega <span class="opt">opcional</span></h3>
-    <label class="obs-label">
+    <label class="ce-field">
+      <span>Observaciones de entrega <span class="ce-opt">opcional</span></span>
       <textarea
+        class="ce-input"
         formControlName="observaciones"
         rows="2"
         maxlength="1000"
         placeholder="Novedades o condición del equipo al entregarlo"
       ></textarea>
-      <span class="hint">Registre cualquier novedad relevante al momento de entregar el equipo.</span>
     </label>
 
     <section class="resumen-final" aria-label="Resumen antes de registrar">
@@ -103,16 +143,20 @@
         <li [class.ok]="firmado">Firma manuscrita</li>
         <li [class.ok]="!!form.controls.nombreFirmante.value?.trim()">Nombre del firmante</li>
       </ul>
-      <p class="aviso final-hint">
-        Al confirmar, la orden pasará a <strong>Entregado</strong> y luego a <strong>Cerrado</strong>.
+      <p class="ce-dlg__note">
+        <span class="material-symbols-outlined" aria-hidden="true">info</span>
+        <span>Al confirmar, la orden pasará a <strong>Entregado</strong> y luego a <strong>Cerrado</strong>.</span>
       </p>
     </section>
 
     @if (error) {
-      <p class="form-error" role="alert">{{ error }}</p>
+      <p class="form-error" role="alert">
+        <span class="material-symbols-outlined" aria-hidden="true">error</span>
+        {{ error }}
+      </p>
     }
 
-    <div class="dlg-actions">
+    <div class="ce-dlg__actions">
       <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
         Cancelar
       </solvix-button>
@@ -120,6 +164,7 @@
         family="tech"
         rank="primary"
         type="submit"
+        icon="handshake"
         [disabled]="!puedeRegistrar"
       >
         {{ enviando ? 'Registrando…' : 'Registrar entrega' }}

@@ -47,11 +47,23 @@ describe('NavbarHomepage', () => {
     expect(support?.getAttribute('href')).toContain('/#contact');
   });
 
-  it('muestra Portal de clientes hacia /login y no un icono de usuario aislado', () => {
+  it('muestra Acceso plataforma hacia /login y no un icono de usuario aislado', () => {
     const portal = fixture.nativeElement.querySelector('.ce-nav__cta--secondary') as HTMLAnchorElement;
-    expect(portal.textContent).toContain('Portal de clientes');
+    expect(portal.textContent).toContain('Acceso plataforma');
     expect(portal.getAttribute('href')).toBe('/login');
     expect(fixture.nativeElement.querySelector('[aria-label="Iniciar sesión"]')).toBeNull();
+  });
+
+  it('expone el orden de navegación Inicio → Servicios → Catálogo → Nosotros', () => {
+    expect(component.menu.map(item => item.label)).toEqual([
+      'Inicio',
+      'Servicios',
+      'Catálogo',
+      'Nosotros'
+    ]);
+    expect(component.menu.find(item => item.label === 'Catálogo')?.path).toBe('/Catalogo');
+    expect(component.menu.find(item => item.label === 'Nosotros')?.fragment).toBe('about');
+    expect(fixture.nativeElement.querySelector('.ce-nav__kicker')).toBeNull();
   });
 
   it('abre y cierra el menú móvil con menuOpen', () => {
@@ -60,5 +72,6 @@ describe('NavbarHomepage', () => {
     fixture.detectChanges();
     expect(component.menuOpen).toBeTrue();
     expect(fixture.nativeElement.querySelector('.ce-nav__toggle').getAttribute('aria-expanded')).toBe('true');
+    expect(fixture.nativeElement.querySelector('.ce-nav__mobile-inner')).toBeTruthy();
   });
 });

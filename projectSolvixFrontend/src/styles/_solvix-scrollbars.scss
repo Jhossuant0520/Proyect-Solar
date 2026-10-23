@@ -42,3 +42,9 @@ html {
   overflow-y: hidden;
   overscroll-behavior-x: contain;
 }
+
+/* Tablas que deben caber en el ancho de la página, sin barra horizontal */
+.table-wrap--fit,
+.table-wrap.table-wrap--fit {
+  overflow: hidden !important;
+}

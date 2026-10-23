@@ -1,42 +1,112 @@
 @use '../../dashboard-ui';
 
-.abc-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
+.abc-panel__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin-bottom: 0.85rem;
 }
 
-.abc-card {
+.abc-panel__head solvix-section-header {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.abc-panel__link {
+  flex: 0 0 auto;
+  align-self: center;
+  color: var(--solvix-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.abc-panel__link:hover,
+.abc-panel__link:focus-visible {
+  text-decoration: underline;
+  outline: none;
+}
+
+.abc-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.abc-row {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.7rem 0.8rem;
   background: var(--solvix-surface-low);
   border: 1px solid var(--solvix-border-subtle);
   border-radius: var(--solvix-radius);
-  padding: 1rem 1.1rem;
 }
 
-.abc-class {
-  margin: 0;
+.abc-row__badge {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.55rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--solvix-font-mono);
+  font-weight: 800;
+  font-size: 1.05rem;
   color: var(--solvix-primary);
-  font-size: 0.72rem;
-  text-transform: uppercase;
+  background: var(--solvix-primary-soft);
 }
 
-.abc-count {
-  margin: 0.4rem 0 0;
+.abc-row__main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.abc-row__title {
+  margin: 0;
   color: var(--solvix-text);
-  font-size: 1.75rem;
-  font-weight: 600;
+  font-size: 0.9rem;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
-.abc-cap,
-.abc-share,
-.abc-hint {
-  margin: 0.2rem 0 0;
+.abc-row__stats {
+  margin: 0.15rem 0 0;
   color: var(--solvix-text-muted);
   font-size: 0.8rem;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-@media (max-width: 767px) {
-  .abc-grid {
-    grid-template-columns: 1fr;
+.abc-row__dot {
+  margin: 0 0.25rem;
+}
+
+.abc-row__bar {
+  height: 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--solvix-border) 80%, transparent);
+  overflow: hidden;
+}
+
+.abc-row__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--solvix-primary);
+  max-width: 100%;
+}
+
+@media (max-width: 480px) {
+  .abc-row__stats {
+    white-space: normal;
   }
 }

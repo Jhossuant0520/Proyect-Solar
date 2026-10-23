@@ -99,6 +99,8 @@ export interface AbcClaseVista {
   clase: 'A' | 'B' | 'C';
   productos: number;
   participacion: number;
+  /** Umbral del backend (limiteA / limiteB) o null si no viene. */
+  umbral: number | null;
 }
 
 export interface InsightVista {

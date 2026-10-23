@@ -1,5 +1,14 @@
 :host {
   display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+:host *,
+:host *::before,
+:host *::after {
+  box-sizing: border-box;
 }
 
 .cta-homepage {
@@ -18,9 +27,11 @@
 }
 
 .cta-homepage__container {
-  width: min(80rem, 100%);
+  box-sizing: border-box;
+  width: min(72rem, 100%);
+  max-width: 100%;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding-inline: clamp(1rem, 3.5vw, 2.5rem);
 }
 
 .cta-homepage__panel {
@@ -111,6 +122,8 @@
   font-size: 0.875rem;
   font-weight: 600;
   line-height: 1.2;
+  white-space: normal;
+  text-align: center;
   text-decoration: none !important;
   transition:
     transform 180ms ease,
@@ -181,22 +194,21 @@
 
 .cta-homepage__watermark {
   position: absolute;
-  right: -0.75rem;
-  bottom: -1.5rem;
+  right: 0;
+  bottom: 0;
+  max-width: 100%;
+  overflow: hidden;
   font-size: clamp(8rem, 18vw, 12.5rem);
   line-height: 1;
   color: rgba(255, 255, 255, 0.08);
   pointer-events: none;
   user-select: none;
+  transform: translate(12%, 18%);
 }
 
 @media (min-width: 640px) {
-  .cta-homepage__container {
-    padding: 0 2rem;
-  }
-
   .cta-homepage__panel {
-    padding: 2.75rem 2.5rem;
+    padding: 2.75rem clamp(1.5rem, 3vw, 2.5rem);
   }
 }
 

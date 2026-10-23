@@ -1,4 +1,5 @@
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
+import { SolvixSnackComponent } from '../components/solvix-snack/solvix-snack';
 
 export type SolvixSnackTone = 'info' | 'success' | 'warning' | 'error';
 
@@ -10,21 +11,20 @@ const TONE_CLASS: Record<SolvixSnackTone, string> = {
 };
 
 /**
- * Toast SOLVIX (card). Usar en lugar de snackBar.open suelto
- * para éxito / error / aviso con el mismo lenguaje visual.
+ * Toast SOLVIX compacto (componente con icono). Usar en lugar de snackBar.open suelto.
  */
 export function showSolvixSnack(
   snackBar: MatSnackBar,
   message: string,
   tone: SolvixSnackTone = 'info',
-  duration = 3500,
-  action = 'Cerrar'
+  duration = 3500
 ): void {
   const config: MatSnackBarConfig = {
     duration,
     horizontalPosition: 'end',
     verticalPosition: 'top',
-    panelClass: ['solvix-snack', TONE_CLASS[tone]]
+    panelClass: ['solvix-snack', TONE_CLASS[tone]],
+    data: { message, tone }
   };
-  snackBar.open(message, action, config);
+  snackBar.openFromComponent(SolvixSnackComponent, config);
 }

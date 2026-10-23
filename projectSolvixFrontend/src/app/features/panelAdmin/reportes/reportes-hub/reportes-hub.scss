@@ -15,6 +15,21 @@
   text-decoration: none;
   color: inherit;
   display: block;
+  background: var(--solvix-panel);
+  border: 1px solid var(--solvix-border);
+  border-radius: var(--solvix-radius-card);
+  box-shadow: var(--solvix-shadow-sm);
+  padding: 0.85rem 1rem;
+  transition:
+    border-color var(--motion-fast, 140ms) var(--ease-standard, ease),
+    box-shadow var(--motion-fast, 140ms) var(--ease-standard, ease);
+}
+
+.hub-card:hover,
+.hub-card:focus-visible {
+  border-color: color-mix(in srgb, var(--solvix-primary) 28%, var(--solvix-border));
+  box-shadow: var(--solvix-shadow);
+  outline: none;
 }
 
 .hub-card__body {

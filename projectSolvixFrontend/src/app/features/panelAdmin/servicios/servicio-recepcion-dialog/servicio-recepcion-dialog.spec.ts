@@ -91,7 +91,7 @@ describe('ServicioRecepcionDialogComponent', () => {
         { provide: OrdenServicioService, useValue: ordenService },
         { provide: MatDialogRef, useValue: dialogRef },
         { provide: MAT_DIALOG_DATA, useValue: data },
-        { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open']) }
+        { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open', 'openFromComponent']) }
       ]
     }).compileComponents();
 

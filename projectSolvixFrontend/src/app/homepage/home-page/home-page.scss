@@ -1,5 +1,10 @@
 :host {
+  --home-max: 72rem;
+  --home-gutter: clamp(1rem, 3.5vw, 2.5rem);
+
   display: block;
+  width: 100%;
+  max-width: 100%;
   background: #faf8ff;
   color: #131b2e;
 }
@@ -7,7 +12,15 @@
 section {
   margin: 0;
   padding: 0;
-  scroll-margin-top: 120px;
+  max-width: 100%;
+  /* Coincide con la altura real de la navbar fija (4.5rem móvil / 5rem ≥640px) + margen. */
+  scroll-margin-top: 5.5rem;
+}
+
+@media (min-width: 640px) {
+  section {
+    scroll-margin-top: 6.25rem;
+  }
 }
 
 app-navbar-homepage,
@@ -23,4 +36,7 @@ app-contact,
 app-about-homepage,
 app-footer-homepage {
   display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }

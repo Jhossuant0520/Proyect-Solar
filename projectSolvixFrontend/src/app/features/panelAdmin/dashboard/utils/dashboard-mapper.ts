@@ -138,12 +138,12 @@ export function mapInventario(dto: InventarioKpiDTO): InventarioSaludVista {
   };
 }
 
-/** Cuenta y suma participación ya clasificada. No recalcula A/B/C. */
+/** Cuenta y suma participación ya clasificada. No recalcula A/B/C ni umbrales. */
 export function mapAbcClases(dto: AnalisisABCDTO): AbcClaseVista[] {
   const clases: Record<'A' | 'B' | 'C', AbcClaseVista> = {
-    A: { clase: 'A', productos: 0, participacion: 0 },
-    B: { clase: 'B', productos: 0, participacion: 0 },
-    C: { clase: 'C', productos: 0, participacion: 0 }
+    A: { clase: 'A', productos: 0, participacion: 0, umbral: toNumber(dto.limiteA) },
+    B: { clase: 'B', productos: 0, participacion: 0, umbral: toNumber(dto.limiteB) },
+    C: { clase: 'C', productos: 0, participacion: 0, umbral: null }
   };
 
   for (const producto of dto.productos ?? []) {
@@ -222,18 +222,12 @@ function mapVariacion(dto?: VariacionDTO | null): VariacionVista | undefined {
     return undefined;
   }
   const valor = toNumber(dto.variacionPorcentual);
-  if (dto.estado === 'SIN_BASE_DE_COMPARACION' || valor == null) {
-    return {
-      texto: 'Sin comparación',
-      tipo: 'neutral',
-      estado: dto.estado
-    };
-  }
-  if (dto.estado !== 'OK') {
+  // Solo mostrar % cuando el backend confirma base comparable (estado OK + valor).
+  if (dto.estado !== 'OK' || valor == null) {
     return {
       texto: labelEstadoMetrica(dto.estado) || 'Sin comparación',
       tipo: 'neutral',
-      estado: dto.estado
+      estado: dto.estado === 'OK' ? 'SIN_BASE_DE_COMPARACION' : dto.estado
     };
   }
   return {

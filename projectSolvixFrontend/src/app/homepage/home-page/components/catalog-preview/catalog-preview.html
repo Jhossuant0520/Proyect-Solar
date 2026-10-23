@@ -1,4 +1,9 @@
-<section class="catalog-preview">
+<section
+  #catalogSection
+  class="catalog-preview"
+  [class.is-motion-enabled]="motionEnabled"
+  [class.is-revealed]="revealed"
+>
   <div class="catalog-preview__container">
     <header class="catalog-preview__header">
       <div class="catalog-preview__copy">
@@ -18,7 +23,7 @@
     @if (viewState === 'LOADING') {
       <div class="catalog-preview__grid" aria-busy="true">
         @for (i of [1, 2, 3, 4]; track i) {
-          <div class="catalog-card catalog-card--skeleton" [style.--card-stagger]="i - 1"></div>
+          <div class="catalog-card catalog-card--skeleton"></div>
         }
       </div>
     }
@@ -43,7 +48,7 @@
     @if (viewState === 'SUCCESS') {
       <div class="catalog-preview__grid">
         @for (product of products; track product.id; let i = $index) {
-          <article class="catalog-card" [style.--card-stagger]="i">
+          <article class="catalog-card catalog-card--product" [style.--card-stagger]="i">
             <div class="catalog-card__image-wrap">
               @if (imagenDisponible(product)) {
                 <img

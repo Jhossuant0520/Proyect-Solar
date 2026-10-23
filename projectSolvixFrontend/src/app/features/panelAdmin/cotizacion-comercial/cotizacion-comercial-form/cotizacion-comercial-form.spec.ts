@@ -90,7 +90,7 @@ describe('CotizacionComercialFormComponent', () => {
     service = jasmine.createSpyObj('CotizacionComercialService', ['crear', 'actualizar', 'obtener']);
     router = jasmine.createSpyObj('Router', ['navigate']);
     dialog = jasmine.createSpyObj('MatDialog', ['open']);
-    const snack = jasmine.createSpyObj('MatSnackBar', ['open']);
+    const snack = jasmine.createSpyObj('MatSnackBar', ['open', 'openFromComponent']);
     await TestBed.configureTestingModule({
       imports: [CotizacionComercialFormComponent, NoopAnimationsModule],
       providers: [

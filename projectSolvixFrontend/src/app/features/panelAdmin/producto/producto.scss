@@ -47,7 +47,7 @@ label,
 
 .req {
   color: var(--solvix-primary);
-  background: rgba(79, 209, 255, 0.12);
+  background: color-mix(in srgb, var(--solvix-primary) 12%, transparent);
 }
 
 .opt {

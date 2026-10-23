@@ -1,68 +1,77 @@
 <section class="catalog-detail">
-
-  <div class="detail-top">
-    <a routerLink="/Catalogo" class="detail-back">← Volver al catálogo</a>
+  <div class="catalog-detail__ambient" aria-hidden="true">
+    <span class="catalog-detail__blob catalog-detail__blob--a"></span>
+    <span class="catalog-detail__blob catalog-detail__blob--b"></span>
   </div>
 
-  @if (viewState === 'LOADING') {
-    <div class="detail-skeleton" aria-busy="true"></div>
-  }
-
-  @if (viewState === 'ERROR') {
-    <div class="detail-state">
-      <p>No pudimos cargar este producto.</p>
-      <a routerLink="/Catalogo" class="btn-cyber-primary">Volver al catálogo</a>
+  <div class="catalog-detail__content">
+    <div class="detail-top">
+      <a routerLink="/Catalogo" class="detail-back">← Volver al catálogo</a>
     </div>
-  }
 
-  @if (viewState === 'SUCCESS' && producto) {
-    <article class="detail-card">
-      <div class="detail-media">
-        @if (imagenDisponible) {
-          <img
-            [src]="urlImagen"
-            [alt]="producto.nombre"
-            (error)="onImagenError()"
-          />
-        } @else {
-          <div class="image-fallback">
-            <span>Sin imagen</span>
-          </div>
-        }
+    @if (viewState === 'LOADING') {
+      <div class="detail-skeleton" aria-busy="true"></div>
+    }
+
+    @if (viewState === 'ERROR') {
+      <div class="detail-state">
+        <p>No pudimos cargar este producto.</p>
+        <a routerLink="/Catalogo" class="detail-btn detail-btn--primary">Volver al catálogo</a>
       </div>
+    }
 
-      <div class="detail-body">
-        <div class="detail-meta">
-          <solvix-badge [tone]="tonoDisponibilidad(producto.disponibilidad)">
-            {{ labelDisponibilidad(producto.disponibilidad) }}
-          </solvix-badge>
-          @if (producto.categoriaNombre) {
-            <span class="categoria">{{ producto.categoriaNombre }}</span>
+    @if (viewState === 'SUCCESS' && producto) {
+      <article class="detail-card">
+        <div class="detail-media">
+          @if (imagenDisponible) {
+            <img
+              [src]="urlImagen"
+              [alt]="producto.nombre"
+              (error)="onImagenError()"
+            />
+          } @else {
+            <div class="image-fallback">
+              <span class="material-symbols-outlined">inventory_2</span>
+              <span>Sin imagen</span>
+            </div>
           }
         </div>
 
-        <h1>{{ producto.nombre }}</h1>
-        <p class="marca">{{ producto.marca }}</p>
-        <p class="price">{{ formatMoney(producto.precioVentaActual) }}</p>
+        <div class="detail-body">
+          <div class="detail-meta">
+            <span
+              class="stock-badge"
+              [class.stock-badge--out]="producto.disponibilidad === 'AGOTADO'"
+            >
+              {{ labelDisponibilidad(producto.disponibilidad) }}
+            </span>
+            @if (producto.categoriaNombre) {
+              <span class="categoria">{{ producto.categoriaNombre }}</span>
+            }
+          </div>
 
-        @if (producto.descripcion) {
-          <p class="descripcion">{{ producto.descripcion }}</p>
-        } @else {
-          <p class="descripcion descripcion--muted">Sin descripción adicional.</p>
-        }
+          <h1>{{ producto.nombre }}</h1>
+          <p class="marca">{{ producto.marca }}</p>
+          <p class="price">{{ formatMoney(producto.precioVentaActual) }}</p>
 
-        <div class="detail-actions">
-          <a
-            class="btn-cyber-secondary"
-            [href]="whatsappUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Contactar
-          </a>
+          @if (producto.descripcion) {
+            <p class="descripcion">{{ producto.descripcion }}</p>
+          } @else {
+            <p class="descripcion descripcion--muted">Sin descripción adicional.</p>
+          }
+
+          <div class="detail-actions">
+            <a
+              class="detail-btn detail-btn--primary"
+              [href]="whatsappUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Contactar por WhatsApp
+            </a>
+          </div>
         </div>
-      </div>
-    </article>
-  }
-
+      </article>
+    }
+  </div>
 </section>

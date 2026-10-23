@@ -1,215 +1,95 @@
 :host {
   display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
-.steps-homepage {
-  position: relative;
-  padding: 96px 64px;
-  overflow: hidden;
-  background: var(--solvix-surface);
+:host *,
+:host *::before,
+:host *::after {
+  box-sizing: border-box;
 }
 
-.steps-glow {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(ellipse at center, var(--solvix-home-glow-soft), transparent 70%);
+:host section {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
 }
 
-.steps-inner {
-  position: relative;
-  z-index: 2;
-  max-width: 1280px;
-  margin: 0 auto;
+:host .max-w-7xl {
+  box-sizing: border-box;
+  width: min(72rem, 100%);
+  max-width: 100% !important;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 3.5vw, 2.5rem) !important;
 }
 
-.steps-inner h2 {
-  margin: 0 0 80px;
-  text-align: center;
-  font-size: clamp(1.75rem, 4vw, 2.5rem);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--solvix-text);
-  animation: fadeInUp 0.7s ease both;
+:host .grid {
+  width: 100%;
+  min-width: 0;
 }
 
-.steps-track {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 48px;
-}
-
-.steps-line {
-  display: none;
-}
-
-.step-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  animation: fadeInUp 0.7s ease both;
-}
-
-.step-item:nth-child(2) { animation-delay: 0.1s; }
-.step-item:nth-child(3) { animation-delay: 0.2s; }
-.step-item:nth-child(4) { animation-delay: 0.3s; }
-.step-item:nth-child(5) { animation-delay: 0.4s; }
-
-.step-circle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 64px;
-  height: 64px;
-  margin-bottom: 24px;
-  border-radius: 50%;
-  background: var(--solvix-home-card-bg-solid);
-  border: 1px solid var(--solvix-home-card-border);
-  box-shadow: var(--solvix-home-card-shadow);
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  transition: transform 0.3s ease;
-}
-
-.step-circle.is-primary {
-  border: 2px solid var(--solvix-primary);
-  color: var(--solvix-primary);
-  box-shadow: var(--solvix-glow);
-  animation: circleGlow 3s ease-in-out infinite;
-}
-
-.step-circle.is-neon {
-  border: 2px solid var(--solvix-neon);
-  color: var(--solvix-neon);
-  box-shadow: var(--solvix-glow);
-  animation: circleGlow 3s ease-in-out 0.4s infinite;
-}
-
-.step-circle.is-secondary {
-  border: 2px solid var(--solvix-secondary);
-  color: var(--solvix-secondary);
-  box-shadow: var(--solvix-glow);
-  animation: circleGlow 3s ease-in-out 0.8s infinite;
-}
-
-.step-circle.is-filled {
-  border: 2px solid var(--solvix-primary);
-  background: var(--solvix-primary);
-  color: var(--solvix-on-primary);
-  box-shadow: var(--solvix-glow);
-  animation: circleGlow 3s ease-in-out 1.2s infinite;
-}
-
-.step-item:hover .step-circle {
-  transform: scale(1.08);
-}
-
-.step-item h3 {
-  margin: 0 0 12px;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--solvix-text);
-}
-
-.step-item p {
-  margin: 0;
-  max-width: 220px;
-  font-size: 1rem;
-  line-height: 1.5;
-  color: var(--solvix-text-muted);
-}
-
-@media (min-width: 768px) {
-  .steps-track {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 0;
-  }
-
-  .steps-line {
-    display: block;
-    position: absolute;
-    top: 32px;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: var(--solvix-home-separator);
-    z-index: 0;
-    overflow: hidden;
-  }
-
-  .steps-line-glow {
-    display: block;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(to right, var(--solvix-primary), var(--solvix-neon), var(--solvix-secondary));
-    opacity: 0.5;
-    filter: blur(2px);
-    animation: lineShimmer 4s ease-in-out infinite alternate;
-  }
-
-  .steps-line::after {
-    content: "";
-    position: absolute;
-    top: -3px;
-    left: 0;
-    width: 10px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--solvix-primary);
-    box-shadow: 0 0 12px var(--solvix-primary);
-    animation: lineTravel 4.5s linear infinite;
-  }
-
-  .step-item {
-    position: relative;
-    z-index: 1;
-    width: 25%;
+/* 3 columnas solo con espacio real; entre 768–899 se apilan o usan 1 col. */
+@media (min-width: 768px) and (max-width: 899px) {
+  :host .grid.md\:grid-cols-3 {
+    grid-template-columns: 1fr !important;
   }
 }
 
-@media (max-width: 767px) {
-  .steps-homepage {
-    padding: 64px 20px;
-  }
-
-  .steps-inner h2 {
-    margin-bottom: 48px;
+@media (min-width: 900px) {
+  :host .grid.md\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }
 }
 
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+:host .grid > div {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
-@keyframes lineShimmer {
-  from { opacity: 0.35; }
-  to { opacity: 0.65; }
+:host .steps-icon {
+  transition: transform 180ms ease;
 }
 
-@keyframes circleGlow {
-  0%, 100% { box-shadow: 0 0 12px color-mix(in srgb, var(--solvix-primary) 30%, transparent); }
-  50% { box-shadow: 0 0 22px color-mix(in srgb, var(--solvix-primary) 50%, transparent); }
+:host .steps-card:hover .steps-icon {
+  transform: scale(1.04);
 }
 
-@keyframes lineTravel {
-  from { left: 0; opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  to { left: calc(100% - 10px); opacity: 0; }
+/*
+  Progressive enhancement: visible por defecto.
+  Solo se oculta bajo .is-motion-enabled:not(.is-revealed) cuando JS + IO lo habilitan.
+*/
+@media (prefers-reduced-motion: no-preference) {
+  :host section.is-motion-enabled:not(.is-revealed) .steps-reveal {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  :host section.is-motion-enabled.is-revealed .steps-reveal {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 450ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: calc(var(--reveal-i, 0) * 80ms);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .steps-inner h2,
-  .step-item,
-  .steps-line-glow,
-  .step-circle,
-  .steps-line::after {
+  :host .steps-reveal,
+  :host .steps-card,
+  :host .steps-icon,
+  :host .group {
     animation: none;
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  :host .steps-card:hover .steps-icon {
+    transform: none;
   }
 }

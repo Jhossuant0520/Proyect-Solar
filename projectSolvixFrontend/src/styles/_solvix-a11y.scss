@@ -68,7 +68,7 @@ body {
 
 /* Snackbar no se sale en móvil. */
 .mat-mdc-snack-bar-container.solvix-snack {
-  max-width: min(26rem, calc(100vw - 1rem)) !important;
+  max-width: min(24rem, calc(100vw - 1rem)) !important;
 }
 
 /* Targets táctiles tipados para icon-buttons SOLVIX. */

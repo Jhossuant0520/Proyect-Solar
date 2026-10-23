@@ -1,23 +1,39 @@
-<div class="cotizacion-rechazar-dialog">
-  <header class="dlg-head">
-    <h2>Rechazar cotización</h2>
-    <p>Registra el rechazo de la cotización {{ data.numero }}.</p>
+<div class="ce-dlg is-danger">
+  <header class="ce-dlg__head">
+    <div class="ce-dlg__lead">
+      <span class="ce-dlg__badge" aria-hidden="true">
+        <span class="material-symbols-outlined">cancel</span>
+      </span>
+      <div class="ce-dlg__copy">
+        <p class="ce-dlg__kicker">Cotización</p>
+        <h2>Rechazar cotización</h2>
+        <p class="ce-dlg__sub">Registra el rechazo de {{ data.numero }}.</p>
+      </div>
+    </div>
+    <button type="button" class="ce-dlg__close" aria-label="Cerrar" (click)="cancelar()">
+      <span class="material-symbols-outlined" aria-hidden="true">close</span>
+    </button>
   </header>
-  <form class="dlg-form" [formGroup]="form" (ngSubmit)="confirmar()">
-    <label>
-      Observación
+
+  <form class="ce-dlg__body" [formGroup]="form" (ngSubmit)="confirmar()">
+    <label class="ce-field">
+      <span>Observación <span class="ce-opt">opcional</span></span>
       <textarea
+        class="ce-input"
         formControlName="observacion"
         rows="3"
         maxlength="1000"
-        placeholder="Opcional"
+        placeholder="Motivo del rechazo, si lo hay"
       ></textarea>
     </label>
-    <div class="dlg-actions">
+
+    <div class="ce-dlg__actions">
       <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
         Cancelar
       </solvix-button>
-      <solvix-button family="tech" rank="danger" type="submit">Rechazar</solvix-button>
+      <solvix-button family="tech" rank="danger" type="submit" icon="cancel">
+        Rechazar
+      </solvix-button>
     </div>
   </form>
 </div>

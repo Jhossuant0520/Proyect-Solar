@@ -8,112 +8,80 @@
       (retry)="cargar()"
     />
   } @else {
-    <!-- ZONA 1: Cabecera -->
+    <!-- 1. ENCABEZADO COMPACTO DE LA ORDEN -->
     <header class="detalle-head">
       <div class="head-main">
-        <div class="head-title-row">
-          <div>
-            <p class="kicker">Orden de servicio</p>
-            <h1 class="solvix-mono">{{ orden.numero }}</h1>
+        <!-- Fila superior: Volver a la lista (enlace discreto) + Kicker | Menú compacto de 3 puntos -->
+        <div class="head-top-bar">
+          <div class="head-nav-left">
+            <a
+              class="btn-volver-link"
+              [routerLink]="['/servicios']"
+              (click)="$event.preventDefault(); volver()"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+              <span>Volver a la lista</span>
+            </a>
+            <span class="head-divider" aria-hidden="true"></span>
+            <p class="kicker">Orden de servicio técnico</p>
           </div>
+
           <div class="head-actions">
-            <solvix-button family="tech" rank="tertiary" icon="arrow_back" (click)="volver()">
-              Volver
-            </solvix-button>
-            @if (hayOpcionesWhatsApp) {
-              <button
-                type="button"
-                class="btn-mas-acciones btn-whatsapp"
-                [matMenuTriggerFor]="menuWhatsApp"
-                (menuOpened)="avisarWhatsAppSiNoListo()"
-                [disabled]="editando"
-                aria-label="Preparar mensaje de WhatsApp"
-                [attr.title]="
-                  puedePrepararWhatsApp
-                    ? 'Preparar mensaje de WhatsApp'
-                    : 'Registra un teléfono válido en la ficha del cliente.'
-                "
-              >
-                <span class="material-symbols-outlined" aria-hidden="true">chat</span>
-                WhatsApp
-              </button>
-              <mat-menu #menuWhatsApp="matMenu" class="solvix-menu menu-whatsapp">
-                <div class="menu-whatsapp-ayuda" role="note">
-                  Elige el mensaje que deseas preparar. Se abrirá WhatsApp para que lo revises y
-                  envíes.
-                </div>
-                @if (mostrarWhatsAppRecepcion) {
-                  <button
-                    mat-menu-item
-                    type="button"
-                    [disabled]="!puedePrepararWhatsApp"
-                    (click)="prepararWhatsApp('recepcion')"
-                  >
-                    Recepción — Abrir WhatsApp
-                  </button>
-                }
-                @if (mostrarWhatsAppCotizacion) {
-                  <button
-                    mat-menu-item
-                    type="button"
-                    [disabled]="!puedePrepararWhatsApp"
-                    (click)="prepararWhatsApp('cotizacion')"
-                  >
-                    Cotización — Abrir WhatsApp
-                  </button>
-                }
-                @if (mostrarWhatsAppEquipoListo) {
-                  <button
-                    mat-menu-item
-                    type="button"
-                    [disabled]="!puedePrepararWhatsApp"
-                    (click)="prepararWhatsApp('equipoListo')"
-                  >
-                    Equipo listo — Abrir WhatsApp
-                  </button>
-                }
-              </mat-menu>
-            }
             @if (hayMenuMasAcciones) {
               <button
                 type="button"
                 class="btn-mas-acciones"
                 [matMenuTriggerFor]="menuMasAcciones"
                 aria-label="Más acciones"
+                title="Más acciones de la orden"
               >
-                Más acciones
+                <span class="sr-only">Más acciones</span>
                 <span class="material-symbols-outlined" aria-hidden="true">more_vert</span>
               </button>
-              <mat-menu #menuMasAcciones="matMenu" class="solvix-menu">
+              <mat-menu #menuMasAcciones="matMenu" class="solvix-menu menu-orden-acciones" xPosition="before">
                 @if (accionEspera) {
                   <button
                     mat-menu-item
                     type="button"
+                    class="menu-orden-item"
                     [disabled]="cambiandoEstado || editando || pendingRepuestos <= 0"
                     (click)="ejecutarAccionEspera()"
                   >
-                    {{ accionEspera.boton }}
+                    <span class="material-symbols-outlined menu-orden-item__icon" aria-hidden="true">
+                      hourglass_empty
+                    </span>
+                    <span class="menu-orden-item__text">{{ accionEspera.boton }}</span>
                   </button>
                 }
                 @if (accionFalla) {
                   <button
                     mat-menu-item
                     type="button"
+                    class="menu-orden-item"
                     [disabled]="cambiandoEstado || editando"
                     (click)="ejecutarAccionFalla()"
                   >
-                    {{ accionFalla.boton }}
+                    <span class="material-symbols-outlined menu-orden-item__icon" aria-hidden="true">
+                      notification_important
+                    </span>
+                    <span class="menu-orden-item__text">{{ accionFalla.boton }}</span>
                   </button>
+                }
+                @if ((accionEspera || accionFalla) && accionCancelar) {
+                  <div class="menu-orden-divider" role="separator"></div>
                 }
                 @if (accionCancelar) {
                   <button
                     mat-menu-item
                     type="button"
-                    class="menu-danger"
+                    class="menu-orden-item menu-danger"
                     [disabled]="cambiandoEstado || editando"
                     (click)="ejecutarAccionCancelar()"
                   >
-                    {{ accionCancelar.boton }}
+                    <span class="material-symbols-outlined menu-orden-item__icon" aria-hidden="true">
+                      cancel
+                    </span>
+                    <span class="menu-orden-item__text">{{ accionCancelar.boton }}</span>
                   </button>
                 }
               </mat-menu>
@@ -121,49 +89,266 @@
           </div>
         </div>
 
-        <div class="head-estado" [attr.data-estado]="orden.estado">
-          <span class="material-symbols-outlined estado-icono" aria-hidden="true">{{ ux.icono }}</span>
-          <solvix-badge class="estado-badge" [tone]="estadoTone(orden.estado)">
-            {{ estadoLabel(orden.estado) }}
-          </solvix-badge>
+        <!-- Fila media: Código OT + copiar + Pill de Estado | Pill de Prioridad por antigüedad -->
+        <div class="head-title-row">
+          <div class="head-id-group">
+            <h1 class="solvix-mono">{{ orden.numero }}</h1>
+            <button
+              type="button"
+              class="btn-copy-ot"
+              (click)="copiarCodigoOrden()"
+              title="Copiar código de Orden"
+              aria-label="Copiar código de orden"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">content_copy</span>
+            </button>
+
+            <div
+              class="head-estado-pill"
+              [attr.data-estado]="orden.estado"
+              [attr.data-tone]="estadoTone(orden.estado)"
+            >
+              <span class="material-symbols-outlined estado-icono" aria-hidden="true">{{ ux.icono }}</span>
+              <solvix-badge class="estado-badge" [tone]="estadoTone(orden.estado)">
+                {{ estadoLabel(orden.estado) }}
+              </solvix-badge>
+            </div>
+          </div>
+
+          @if (prioridadOperativa; as prio) {
+            <div
+              class="prioridad-pill"
+              [attr.data-prioridad]="prio.codigo"
+              [class.is-activa]="prio.activa"
+              [class.is-finalizada]="!prio.activa"
+              [attr.title]="'Prioridad operativa por antigüedad (' + prio.resumenEdad + ')'"
+            >
+              <span class="material-symbols-outlined prioridad-pill__icon" aria-hidden="true">
+                {{
+                  !prio.activa
+                    ? 'task_alt'
+                    : prio.codigo === 'MUY_ALTA'
+                      ? 'error'
+                      : prio.codigo === 'ALTA' || prio.codigo === 'MEDIA'
+                        ? 'priority_high'
+                        : 'schedule'
+                }}
+              </span>
+              <span class="prioridad-pill__label">{{ prio.labelCorto }}</span>
+              <span class="prioridad-pill__sep" aria-hidden="true">·</span>
+              <span class="prioridad-pill__age solvix-mono">
+                {{ prio.dias === 1 ? '1 día' : prio.dias + ' días' }}
+              </span>
+            </div>
+          }
         </div>
 
+        <!-- Resumen horizontal simplificado: 1. Cliente, 2. Equipo, 3. Última modificación -->
         <dl class="head-facts">
-          <div>
-            <dt>Cliente</dt>
-            <dd>
-              <a [routerLink]="['/clientes', orden.clienteId]">{{ orden.clienteNombre }}</a>
-            </dd>
+          <div class="fact-item">
+            <span class="material-symbols-outlined fact-icon" aria-hidden="true">account_circle</span>
+            <div class="fact-copy">
+              <dt>Cliente</dt>
+              <dd [attr.title]="orden.clienteNombre">
+                <a [routerLink]="['/clientes', orden.clienteId]">{{ orden.clienteNombre }}</a>
+              </dd>
+            </div>
           </div>
-          <div>
-            <dt>Equipo</dt>
-            <dd>{{ equipo(orden) }}</dd>
+
+          <div class="fact-item">
+            <span class="material-symbols-outlined fact-icon" aria-hidden="true">devices</span>
+            <div class="fact-copy">
+              <dt>Equipo</dt>
+              <dd [attr.title]="equipo(orden)">{{ equipo(orden) }}</dd>
+            </div>
           </div>
-          <div class="fact-fecha">
-            <dt>Recepción</dt>
-            <dd class="solvix-mono">{{ fecha(orden.fechaRecepcion) }}</dd>
-          </div>
-          @if (orden.fechaActualizacion) {
-            <div class="fact-fecha">
-              <dt>Actualización</dt>
-              <dd class="solvix-mono">{{ fecha(orden.fechaActualizacion) }}</dd>
+
+          @if (orden.fechaActualizacion || orden.fechaRecepcion) {
+            <div class="fact-item fact-fecha">
+              <span class="material-symbols-outlined fact-icon is-success" aria-hidden="true">update</span>
+              <div class="fact-copy">
+                <dt>Última modificación</dt>
+                <dd
+                  class="solvix-mono"
+                  [attr.title]="fecha(orden.fechaActualizacion || orden.fechaRecepcion)"
+                >
+                  {{ fecha(orden.fechaActualizacion || orden.fechaRecepcion) }}
+                </dd>
+              </div>
             </div>
           }
         </dl>
       </div>
     </header>
 
-    <!-- ZONA 2: Siguiente paso + progreso -->
+    <!-- 2. TARJETA DE ACCIÓN PENDIENTE / SIGUIENTE PASO (Stitch B) -->
     <section
       class="panel siguiente-panel"
       [class.is-attention]="
-        orden.estado === 'ESPERA_REPUESTO' || orden.estado === 'REQUIERE_APROBACION_ADICIONAL'
+        orden.estado === 'PENDIENTE_APROBACION' ||
+        orden.estado === 'COTIZADO' ||
+        orden.estado === 'ESPERA_REPUESTO' ||
+        orden.estado === 'REQUIERE_APROBACION_ADICIONAL'
       "
+      [class.is-complete]="
+        orden.estado === 'LISTO' || orden.estado === 'ENTREGADO' || orden.estado === 'CERRADO'
+      "
+      [class.is-terminal]="!accionPrincipal"
       aria-labelledby="siguiente-titulo"
     >
-      <solvix-section-header kicker="Operación" title="Siguiente paso" />
+      <div class="siguiente-accent" aria-hidden="true"></div>
 
-      <div class="progreso-wrap progreso-desktop">
+      <div class="siguiente-grid">
+        <div class="siguiente-copy">
+          <div class="siguiente-kicker-row">
+            <span class="material-symbols-outlined siguiente-kicker-icon" aria-hidden="true">
+              {{ accionPrincipal ? 'assignment_late' : ux.icono }}
+            </span>
+            <solvix-section-header
+              kicker="Operación"
+              [title]="accionPrincipal ? '' : 'Estado del servicio'"
+            />
+            @if (resumenFase; as rf) {
+              <p class="fase-chip">Fase {{ rf.numero }} de {{ rf.total }} · {{ rf.label }}</p>
+            }
+          </div>
+
+          <h2 id="siguiente-titulo" class="siguiente-headline">
+            {{ ux.descripcionTaller }}
+          </h2>
+
+          @if (cotizacionDestacada && (orden.estado === 'PENDIENTE_APROBACION' || orden.estado === 'COTIZADO')) {
+            <p class="siguiente-sub">
+              Cotización vinculada:
+              <strong class="solvix-mono">{{ cotizacionDestacada.numero }}</strong>
+              por
+              <strong class="solvix-mono">{{ money(cotizacionDestacada.total) }}</strong>.
+            </p>
+          }
+
+          <div class="siguiente-block">
+            <p class="label-mini">Próximo paso recomendado:</p>
+            <p class="siguiente-texto">{{ ux.siguienteTaller }}</p>
+          </div>
+
+          @if (requisitosPendientes.length) {
+            <ul class="requisitos" aria-label="Requisitos pendientes">
+              @for (req of requisitosPendientes; track req) {
+                <li>{{ req }}</li>
+              }
+            </ul>
+          }
+
+          @if (guiaTecnica) {
+            <p class="hint guia-hint">{{ guiaTecnica }}</p>
+          }
+          @if (estadoError) {
+            <p class="form-error">{{ estadoError }}</p>
+          }
+        </div>
+
+        @if (accionPrincipal) {
+          <div class="siguiente-actions siguiente-actions--desktop">
+            <solvix-button
+              family="tech"
+              rank="primary"
+              [icon]="
+                orden.estado === 'PENDIENTE_APROBACION'
+                  ? 'how_to_reg'
+                  : orden.estado === 'RECEPCIONADO'
+                    ? 'play_arrow'
+                    : ''
+              "
+              [disabled]="cambiandoEstado || editando"
+              (click)="ejecutarAccionPrincipal()"
+            >
+              {{ accionPrincipal.boton }}
+            </solvix-button>
+
+            @if (mostrarWhatsAppCotizacion && puedePrepararWhatsApp) {
+              <button
+                type="button"
+                class="btn-secondary-inline"
+                [disabled]="editando"
+                (click)="prepararWhatsApp('cotizacion')"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">forward_to_inbox</span>
+                <span>Enviar / reenviar cotización por WhatsApp</span>
+              </button>
+            } @else if (mostrarWhatsAppEquipoListo && puedePrepararWhatsApp) {
+              <button
+                type="button"
+                class="btn-secondary-inline"
+                [disabled]="editando"
+                (click)="prepararWhatsApp('equipoListo')"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">chat</span>
+                <span>Avisar equipo listo por WhatsApp</span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- 3. TRAZABILIDAD OPERATIVA (después de Operación) -->
+    <section class="panel trazabilidad-panel" aria-label="Trazabilidad operativa">
+      <div class="trazabilidad-head">
+        <div class="trazabilidad-head__lead">
+          <div class="trazabilidad-icon-badge" aria-hidden="true">
+            <span class="material-symbols-outlined">timeline</span>
+          </div>
+          <div class="trazabilidad-head__titles">
+            <p class="trazabilidad-kicker">Flujo operativo</p>
+            <h2 class="trazabilidad-title">Trazabilidad Operativa</h2>
+          </div>
+        </div>
+        @if (prioridadOperativa; as prio) {
+          <span class="trazabilidad-age solvix-mono">
+            {{ prio.activa ? prio.label + ' · ' + prio.resumenEdad : prio.resumenEdad }}
+          </span>
+        }
+      </div>
+
+      <ol class="traza-stepper" role="list">
+        @for (etapa of etapasTrazabilidad; track etapa.codigo; let last = $last) {
+          <li
+            class="traza-step"
+            [attr.data-estado]="etapa.estadoVisual"
+            [attr.aria-current]="etapa.estadoVisual === 'actual' ? 'step' : null"
+          >
+            <div class="traza-step__rail">
+              <div class="traza-step__circle">
+                @if (etapa.estadoVisual === 'completada') {
+                  <span class="material-symbols-outlined" aria-hidden="true">check</span>
+                } @else if (etapa.estadoVisual === 'actual') {
+                  <span class="material-symbols-outlined" aria-hidden="true">{{ etapa.icono }}</span>
+                  <span class="traza-step__pulse" aria-hidden="true"></span>
+                } @else if (etapa.estadoVisual === 'cancelada') {
+                  <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                } @else {
+                  <span class="solvix-mono">{{ etapa.numero }}</span>
+                }
+              </div>
+              @if (!last) {
+                <div
+                  class="traza-step__line"
+                  [class.is-filled]="etapa.estadoVisual === 'completada'"
+                  aria-hidden="true"
+                ></div>
+              }
+            </div>
+
+            <div class="traza-step__body">
+              <span class="traza-step__title">{{ etapa.numero }}. {{ etapa.titulo }}</span>
+              <span class="traza-step__badge solvix-mono">{{ etapa.badgeTexto }}</span>
+              <span class="traza-step__meta">{{ etapa.detalleTexto }}</span>
+            </div>
+          </li>
+        }
+      </ol>
+
+      <div class="progreso-wrap progreso-desktop sr-only" aria-hidden="true">
         <solvix-progress-fases
           [estadoCodigo]="orden.estado"
           [faseAlCancelar]="faseAlCancelar"
@@ -178,68 +363,46 @@
         />
       </div>
 
-      @if (resumenFase; as rf) {
-        <p class="fase-chip">Fase {{ rf.numero }} de {{ rf.total }} · {{ rf.label }}</p>
-      }
-
-      <h2 id="siguiente-titulo" class="sr-only">Contexto del siguiente paso</h2>
-      <p class="siguiente-desc">{{ ux.descripcionTaller }}</p>
-
-      <div class="siguiente-block">
-        <p class="label-mini">Qué sigue</p>
-        <p class="siguiente-texto">{{ ux.siguienteTaller }}</p>
-      </div>
-
-      @if (requisitosPendientes.length) {
-        <ul class="requisitos" aria-label="Requisitos pendientes">
-          @for (req of requisitosPendientes; track req) {
-            <li>{{ req }}</li>
-          }
-        </ul>
-      }
-
-      @if (guiaTecnica) {
-        <p class="hint guia-hint">{{ guiaTecnica }}</p>
-      }
-      @if (estadoError) {
-        <p class="form-error">{{ estadoError }}</p>
-      }
-
-      <div class="siguiente-actions siguiente-actions--desktop">
-        @if (accionPrincipal) {
-          <solvix-button
-            family="tech"
-            rank="primary"
-            [disabled]="cambiandoEstado || editando"
-            (click)="ejecutarAccionPrincipal()"
-          >
-            {{ accionPrincipal.boton }}
-          </solvix-button>
-        }
+      <div class="trazabilidad-foot">
+        <span class="material-symbols-outlined" aria-hidden="true">verified</span>
+        <span>
+          El avance de etapas refleja los eventos registrados y las validaciones oficiales de la orden.
+        </span>
       </div>
     </section>
 
+    <!-- 4. LAYOUT: técnica + cotizaciones | documentos + WhatsApp + actividad -->
     <div class="detalle-layout">
-      <!-- Columna principal -->
+      <!-- COLUMNA PRINCIPAL -->
       <div class="col-principal">
-        <section #panelTecnico class="panel seccion-colapsable tecnico-panel" [class.is-resumen]="esResumenCompleto">
+        <!-- E. SECCIÓN TÉCNICA -->
+        <section
+          #panelTecnico
+          class="panel seccion-colapsable tecnico-panel"
+          [class.is-resumen]="esResumenCompleto"
+        >
           <button
             type="button"
-            class="seccion-toggle"
+            class="seccion-toggle seccion-toggle--stitch"
             (click)="toggleSeccion('tecnico')"
             [attr.aria-expanded]="secciones.tecnico"
           >
-            <solvix-section-header
-              kicker="Taller"
-              title="Sección técnica"
-              [subtitle]="
-                esResumenCompleto
-                  ? 'Resumen técnico de esta orden.'
-                  : enDiagnostico
-                    ? 'Completa el diagnóstico técnico.'
-                    : 'Información técnica de la orden.'
-              "
-            />
+            <div class="tecnico-header-wrap">
+              <div class="tecnico-icon-badge" aria-hidden="true">
+                <span class="material-symbols-outlined">build</span>
+              </div>
+              <solvix-section-header
+                kicker="Taller"
+                title="Sección técnica"
+                [subtitle]="
+                  esResumenCompleto
+                    ? 'Resumen técnico de esta orden.'
+                    : enDiagnostico
+                      ? 'Completa el diagnóstico técnico.'
+                      : 'Información técnica de la orden.'
+                "
+              />
+            </div>
             <span
               class="material-symbols-outlined seccion-chevron"
               [class.is-open]="secciones.tecnico"
@@ -250,7 +413,10 @@
           @if (secciones.tecnico) {
             <div class="seccion-body">
               @if (puedeEditar(orden.estado) && !editando) {
-                <div class="inline-actions">
+                <div class="inline-actions inline-actions--top">
+                  <p class="hint inline-note">
+                    Solo se guardan estos textos. Cliente, equipo y estado no cambian aquí.
+                  </p>
                   <solvix-button
                     family="tech"
                     rank="secondary"
@@ -278,27 +444,39 @@
                       [attr.data-campo]="campo.id"
                     >
                       <header class="campo-head">
-                        <h3>{{ campo.label }}</h3>
+                        <div class="campo-head__lead">
+                          <span
+                            class="campo-icon material-symbols-outlined"
+                            aria-hidden="true"
+                          >{{ campo.icon }}</span>
+                          <div class="campo-head__titles">
+                            <h3>{{ campo.label }}</h3>
+                            <p class="campo-hint">{{ campo.hint }}</p>
+                          </div>
+                        </div>
                         @if (esCampoDestacado(campo.id) && tieneTexto(campo.id)) {
-                          <span class="foco-tag">En foco</span>
+                          <span class="foco-tag solvix-mono">En foco</span>
                         }
                       </header>
+
                       @if (tieneTexto(campo.id)) {
-                        <p class="campo-hint">{{ campo.hint }}</p>
-                        <p class="body-text">{{ valorCampo(orden, campo.id) }}</p>
+                        <div class="campo-value-box">
+                          <p class="body-text">{{ valorCampo(orden, campo.id) }}</p>
+                        </div>
                       } @else if (puedeEditarCampo(campo.id)) {
                         <button
                           type="button"
                           class="btn-agregar-campo"
                           (click)="iniciarEdicion(campo.id)"
                         >
-                          Agregar {{ campo.label.toLowerCase() }}
+                          <span class="material-symbols-outlined" aria-hidden="true">add</span>
+                          <span>Agregar {{ campo.label.toLowerCase() }}</span>
                         </button>
                       } @else if (hintBloqueado(campo.id)) {
-                        <p class="hint bloqueado-hint" style="display: flex; gap: 4px; align-items: center; margin-top: 8px;">
-                          <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 16px;">lock</span>
-                          {{ hintBloqueado(campo.id) }}
-                        </p>
+                        <div class="campo-locked-box">
+                          <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+                          <span>{{ hintBloqueado(campo.id) }}</span>
+                        </div>
                       } @else {
                         <p class="hint">Sin información registrada.</p>
                       }
@@ -321,17 +499,27 @@
                       [class.is-destacado]="esCampoDestacado(campo.id)"
                       [attr.data-campo]="campo.id"
                     >
-                      <span class="label-row" style="display: block; font-weight: 500; margin-bottom: 4px;">
-                        {{ campo.label }}
-                        @if (campo.id === 'diagnostico' && enDiagnostico) {
-                          <span class="req">requerido</span>
-                        }
-                        @if (esCampoDestacado(campo.id)) {
-                          <span class="foco-tag">En foco</span>
-                        }
-                      </span>
-                      <span class="campo-hint" style="display: block; margin-bottom: 8px;">{{ campo.hint }}</span>
-                      
+                      <div class="campo-head">
+                        <div class="campo-head__lead">
+                          <span
+                            class="campo-icon material-symbols-outlined"
+                            aria-hidden="true"
+                          >{{ campo.icon }}</span>
+                          <div class="campo-head__titles">
+                            <span class="label-row">
+                              {{ campo.label }}
+                              @if (campo.id === 'diagnostico' && enDiagnostico) {
+                                <span class="req">requerido</span>
+                              }
+                              @if (esCampoDestacado(campo.id)) {
+                                <span class="foco-tag solvix-mono">En foco</span>
+                              }
+                            </span>
+                            <span class="campo-hint">{{ campo.hint }}</span>
+                          </div>
+                        </div>
+                      </div>
+
                       @if (puedeEditarCampo(campo.id)) {
                         <textarea
                           [formControlName]="campo.id"
@@ -341,13 +529,13 @@
                         ></textarea>
                       } @else {
                         @if (hintBloqueado(campo.id)) {
-                          <div class="bloqueo-inline" style="background: var(--surface-2); padding: 12px; border-radius: 6px; display: flex; gap: 8px; align-items: center; color: var(--text-secondary);">
-                            <span class="material-symbols-outlined" style="font-size: 18px;">lock</span>
-                            <span style="font-size: 0.85rem;">{{ hintBloqueado(campo.id) }}</span>
+                          <div class="campo-locked-box">
+                            <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+                            <span>{{ hintBloqueado(campo.id) }}</span>
                           </div>
                         } @else if (tieneTexto(campo.id)) {
-                          <div class="read-only-box" style="background: var(--surface-2); padding: 12px; border-radius: 6px; white-space: pre-wrap; font-size: 0.95rem;">
-                            {{ valorCampo(orden, campo.id) }}
+                          <div class="campo-value-box">
+                            <p class="body-text">{{ valorCampo(orden, campo.id) }}</p>
                           </div>
                         } @else {
                           <em class="hint">Sin información.</em>
@@ -363,8 +551,14 @@
                     <p class="form-error">{{ editError }}</p>
                   }
 
-                  <div class="inline-actions">
-                    <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelarEdicion()">
+                  <div class="inline-actions inline-actions--edit">
+                    <solvix-button
+                      family="tech"
+                      rank="tertiary"
+                      type="button"
+                      icon="close"
+                      (click)="cancelarEdicion()"
+                    >
                       Cancelar
                     </solvix-button>
                     <solvix-button
@@ -389,14 +583,24 @@
           }
         </section>
 
-        <section #panelCotizaciones class="panel seccion-colapsable">
+        <!-- F. COTIZACIONES E INFORMACIÓN ECONÓMICA -->
+        <section #panelCotizaciones class="panel seccion-colapsable cotizaciones-section">
           <button
             type="button"
             class="seccion-toggle"
             (click)="toggleSeccion('cotizaciones')"
             [attr.aria-expanded]="secciones.cotizaciones"
           >
-            <solvix-section-header kicker="Economía" title="Cotizaciones" />
+            <div class="tecnico-header-wrap">
+              <div class="tecnico-icon-badge" aria-hidden="true">
+                <span class="material-symbols-outlined">request_quote</span>
+              </div>
+              <solvix-section-header
+                kicker="Economía"
+                title="Cotizaciones"
+                subtitle="Propuestas formales de esta orden."
+              />
+            </div>
             <span
               class="material-symbols-outlined seccion-chevron"
               [class.is-open]="secciones.cotizaciones"
@@ -410,17 +614,21 @@
                 [estado]="orden.estado"
                 [canManage]="puedeGestionarRepuestos"
                 [compactResumen]="true"
+                [clienteNombre]="orden.clienteNombre"
+                (cotizacionesChange)="onCotizacionesPanelChange($event)"
                 (ordenActualizada)="onCotizacionOrdenActualizada()"
                 (documentoEsperado)="onDocumentoCotizacionEsperado($event)"
               />
             </div>
           }
         </section>
+
       </div>
 
-      <!-- Columna secundaria: documentos + actividad (en móvil va justo después de Siguiente paso) -->
+      <!-- COLUMNA CONTEXTUAL: Documentos → WhatsApp → Actividad -->
       <aside class="col-secundaria">
-        <section class="panel">
+        <!-- G. DOCUMENTOS ASOCIADOS -->
+        <section class="panel panel-documentos">
           <app-servicio-documentos-panel
             [ordenId]="orden.id"
             [estado]="orden.estado"
@@ -431,6 +639,68 @@
           />
         </section>
 
+        <!-- H. WHATSAPP CONTEXTUAL -->
+        @if (hayOpcionesWhatsApp) {
+          <section
+            #previewWhatsAppCard
+            class="panel whatsapp-card"
+            [class.is-highlighted]="whatsappHighlight"
+            aria-label="WhatsApp contextual"
+          >
+            <header class="whatsapp-card__head">
+              <div class="whatsapp-card__title-wrap">
+                <div class="whatsapp-icon-badge" aria-hidden="true">
+                  <span class="material-symbols-outlined">chat</span>
+                </div>
+                <div class="whatsapp-card__titles">
+                  <p class="whatsapp-card__kicker">Comunicación</p>
+                  <h2 class="whatsapp-card__title">WhatsApp asistido</h2>
+                </div>
+              </div>
+              <span
+                class="whatsapp-status-pill solvix-mono"
+                [class.is-ready]="puedePrepararWhatsApp"
+              >
+                {{ puedePrepararWhatsApp ? 'Listo' : 'Sin teléfono' }}
+              </span>
+            </header>
+
+            <div class="whatsapp-card__recipient">
+              <span class="whatsapp-label">Destinatario</span>
+              <div class="whatsapp-recipient-row">
+                <strong>{{ orden.clienteNombre }}</strong>
+                <span class="solvix-mono whatsapp-phone">{{ telefonoWaFormateado }}</span>
+              </div>
+              <span class="whatsapp-template-tag">
+                Plantilla: <strong>{{ labelPlantillaContextualWhatsApp }}</strong>
+              </span>
+            </div>
+
+            <div class="whatsapp-preview-box">
+              <p class="whatsapp-preview-text">{{ vistaPreviaMensajeWhatsApp }}</p>
+            </div>
+
+            <div class="whatsapp-protocol-note">
+              <span class="material-symbols-outlined" aria-hidden="true">info</span>
+              <span>
+                Abrir WhatsApp prepara el mensaje en el chat, pero no cambia ni aprueba el estado de
+                la orden.
+              </span>
+            </div>
+
+            <button
+              type="button"
+              class="btn-whatsapp-open"
+              [disabled]="editando || !puedePrepararWhatsApp"
+              (click)="abrirWhatsAppContextual()"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+              <span>Abrir WhatsApp Web</span>
+            </button>
+          </section>
+        }
+
+        <!-- I. ACTIVIDAD RECIENTE E HISTORIAL -->
         <section class="panel seccion-colapsable">
           <button
             type="button"
@@ -438,17 +708,26 @@
             (click)="toggleSeccion('actividad')"
             [attr.aria-expanded]="secciones.actividad"
           >
-            <solvix-section-header
-              kicker="Trazabilidad"
-              title="Actividad reciente"
-              subtitle="Últimos cambios de estado."
-            />
-            <span
-              class="material-symbols-outlined seccion-chevron"
-              [class.is-open]="secciones.actividad"
-              aria-hidden="true"
-            >expand_more</span>
+            <div class="actividad-header-wrap">
+              <div class="actividad-icon-badge" aria-hidden="true">
+                <span class="material-symbols-outlined">history_toggle_off</span>
+              </div>
+              <solvix-section-header
+                kicker="Historial"
+                title="Actividad reciente"
+                subtitle="Últimos cambios de estado."
+              />
+            </div>
+            <div class="actividad-header-right">
+              <span class="realtime-pill solvix-mono">Auditoría</span>
+              <span
+                class="material-symbols-outlined seccion-chevron"
+                [class.is-open]="secciones.actividad"
+                aria-hidden="true"
+              >expand_more</span>
+            </div>
           </button>
+
           @if (secciones.actividad) {
             <div class="seccion-body">
               @if (historialState === 'loading') {
@@ -467,10 +746,20 @@
                     <li
                       [class.is-actual]="i === 0"
                       [class.is-cancel]="item.estadoNuevo === 'CANCELADO'"
+                      [class.is-success]="
+                        item.estadoNuevo === 'APROBADO' ||
+                        item.estadoNuevo === 'LISTO' ||
+                        item.estadoNuevo === 'ENTREGADO' ||
+                        item.estadoNuevo === 'DIAGNOSTICADO'
+                      "
+                      [class.is-warning]="
+                        item.estadoNuevo === 'PENDIENTE_APROBACION' ||
+                        item.estadoNuevo === 'ESPERA_REPUESTO' ||
+                        item.estadoNuevo === 'REQUIERE_APROBACION_ADICIONAL'
+                      "
                     >
                       <div class="tl-marker"></div>
                       <div class="tl-body">
-                        <p class="tl-fecha solvix-mono">{{ fecha(item.fechaCambio) }}</p>
                         <p class="tl-estados">
                           {{ estadoLabel(item.estadoAnterior) }} →
                           {{ estadoLabel(item.estadoNuevo) }}
@@ -479,23 +768,32 @@
                         @if (item.observacion) {
                           <p class="tl-obs"><span>Observación:</span> {{ item.observacion }}</p>
                         }
-                        <p class="tl-user"><span>Realizado por:</span> {{ item.usuario }}</p>
+                        <div class="tl-meta-row solvix-mono">
+                          <span class="tl-fecha">{{ fecha(item.fechaCambio) }}</span>
+                          <span aria-hidden="true">•</span>
+                          <span class="tl-user"><span>Realizado por:</span> {{ item.usuario }}</span>
+                        </div>
                       </div>
                     </li>
                   }
                 </ol>
                 @if (hayMasHistorial) {
-                  <button
-                    type="button"
-                    class="btn-link"
-                    (click)="historialCompleto = !historialCompleto"
-                  >
-                    {{
-                      historialCompleto
-                        ? 'Ver solo recientes'
-                        : 'Ver historial completo (' + historial.length + ')'
-                    }}
-                  </button>
+                  <div class="timeline-foot">
+                    <button
+                      type="button"
+                      class="btn-link"
+                      (click)="historialCompleto = !historialCompleto"
+                    >
+                      <span>
+                        {{
+                          historialCompleto
+                            ? 'Ver solo recientes'
+                            : 'Ver historial completo (' + historial.length + ')'
+                        }}
+                      </span>
+                      <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+                    </button>
+                  </div>
                 }
               }
             </div>

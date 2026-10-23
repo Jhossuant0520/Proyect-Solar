@@ -4,7 +4,7 @@
   } @else if (estado === 'error' || !cotizacion) {
     <solvix-error-state [title]="errorTitle" [message]="errorMessage" (retry)="cargar()" />
   } @else {
-    <solvix-page-header
+    <solvix-page-header icon="request_quote"
       kicker="Cotización comercial"
       [title]="cotizacion.numero"
       [subtitle]="cotizacion.clienteNombre"

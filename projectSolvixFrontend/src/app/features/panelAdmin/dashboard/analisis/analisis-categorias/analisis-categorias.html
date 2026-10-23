@@ -1,0 +1,10 @@
+<section class="analisis-view">
+  <h2 class="analisis-view__heading">Rendimiento por categoría</h2>
+  <div class="analisis-view__chart analisis-view__chart--tall">
+    <solvix-category-performance
+      [categories]="categorias()"
+      [state]="state()"
+      (retry)="retry()"
+    />
+  </div>
+</section>

@@ -1,96 +1,28 @@
-.transicion-dialog {
+@use '../../../../../styles/solvix-dialog' as d;
+
+@include d.dialog;
+
+.ce-dlg {
   min-width: min(420px, 92vw);
-  padding: 1.25rem 1.35rem 1.1rem;
-  color: var(--solvix-text, #fff);
-  background: var(--solvix-surface, #0f172a);
-}
-
-.transicion-dialog.is-danger {
-  border-top: 3px solid #ef4444;
-}
-
-.transicion-dialog.is-attention {
-  border-top: 3px solid #fbbf24;
 }
 
 .pendientes-list {
   margin: 0.85rem 0 0;
   padding: 0.65rem 0.85rem;
   list-style: disc inside;
-  border-radius: 8px;
-  background: rgba(251, 191, 36, 0.08);
-  border: 1px solid rgba(251, 191, 36, 0.28);
-  color: var(--solvix-text-secondary, #cfe9ff);
-  font-size: 0.88rem;
-}
-
-.dlg-head h2 {
-  margin: 0 0 0.35rem;
-  font-size: 1.15rem;
-  color: var(--solvix-primary, #4fd1ff);
-}
-
-.dlg-head p {
-  margin: 0;
-  color: var(--solvix-text-secondary, #cfe9ff);
-  font-size: 0.92rem;
-  line-height: 1.4;
-}
-
-.bloqueo {
-  margin: 0.9rem 0 0;
-  padding: 0.65rem 0.75rem;
-  border-radius: 8px;
-  background: rgba(245, 158, 11, 0.12);
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  color: #fbbf24;
-  font-size: 0.88rem;
-}
-
-.dlg-form {
-  display: grid;
-  gap: 0.85rem;
-  margin-top: 1rem;
-}
-
-.dlg-form label {
-  display: grid;
-  gap: 0.35rem;
-  font-size: 0.85rem;
-  color: var(--solvix-text-muted, #94a3b8);
-}
-
-.label-row {
-  display: flex;
-  gap: 0.35rem;
-  align-items: baseline;
-}
-
-.req {
-  color: var(--solvix-primary, #4fd1ff);
-  font-size: 0.75rem;
-}
-
-textarea {
-  width: 100%;
-  resize: vertical;
-  border-radius: 8px;
-  border: 1px solid rgba(79, 209, 255, 0.25);
-  background: var(--solvix-panel);
-  color: var(--solvix-text, #fff);
-  padding: 0.55rem 0.65rem;
-  font: inherit;
+  border-radius: 0.55rem;
+  background: var(--solvix-warning-soft, #fffbeb);
+  border: 1px solid color-mix(in srgb, var(--solvix-warning, #b45309) 30%, transparent);
+  color: var(--solvix-text-secondary, #3f4850);
+  font-size: 0.8125rem;
 }
 
 .form-error {
   margin: 0;
-  color: #f87171;
-  font-size: 0.85rem;
+  color: var(--solvix-error, #ba1a1a);
+  font-size: 0.8125rem;
 }
 
-.dlg-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.6rem;
-  margin-top: 0.25rem;
+.ce-dlg__actions {
+  margin-top: 0.15rem;
 }

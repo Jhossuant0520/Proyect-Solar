@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { DialogoConfirmacionDelete } from './dialogo-confirmacion-delete';
 
@@ -8,7 +9,11 @@ describe('DialogoConfirmacionDelete', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DialogoConfirmacionDelete]
+      imports: [DialogoConfirmacionDelete],
+      providers: [
+        { provide: MAT_DIALOG_DATA, useValue: { mensaje: '¿Eliminar este registro?' } },
+        { provide: MatDialogRef, useValue: { close: () => undefined } }
+      ]
     })
     .compileComponents();
 

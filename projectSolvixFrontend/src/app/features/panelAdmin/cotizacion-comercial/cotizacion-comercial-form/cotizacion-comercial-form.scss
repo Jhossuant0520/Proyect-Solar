@@ -101,7 +101,7 @@ textarea:disabled {
   gap: 0.3rem;
   padding: 0.4rem 0.8rem;
   border-radius: 999px;
-  border: 1px dashed rgba(79, 209, 255, 0.45);
+  border: 1px dashed color-mix(in srgb, var(--solvix-primary) 45%, transparent);
   background: transparent;
   color: var(--color-primary, var(--solvix-primary));
   font: inherit;
@@ -110,7 +110,7 @@ textarea:disabled {
 }
 
 .chip:hover {
-  background: rgba(79, 209, 255, 0.08);
+  background: color-mix(in srgb, var(--solvix-primary) 08%, transparent);
 }
 
 .chip .material-symbols-outlined {

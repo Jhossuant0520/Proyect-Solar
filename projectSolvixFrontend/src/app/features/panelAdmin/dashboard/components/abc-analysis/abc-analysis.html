@@ -1,19 +1,42 @@
-<section class="dash-panel" aria-labelledby="abc-title">
-  <solvix-section-header
-    kicker="Concentración"
-    title="Análisis ABC"
-    subtitle="La clasificación la calcula el backend. Aquí solo se muestra."
-  />
+<section class="dash-panel abc-panel" aria-labelledby="abc-title">
+  <div class="abc-panel__head">
+    <solvix-section-header
+      kicker="Concentración"
+      title="Análisis ABC"
+      subtitle="Participación por clase según el backend."
+    />
+    <a class="abc-panel__link" [routerLink]="detailLink">{{ detailLabel }}</a>
+  </div>
 
   <solvix-section-state [state]="state" loadingLabel="Cargando análisis ABC." (retry)="retry.emit()">
-    <div class="abc-grid">
+    <div class="abc-rows" role="list">
       @for (item of classes; track item.clase) {
-        <article class="abc-card" [attr.aria-label]="'Clase ' + item.clase">
-          <p class="solvix-mono abc-class">Clase {{ item.clase }}</p>
-          <p class="abc-count solvix-mono">{{ qty(item.productos) }}</p>
-          <p class="abc-cap">productos</p>
-          <p class="abc-share solvix-mono">{{ percent(item.participacion) }} de participación</p>
-          <p class="abc-hint">{{ hint(item.clase) }}</p>
+        <article class="abc-row" role="listitem" [attr.aria-label]="'Clase ' + item.clase">
+          <div class="abc-row__badge" [attr.data-clase]="item.clase">{{ item.clase }}</div>
+          <div class="abc-row__main">
+            <div class="abc-row__meta">
+              <p class="abc-row__title">Clase {{ item.clase }}</p>
+              <p class="abc-row__stats">
+                <span class="solvix-mono">{{ qty(item.productos) }}</span> productos
+                <span class="abc-row__dot" aria-hidden="true">·</span>
+                <span class="solvix-mono">{{ percent(item.participacion) }}</span> participación
+                @if (item.umbral != null) {
+                  <span class="abc-row__dot" aria-hidden="true">·</span>
+                  umbral <span class="solvix-mono">{{ percent(item.umbral) }}</span>
+                }
+              </p>
+            </div>
+            <div
+              class="abc-row__bar"
+              role="progressbar"
+              [attr.aria-valuenow]="barValue(item.participacion)"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              [attr.aria-label]="'Participación clase ' + item.clase"
+            >
+              <span class="abc-row__fill" [style.width.%]="barValue(item.participacion)"></span>
+            </div>
+          </div>
         </article>
       }
     </div>

@@ -1,11 +1,28 @@
-<div class="confirm-dialog">
-  <h2>Confirmación</h2>
-  <p>{{ data.mensaje }}</p>
-  <div class="confirm-dialog__actions">
+<div class="ce-dlg is-danger">
+  <header class="ce-dlg__head">
+    <div class="ce-dlg__lead">
+      <span class="ce-dlg__badge" aria-hidden="true">
+        <span class="material-symbols-outlined">delete</span>
+      </span>
+      <div class="ce-dlg__copy">
+        <p class="ce-dlg__kicker">Acción destructiva</p>
+        <h2>Confirmación</h2>
+      </div>
+    </div>
+    <button type="button" class="ce-dlg__close" aria-label="Cerrar" (click)="cerrar(false)">
+      <span class="material-symbols-outlined" aria-hidden="true">close</span>
+    </button>
+  </header>
+
+  <div class="ce-dlg__body">
+    <p class="ce-dlg__text">{{ data.mensaje }}</p>
+  </div>
+
+  <div class="ce-dlg__actions">
     <solvix-button family="tech" rank="tertiary" type="button" (click)="cerrar(false)">
       Cancelar
     </solvix-button>
-    <solvix-button family="tech" rank="danger" type="button" (click)="cerrar(true)">
+    <solvix-button family="tech" rank="danger" type="button" icon="delete" (click)="cerrar(true)">
       Confirmar
     </solvix-button>
   </div>

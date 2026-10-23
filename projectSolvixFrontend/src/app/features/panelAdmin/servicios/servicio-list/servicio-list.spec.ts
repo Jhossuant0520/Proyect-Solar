@@ -35,7 +35,7 @@ function pagina(
   return {
     contenido,
     pagina: 0,
-    tamano: 20,
+    tamano: 5,
     totalElementos: contenido.length,
     totalPaginas: contenido.length ? 1 : 0,
     ...extras
@@ -72,12 +72,39 @@ describe('ServicioListComponent', () => {
     tick();
     expect(component.state).toBe('ready');
     expect(ordenService.listar).toHaveBeenCalledWith(
-      jasmine.objectContaining({ pagina: 0, tamano: 20 })
+      jasmine.objectContaining({ pagina: 0, tamano: 5 })
     );
     const text = fixture.nativeElement.textContent as string;
     expect(text).toContain('OS-2026-000001');
     expect(text).toContain('Ana Ruiz');
+    expect(text).toContain('Antigüedad de órdenes');
+    expect(text).toContain('Órdenes que requieren atención');
+    expect(text).not.toContain('Herramientas Rápidas');
+    expect(text).not.toContain('Carga en Bancos');
     expect(fixture.nativeElement.querySelector('app-cliente-buscador')).not.toBeNull();
+  }));
+
+  it('navega al detalle desde la cola de atención cuando hay operativas', fakeAsync(() => {
+    ordenService.listar.and.returnValue(
+      of(
+        pagina(
+          [
+            {
+              ...orden,
+              estado: 'PENDIENTE_APROBACION',
+              fechaRecepcion: '2026-01-01T10:00:00'
+            }
+          ],
+          { totalElementos: 1, totalPaginas: 1 }
+        )
+      )
+    );
+    const navigate = spyOn(router, 'navigate');
+    fixture.detectChanges();
+    tick();
+    expect(component.colaAtencion.length).toBeGreaterThan(0);
+    component.abrir(component.colaAtencion[0].id);
+    expect(navigate).toHaveBeenCalledWith(['/servicios', component.colaAtencion[0].id]);
   }));
 
   it('muestra empty cuando no hay órdenes', fakeAsync(() => {

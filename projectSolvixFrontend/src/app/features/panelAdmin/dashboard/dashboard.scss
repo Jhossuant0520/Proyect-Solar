@@ -4,17 +4,33 @@
   max-width: 80rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.35rem;
+  min-width: 0;
 }
 
-.dashboard-split {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-  gap: 1.5rem;
+.dashboard-primary {
+  min-width: 0;
+  min-height: 24rem;
 }
 
-@media (max-width: 1199px) {
-  .dashboard-split {
-    grid-template-columns: 1fr;
-  }
+.dashboard-more {
+  margin: 0.25rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.75rem;
+  align-items: center;
+  color: var(--solvix-text-muted);
+  font-size: 0.9rem;
+}
+
+.dashboard-more a {
+  color: var(--solvix-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.dashboard-more a:hover,
+.dashboard-more a:focus-visible {
+  text-decoration: underline;
+  outline: none;
 }

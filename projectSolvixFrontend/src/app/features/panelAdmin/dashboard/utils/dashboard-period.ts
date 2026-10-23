@@ -37,11 +37,13 @@ export function rangoDePreset(preset: PeriodoPreset, hoy = new Date()): { desde:
 }
 
 export function toQueryDesde(date: string): string {
-  return date.includes('T') ? date : `${date}T00:00:00`;
+  const day = date?.trim() ? date : toDateInput(new Date());
+  return day.includes('T') ? day : `${day}T00:00:00`;
 }
 
 export function toQueryHasta(date: string): string {
-  return date.includes('T') ? date : `${date}T23:59:59`;
+  const day = date?.trim() ? date : toDateInput(new Date());
+  return day.includes('T') ? day : `${day}T23:59:59`;
 }
 
 function toDateInput(value: Date): string {

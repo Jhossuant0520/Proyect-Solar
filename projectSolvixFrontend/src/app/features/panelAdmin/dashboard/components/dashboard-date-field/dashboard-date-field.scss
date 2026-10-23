@@ -1,0 +1,413 @@
+:host {
+  display: block;
+  position: relative;
+  min-width: 0;
+}
+
+.date-field {
+  position: relative;
+  min-width: 0;
+}
+
+.date-field__trigger {
+  width: 100%;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 0;
+  background: var(--solvix-surface);
+  border: 1px solid var(--solvix-border);
+  color: var(--solvix-text);
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.55rem;
+  font-family: var(--solvix-font);
+  font-size: 0.85rem;
+  text-transform: none;
+  letter-spacing: 0;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color var(--motion-fast, 140ms) var(--ease-standard, ease),
+    box-shadow var(--motion-fast, 140ms) var(--ease-standard, ease),
+    background-color var(--motion-fast, 140ms) var(--ease-standard, ease);
+}
+
+.date-field__trigger:hover {
+  border-color: color-mix(in srgb, var(--solvix-primary) 40%, var(--solvix-border));
+}
+
+.date-field__trigger:focus-visible {
+  outline: none;
+  border-color: var(--solvix-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--solvix-primary) 18%, transparent);
+}
+
+.date-field__value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.date-field__trigger .material-symbols-outlined {
+  flex: 0 0 auto;
+  font-size: 1.15rem;
+  color: var(--solvix-primary);
+}
+
+.date-field__panel {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  z-index: 60;
+  width: min(19.5rem, calc(100vw - 2rem));
+  padding: 0.75rem 0.75rem 0.55rem;
+  background: var(--solvix-surface);
+  border: 1px solid var(--solvix-border);
+  border-radius: var(--solvix-radius-card, 0.75rem);
+  box-shadow:
+    var(--solvix-shadow-sm),
+    0 16px 36px color-mix(in srgb, var(--solvix-text) 14%, transparent);
+  color: var(--solvix-text);
+  transform-origin: top left;
+  animation: date-panel-in var(--motion-normal, 200ms) var(--ease-emphasized, cubic-bezier(0.2, 0, 0, 1)) both;
+}
+
+.date-field__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+}
+
+.date-field__title-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.date-field__title-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+  border: 0;
+  background: transparent;
+  color: var(--solvix-text);
+  font-family: var(--solvix-font);
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  cursor: pointer;
+  border-radius: 0.4rem;
+  padding: 0.2rem 0.25rem;
+  max-width: 11.5rem;
+}
+
+.date-field__title-btn .material-symbols-outlined {
+  font-size: 1.25rem;
+  color: var(--solvix-text-muted);
+}
+
+.date-field__title-btn:hover,
+.date-field__title-btn:focus-visible,
+.date-field__title-btn[aria-expanded='true'] {
+  background: var(--solvix-primary-soft);
+  color: var(--solvix-primary);
+  outline: none;
+}
+
+.date-field__year-spin {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.date-field__spin {
+  width: 1.35rem;
+  height: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: var(--solvix-text-muted);
+  border-radius: 0.25rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.date-field__spin .material-symbols-outlined {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.date-field__spin:hover,
+.date-field__spin:focus-visible {
+  background: var(--solvix-primary-soft);
+  color: var(--solvix-primary);
+  outline: none;
+}
+
+.date-field__month-arrows {
+  display: inline-flex;
+  gap: 0.15rem;
+  flex: 0 0 auto;
+}
+
+.date-field__nav-btn {
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--solvix-text-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--motion-fast, 140ms) var(--ease-standard, ease),
+    color var(--motion-fast, 140ms) var(--ease-standard, ease);
+}
+
+.date-field__nav-btn:hover,
+.date-field__nav-btn:focus-visible {
+  background: var(--solvix-primary-soft);
+  color: var(--solvix-primary);
+  outline: none;
+  border-color: color-mix(in srgb, var(--solvix-primary) 25%, transparent);
+}
+
+.date-field__body {
+  animation: date-slide-in var(--motion-normal, 200ms) var(--ease-emphasized, cubic-bezier(0.2, 0, 0, 1)) both;
+}
+
+.date-field__body[data-slide='-1'] {
+  animation-name: date-slide-from-left;
+}
+
+.date-field__body[data-slide='1'] {
+  animation-name: date-slide-from-right;
+}
+
+.date-field__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.15rem;
+  margin-bottom: 0.3rem;
+}
+
+.date-field__weekdays span {
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--solvix-text-muted);
+  padding: 0.2rem 0;
+}
+
+.date-field__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.15rem;
+}
+
+.date-field__day {
+  aspect-ratio: 1;
+  min-height: 2rem;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: var(--solvix-text);
+  font-family: var(--solvix-font);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color var(--motion-fast, 140ms) var(--ease-standard, ease),
+    color var(--motion-fast, 140ms) var(--ease-standard, ease),
+    transform var(--motion-fast, 140ms) var(--ease-standard, ease),
+    box-shadow var(--motion-fast, 140ms) var(--ease-standard, ease);
+}
+
+.date-field__day.is-outside {
+  color: var(--solvix-text-muted);
+  opacity: 0.42;
+}
+
+.date-field__day.is-today:not(.is-selected) {
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--solvix-primary) 60%, transparent);
+  color: var(--solvix-primary);
+}
+
+.date-field__day:hover:not(.is-selected),
+.date-field__day.is-focused:not(.is-selected) {
+  background: var(--solvix-primary-soft);
+  color: var(--solvix-primary-hover, var(--solvix-primary));
+}
+
+.date-field__day.is-selected {
+  background: var(--solvix-btn-tech-primary-bg, #006194);
+  color: var(--solvix-btn-tech-primary-fg, #ffffff);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--solvix-btn-tech-primary-bg, #006194) 35%, transparent);
+}
+
+.date-field__day:active {
+  transform: scale(0.94);
+}
+
+.date-field__day:focus-visible {
+  outline: 2px solid var(--solvix-primary);
+  outline-offset: 1px;
+}
+
+.date-field__picker {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+  min-height: 12.5rem;
+  align-content: start;
+  animation: date-fade-in var(--motion-fast, 140ms) var(--ease-enter, ease) both;
+}
+
+.date-field__picker--years {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.date-field__picker-item {
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  background: var(--solvix-surface-low);
+  color: var(--solvix-text);
+  font-family: var(--solvix-font);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  padding: 0.55rem 0.35rem;
+  cursor: pointer;
+  transition:
+    background-color var(--motion-fast, 140ms) var(--ease-standard, ease),
+    color var(--motion-fast, 140ms) var(--ease-standard, ease),
+    border-color var(--motion-fast, 140ms) var(--ease-standard, ease);
+}
+
+.date-field__picker-item:hover,
+.date-field__picker-item:focus-visible {
+  background: var(--solvix-primary-soft);
+  color: var(--solvix-primary);
+  outline: none;
+}
+
+.date-field__picker-item.is-active {
+  background: var(--solvix-btn-tech-primary-bg, #006194);
+  color: var(--solvix-btn-tech-primary-fg, #ffffff);
+  border-color: transparent;
+}
+
+.date-field__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.55rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid var(--solvix-border-subtle);
+}
+
+.date-field__link {
+  border: 0;
+  background: transparent;
+  color: var(--solvix-primary);
+  font-family: var(--solvix-font);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.3rem 0.35rem;
+  border-radius: 0.35rem;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.date-field__link:hover,
+.date-field__link:focus-visible {
+  background: var(--solvix-primary-soft);
+  outline: none;
+}
+
+@keyframes date-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.35rem) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes date-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes date-slide-from-left {
+  from {
+    opacity: 0.35;
+    transform: translateX(-0.55rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes date-slide-from-right {
+  from {
+    opacity: 0.35;
+    transform: translateX(0.55rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes date-slide-in {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .date-field__panel {
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(20rem, calc(100vw - 1.5rem));
+    transform-origin: top center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .date-field__panel,
+  .date-field__body,
+  .date-field__picker,
+  .date-field__day,
+  .date-field__trigger,
+  .date-field__nav-btn,
+  .date-field__picker-item {
+    animation: none !important;
+    transition: none !important;
+  }
+}

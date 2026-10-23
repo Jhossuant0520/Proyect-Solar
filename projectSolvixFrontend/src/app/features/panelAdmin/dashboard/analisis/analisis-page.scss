@@ -1,0 +1,57 @@
+.analisis-view {
+  position: relative;
+  z-index: 1;
+  max-width: 80rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.analisis-view__chart {
+  min-width: 0;
+  min-height: 22rem;
+}
+
+.analisis-view__chart--tall {
+  min-height: 26rem;
+}
+
+.analisis-view__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.analisis-view__split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.analisis-view__note {
+  margin: 0;
+  color: var(--solvix-text-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.analisis-view__note a {
+  color: var(--solvix-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.analisis-view__note a:hover,
+.analisis-view__note a:focus-visible {
+  text-decoration: underline;
+  outline: none;
+}
+
+@media (max-width: 1199px) {
+  .analisis-view__split {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,19 @@
+<section class="analisis-view">
+  <h2 class="analisis-view__heading">Productos</h2>
+  <div class="analisis-view__stack">
+    <div class="analisis-view__chart analisis-view__chart--tall">
+      <solvix-top-products
+        [products]="ranking()"
+        [criterio]="criterio()"
+        [state]="rankingState()"
+        (criterioChange)="onCriterio($event)"
+        (retry)="retry()"
+      />
+    </div>
+    <solvix-low-performance-products
+      [products]="revision()"
+      [state]="revisionState()"
+      (retry)="retry()"
+    />
+  </div>
+</section>

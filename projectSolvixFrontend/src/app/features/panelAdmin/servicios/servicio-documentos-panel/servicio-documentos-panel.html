@@ -1,9 +1,15 @@
 <section class="documentos-panel" [class.is-compact]="layoutCompacto">
   <div class="documentos-head">
-    <solvix-section-header
-      title="Documentos"
-      subtitle="Documentos disponibles para esta orden."
-    />
+    <div class="doc-header-main">
+      <div class="doc-icon-badge" aria-hidden="true">
+        <span class="material-symbols-outlined">folder_open</span>
+      </div>
+      <div class="doc-header-copy">
+        <p class="doc-header-kicker">Archivo</p>
+        <h3 class="doc-header-title">Documentos asociados</h3>
+      </div>
+    </div>
+    <span class="doc-counter solvix-mono">{{ totalRegistros }} registros</span>
   </div>
 
   @if (state === 'loading') {
@@ -84,70 +90,74 @@
             [class.is-relevante]="slot.relevante"
             [class.is-pendiente]="!slot.vigente"
             role="listitem"
-            [attr.aria-label]="slot.faseLabel"
+            [attr.aria-label]="slot.titulo"
           >
-            <header class="slot-head">
-              <p class="slot-fase">{{ slot.faseLabel }}</p>
-              @if (slot.relevante) {
-                <solvix-badge tone="success">Relevante</solvix-badge>
-              }
-            </header>
-
             @if (slot.vigente; as doc) {
               <div class="card-doc" [class.is-nuevo]="esRecienGenerado(doc)" [attr.data-doc-id]="doc.id">
-                <div class="card-main">
-                  <div class="card-title">
-                    <strong>{{ tituloDoc(doc) }}</strong>
-                    @if (esRecienGenerado(doc)) {
-                      <solvix-badge tone="success">NUEVO</solvix-badge>
+                <div class="doc-row-lead">
+                  <span class="doc-type-badge" aria-hidden="true">
+                    <span class="material-symbols-outlined">picture_as_pdf</span>
+                  </span>
+                  <div class="doc-copy">
+                    <strong class="card-title-text">{{ tituloDoc(doc) }}</strong>
+                    <p class="meta solvix-mono">{{ metaLinea(doc) }}</p>
+                    @if (esRecienGenerado(doc) || slot.relevante) {
+                      <div class="doc-tags" aria-label="Estado del documento">
+                        @if (esRecienGenerado(doc)) {
+                          <span class="doc-tag doc-tag--nuevo">Nuevo</span>
+                        }
+                        @if (slot.relevante) {
+                          <span class="doc-tag doc-tag--relevante">Relevante</span>
+                        }
+                      </div>
                     }
-                    <solvix-badge tone="neutral">Versión {{ doc.version }}</solvix-badge>
-                    <solvix-badge tone="success">Disponible</solvix-badge>
                   </div>
-                  <p class="meta">
-                    Generado {{ fecha(doc.fechaGeneracion) }}
-                    @if (doc.usuarioGeneracion) {
-                      · {{ doc.usuarioGeneracion }}
-                    }
-                  </p>
                 </div>
 
-                <div class="card-actions">
-                  <solvix-button
-                    family="tech"
-                    rank="secondary"
+                <div class="card-actions card-actions--icons">
+                  <button
                     type="button"
-                    icon="visibility"
+                    class="btn-doc-icon"
                     [disabled]="accionEnCurso"
-                    [loading]="accionTipo === 'ver' && docAccionId === doc.id"
-                    (click)="ver(doc)"
+                    [attr.aria-label]="'Imprimir ' + tituloDoc(doc)"
+                    matTooltip="Imprimir"
+                    (click)="imprimir(doc)"
                   >
-                    Ver
-                  </solvix-button>
-                  <solvix-button
-                    family="tech"
-                    rank="tertiary"
+                    @if (accionTipo === 'imprimir' && docAccionId === doc.id) {
+                      <span class="material-symbols-outlined is-spin" aria-hidden="true">progress_activity</span>
+                    } @else {
+                      <span class="material-symbols-outlined" aria-hidden="true">print</span>
+                    }
+                  </button>
+                  <button
                     type="button"
-                    icon="download"
+                    class="btn-doc-icon"
                     [disabled]="accionEnCurso"
-                    [loading]="accionTipo === 'descargar' && docAccionId === doc.id"
+                    [attr.aria-label]="'Descargar ' + tituloDoc(doc)"
+                    matTooltip="Descargar"
                     (click)="descargar(doc)"
                   >
-                    Descargar
-                  </solvix-button>
+                    @if (accionTipo === 'descargar' && docAccionId === doc.id) {
+                      <span class="material-symbols-outlined is-spin" aria-hidden="true">progress_activity</span>
+                    } @else {
+                      <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                    }
+                  </button>
                   @if (canManage) {
-                    <solvix-button
-                      family="tech"
-                      rank="tertiary"
+                    <button
                       type="button"
-                      icon="refresh"
+                      class="btn-doc-icon"
                       [disabled]="accionEnCurso"
-                      [loading]="esAccionLoading('regenerar', doc.id)"
-                      ariaLabel="Regenerar PDF"
+                      aria-label="Regenerar PDF"
+                      matTooltip="Regenerar"
                       (click)="regenerar(doc)"
                     >
-                      {{ esAccionLoading('regenerar', doc.id) ? 'Generando PDF…' : 'Regenerar' }}
-                    </solvix-button>
+                      @if (esAccionLoading('regenerar', doc.id)) {
+                        <span class="material-symbols-outlined is-spin" aria-hidden="true">progress_activity</span>
+                      } @else {
+                        <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+                      }
+                    </button>
                   }
                 </div>
               </div>
@@ -168,34 +178,39 @@
                   <ul class="lista-anteriores">
                     @for (prev of slot.anteriores; track prev.id) {
                       <li class="card-doc is-historial" [attr.data-doc-id]="prev.id">
-                        <div class="card-main">
-                          <div class="card-title">
-                            <strong>{{ tituloDoc(prev) }}</strong>
-                            <solvix-badge tone="neutral">Versión {{ prev.version }}</solvix-badge>
+                        <div class="doc-row-lead">
+                          <span class="doc-type-badge is-muted" aria-hidden="true">
+                            <span class="material-symbols-outlined">description</span>
+                          </span>
+                          <div class="doc-copy">
+                            <div class="card-title">
+                              <strong>{{ tituloDoc(prev) }}</strong>
+                              <span class="meta-chip solvix-mono">v{{ prev.version }}</span>
+                            </div>
+                            <p class="meta solvix-mono">{{ metaLinea(prev) }}</p>
                           </div>
-                          <p class="meta">Generado {{ fecha(prev.fechaGeneracion) }}</p>
                         </div>
-                        <div class="card-actions">
-                          <solvix-button
-                            family="tech"
-                            rank="tertiary"
+                        <div class="card-actions card-actions--icons">
+                          <button
                             type="button"
-                            icon="visibility"
+                            class="btn-doc-icon"
                             [disabled]="accionEnCurso"
-                            (click)="ver(prev)"
+                            [attr.aria-label]="'Imprimir ' + tituloDoc(prev)"
+                            matTooltip="Imprimir"
+                            (click)="imprimir(prev)"
                           >
-                            Ver
-                          </solvix-button>
-                          <solvix-button
-                            family="tech"
-                            rank="tertiary"
+                            <span class="material-symbols-outlined" aria-hidden="true">print</span>
+                          </button>
+                          <button
                             type="button"
-                            icon="download"
+                            class="btn-doc-icon"
                             [disabled]="accionEnCurso"
+                            [attr.aria-label]="'Descargar ' + tituloDoc(prev)"
+                            matTooltip="Descargar"
                             (click)="descargar(prev)"
                           >
-                            Descargar
-                          </solvix-button>
+                            <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                          </button>
                         </div>
                       </li>
                     }
@@ -204,9 +219,18 @@
               }
             } @else {
               <div class="slot-pendiente">
-                <p class="slot-titulo">{{ slot.titulo }}</p>
-                <solvix-badge tone="warning">Pendiente</solvix-badge>
-                <p class="slot-hint">{{ slot.pendienteMsg }}</p>
+                <div class="slot-pendiente__row">
+                  <div class="doc-row-lead">
+                    <span class="doc-type-badge is-pending" aria-hidden="true">
+                      <span class="material-symbols-outlined">schedule</span>
+                    </span>
+                    <div class="doc-copy">
+                      <p class="slot-titulo">{{ slot.titulo }}</p>
+                      <p class="slot-hint">{{ slot.pendienteMsg }}</p>
+                    </div>
+                  </div>
+                  <span class="doc-inactive-pill solvix-mono">Pendiente</span>
+                </div>
                 @if (slot.tipo === 'COMPROBANTE_RECEPCION' && canManage && state === 'comprobante_pendiente') {
                   <solvix-button
                     family="tech"

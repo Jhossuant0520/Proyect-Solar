@@ -140,6 +140,27 @@ describe('ClienteBuscadorComponent', () => {
     expect(emitidos[0]?.id).toBe(6);
   }));
 
+  it('el panel de resultados flota y se cierra al hacer clic fuera o con Escape', fakeAsync(() => {
+    clienteService.buscar.and.returnValue(of([cliente()]));
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.dispatchEvent(new Event('focus'));
+    tick();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.panel .resultados')).not.toBeNull();
+
+    document.body.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.panel')).toBeNull();
+
+    input.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.panel')).not.toBeNull();
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.panel')).toBeNull();
+  }));
+
   it('mantiene el input de filtro dentro del contenedor search del sistema', () => {
     const search = fixture.nativeElement.querySelector('.search') as HTMLElement;
     const input = fixture.nativeElement.querySelector('.search input') as HTMLInputElement;

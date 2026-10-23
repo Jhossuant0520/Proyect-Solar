@@ -1,15 +1,113 @@
-<div class="cotizacion-confirm-dialog">
-  <header class="dlg-head">
-    <h2>{{ titulo }}</h2>
-    <p>{{ mensaje }}</p>
-    <p class="numero solvix-mono">{{ data.numero }}</p>
+<div class="ce-dlg" [class.is-danger]="esDecision && decisionSeleccionada === 'rechazar'">
+  <header class="ce-dlg__head">
+    <div class="ce-dlg__lead">
+      <span class="ce-dlg__badge" aria-hidden="true">
+        <span class="material-symbols-outlined">{{ icono }}</span>
+      </span>
+      <div class="ce-dlg__copy">
+        <p class="ce-dlg__kicker">{{ kicker }}</p>
+        <h2>{{ titulo }}</h2>
+      </div>
+    </div>
+    <button type="button" class="ce-dlg__close" aria-label="Cerrar" (click)="cancelar()">
+      <span class="material-symbols-outlined" aria-hidden="true">close</span>
+    </button>
   </header>
-  <div class="dlg-actions">
+
+  @if (esDecision) {
+    <div class="ce-dlg__body">
+      <p class="ce-dlg__text">
+        Registra el resultado de la comunicación
+        @if (data.clienteNombre) {
+          con <strong>{{ data.clienteNombre }}</strong>
+        }
+        sobre la cotización
+        <strong class="solvix-mono ref">{{ data.numero }}</strong>
+        @if (data.totalFormateado) {
+          ({{ data.totalFormateado }})
+        }.
+      </p>
+
+      <div>
+        <span class="field-kicker">Resolución del cliente</span>
+        <div class="decision-grid">
+          <label
+            class="decision-card decision-card--approve"
+            [class.is-selected]="decisionSeleccionada === 'aprobar'"
+          >
+            <input
+              type="radio"
+              name="decisionCliente"
+              value="aprobar"
+              [(ngModel)]="decisionSeleccionada"
+            />
+            <span class="decision-card__icon material-symbols-outlined" aria-hidden="true">verified</span>
+            <div class="decision-card__copy">
+              <strong>Aprobar reparación</strong>
+              <span>Autoriza la cotización y habilita la reparación</span>
+            </div>
+          </label>
+
+          @if (data.permiteRechazar !== false) {
+            <label
+              class="decision-card decision-card--reject"
+              [class.is-selected]="decisionSeleccionada === 'rechazar'"
+            >
+              <input
+                type="radio"
+                name="decisionCliente"
+                value="rechazar"
+                [(ngModel)]="decisionSeleccionada"
+              />
+              <span class="decision-card__icon material-symbols-outlined" aria-hidden="true">cancel</span>
+              <div class="decision-card__copy">
+                <strong>Rechazar cotización</strong>
+                <span>Registra la negativa sobre la propuesta</span>
+              </div>
+            </label>
+          }
+        </div>
+      </div>
+
+      @if (decisionSeleccionada === 'rechazar') {
+        <label class="ce-field">
+          <span>Observaciones del cliente <span class="ce-opt">opcional</span></span>
+          <textarea
+            class="ce-input"
+            [(ngModel)]="observacion"
+            rows="2"
+            maxlength="1000"
+            placeholder="Motivo o comentario del cliente…"
+          ></textarea>
+        </label>
+      } @else {
+        <p class="ce-dlg__note">
+          <span class="material-symbols-outlined" aria-hidden="true">info</span>
+          <span>Al aprobar, la orden pasa a Aprobado según el flujo oficial.</span>
+        </p>
+      }
+    </div>
+  } @else {
+    <div class="ce-dlg__body">
+      <p class="ce-dlg__text">{{ mensaje }}</p>
+      <p class="numero solvix-mono">{{ data.numero }}</p>
+    </div>
+  }
+
+  <div class="ce-dlg__actions">
     <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
       Cancelar
     </solvix-button>
-    <solvix-button family="tech" rank="primary" type="button" (click)="confirmar()">
-      @if (data.modo === 'aprobar') {
+    <solvix-button
+      family="tech"
+      [rank]="esDecision && decisionSeleccionada === 'rechazar' ? 'danger' : 'primary'"
+      type="button"
+      [icon]="iconoConfirmar"
+      (click)="confirmar()"
+    >
+      @if (esDecision) {
+        Guardar resolución
+      } @else if (data.modo === 'aprobar') {
         Confirmar aprobación
       } @else {
         Presentar

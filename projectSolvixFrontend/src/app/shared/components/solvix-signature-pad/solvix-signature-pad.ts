@@ -59,25 +59,79 @@ export const SOLVIX_FIRMA_TRAZO = '#000000';
         margin-top: 0.45rem;
         flex-wrap: wrap;
       }
+      .firma-wrap {
+        transition:
+          border-color 160ms ease,
+          box-shadow 160ms ease;
+      }
+      .firma-wrap:hover {
+        border-color: var(--color-primary, var(--solvix-primary));
+      }
       .firma-status {
-        font-size: 0.82rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.2rem 0.65rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 600;
         color: var(--color-text-muted, var(--solvix-text-muted));
+        background: color-mix(in srgb, var(--color-text-muted, #64748b) 12%, transparent);
+        transition:
+          background 200ms ease,
+          color 200ms ease;
+      }
+      .firma-status::before {
+        content: '';
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 999px;
+        background: currentColor;
       }
       .firma-status.ok {
         color: var(--color-success, var(--solvix-success));
+        background: color-mix(in srgb, var(--color-success, #047857) 14%, transparent);
+      }
+      .firma-status.ok::before {
+        animation: firma-pulse 1.4s ease-out 2;
+      }
+      @keyframes firma-pulse {
+        0% {
+          box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 55%, transparent);
+        }
+        100% {
+          box-shadow: 0 0 0 7px transparent;
+        }
       }
       .limpiar {
-        min-height: var(--solvix-touch-min, 44px);
+        min-height: 2.5rem;
         border-radius: 8px;
         border: 1px solid var(--color-border, var(--solvix-border));
         background: transparent;
         color: var(--color-text-primary, var(--solvix-text));
-        padding: 0.35rem 0.8rem;
+        padding: 0.35rem 0.9rem;
         font: inherit;
+        font-size: 0.8125rem;
+        font-weight: 600;
         cursor: pointer;
+        transition:
+          background 140ms ease,
+          border-color 140ms ease,
+          color 140ms ease;
       }
       .limpiar:hover {
         border-color: var(--color-primary, var(--solvix-primary));
+        color: var(--color-primary, var(--solvix-primary));
+        background: var(--solvix-primary-soft, transparent);
+      }
+      .limpiar:focus-visible {
+        outline: 2px solid var(--color-primary, var(--solvix-primary));
+        outline-offset: 2px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .firma-status.ok::before {
+          animation: none;
+        }
       }
       @media (max-width: 767px) {
         .firma-canvas {

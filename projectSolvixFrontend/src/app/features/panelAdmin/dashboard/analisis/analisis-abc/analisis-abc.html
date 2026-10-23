@@ -1,0 +1,17 @@
+<section class="analisis-view">
+  <h2 class="analisis-view__heading">Análisis ABC</h2>
+  <div class="analisis-view__chart">
+    <solvix-abc-analysis
+      [classes]="abc()"
+      [state]="state()"
+      detailLink="/reportes/inventario"
+      detailLabel="Ver detalle tabular ABC"
+      (retry)="retry()"
+    />
+  </div>
+  <p class="analisis-view__note">
+    El listado tabular de productos por clase está en
+    <a routerLink="/reportes/inventario">Reportes · Inventario</a>
+    (exportación CSV).
+  </p>
+</section>

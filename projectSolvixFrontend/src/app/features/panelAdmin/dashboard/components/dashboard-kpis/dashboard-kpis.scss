@@ -3,9 +3,11 @@
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 1rem;
   position: relative;
+  align-items: stretch;
 }
 
 .kpi-card {
+  height: 100%;
   animation: solvix-kpi-enter var(--motion-normal) var(--ease-enter) both;
   animation-delay: calc(var(--kpi-i, 0) * var(--motion-stagger, 50ms));
 }

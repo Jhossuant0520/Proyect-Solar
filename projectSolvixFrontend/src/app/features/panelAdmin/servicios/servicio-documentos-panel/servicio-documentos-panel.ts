@@ -16,7 +16,6 @@ import { SolvixButtonComponent } from '../../../../shared/components/solvix-butt
 import { SolvixEmptyStateComponent } from '../../../../shared/components/solvix-empty-state/solvix-empty-state';
 import { SolvixErrorStateComponent } from '../../../../shared/components/solvix-error-state/solvix-error-state';
 import { SolvixLoadingStateComponent } from '../../../../shared/components/solvix-loading-state/solvix-loading-state';
-import { SolvixSectionHeaderComponent } from '../../../../shared/components/solvix-section-header/solvix-section-header';
 import { DialogoConfirmacionDelete } from '../../../../shared/components/dialogo-confirmacion-delete/dialogo-confirmacion-delete';
 import { DocumentoOrdenServicioService } from '../../../../core/services/documento-orden-servicio.service';
 import {
@@ -72,7 +71,6 @@ const POLL_MAX_TICKS = 10;
     MatDialogModule,
     MatSnackBarModule,
     MatTooltipModule,
-    SolvixSectionHeaderComponent,
     SolvixButtonComponent,
     SolvixBadgeComponent,
     SolvixLoadingStateComponent,
@@ -95,7 +93,14 @@ export class ServicioDocumentosPanelComponent implements OnChanges, OnDestroy {
   errorMessage = 'No pudimos cargar los documentos.';
   accionEnCurso = false;
   /** Tipo de acción documental en curso (para [loading] del solvix-button). */
-  accionTipo: 'comprobante' | 'regenerar' | 'generar-esperado' | 'ver' | 'descargar' | null = null;
+  accionTipo:
+    | 'comprobante'
+    | 'regenerar'
+    | 'generar-esperado'
+    | 'ver'
+    | 'imprimir'
+    | 'descargar'
+    | null = null;
   docAccionId: number | null = null;
   /** Id del documento recién generado en esta sesión (badge NUEVO + scroll). */
   docRecienGeneradoId: number | null = null;
@@ -178,6 +183,20 @@ export class ServicioDocumentosPanelComponent implements OnChanges, OnDestroy {
       this.state === 'comprobante_pendiente' ||
       this.state === 'comprobante_timeout'
     );
+  }
+
+  /** Contador de espacios documentales (siempre 3 tipos). */
+  get totalRegistros(): number {
+    return this.slotsDocumentales.length;
+  }
+
+  /** Línea meta compacta: número / fecha (presentación). */
+  metaLinea(doc: DocumentoOrdenServicioResponseDTO): string {
+    const cuando = this.fecha(doc.fechaGeneracion);
+    if (doc.tipoDocumento === 'COTIZACION' && doc.cotizacionNumero?.trim()) {
+      return `${doc.cotizacionNumero.trim()} · ${cuando}`;
+    }
+    return `v${doc.version} · ${cuando}`;
   }
 
   get comprobante(): DocumentoOrdenServicioResponseDTO | null {
@@ -390,6 +409,30 @@ export class ServicioDocumentosPanelComponent implements OnChanges, OnDestroy {
       },
       error: err => {
         this.feedback.error(mensajeErrorServicio(err, 'No pudimos abrir el PDF.'));
+      }
+    });
+  }
+
+  /** Abre el PDF e inicia impresión (misma fuente que “ver”). */
+  imprimir(doc: DocumentoOrdenServicioResponseDTO): void {
+    if (this.accionEnCurso) {
+      return;
+    }
+    this.accionEnCurso = true;
+    this.accionTipo = 'imprimir';
+    this.docAccionId = doc.id;
+    this.documentoService.descargarPdf(this.ordenId, doc.id, 'inline').pipe(
+      finalize(() => {
+        this.accionEnCurso = false;
+        this.accionTipo = null;
+        this.docAccionId = null;
+      })
+    ).subscribe({
+      next: blob => {
+        this.documentoService.imprimirPdf(blob);
+      },
+      error: err => {
+        this.feedback.error(mensajeErrorServicio(err, 'No pudimos preparar el PDF para imprimir.'));
       }
     });
   }

@@ -10,15 +10,86 @@
     <span class="material-symbols-outlined" aria-hidden="true">menu</span>
   </button>
 
-  <label class="admin-topbar__search">
-    <span class="material-symbols-outlined" aria-hidden="true">search</span>
+  <div class="admin-topbar__search">
+    <span class="material-symbols-outlined admin-topbar__search-icon" aria-hidden="true">search</span>
     <input
+      #searchInput
+      class="admin-topbar__search-input"
       type="search"
-      placeholder="Buscar producto o identificador"
-      aria-label="Búsqueda. Disponible en una fase posterior."
+      placeholder="Buscar productos, clientes, servicios…"
+      aria-label="Buscar registros del panel"
       autocomplete="off"
+      role="combobox"
+      [attr.aria-expanded]="showPanel"
+      aria-controls="admin-search-results"
+      aria-autocomplete="list"
+      [attr.aria-activedescendant]="activeIndex >= 0 ? 'admin-search-opt-' + activeIndex : null"
+      [ngModel]="query"
+      (ngModelChange)="onQueryChange($event)"
+      (focus)="onFocus()"
+      (keydown)="onKeydown($event)"
     />
-  </label>
+    @if (query) {
+      <button
+        type="button"
+        class="admin-topbar__search-clear"
+        aria-label="Limpiar búsqueda"
+        (click)="clear()"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+      </button>
+    }
+
+    @if (showPanel) {
+      <div
+        id="admin-search-results"
+        class="admin-topbar__results"
+        role="listbox"
+        aria-label="Resultados de búsqueda"
+      >
+        @if (loading) {
+          <p class="admin-topbar__status">Buscando…</p>
+        } @else if (hasError && flatHits.length === 0) {
+          <p class="admin-topbar__status admin-topbar__status--error">
+            No pudimos completar la búsqueda. Inténtalo de nuevo.
+          </p>
+        } @else if (empty) {
+          <p class="admin-topbar__status">No hay registros que coincidan.</p>
+        } @else {
+          @if (hasError) {
+            <p class="admin-topbar__status admin-topbar__status--warn">
+              Algunos resultados no se pudieron cargar.
+            </p>
+          }
+          @for (group of groups; track group.kind) {
+            <div class="admin-topbar__group">
+              <p class="admin-topbar__group-label">{{ group.label }}</p>
+              @for (hit of group.hits; track hit.kind + '-' + hit.id) {
+                <button
+                  type="button"
+                  class="admin-topbar__result"
+                  role="option"
+                  [id]="'admin-search-opt-' + flatIndex(hit)"
+                  [class.is-active]="flatIndex(hit) === activeIndex"
+                  [attr.aria-selected]="flatIndex(hit) === activeIndex"
+                  (mousedown)="$event.preventDefault()"
+                  (click)="go(hit)"
+                >
+                  <span class="material-symbols-outlined" aria-hidden="true">{{ hit.icon }}</span>
+                  <span class="admin-topbar__result-copy">
+                    <span class="admin-topbar__result-label">{{ hit.title }}</span>
+                    @if (hit.meta) {
+                      <span class="admin-topbar__result-meta">{{ hit.meta }}</span>
+                    }
+                  </span>
+                </button>
+              }
+            </div>
+          }
+        }
+      </div>
+    }
+  </div>
 
   <div class="admin-topbar__actions">
     <button type="button" class="admin-topbar__icon" disabled aria-label="Notificaciones. Disponible más adelante.">

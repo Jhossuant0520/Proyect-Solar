@@ -1,8 +1,14 @@
 <div class="cotizacion-form-dialog">
   <header class="dlg-head">
-    <div class="head-main">
-      <p class="kicker">Cotización de servicio</p>
-      <h2>{{ titulo }}</h2>
+    <div class="dlg-head__lead">
+      <div class="dlg-icon-badge" aria-hidden="true">
+        <span class="material-symbols-outlined">request_quote</span>
+      </div>
+      <div class="head-main">
+        <p class="kicker">Economía</p>
+        <h2>{{ titulo }}</h2>
+        <p class="dlg-sub">Cotización de servicio · precios oficiales del servidor.</p>
+      </div>
     </div>
     <div class="tipo-pill" aria-label="Tipo de cotización">
       <span class="pill-label">Tipo</span>
@@ -20,7 +26,10 @@
   <form class="dlg-form" [formGroup]="form" (ngSubmit)="guardar()">
     @if (esAdicional) {
       <section class="sec">
-        <h3>Motivo de ampliación <span class="req">requerido</span></h3>
+        <div class="sec-title-row">
+          <span class="sec-icon material-symbols-outlined" aria-hidden="true">edit_note</span>
+          <h3>Motivo de ampliación <span class="req">requerido</span></h3>
+        </div>
         <textarea
           formControlName="motivoAmpliacion"
           rows="2"
@@ -33,7 +42,10 @@
 
     <section class="sec">
       <div class="sec-head">
-        <h3>Líneas de cotización</h3>
+        <div class="sec-title-row">
+          <span class="sec-icon material-symbols-outlined" aria-hidden="true">list_alt</span>
+          <h3>Líneas de cotización</h3>
+        </div>
         <div class="lineas-actions">
           <solvix-button family="tech" rank="secondary" type="button" icon="inventory_2"
             [disabled]="editorAbierto" (click)="nuevaLinea('REPUESTO')">
@@ -174,7 +186,7 @@
           }
 
           <div class="editor-actions">
-            <solvix-button family="tech" rank="tertiary" type="button" (click)="cerrarEditor()">
+            <solvix-button family="tech" rank="tertiary" type="button" icon="close" (click)="cerrarEditor()">
               Descartar
             </solvix-button>
             <solvix-button family="tech" rank="secondary" type="button" icon="check" (click)="aplicarEditor()">
@@ -186,7 +198,10 @@
     </section>
 
     <section class="sec">
-      <h3>Observaciones <span class="opt">opcional</span></h3>
+      <div class="sec-title-row">
+        <span class="sec-icon material-symbols-outlined" aria-hidden="true">sticky_note_2</span>
+        <h3>Observaciones <span class="opt">opcional</span></h3>
+      </div>
       <textarea
         formControlName="observaciones"
         rows="2"
@@ -197,6 +212,10 @@
     </section>
 
     <section class="sec resumen" aria-label="Resumen económico">
+      <div class="sec-title-row">
+        <span class="sec-icon material-symbols-outlined" aria-hidden="true">payments</span>
+        <h3>Resumen</h3>
+      </div>
       <dl class="totales">
         <div><dt>Repuestos</dt><dd class="solvix-mono">{{ money(subtotalRepuestos) }}</dd></div>
         <div><dt>Mano de obra</dt><dd class="solvix-mono">{{ money(subtotalManoObra) }}</dd></div>
@@ -211,7 +230,7 @@
     }
 
     <div class="dlg-actions">
-      <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
+      <solvix-button family="tech" rank="tertiary" type="button" icon="close" (click)="cancelar()">
         Cancelar
       </solvix-button>
       <solvix-button family="tech" rank="primary" type="submit" icon="save" [disabled]="enviando">

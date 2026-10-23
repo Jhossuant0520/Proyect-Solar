@@ -79,6 +79,45 @@ export class TransicionEstadoDialogComponent {
     return this.data.modo === 'confirmacion';
   }
 
+  get dlgIcon(): string {
+    if (this.esCancelacion) {
+      return 'cancel';
+    }
+    if (this.esEspera) {
+      return 'hourglass_empty';
+    }
+    if (this.esNuevaFalla) {
+      return 'notification_important';
+    }
+    return 'task_alt';
+  }
+
+  get dlgKicker(): string {
+    if (this.esCancelacion) {
+      return 'Acción destructiva';
+    }
+    if (this.esEspera) {
+      return 'Espera operativa';
+    }
+    if (this.esNuevaFalla) {
+      return 'Nueva situación';
+    }
+    return 'Confirmación';
+  }
+
+  get dlgConfirmIcon(): string {
+    if (this.esCancelacion) {
+      return 'cancel';
+    }
+    if (this.esEspera) {
+      return 'hourglass_empty';
+    }
+    if (this.esNuevaFalla) {
+      return 'send';
+    }
+    return 'check';
+  }
+
   cancelar(): void {
     this.dialogRef.close();
   }

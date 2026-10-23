@@ -79,6 +79,65 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: 'dashboard', component: DashboardComponent },
+      {
+        path: 'dashboard/analisis',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/panelAdmin/dashboard/analisis/analisis-shell/analisis-shell').then(
+            m => m.AnalisisShellComponent
+          ),
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/panelAdmin/dashboard/analisis/analisis-hub/analisis-hub').then(
+                m => m.AnalisisHubComponent
+              )
+          },
+          {
+            path: 'evolucion',
+            loadComponent: () =>
+              import('./features/panelAdmin/dashboard/analisis/analisis-evolucion/analisis-evolucion').then(
+                m => m.AnalisisEvolucionComponent
+              )
+          },
+          {
+            path: 'categorias',
+            loadComponent: () =>
+              import('./features/panelAdmin/dashboard/analisis/analisis-categorias/analisis-categorias').then(
+                m => m.AnalisisCategoriasComponent
+              )
+          },
+          {
+            path: 'productos',
+            loadComponent: () =>
+              import('./features/panelAdmin/dashboard/analisis/analisis-productos/analisis-productos').then(
+                m => m.AnalisisProductosComponent
+              )
+          },
+          {
+            path: 'inventario',
+            loadComponent: () =>
+              import('./features/panelAdmin/dashboard/analisis/analisis-inventario/analisis-inventario').then(
+                m => m.AnalisisInventarioComponent
+              )
+          },
+          {
+            path: 'abc',
+            loadComponent: () =>
+              import('./features/panelAdmin/dashboard/analisis/analisis-abc/analisis-abc').then(
+                m => m.AnalisisAbcComponent
+              )
+          },
+          {
+            path: 'abastecimiento',
+            loadComponent: () =>
+              import(
+                './features/panelAdmin/dashboard/analisis/analisis-abastecimiento/analisis-abastecimiento'
+              ).then(m => m.AnalisisAbastecimientoComponent)
+          }
+        ]
+      },
       { path: 'mi-cuenta', component: MiCuenta },
 
       { path: 'productos', component: ProductoList, canActivate: [adminGuard] },
@@ -154,6 +213,7 @@ export const routes: Routes = [
           ),
         canActivate: [adminGuard]
       },
+      { path: 'reportes/analisis', redirectTo: 'dashboard/analisis', pathMatch: 'full' },
       {
         path: 'reportes/ventas',
         loadComponent: () =>

@@ -3,7 +3,9 @@ import {
   Component,
   ElementRef,
   Input,
+  OnChanges,
   OnDestroy,
+  SimpleChanges,
   ViewChild,
   inject
 } from '@angular/core';
@@ -18,8 +20,12 @@ import { AdminNavGroup } from './admin-nav';
   templateUrl: './admin-sidebar.html',
   styleUrl: './admin-sidebar.scss'
 })
-export class AdminSidebarComponent implements AfterViewInit, OnDestroy {
+export class AdminSidebarComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() groups: AdminNavGroup[] = [];
+  @Input() brandName = 'Computer & Electronic';
+  @Input() brandKicker = 'Panel administrativo';
+  /** Conserva query params (periodo) al cambiar de vista de análisis. */
+  @Input() preserveQuery = false;
 
   @ViewChild('nav') nav?: ElementRef<HTMLElement>;
 
@@ -35,6 +41,14 @@ export class AdminSidebarComponent implements AfterViewInit, OnDestroy {
       .pipe(filter(e => e instanceof NavigationEnd))
       .subscribe(() => void Promise.resolve().then(() => this.syncIndicator()));
     void Promise.resolve().then(() => this.syncIndicator());
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Solo reaccionar a cambio real de referencia; el layout memoiza `navGroups`
+    // para no recrear el array en cada ciclo de detección de cambios.
+    if (changes['groups'] && !changes['groups'].firstChange) {
+      void Promise.resolve().then(() => this.syncIndicator());
+    }
   }
 
   ngOnDestroy(): void {

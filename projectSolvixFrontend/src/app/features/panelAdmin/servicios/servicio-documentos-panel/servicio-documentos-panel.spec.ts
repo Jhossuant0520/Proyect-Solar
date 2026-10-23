@@ -57,6 +57,7 @@ describe('ServicioDocumentosPanelComponent', () => {
       'generarCotizacionPdf',
       'generarActaEntrega',
       'abrirPdfEnNuevaPestana',
+      'imprimirPdf',
       'descargarBlobComoArchivo'
     ]);
     dialog = jasmine.createSpyObj('MatDialog', ['open']);
@@ -71,11 +72,11 @@ describe('ServicioDocumentosPanelComponent', () => {
       providers: [
         { provide: DocumentoOrdenServicioService, useValue: documentoService },
         { provide: MatDialog, useValue: dialog },
-        { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open']) }
+        { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open', 'openFromComponent']) }
       ]
     })
       .overrideProvider(MatDialog, { useValue: dialog })
-      .overrideProvider(MatSnackBar, { useValue: jasmine.createSpyObj('MatSnackBar', ['open']) })
+      .overrideProvider(MatSnackBar, { useValue: jasmine.createSpyObj('MatSnackBar', ['open', 'openFromComponent']) })
       .compileComponents();
 
     fixture = TestBed.createComponent(ServicioDocumentosPanelComponent);
@@ -93,9 +94,9 @@ describe('ServicioDocumentosPanelComponent', () => {
     expect(documentoService.asegurarComprobanteRecepcion).toHaveBeenCalledWith(12);
     const text = fixture.nativeElement.textContent as string;
     expect(text).toContain('Comprobante de recepción');
-    expect(text).toContain('NUEVO');
+    expect(text).toContain('Nuevo');
     expect(component.docRecienGeneradoId).toBe(1);
-    expect(text).toContain('Ver');
+    expect(fixture.nativeElement.querySelector('[aria-label^="Imprimir "]')).toBeTruthy();
     expect(text).not.toContain('Generar comprobante');
     expect(text).not.toContain('Reintentar generación');
     expect(text).not.toContain('WhatsApp');
@@ -155,8 +156,8 @@ describe('ServicioDocumentosPanelComponent', () => {
     const text = fixture.nativeElement.textContent as string;
     expect(text).toContain('Versiones anteriores (1)');
     expect(component.versionesAbiertasDe('COMPROBANTE_RECEPCION')).toBeFalse();
-    expect(text).toContain('Versión 2');
-    expect(text).not.toMatch(/Versión 1(?!\d)/);
+    expect(text).toContain('v2 ·');
+    expect(text).not.toMatch(/v1 ·/);
   }));
 
   it('acciones administrativas: Regenerar visible y sin WhatsApp', fakeAsync(() => {
@@ -166,13 +167,12 @@ describe('ServicioDocumentosPanelComponent', () => {
     fixture.componentRef.setInput('canManage', true);
     fixture.detectChanges();
     tick();
-    const text = fixture.nativeElement.textContent as string;
-    expect(text).toContain('Ver');
-    expect(text).toContain('Descargar');
-    expect(text).toContain('Regenerar');
-    expect(fixture.nativeElement.querySelector('[aria-label="Regenerar PDF"]')).toBeTruthy();
-    expect(text).not.toContain('WhatsApp');
-    expect(text).not.toContain('comprobante-OS-2026-000012-v1.pdf');
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('[aria-label^="Imprimir "]')).toBeTruthy();
+    expect(root.querySelector('[aria-label^="Descargar "]')).toBeTruthy();
+    expect(root.querySelector('[aria-label="Regenerar PDF"]')).toBeTruthy();
+    expect(root.textContent).not.toContain('WhatsApp');
+    expect(root.textContent).not.toContain('comprobante-OS-2026-000012-v1.pdf');
   }));
 
   it('tres slots documentales siempre visibles', fakeAsync(() => {
@@ -182,14 +182,14 @@ describe('ServicioDocumentosPanelComponent', () => {
     fixture.detectChanges();
     tick();
     const text = fixture.nativeElement.textContent as string;
-    expect(text).toContain('Recepción');
+    expect(text).toContain('Comprobante de recepción');
     expect(text).toContain('Cotización');
-    expect(text).toContain('Entrega');
+    expect(text).toContain('Acta de entrega');
     expect(text).toContain('Se genera al crear la orden');
     expect(text).toContain('Se genera al presentar la cotización');
     expect(text).toContain('Se genera al registrar la entrega');
     expect(component.docRecienGeneradoId).toBeNull();
-    expect(text).not.toContain('NUEVO');
+    expect(text).not.toContain('Nuevo');
   }));
 
   it('muestra Generando mientras asegurar está en curso', fakeAsync(() => {
@@ -226,7 +226,7 @@ describe('ServicioDocumentosPanelComponent', () => {
     tick(800);
     fixture.detectChanges();
     expect(component.docRecienGeneradoId).toBe(1);
-    expect(fixture.nativeElement.textContent).toContain('NUEVO');
+    expect(fixture.nativeElement.textContent).toContain('Nuevo');
     component.ngOnDestroy();
   }));
 
@@ -321,12 +321,12 @@ describe('ServicioDocumentosPanelComponent', () => {
     fixture.detectChanges();
     expect(component.esperandoDoc).toBeNull();
     expect(component.docRecienGeneradoId).toBe(9);
-    expect(fixture.nativeElement.textContent).toContain('NUEVO');
+    expect(fixture.nativeElement.textContent).toContain('Nuevo');
     expect(fixture.nativeElement.textContent).toContain('Cotización COT-2026-000044');
     component.ngOnDestroy();
   }));
 
-  it('lista documentos por tipo con Ver / Descargar / Regenerar', fakeAsync(() => {
+  it('lista documentos por tipo con Imprimir / Descargar / Regenerar', fakeAsync(() => {
     documentoService.listar.and.returnValue(
       of([
         docBase(),
@@ -348,12 +348,12 @@ describe('ServicioDocumentosPanelComponent', () => {
     const text = fixture.nativeElement.textContent as string;
     expect(text).toContain('Comprobante de recepción');
     expect(text).toContain('Cotización');
-    expect(text).toContain('Ver');
-    expect(text).toContain('Descargar');
-    expect(text).toContain('Regenerar');
-    expect(fixture.nativeElement.querySelector('[aria-label="Regenerar PDF"]')).toBeTruthy();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('[aria-label^="Imprimir "]')).toBeTruthy();
+    expect(root.querySelector('[aria-label^="Descargar "]')).toBeTruthy();
+    expect(root.querySelector('[aria-label="Regenerar PDF"]')).toBeTruthy();
     expect(component.docRecienGeneradoId).toBeNull();
-    expect(text).not.toContain('NUEVO');
+    expect(text).not.toContain('Nuevo');
   }));
 
   it('Ver descarga PDF inline y abre pestaña', fakeAsync(() => {
@@ -425,8 +425,7 @@ describe('ServicioDocumentosPanelComponent', () => {
 
     expect(component.accionEnCurso).toBeTrue();
     expect(component.accionTipo).toBe('regenerar');
-    expect(fixture.nativeElement.querySelector('.is-loading')).not.toBeNull();
-    expect(fixture.nativeElement.textContent).toContain('Generando PDF');
+    expect(fixture.nativeElement.querySelector('.btn-doc-icon .is-spin')).not.toBeNull();
 
     pending.error({ status: 500 });
     tick();

@@ -4,13 +4,20 @@ import { aOrdenServicioRequest, aRequestActualizacionTextos } from './servicio-m
 import {
   accionNuevaFalla,
   accionPrincipalDesde,
+  calcularDiasCalendarioDesde,
+  calcularDistribucionAntiguedad,
+  calcularPrioridadPorAntiguedad,
   campoTecnicoDestacado,
+  construirColaAtencion,
+  construirTrazabilidadOperativa,
+  motivoAtencionOrden,
   contarRepuestosPendientes,
   equipoResumen,
   esEstadoTerminal,
   esResumenTecnicoCompleto,
   filtrarOrdenesLocal,
   labelEstadoOrden,
+  mensajeCambioEstado,
   mensajeErrorServicio,
   pasosWorkflow,
   puedeEditarTextos,
@@ -278,6 +285,122 @@ describe('servicio-ui', () => {
     expect(mensajeErrorServicio(zxing, 'No pudimos crear la orden.')).toBe(
       'No pudimos crear la orden.'
     );
+  });
+
+  it('calcula prioridad operativa por antigüedad (0-3 Baja, 4-7 Media, 8-15 Alta, 16+ Muy alta)', () => {
+    const hoy = new Date(2026, 2, 20, 14, 0, 0); // 20 Mar 2026
+    expect(calcularDiasCalendarioDesde('2026-03-20T09:00:00', hoy)).toBe(0);
+    expect(calcularPrioridadPorAntiguedad('2026-03-18T10:00:00', 'EN_DIAGNOSTICO', hoy)?.codigo).toBe(
+      'BAJA'
+    );
+    expect(calcularPrioridadPorAntiguedad('2026-03-15T10:00:00', 'PENDIENTE_APROBACION', hoy)?.codigo).toBe(
+      'MEDIA'
+    );
+    expect(calcularPrioridadPorAntiguedad('2026-03-10T10:00:00', 'PENDIENTE_APROBACION', hoy)?.codigo).toBe(
+      'ALTA'
+    );
+    // Frontera exacta entre 15 días (Alta) y 16 días (Muy alta)
+    const dia15 = calcularPrioridadPorAntiguedad('2026-03-05T10:00:00', 'EN_REPARACION', hoy);
+    expect(dia15?.dias).toBe(15);
+    expect(dia15?.codigo).toBe('ALTA');
+    expect(dia15?.labelCorto).toBe('Alta');
+    expect(dia15?.activa).toBeTrue();
+
+    const dia16 = calcularPrioridadPorAntiguedad('2026-03-04T10:00:00', 'EN_REPARACION', hoy);
+    expect(dia16?.dias).toBe(16);
+    expect(dia16?.codigo).toBe('MUY_ALTA');
+    expect(dia16?.labelCorto).toBe('Muy alta');
+    expect(dia16?.activa).toBeTrue();
+
+    expect(calcularPrioridadPorAntiguedad('2026-03-01T10:00:00', 'EN_REPARACION', hoy)?.codigo).toBe(
+      'MUY_ALTA'
+    );
+
+    // Órdenes finalizadas no se presentan como activas críticas
+    const entregada = calcularPrioridadPorAntiguedad('2026-01-01T10:00:00', 'ENTREGADO', hoy);
+    expect(entregada?.activa).toBeFalse();
+    expect(entregada?.tone).toBe('neutral');
+  });
+
+  it('arma el toast de cambio de estado con nombres legibles', () => {
+    expect(mensajeCambioEstado('RECEPCIONADO', 'EN_DIAGNOSTICO')).toBe(
+      'Recepcionado → En diagnóstico'
+    );
+  });
+
+  it('distribuye antigüedad solo con órdenes activas y reutiliza umbrales de prioridad', () => {
+    const hoy = new Date(2026, 2, 20, 14, 0, 0);
+    const dist = calcularDistribucionAntiguedad(
+      [
+        orden({ id: 1, fechaRecepcion: '2026-03-19T10:00:00', estado: 'RECEPCIONADO' }),
+        orden({ id: 2, fechaRecepcion: '2026-03-14T10:00:00', estado: 'EN_REPARACION' }),
+        orden({ id: 3, fechaRecepcion: '2026-03-01T10:00:00', estado: 'PENDIENTE_APROBACION' }),
+        orden({ id: 4, fechaRecepcion: '2026-01-01T10:00:00', estado: 'ENTREGADO' })
+      ],
+      hoy
+    );
+    expect(dist.totalActivas).toBe(3);
+    expect(dist.grupos.find(g => g.codigo === 'BAJA')?.cantidad).toBe(1);
+    expect(dist.grupos.find(g => g.codigo === 'MEDIA')?.cantidad).toBe(1);
+    expect(dist.grupos.find(g => g.codigo === 'MUY_ALTA')?.cantidad).toBe(1);
+    // 33+33+34 o 33×3 por redondeo; cada barra refleja cantidad/total.
+    const sumaPct = dist.grupos.reduce((s, g) => s + g.porcentaje, 0);
+    expect(sumaPct).toBeGreaterThanOrEqual(99);
+    expect(sumaPct).toBeLessThanOrEqual(100);
+  });
+
+  it('arma cola de atención sin duplicados y con motivos reales de estado', () => {
+    const hoy = new Date(2026, 2, 20, 14, 0, 0);
+    expect(motivoAtencionOrden(orden({ estado: 'PENDIENTE_APROBACION' }))).toContain('Aprobación');
+    expect(motivoAtencionOrden(orden({ estado: 'ESPERA_REPUESTO' }))).toContain('repuesto');
+    const cola = construirColaAtencion(
+      [
+        orden({
+          id: 10,
+          numero: 'OS-A',
+          estado: 'PENDIENTE_APROBACION',
+          fechaRecepcion: '2026-03-01T10:00:00'
+        }),
+        orden({
+          id: 11,
+          numero: 'OS-B',
+          estado: 'ESPERA_REPUESTO',
+          fechaRecepcion: '2026-03-08T10:00:00'
+        }),
+        orden({
+          id: 12,
+          numero: 'OS-C',
+          estado: 'RECEPCIONADO',
+          fechaRecepcion: '2026-03-19T10:00:00'
+        }),
+        orden({
+          id: 13,
+          numero: 'OS-D',
+          estado: 'ENTREGADO',
+          fechaRecepcion: '2026-01-01T10:00:00'
+        })
+      ],
+      5,
+      hoy
+    );
+    expect(cola.length).toBeGreaterThan(0);
+    expect(cola.some(c => c.numero === 'OS-D')).toBeFalse();
+    expect(new Set(cola.map(c => c.id)).size).toBe(cola.length);
+    expect(cola[0].numero).toBe('OS-A');
+  });
+
+  it('construye las 5 etapas de trazabilidad operativa con estados y bloqueos reales', () => {
+    const base = orden({ estado: 'PENDIENTE_APROBACION', diagnostico: 'Cortocircuito en VRM' });
+    const etapas = construirTrazabilidadOperativa(base, [
+      { estadoNuevo: 'DIAGNOSTICADO', fechaCambio: '2026-03-01T11:45:00' }
+    ]);
+    expect(etapas.length).toBe(5);
+    expect(etapas[0].estadoVisual).toBe('completada');
+    expect(etapas[1].estadoVisual).toBe('completada');
+    expect(etapas[2].estadoVisual).toBe('actual');
+    expect(etapas[3].estadoVisual).toBe('bloqueada');
+    expect(etapas[3].detalleTexto).toContain('aprobación');
+    expect(etapas[4].estadoVisual).toBe('pendiente');
   });
 });
 

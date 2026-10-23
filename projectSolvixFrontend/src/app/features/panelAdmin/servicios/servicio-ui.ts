@@ -429,6 +429,18 @@ export function labelEstadoOrden(estado: EstadoOrdenServicio | string): string {
   return estadoOrdenUx(estado).nombreInterno;
 }
 
+/** Texto corto para el toast de cambio de estado (nunca códigos RECEPCIONADO). */
+export function mensajeCambioEstado(
+  anterior: EstadoOrdenServicio | string | null | undefined,
+  nuevo: EstadoOrdenServicio | string | null | undefined
+): string {
+  const destino = nuevo ? labelEstadoOrden(nuevo) : '';
+  if (anterior && nuevo) {
+    return `${labelEstadoOrden(anterior)} → ${destino}`;
+  }
+  return destino ? `Estado: ${destino}.` : 'Estado actualizado.';
+}
+
 export function labelTipoEquipo(tipo: TipoEquipo | string | null | undefined): string {
   if (!tipo) {
     return '—';
@@ -497,6 +509,8 @@ export interface CampoTecnicoUi {
   id: CampoTecnicoId;
   label: string;
   hint: string;
+  /** Material Symbol — solo presentación / escaneo. */
+  icon: string;
   maxLength: number;
 }
 
@@ -506,24 +520,28 @@ export const CAMPOS_TECNICOS: CampoTecnicoUi[] = [
     id: 'problemaReportado',
     label: 'Problema reportado',
     hint: 'Qué indicó el cliente al entregar el equipo.',
+    icon: 'assignment',
     maxLength: 2000
   },
   {
     id: 'diagnostico',
     label: 'Diagnóstico',
     hint: 'Qué encontró el técnico al revisar el equipo.',
+    icon: 'troubleshoot',
     maxLength: 2000
   },
   {
     id: 'trabajoRealizado',
     label: 'Trabajo realizado',
     hint: 'Qué trabajo o reparación se realizó.',
+    icon: 'handyman',
     maxLength: 2000
   },
   {
     id: 'observaciones',
     label: 'Observaciones',
     hint: 'Información adicional importante sobre la orden.',
+    icon: 'sticky_note_2',
     maxLength: 1000
   }
 ];
@@ -848,3 +866,655 @@ export function textoCostoHistoricoRepuesto(linea: {
   }
   return 'Costo histórico no disponible';
 }
+
+export type PrioridadAntiguedadCodigo = 'BAJA' | 'MEDIA' | 'ALTA' | 'MUY_ALTA';
+
+export interface PrioridadAntiguedadUi {
+  codigo: PrioridadAntiguedadCodigo;
+  label: string;
+  labelCorto: string;
+  dias: number;
+  tone: SolvixBadgeTone;
+  /** true cuando la orden sigue activa (no entregada, cerrada ni cancelada). */
+  activa: boolean;
+  resumenEdad: string;
+}
+
+const ICONO_PRIORIDAD_ANTIGUEDAD: Record<PrioridadAntiguedadCodigo, string> = {
+  BAJA: 'keyboard_arrow_down',
+  MEDIA: 'remove',
+  ALTA: 'keyboard_arrow_up',
+  MUY_ALTA: 'keyboard_double_arrow_up'
+};
+
+export function iconoPrioridadAntiguedad(codigo: PrioridadAntiguedadCodigo): string {
+  return ICONO_PRIORIDAD_ANTIGUEDAD[codigo] ?? 'remove';
+}
+
+/**
+ * Calcula días calendario transcurridos entre la fecha local de recepción y `ahora` (medianoche local).
+ * Nunca devuelve un valor negativo.
+ */
+export function calcularDiasCalendarioDesde(
+  fechaRecepcion: string | number[] | null | undefined,
+  ahora: Date = new Date()
+): number | null {
+  if (fechaRecepcion == null) {
+    return null;
+  }
+  let y: number;
+  let m: number;
+  let d: number;
+
+  if (Array.isArray(fechaRecepcion) && fechaRecepcion.length >= 3) {
+    [y, m, d] = fechaRecepcion;
+  } else if (typeof fechaRecepcion === 'string') {
+    const trimmed = fechaRecepcion.trim();
+    const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(trimmed);
+    if (match) {
+      y = Number(match[1]);
+      m = Number(match[2]);
+      d = Number(match[3]);
+    } else {
+      const parsed = new Date(trimmed);
+      if (Number.isNaN(parsed.getTime())) {
+        return null;
+      }
+      y = parsed.getFullYear();
+      m = parsed.getMonth() + 1;
+      d = parsed.getDate();
+    }
+  } else {
+    return null;
+  }
+
+  const inicioLocal = new Date(y, m - 1, d);
+  if (Number.isNaN(inicioLocal.getTime())) {
+    return null;
+  }
+  const hoyLocal = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+  const diffMs = hoyLocal.getTime() - inicioLocal.getTime();
+  return Math.max(0, Math.round(diffMs / 86_400_000));
+}
+
+export function esOrdenFinalizadaParaPrioridad(
+  estado: EstadoOrdenServicio | string | null | undefined
+): boolean {
+  return estado === 'ENTREGADO' || estado === 'CERRADO' || estado === 'CANCELADO';
+}
+
+/**
+ * Prioridad operativa por antigüedad (días calendario desde recepción):
+ * 0–3: Baja | 4–7: Media | 8–15: Alta | 16+: Muy alta.
+ * Las órdenes entregadas, cerradas o canceladas no se presentan como activas de prioridad crítica.
+ */
+export function calcularPrioridadPorAntiguedad(
+  fechaRecepcion: string | number[] | null | undefined,
+  estado: EstadoOrdenServicio | string | null | undefined,
+  ahora: Date = new Date()
+): PrioridadAntiguedadUi | null {
+  const dias = calcularDiasCalendarioDesde(fechaRecepcion, ahora);
+  if (dias == null) {
+    return null;
+  }
+  const resumenEdad =
+    dias === 0 ? 'Recibida hoy' : dias === 1 ? '1 día desde recepción' : `${dias} días desde recepción`;
+
+  if (esOrdenFinalizadaParaPrioridad(estado)) {
+    return {
+      codigo: 'BAJA',
+      label: estado === 'CANCELADO' ? 'Orden cancelada' : 'Ciclo finalizado',
+      labelCorto: estado === 'CANCELADO' ? 'Cancelada' : 'Finalizada',
+      dias,
+      tone: 'neutral',
+      activa: false,
+      resumenEdad
+    };
+  }
+
+  if (dias <= 3) {
+    return {
+      codigo: 'BAJA',
+      label: 'Prioridad Baja',
+      labelCorto: 'Baja',
+      dias,
+      tone: 'neutral',
+      activa: true,
+      resumenEdad
+    };
+  }
+  if (dias <= 7) {
+    return {
+      codigo: 'MEDIA',
+      label: 'Prioridad Media',
+      labelCorto: 'Media',
+      dias,
+      tone: 'warning',
+      activa: true,
+      resumenEdad
+    };
+  }
+  if (dias <= 15) {
+    return {
+      codigo: 'ALTA',
+      label: 'Prioridad Alta',
+      labelCorto: 'Alta',
+      dias,
+      tone: 'warning',
+      activa: true,
+      resumenEdad
+    };
+  }
+  return {
+    codigo: 'MUY_ALTA',
+    label: 'Prioridad Muy alta',
+    labelCorto: 'Muy alta',
+    dias,
+    tone: 'error',
+    activa: true,
+    resumenEdad
+  };
+}
+
+/** Estados que siguen en taller (excluye entregadas, cerradas y canceladas). */
+export const ESTADOS_ACTIVOS_TALLER: readonly EstadoOrdenServicio[] = [
+  'RECEPCIONADO',
+  'EN_DIAGNOSTICO',
+  'DIAGNOSTICADO',
+  'COTIZADO',
+  'PENDIENTE_APROBACION',
+  'APROBADO',
+  'EN_REPARACION',
+  'ESPERA_REPUESTO',
+  'REQUIERE_APROBACION_ADICIONAL',
+  'LISTO'
+] as const;
+
+export function esOrdenActivaEnTaller(
+  estado: EstadoOrdenServicio | string | null | undefined
+): boolean {
+  return (
+    !!estado &&
+    !esOrdenFinalizadaParaPrioridad(estado) &&
+    (ESTADOS_ACTIVOS_TALLER as readonly string[]).includes(estado)
+  );
+}
+
+export interface DistribucionAntiguedadGrupoUi {
+  codigo: PrioridadAntiguedadCodigo;
+  label: string;
+  rango: string;
+  cantidad: number;
+  porcentaje: number;
+}
+
+export interface DistribucionAntiguedadUi {
+  totalActivas: number;
+  grupos: DistribucionAntiguedadGrupoUi[];
+}
+
+const RANGO_ANTIGUEDAD: Record<PrioridadAntiguedadCodigo, string> = {
+  BAJA: '0–3 días',
+  MEDIA: '4–7 días',
+  ALTA: '8–15 días',
+  MUY_ALTA: '16 días o más'
+};
+
+const LABEL_ANTIGUEDAD: Record<PrioridadAntiguedadCodigo, string> = {
+  BAJA: 'Prioridad Baja',
+  MEDIA: 'Prioridad Media',
+  ALTA: 'Prioridad Alta',
+  MUY_ALTA: 'Prioridad Muy Alta'
+};
+
+/**
+ * Distribuye órdenes activas por prioridad de antigüedad.
+ * Reutiliza `calcularPrioridadPorAntiguedad`; no redefine umbrales.
+ */
+export function calcularDistribucionAntiguedad(
+  ordenes: OrdenServicioResponseDTO[],
+  ahora: Date = new Date()
+): DistribucionAntiguedadUi {
+  const contadores: Record<PrioridadAntiguedadCodigo, number> = {
+    BAJA: 0,
+    MEDIA: 0,
+    ALTA: 0,
+    MUY_ALTA: 0
+  };
+  let totalActivas = 0;
+  for (const orden of ordenes) {
+    if (!esOrdenActivaEnTaller(orden.estado)) {
+      continue;
+    }
+    const prio = calcularPrioridadPorAntiguedad(orden.fechaRecepcion, orden.estado, ahora);
+    if (!prio?.activa) {
+      continue;
+    }
+    contadores[prio.codigo] += 1;
+    totalActivas += 1;
+  }
+  const ordenCodigos: PrioridadAntiguedadCodigo[] = ['BAJA', 'MEDIA', 'ALTA', 'MUY_ALTA'];
+  return {
+    totalActivas,
+    grupos: ordenCodigos.map(codigo => ({
+      codigo,
+      label: LABEL_ANTIGUEDAD[codigo],
+      rango: RANGO_ANTIGUEDAD[codigo],
+      cantidad: contadores[codigo],
+      porcentaje:
+        totalActivas === 0 ? 0 : Math.round((contadores[codigo] / totalActivas) * 100)
+    }))
+  };
+}
+
+export interface AtencionOrdenUi {
+  id: number;
+  numero: string;
+  titulo: string;
+  motivo: string;
+  dias: number;
+  prioridad: PrioridadAntiguedadUi;
+}
+
+/** Motivo principal de seguimiento según estado real (sin inventar demoras del taller). */
+export function motivoAtencionOrden(orden: OrdenServicioResponseDTO): string {
+  switch (orden.estado) {
+    case 'PENDIENTE_APROBACION':
+    case 'REQUIERE_APROBACION_ADICIONAL':
+      return 'Aprobación del cliente pendiente';
+    case 'ESPERA_REPUESTO':
+      return 'Espera de repuesto';
+    case 'EN_DIAGNOSTICO':
+    case 'RECEPCIONADO':
+      return 'Diagnóstico pendiente';
+    case 'DIAGNOSTICADO':
+    case 'COTIZADO':
+      return 'Cotización pendiente de presentar';
+    case 'APROBADO':
+      return 'Reparación pendiente de iniciar';
+    case 'LISTO':
+      return 'Listo para entrega al cliente';
+    case 'EN_REPARACION': {
+      const prio = calcularPrioridadPorAntiguedad(orden.fechaRecepcion, orden.estado);
+      if (prio && prio.dias >= 8) {
+        return 'Antigüedad elevada en reparación';
+      }
+      return 'Reparación en curso';
+    }
+    default:
+      return 'Requiere seguimiento operativo';
+  }
+}
+
+function scoreAtencionOrden(orden: OrdenServicioResponseDTO, ahora: Date): number {
+  const prio = calcularPrioridadPorAntiguedad(orden.fechaRecepcion, orden.estado, ahora);
+  if (!prio?.activa) {
+    return -1;
+  }
+  const pesoPrio: Record<PrioridadAntiguedadCodigo, number> = {
+    MUY_ALTA: 4000,
+    ALTA: 3000,
+    MEDIA: 2000,
+    BAJA: 1000
+  };
+  const pesoEstado: Partial<Record<EstadoOrdenServicio, number>> = {
+    PENDIENTE_APROBACION: 90,
+    REQUIERE_APROBACION_ADICIONAL: 85,
+    ESPERA_REPUESTO: 80,
+    LISTO: 75,
+    EN_DIAGNOSTICO: 60,
+    RECEPCIONADO: 55,
+    COTIZADO: 50,
+    DIAGNOSTICADO: 45,
+    APROBADO: 40,
+    EN_REPARACION: 35
+  };
+  return pesoPrio[prio.codigo] + (pesoEstado[orden.estado] ?? 0) + prio.dias;
+}
+
+/**
+ * Hasta `limite` órdenes activas que requieren seguimiento, sin duplicados.
+ * Prioriza antigüedad + situación operativa real.
+ */
+export function construirColaAtencion(
+  ordenes: OrdenServicioResponseDTO[],
+  limite = 5,
+  ahora: Date = new Date()
+): AtencionOrdenUi[] {
+  const candidatas = ordenes
+    .filter(o => esOrdenActivaEnTaller(o.estado))
+    .map(orden => {
+      const prioridad = calcularPrioridadPorAntiguedad(
+        orden.fechaRecepcion,
+        orden.estado,
+        ahora
+      );
+      if (!prioridad?.activa) {
+        return null;
+      }
+      const score = scoreAtencionOrden(orden, ahora);
+      // Incluye órdenes con score alto o estados que siempre piden acción.
+      const urgentePorEstado = [
+        'PENDIENTE_APROBACION',
+        'REQUIERE_APROBACION_ADICIONAL',
+        'ESPERA_REPUESTO',
+        'LISTO'
+      ].includes(orden.estado);
+      const urgentePorEdad = prioridad.codigo === 'ALTA' || prioridad.codigo === 'MUY_ALTA';
+      if (!urgentePorEstado && !urgentePorEdad && prioridad.codigo === 'BAJA') {
+        return null;
+      }
+      return {
+        orden,
+        prioridad,
+        score
+      };
+    })
+    .filter((x): x is NonNullable<typeof x> => x != null)
+    .sort((a, b) => b.score - a.score);
+
+  const vistos = new Set<number>();
+  const resultado: AtencionOrdenUi[] = [];
+  for (const item of candidatas) {
+    if (vistos.has(item.orden.id)) {
+      continue;
+    }
+    vistos.add(item.orden.id);
+    resultado.push({
+      id: item.orden.id,
+      numero: item.orden.numero,
+      titulo: equipoResumen(item.orden) || item.orden.clienteNombre,
+      motivo: motivoAtencionOrden(item.orden),
+      dias: item.prioridad.dias,
+      prioridad: item.prioridad
+    });
+    if (resultado.length >= limite) {
+      break;
+    }
+  }
+  return resultado;
+}
+
+/** Texto de falla / diagnóstico para listados (sin inventar contenido). */
+export function fallaResumen(orden: OrdenServicioResponseDTO): string {
+  const diag = (orden.diagnostico ?? '').trim();
+  if (diag) {
+    return diag;
+  }
+  const problema = (orden.problemaReportado ?? '').trim();
+  if (problema) {
+    return problema;
+  }
+  return 'Sin diagnóstico registrado';
+}
+
+export interface EtapaTrazabilidadUi {
+  codigo: 'RECEPCION' | 'DIAGNOSTICO' | 'COTIZACION' | 'REPARACION' | 'ENTREGA';
+  numero: number;
+  titulo: string;
+  estadoVisual: 'completada' | 'actual' | 'pendiente' | 'bloqueada' | 'cancelada';
+  badgeTexto: string;
+  detalleTexto: string;
+  fechaTexto: string | null;
+  icono: string;
+}
+
+/**
+ * Construye las 5 etapas de Trazabilidad Operativa basadas en el estado real,
+ * fechas de la orden e historial de transiciones (no solo por posición).
+ */
+export function construirTrazabilidadOperativa(
+  orden: OrdenServicioResponseDTO | null | undefined,
+  historial: {
+    estadoAnterior?: EstadoOrdenServicio | string | null;
+    estadoNuevo: EstadoOrdenServicio | string;
+    fechaCambio?: string | number[] | null;
+  }[] = []
+): EtapaTrazabilidadUi[] {
+  if (!orden) {
+    return [];
+  }
+  const estado = orden.estado;
+
+  const fechaDeEstados = (... buscados: EstadoOrdenServicio[]): string | null => {
+    for (const item of historial) {
+      if (buscados.includes(item.estadoNuevo as EstadoOrdenServicio) && item.fechaCambio) {
+        return formatFechaOrden(item.fechaCambio);
+      }
+    }
+    return null;
+  };
+
+  const recepcionCompletada = estado !== 'RECEPCIONADO' && estado !== 'CANCELADO';
+  const tieneDiagnosticoEvento =
+    !!(orden.diagnostico ?? '').trim() ||
+    historial.some(h =>
+      [
+        'DIAGNOSTICADO',
+        'COTIZADO',
+        'PENDIENTE_APROBACION',
+        'APROBADO',
+        'EN_REPARACION',
+        'ESPERA_REPUESTO',
+        'REQUIERE_APROBACION_ADICIONAL',
+        'LISTO',
+        'ENTREGADO',
+        'CERRADO'
+      ].includes(h.estadoNuevo as EstadoOrdenServicio)
+    );
+  const tieneAprobacionEvento =
+    [
+      'APROBADO',
+      'EN_REPARACION',
+      'ESPERA_REPUESTO',
+      'LISTO',
+      'ENTREGADO',
+      'CERRADO'
+    ].includes(estado) ||
+    historial.some(h => h.estadoNuevo === 'APROBADO');
+  const tieneReparacionCompletada =
+    ['LISTO', 'ENTREGADO', 'CERRADO'].includes(estado) ||
+    historial.some(h => h.estadoNuevo === 'LISTO');
+  const tieneEntregaCompletada =
+    ['ENTREGADO', 'CERRADO'].includes(estado) ||
+    historial.some(h => h.estadoNuevo === 'ENTREGADO' || h.estadoNuevo === 'CERRADO');
+
+  const fechaRecepcionTxt = orden.fechaRecepcion ? formatFechaOrden(orden.fechaRecepcion) : null;
+  const fechaDiagnosticoTxt =
+    fechaDeEstados('DIAGNOSTICADO', 'EN_DIAGNOSTICO') ??
+    (tieneDiagnosticoEvento && orden.fechaActualizacion
+      ? formatFechaOrden(orden.fechaActualizacion)
+      : null);
+  const fechaCotizacionTxt = fechaDeEstados('APROBADO', 'PENDIENTE_APROBACION', 'COTIZADO');
+  const fechaReparacionTxt = fechaDeEstados('LISTO', 'EN_REPARACION', 'ESPERA_REPUESTO');
+  const fechaEntregaTxt =
+    (orden.fechaCierre ? formatFechaOrden(orden.fechaCierre) : null) ??
+    fechaDeEstados('ENTREGADO', 'CERRADO');
+
+  // Etapa 1: Recepción
+  const etapa1: EtapaTrazabilidadUi = {
+    codigo: 'RECEPCION',
+    numero: 1,
+    titulo: 'Recepción',
+    estadoVisual:
+      estado === 'CANCELADO' && !tieneDiagnosticoEvento
+        ? 'cancelada'
+        : estado === 'RECEPCIONADO'
+          ? 'actual'
+          : 'completada',
+    badgeTexto:
+      estado === 'CANCELADO' && !tieneDiagnosticoEvento
+        ? 'CANCELADA'
+        : estado === 'RECEPCIONADO'
+          ? 'ACTUAL · RECIBIDO'
+          : 'COMPLETADA',
+    detalleTexto:
+      estado === 'RECEPCIONADO'
+        ? 'Equipo recibido en taller'
+        : fechaRecepcionTxt ?? 'Ingreso registrado',
+    fechaTexto: fechaRecepcionTxt,
+    icono: estado === 'RECEPCIONADO' ? 'inventory_2' : 'check'
+  };
+
+  // Etapa 2: Diagnóstico
+  let estado2: EtapaTrazabilidadUi['estadoVisual'] = 'pendiente';
+  let badge2 = 'PENDIENTE';
+  let detalle2 = 'Revisión técnica inicial';
+  let icono2 = '2';
+  if (estado === 'EN_DIAGNOSTICO' || estado === 'DIAGNOSTICADO') {
+    estado2 = 'actual';
+    badge2 = estado === 'DIAGNOSTICADO' ? 'ACTUAL · LISTO' : 'ACTUAL · EN CURSO';
+    detalle2 =
+      estado === 'DIAGNOSTICADO' ? 'Diagnóstico completado' : 'Evaluando falla reportada';
+    icono2 = 'search';
+  } else if (tieneDiagnosticoEvento && estado !== 'RECEPCIONADO') {
+    estado2 = 'completada';
+    badge2 = 'COMPLETADA';
+    detalle2 = fechaDiagnosticoTxt ?? 'Diagnóstico registrado';
+    icono2 = 'check';
+  } else if (estado === 'CANCELADO') {
+    estado2 = 'cancelada';
+    badge2 = 'CANCELADA';
+    detalle2 = 'Flujo detenido';
+    icono2 = 'close';
+  }
+
+  const etapa2: EtapaTrazabilidadUi = {
+    codigo: 'DIAGNOSTICO',
+    numero: 2,
+    titulo: 'Diagnóstico',
+    estadoVisual: estado2,
+    badgeTexto: badge2,
+    detalleTexto: detalle2,
+    fechaTexto: fechaDiagnosticoTxt,
+    icono: icono2
+  };
+
+  // Etapa 3: Cotización y aprobación
+  let estado3: EtapaTrazabilidadUi['estadoVisual'] = 'pendiente';
+  let badge3 = 'PENDIENTE';
+  let detalle3 = 'Propuesta y autorización';
+  let icono3 = '3';
+  if (
+    estado === 'COTIZADO' ||
+    estado === 'PENDIENTE_APROBACION' ||
+    estado === 'REQUIERE_APROBACION_ADICIONAL'
+  ) {
+    estado3 = 'actual';
+    badge3 =
+      estado === 'PENDIENTE_APROBACION'
+        ? 'ACTUAL · ESPERA'
+        : estado === 'REQUIERE_APROBACION_ADICIONAL'
+          ? 'ACTUAL · AMPLIACIÓN'
+          : 'ACTUAL · COTIZADO';
+    detalle3 =
+      estado === 'PENDIENTE_APROBACION'
+        ? 'Esperando decisión del cliente'
+        : estado === 'REQUIERE_APROBACION_ADICIONAL'
+          ? 'Requiere cotización adicional'
+          : 'Lista para presentar al cliente';
+    icono3 = 'hourglass_top';
+  } else if (tieneAprobacionEvento) {
+    estado3 = 'completada';
+    badge3 = 'COMPLETADA';
+    detalle3 = fechaCotizacionTxt ?? 'Cotización aprobada';
+    icono3 = 'check';
+  } else if (estado === 'RECEPCIONADO' || estado === 'EN_DIAGNOSTICO') {
+    estado3 = 'bloqueada';
+    badge3 = 'BLOQUEADA';
+    detalle3 = 'Requiere diagnóstico previo';
+    icono3 = '3';
+  }
+
+  const etapa3: EtapaTrazabilidadUi = {
+    codigo: 'COTIZACION',
+    numero: 3,
+    titulo: 'Cotización y aprobación',
+    estadoVisual: estado3,
+    badgeTexto: badge3,
+    detalleTexto: detalle3,
+    fechaTexto: fechaCotizacionTxt,
+    icono: icono3
+  };
+
+  // Etapa 4: Reparación
+  let estado4: EtapaTrazabilidadUi['estadoVisual'] = 'pendiente';
+  let badge4 = 'PENDIENTE';
+  let detalle4 = 'Intervención en taller';
+  let icono4 = '4';
+  if (tieneReparacionCompletada) {
+    estado4 = 'completada';
+    badge4 = 'COMPLETADA';
+    detalle4 = fechaReparacionTxt ?? 'Trabajo técnico finalizado';
+    icono4 = 'check';
+  } else if (estado === 'APROBADO' || estado === 'EN_REPARACION') {
+    estado4 = 'actual';
+    badge4 = estado === 'APROBADO' ? 'ACTUAL · AUTORIZADA' : 'ACTUAL · EN TALLER';
+    detalle4 =
+      estado === 'APROBADO' ? 'Lista para iniciar banco' : 'Reparación en curso';
+    icono4 = 'build';
+  } else if (estado === 'ESPERA_REPUESTO') {
+    estado4 = 'bloqueada';
+    badge4 = 'EN ESPERA';
+    detalle4 = 'Pausada por repuesto pendiente';
+    icono4 = 'hourglass_empty';
+  } else if (estado === 'REQUIERE_APROBACION_ADICIONAL') {
+    estado4 = 'bloqueada';
+    badge4 = 'BLOQUEADA';
+    detalle4 = 'Requiere aprobación adicional';
+    icono4 = 'lock';
+  } else if (
+    estado === 'RECEPCIONADO' ||
+    estado === 'EN_DIAGNOSTICO' ||
+    estado === 'DIAGNOSTICADO' ||
+    estado === 'COTIZADO' ||
+    estado === 'PENDIENTE_APROBACION'
+  ) {
+    estado4 = 'bloqueada';
+    badge4 = 'BLOQUEADA';
+    detalle4 = 'Requiere aprobación del cliente';
+    icono4 = '4';
+  }
+
+  const etapa4: EtapaTrazabilidadUi = {
+    codigo: 'REPARACION',
+    numero: 4,
+    titulo: 'Reparación',
+    estadoVisual: estado4,
+    badgeTexto: badge4,
+    detalleTexto: detalle4,
+    fechaTexto: fechaReparacionTxt,
+    icono: icono4
+  };
+
+  // Etapa 5: Entrega
+  let estado5: EtapaTrazabilidadUi['estadoVisual'] = 'pendiente';
+  let badge5 = 'PENDIENTE';
+  let detalle5 = 'Cierre técnico final';
+  let icono5 = '5';
+  if (tieneEntregaCompletada) {
+    estado5 = 'completada';
+    badge5 = estado === 'CERRADO' ? 'CERRADA' : 'ENTREGADA';
+    detalle5 = fechaEntregaTxt ?? 'Equipo entregado al cliente';
+    icono5 = 'check';
+  } else if (estado === 'LISTO') {
+    estado5 = 'actual';
+    badge5 = 'ACTUAL · LISTO';
+    detalle5 = 'Disponible para entrega';
+    icono5 = 'check_circle';
+  }
+
+  const etapa5: EtapaTrazabilidadUi = {
+    codigo: 'ENTREGA',
+    numero: 5,
+    titulo: 'Entrega',
+    estadoVisual: estado5,
+    badgeTexto: badge5,
+    detalleTexto: detalle5,
+    fechaTexto: fechaEntregaTxt,
+    icono: icono5
+  };
+
+  return [etapa1, etapa2, etapa3, etapa4, etapa5];
+}
+

@@ -80,7 +80,7 @@ describe('ServicioFormComponent — wizard', () => {
         { provide: EquipoService, useValue: equipoService },
         { provide: OrdenServicioService, useValue: ordenService },
         { provide: SolvixFeedbackService, useValue: feedback },
-        { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open']) }
+        { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open', 'openFromComponent']) }
       ]
     }).compileComponents();
 

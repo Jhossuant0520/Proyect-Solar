@@ -8,27 +8,33 @@
   display: flex;
   flex-direction: column;
   background: var(--solvix-surface);
-  border-right: 1px solid var(--solvix-border-subtle);
-  padding: 1.5rem 0.75rem;
+  border-right: 1px solid var(--solvix-border);
+  box-shadow: var(--solvix-shadow-sm);
+  padding: 1.25rem 0.75rem;
 }
 
 .admin-sidebar__brand {
-  padding: 0 1rem 1.75rem;
+  padding: 0 1rem 1.5rem;
 }
 
 .admin-sidebar__name {
   margin: 0;
-  color: var(--solvix-primary);
-  font-size: 1.5rem;
+  color: var(--solvix-deep, var(--solvix-primary));
+  font-family: var(--solvix-font);
+  font-size: 1.35rem;
   font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 1;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
 }
 
 .admin-sidebar__kicker {
-  margin: 0.35rem 0 0;
-  color: var(--solvix-text-muted);
+  margin: 0.4rem 0 0;
+  color: var(--solvix-primary);
+  font-family: var(--solvix-font);
   font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .admin-sidebar__nav {
@@ -63,14 +69,16 @@
   user-select: none;
 }
 
+/* Pill deslizante: solo relleno suave, sin borde (evita doble contorno con el enlace). */
 .admin-sidebar__indicator {
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
-  border-radius: 0.25rem;
-  background: var(--solvix-primary-soft);
-  border-right: 3px solid var(--solvix-primary);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--solvix-primary-soft) 78%, var(--solvix-surface));
+  border: 0;
+  box-shadow: inset 3px 0 0 var(--solvix-primary);
   opacity: 0;
   pointer-events: none;
   transition:
@@ -93,58 +101,65 @@
   padding: 0.7rem 1rem;
   color: var(--solvix-text-muted);
   text-decoration: none;
-  border-radius: 0.25rem;
+  border-radius: 0.5rem;
   font-size: 0.95rem;
-  border-right: 3px solid transparent;
+  border: 1px solid transparent;
+  background: transparent;
+  outline: none;
   transition:
     background-color var(--motion-fast) var(--ease-standard),
     color var(--motion-fast) var(--ease-standard),
-    border-color var(--motion-fast) var(--ease-standard),
-    transform var(--motion-fast) var(--ease-standard);
+    border-color var(--motion-fast) var(--ease-standard);
 }
 
 .admin-sidebar__link .material-symbols-outlined,
 .admin-sidebar__label {
   transition:
     color var(--motion-fast) var(--ease-standard),
-    transform var(--motion-fast) var(--ease-standard),
     font-variation-settings var(--motion-fast) var(--ease-standard);
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .admin-sidebar__link:hover {
+  .admin-sidebar__link:hover:not(.is-active) {
     color: var(--solvix-text);
     background: var(--solvix-neutral-soft);
-    transform: translateX(3px);
   }
 
-  .admin-sidebar__link:hover .material-symbols-outlined {
+  .admin-sidebar__link:hover:not(.is-active) .material-symbols-outlined {
     color: var(--solvix-primary);
-    transform: translateX(2px);
   }
 }
 
-.admin-sidebar__link:active {
-  transform: translateX(1px);
+/* Pulsación / foco de ratón: sin anillo (evita doble contorno con el pill activo). */
+.admin-sidebar__link:active,
+.admin-sidebar__link:focus:not(:focus-visible) {
+  outline: none !important;
+  outline-width: 0 !important;
+  box-shadow: none;
 }
 
+/* Teclado: indicador de foco accesible, distinto del estado activo. */
 .admin-sidebar__link:focus-visible {
   color: var(--solvix-text);
-  background: var(--solvix-neutral-soft);
   outline: 2px solid var(--color-focus, var(--solvix-primary));
   outline-offset: 2px;
 }
 
 .admin-sidebar__link.is-active {
-  color: var(--solvix-primary);
+  color: var(--solvix-deep, var(--solvix-primary));
   background: transparent;
-  border-right-color: transparent;
+  border-color: transparent;
   font-weight: 600;
+  box-shadow: none;
 }
 
 .admin-sidebar__link.is-active .material-symbols-outlined {
   color: var(--solvix-primary);
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.admin-sidebar__link.is-active:focus-visible {
+  outline-offset: 2px;
 }
 
 @media (max-width: 1023px) {
@@ -165,11 +180,5 @@
 @media (prefers-reduced-motion: reduce) {
   .admin-sidebar__indicator {
     transition: none;
-  }
-
-  .admin-sidebar__link:hover,
-  .admin-sidebar__link:hover .material-symbols-outlined,
-  .admin-sidebar__link:active {
-    transform: none;
   }
 }

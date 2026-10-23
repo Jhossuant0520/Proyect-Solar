@@ -61,7 +61,40 @@ export class DashboardKpisComponent {
     return notaEstadoMetrica(metric.estado);
   }
 
+  /** Oculta -100 % u otras cifras cuando no hay base comparable o el KPI no tiene datos. */
+  variationText(metric: DashboardMetricVista): string {
+    if (this.sinBaseComparable(metric)) {
+      return '';
+    }
+    const variation = metric.variation;
+    if (!variation) {
+      return '';
+    }
+    if (variation.estado !== 'OK') {
+      return variation.texto || '';
+    }
+    return variation.texto || '';
+  }
+
   comparacion(metric: DashboardMetricVista): string {
+    if (!this.variationText(metric)) {
+      return '';
+    }
     return etiquetaComparacion(metric.variation?.estado);
+  }
+
+  variationTypeOf(metric: DashboardMetricVista): 'positive' | 'negative' | 'neutral' {
+    if (!this.variationText(metric) || metric.variation?.estado !== 'OK') {
+      return 'neutral';
+    }
+    return metric.variation?.tipo ?? 'neutral';
+  }
+
+  private sinBaseComparable(metric: DashboardMetricVista): boolean {
+    return (
+      metric.estado === 'SIN_DATOS' ||
+      metric.estado === 'SIN_VENTAS_RECIENTES' ||
+      metric.estado === 'SIN_HISTORIAL_SUFICIENTE'
+    );
   }
 }

@@ -26,24 +26,37 @@
   position: relative;
 }
 
+/* Wash azul ambiental C&E: una sola capa decorativa bajo el topbar. */
+.admin-shell__main::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 12rem;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--solvix-primary-soft) 55%, transparent) 0%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
 .admin-shell__content {
   flex: 1;
   min-width: 0;
   overflow: visible;
-  padding: 1.75rem 2.5rem 2.5rem;
+  padding: 1.5rem 2rem 2.5rem;
+  position: relative;
+  /* Por debajo del topbar (z-index: 40): el dropdown de búsqueda debe quedar encima. */
+  z-index: 1;
 }
 
+/* Blob legacy desactivado; el wash vive en __main::before. */
 .admin-shell__content::before {
-  content: '';
-  position: fixed;
-  top: 20%;
-  left: 40%;
-  width: 24rem;
-  height: 24rem;
-  background: var(--solvix-primary-soft);
-  filter: blur(90px);
-  pointer-events: none;
-  z-index: 0;
+  content: none;
+  display: none;
 }
 
 .admin-shell__backdrop {
@@ -79,6 +92,17 @@
   }
 
   .admin-shell__content {
-    padding: 1.25rem 1rem 2rem;
+    padding: 1rem 0.85rem 1.75rem;
+  }
+
+  .admin-shell__main::before {
+    height: 8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-shell__sidebar,
+  .admin-shell__backdrop {
+    transition: none;
   }
 }

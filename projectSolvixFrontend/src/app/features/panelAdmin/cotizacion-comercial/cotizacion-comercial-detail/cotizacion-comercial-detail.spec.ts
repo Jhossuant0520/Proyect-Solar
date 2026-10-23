@@ -96,7 +96,7 @@ describe('CotizacionComercialDetailComponent', () => {
       ]
     })
       .overrideProvider(MatDialog, { useValue: dialog })
-      .overrideProvider(MatSnackBar, { useValue: jasmine.createSpyObj('MatSnackBar', ['open']) })
+      .overrideProvider(MatSnackBar, { useValue: jasmine.createSpyObj('MatSnackBar', ['open', 'openFromComponent']) })
       .compileComponents();
     fixture = TestBed.createComponent(CotizacionComercialDetailComponent);
   });

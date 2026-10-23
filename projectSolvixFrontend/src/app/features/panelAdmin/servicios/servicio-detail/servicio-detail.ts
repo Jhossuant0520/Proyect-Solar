@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -23,25 +23,32 @@ import {
   AccionWorkflowUi,
   CAMPOS_TECNICOS,
   CampoTecnicoId,
+  EtapaTrazabilidadUi,
+  PrioridadAntiguedadUi,
   accionCancelarDesde,
   accionNuevaFalla,
   accionPrincipalDesde,
   accionSecundariaEspera,
+  calcularPrioridadPorAntiguedad,
   campoTecnicoDestacado,
+  construirTrazabilidadOperativa,
   contarRepuestosPendientes,
   equipoResumen,
   esEstadoTerminal,
   esResumenTecnicoCompleto,
   formatFechaOrden,
   labelEstadoOrden,
+  labelEstadoRepuesto,
   labelTipoEquipo,
   mapHttpError,
+  mensajeCambioEstado,
   mensajeErrorServicio,
   puedeEditarTextos,
   puedeEditarCampoTecnico,
   hintCampoBloqueado,
   tipoAccionWorkflow,
   toneEstadoOrden,
+  toneEstadoRepuesto,
   valorTextoTecnico,
   textosTecnicosSinCambios
 } from '../servicio-ui';
@@ -66,9 +73,12 @@ import {
 } from '../servicio-entrega-dialog/servicio-entrega-dialog';
 import {
   CotizacionPanelIntent,
+  CotizacionesPanelChange,
   DocumentoCotizacionEsperado,
   ServicioCotizacionesPanelComponent
 } from '../servicio-cotizaciones-panel/servicio-cotizaciones-panel';
+import { CotizacionServicioResponseDTO } from '../../../../core/models/cotizacion-servicio.models';
+import { formatMoney } from '../../dashboard/utils/dashboard-format';
 import {
   EsperarDocumentoOpts,
   ServicioDocumentosPanelComponent
@@ -112,12 +122,14 @@ import {
 export class ServicioDetailComponent implements OnInit {
   @ViewChild('panelTecnico') panelTecnico?: ElementRef<HTMLElement>;
   @ViewChild('panelCotizaciones') panelCotizaciones?: ElementRef<HTMLElement>;
+  @ViewChild('previewWhatsAppCard') previewWhatsAppCard?: ElementRef<HTMLElement>;
   @ViewChild(ServicioCotizacionesPanelComponent)
   cotizacionesPanel?: ServicioCotizacionesPanelComponent;
   @ViewChild(ServicioDocumentosPanelComponent)
   documentosPanel?: ServicioDocumentosPanelComponent;
 
   orden: OrdenServicioResponseDTO | null = null;
+  cotizacionesLista: CotizacionServicioResponseDTO[] = [];
   historial: HistorialEstadoOrdenServicioResponseDTO[] = [];
   historialState: 'idle' | 'loading' | 'ready' | 'empty' | 'error' = 'idle';
   historialCompleto = false;
@@ -126,6 +138,7 @@ export class ServicioDetailComponent implements OnInit {
   guardando = false;
   cambiandoEstado = false;
   esperarComprobante = false;
+  whatsappHighlight = false;
   errorTitle = 'No pudimos cargar esta orden.';
   errorMessage = 'La orden no existe o no está disponible.';
   editError = '';
@@ -141,8 +154,11 @@ export class ServicioDetailComponent implements OnInit {
   readonly form;
   readonly campos = CAMPOS_TECNICOS;
   readonly fecha = formatFechaOrden;
+  readonly money = formatMoney;
   readonly estadoLabel = labelEstadoOrden;
   readonly estadoTone = toneEstadoOrden;
+  readonly repuestoLabel = labelEstadoRepuesto;
+  readonly repuestoTone = toneEstadoRepuesto;
   readonly equipo = equipoResumen;
   readonly tipoEquipo = labelTipoEquipo;
   readonly puedeEditar = puedeEditarTextos;
@@ -156,7 +172,8 @@ export class ServicioDetailComponent implements OnInit {
     private ordenServicioService: OrdenServicioService,
     private cotizacionServicioService: CotizacionServicioService,
     private feedback: SolvixFeedbackService,
-    private actionReveal: SolvixActionRevealService
+    private actionReveal: SolvixActionRevealService,
+    private cdr: ChangeDetectorRef
   ) {
     this.form = this.fb.group({
       problemaReportado: ['', Validators.maxLength(2000)],
@@ -323,6 +340,126 @@ export class ServicioDetailComponent implements OnInit {
       this.mostrarWhatsAppCotizacion ||
       this.mostrarWhatsAppEquipoListo
     );
+  }
+
+  get prioridadOperativa(): PrioridadAntiguedadUi | null {
+    if (!this.orden) {
+      return null;
+    }
+    return calcularPrioridadPorAntiguedad(this.orden.fechaRecepcion, this.orden.estado);
+  }
+
+  get etapasTrazabilidad(): EtapaTrazabilidadUi[] {
+    return construirTrazabilidadOperativa(this.orden, this.historial);
+  }
+
+  get ultimoResponsable(): string | null {
+    if (this.historial.length > 0 && this.historial[0].usuario) {
+      return this.historial[0].usuario;
+    }
+    return this.orden?.createdBy ?? null;
+  }
+
+  get cotizacionDestacada(): CotizacionServicioResponseDTO | null {
+    const activas = this.cotizacionesLista.filter(
+      c => c.estado === 'BORRADOR' || c.estado === 'PENDIENTE_APROBACION'
+    );
+    if (activas.length) {
+      return activas[activas.length - 1];
+    }
+    const aprobadas = this.cotizacionesLista.filter(c => c.estado === 'APROBADA');
+    return aprobadas.length ? aprobadas[aprobadas.length - 1] : null;
+  }
+
+  get plantillaContextualWhatsApp(): PlantillaWhatsAppAsistido {
+    if (this.mostrarWhatsAppCotizacion) {
+      return 'cotizacion';
+    }
+    if (this.mostrarWhatsAppEquipoListo) {
+      return 'equipoListo';
+    }
+    return 'recepcion';
+  }
+
+  get labelPlantillaContextualWhatsApp(): string {
+    switch (this.plantillaContextualWhatsApp) {
+      case 'cotizacion':
+        return 'Notificación de cotización';
+      case 'equipoListo':
+        return 'Aviso de equipo listo';
+      default:
+        return 'Confirmación de recepción';
+    }
+  }
+
+  get telefonoWaNormalizado(): string | null {
+    return normalizarTelefonoWa(this.orden?.clienteTelefono);
+  }
+
+  get telefonoWaFormateado(): string {
+    const raw = (this.orden?.clienteTelefono ?? '').trim();
+    if (!raw) {
+      return 'Sin teléfono registrado';
+    }
+    const norm = this.telefonoWaNormalizado;
+    if (norm && norm.length === 12 && norm.startsWith('57')) {
+      return `+57 ${norm.slice(2, 5)} ${norm.slice(5, 8)} ${norm.slice(8)}`;
+    }
+    return raw;
+  }
+
+  get vistaPreviaMensajeWhatsApp(): string {
+    if (!this.orden) {
+      return '';
+    }
+    const token = (this.orden.tokenConsulta ?? '').trim();
+    const urlConsulta = token
+      ? urlConsultaOtPublica(environment.publicWebBaseUrl, token)
+      : `${environment.publicWebBaseUrl}/consulta/ot/…`;
+    return construirMensajeWhatsAppAsistido(this.plantillaContextualWhatsApp, {
+      nombre: this.orden.clienteNombre,
+      ordenNumero: this.orden.numero,
+      urlConsulta,
+      cotizacionNumero: this.cotizacionDestacada?.numero ?? null
+    });
+  }
+
+  copiarCodigoOrden(): void {
+    const codigo = this.orden?.numero;
+    if (!codigo) {
+      return;
+    }
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      navigator.clipboard
+        .writeText(codigo)
+        .then(() => this.feedback.info(`Código ${codigo} copiado al portapapeles.`))
+        .catch(() => this.feedback.info(`Código: ${codigo}`));
+      return;
+    }
+    this.feedback.info(`Código: ${codigo}`);
+  }
+
+  irAPreviewWhatsApp(): void {
+    const el = this.previewWhatsAppCard?.nativeElement;
+    if (!el) {
+      return;
+    }
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    this.whatsappHighlight = true;
+    setTimeout(() => {
+      this.whatsappHighlight = false;
+    }, 1400);
+  }
+
+  abrirWhatsAppContextual(): void {
+    this.prepararWhatsApp(this.plantillaContextualWhatsApp);
+  }
+
+  onCotizacionesPanelChange(ev: CotizacionesPanelChange): void {
+    queueMicrotask(() => {
+      this.cotizacionesLista = ev.items ?? [];
+      this.cdr.markForCheck();
+    });
   }
 
   cargar(): void {
@@ -597,7 +734,7 @@ export class ServicioDetailComponent implements OnInit {
       return;
     }
     if (estado === 'PENDIENTE_APROBACION') {
-      this.irACotizaciones('aprobar');
+      this.irACotizaciones('decision');
       return;
     }
     if (estado === 'REQUIERE_APROBACION_ADICIONAL') {
@@ -840,7 +977,8 @@ export class ServicioDetailComponent implements OnInit {
     this.guardando = false;
     this.guiaTecnica = '';
     this.feedback.success(
-      snack || transicion.mensaje || `Estado: ${labelEstadoOrden(transicion.orden.estado)}.`
+      snack ||
+        mensajeCambioEstado(transicion.estadoAnterior, transicion.estadoNuevo)
     );
     this.cargarHistorial(transicion.orden.id);
   }

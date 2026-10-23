@@ -1,0 +1,33 @@
+<section class="analisis-hub">
+  <header class="analisis-hub__intro">
+    <h2 class="analisis-hub__title">Análisis detallado</h2>
+    <p class="analisis-hub__subtitle">
+      Elige un área para ver gráficas y tablas con espacio completo. El periodo se conserva al cambiar de vista.
+    </p>
+  </header>
+
+  <div class="analisis-hub__grid" role="list">
+    @for (card of cards; track card.path) {
+      <a class="analisis-hub__card" role="listitem" [routerLink]="card.path" queryParamsHandling="preserve">
+        <span class="material-symbols-outlined" aria-hidden="true">{{ card.icon }}</span>
+        <span class="analisis-hub__card-copy">
+          <span class="analisis-hub__card-title">{{ card.title }}</span>
+          <span class="analisis-hub__card-sub">{{ card.subtitle }}</span>
+        </span>
+      </a>
+    }
+  </div>
+
+  @if (insightsState() !== 'empty') {
+    <solvix-business-insights
+      [insights]="insights()"
+      [state]="insightsState()"
+      (retry)="retryInsights()"
+    />
+  }
+
+  <p class="analisis-hub__exports">
+    Exportaciones CSV en
+    <a routerLink="/reportes">Reportes</a>.
+  </p>
+</section>

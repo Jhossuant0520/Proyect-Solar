@@ -27,27 +27,33 @@ export type SolvixMetricFormato = 'money' | 'percent' | 'quantity' | 'ratio';
       [attr.aria-label]="label"
     >
       <div class="metric__head">
-        <span class="metric__title">
+        <div class="metric__title">
           <span class="metric__label">{{ label }}</span>
           @if (help) {
-            <solvix-field-help [text]="help" [ariaLabel]="'Qué significa ' + label" placement="bottom" />
+            <solvix-field-help class="metric__help" [text]="help" [ariaLabel]="'Qué significa ' + label" placement="bottom" />
           }
-        </span>
+        </div>
         @if (icon) {
-          <span class="material-symbols-outlined metric__icon" aria-hidden="true">{{ icon }}</span>
+          <span class="metric__icon-wrap" aria-hidden="true">
+            <span class="material-symbols-outlined metric__icon">{{ icon }}</span>
+          </span>
         }
       </div>
-      @if (incomplete) {
-        <p class="metric__incomplete">{{ value }}</p>
-      } @else {
-        <p class="metric__value solvix-mono" aria-live="polite">{{ displayText }}</p>
-      }
-      @if (hint) {
-        <p class="metric__hint">{{ hint }}</p>
-      }
-      @if (statusNote) {
-        <p class="metric__status">{{ statusNote }}</p>
-      }
+
+      <div class="metric__body">
+        @if (incomplete) {
+          <p class="metric__incomplete">{{ value }}</p>
+        } @else {
+          <p class="metric__value solvix-mono" aria-live="polite">{{ displayText }}</p>
+        }
+        @if (hint) {
+          <p class="metric__hint">{{ hint }}</p>
+        }
+        @if (statusNote) {
+          <p class="metric__status">{{ statusNote }}</p>
+        }
+      </div>
+
       @if (variation) {
         <p class="metric__var" [class]="'metric__var--' + variationType">
           {{ variation }}
@@ -63,79 +69,96 @@ export type SolvixMetricFormato = 'money' | 'percent' | 'quantity' | 'ratio';
       display: block;
       min-width: 0;
       overflow: visible;
+      height: 100%;
     }
     :host:hover,
     :host:focus-within {
       z-index: 3;
     }
     .metric {
-      background: var(--solvix-panel, rgba(15, 23, 42, 0.8));
-      backdrop-filter: blur(16px);
+      height: 100%;
+      box-sizing: border-box;
+      background: var(--solvix-panel, #fff);
+      backdrop-filter: none;
       border: 1px solid var(--solvix-border);
-      border-radius: var(--solvix-radius-card, var(--solvix-radius));
-      padding: 1.1rem 1.2rem;
-      min-height: 9.5rem;
+      border-radius: var(--solvix-radius-card, 0.75rem);
+      border-top: 3px solid color-mix(in srgb, var(--solvix-primary) 55%, var(--solvix-border));
+      padding: 1.05rem 1.15rem 1.1rem;
+      min-height: 10.25rem;
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
+      gap: 0.55rem;
       overflow: visible;
       box-shadow: var(--solvix-shadow-sm, none);
       transition:
-        transform var(--motion-fast, 140ms) var(--ease-standard, ease),
         box-shadow var(--motion-fast, 140ms) var(--ease-standard, ease),
         border-color var(--motion-fast, 140ms) var(--ease-standard, ease);
     }
-    .metric__icon {
-      transition: transform var(--motion-fast, 140ms) var(--ease-standard, ease);
-    }
-    @media (hover: hover) and (pointer: fine) {
-      .metric--interactive:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--solvix-shadow-sm);
-      }
-      .metric--interactive:hover .metric__icon {
-        transform: scale(1.04);
-      }
-    }
     .metric__head {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 0.5rem;
-      color: var(--solvix-text-muted);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 2.25rem;
+      align-items: start;
+      column-gap: 0.65rem;
+      min-height: 2.25rem;
     }
     .metric__title {
       display: flex;
-      align-items: flex-start;
-      gap: 0.35rem;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.3rem 0.4rem;
       min-width: 0;
     }
     .metric__label {
+      flex: 1 1 auto;
+      min-width: 0;
       font-family: var(--solvix-font);
       font-size: 0.72rem;
       font-weight: 700;
       line-height: 1.35;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
       color: var(--solvix-text-muted);
     }
-    .metric__head .material-symbols-outlined {
+    .metric__help {
+      flex: 0 0 auto;
+      align-self: center;
+    }
+    .metric__icon-wrap {
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 0.55rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--solvix-primary-soft);
       color: var(--solvix-primary);
-      font-size: 1.15rem;
       flex-shrink: 0;
     }
+    .metric__icon {
+      font-size: 1.2rem;
+      line-height: 1;
+      color: inherit;
+    }
+    .metric__body {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
     .metric__value {
-      margin: 0.35rem 0 0;
+      margin: 0;
       color: var(--solvix-text);
       font-family: var(--solvix-font-mono);
-      font-size: 1.65rem;
+      font-size: clamp(1.35rem, 1.1rem + 0.6vw, 1.7rem);
       font-weight: 800;
       letter-spacing: -0.03em;
+      line-height: 1.15;
     }
     .metric__incomplete {
-      margin: 0.45rem 0 0;
+      margin: 0;
       color: var(--solvix-warning);
-      font-size: 0.95rem;
+      font-size: 0.98rem;
       font-weight: 600;
       line-height: 1.3;
     }
@@ -154,13 +177,16 @@ export type SolvixMetricFormato = 'money' | 'percent' | 'quantity' | 'ratio';
       color: var(--solvix-text-secondary);
     }
     .metric__var {
-      margin: 0.35rem 0 0;
+      margin: auto 0 0;
+      padding-top: 0.35rem;
+      border-top: 1px solid var(--solvix-border-subtle);
       font-family: var(--solvix-font-mono);
       font-size: 0.72rem;
       line-height: 1.35;
     }
     .metric__var span {
       display: block;
+      margin-top: 0.15rem;
       font-family: var(--solvix-font);
       font-weight: 400;
       letter-spacing: 0;
@@ -170,10 +196,21 @@ export type SolvixMetricFormato = 'money' | 'percent' | 'quantity' | 'ratio';
     .metric__var--positive { color: var(--solvix-success); }
     .metric__var--negative { color: var(--solvix-error); }
     .metric__var--neutral { color: var(--solvix-text-muted); }
-    .metric--warning { border-color: rgba(245, 158, 11, 0.35); }
-    .metric--error { border-color: rgba(255, 180, 171, 0.35); }
-    .metric--success .metric__head .material-symbols-outlined {
+    .metric--warning {
+      border-top-color: color-mix(in srgb, var(--solvix-warning) 65%, var(--solvix-border));
+    }
+    .metric--error {
+      border-top-color: color-mix(in srgb, var(--solvix-error) 65%, var(--solvix-border));
+    }
+    .metric--success .metric__icon-wrap {
       color: var(--solvix-success);
+      background: var(--solvix-success-soft);
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .metric--interactive:hover {
+        box-shadow: var(--solvix-shadow-sm);
+        border-color: color-mix(in srgb, var(--solvix-primary) 28%, var(--solvix-border));
+      }
     }
   `]
 })

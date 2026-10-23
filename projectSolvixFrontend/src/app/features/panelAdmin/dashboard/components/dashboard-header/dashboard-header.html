@@ -1,17 +1,10 @@
-<solvix-page-header
+<solvix-page-header icon="monitoring"
   kicker="Panel administrativo"
   title="Resumen del negocio"
   subtitle="Esto está pasando en tu negocio"
 >
   <div class="header-controls">
-    <div class="dash-chips dash-chips--period" #periodChips role="group" aria-label="Período">
-      <span
-        class="dash-chips__indicator"
-        [class.is-ready]="indicatorReady"
-        [style.transform]="'translateX(' + indicatorX + 'px)'"
-        [style.width.px]="indicatorW"
-        aria-hidden="true"
-      ></span>
+    <div class="dash-chips dash-chips--period" role="group" aria-label="Período">
       @for (preset of presets; track preset.id) {
         <button
           type="button"
@@ -29,25 +22,35 @@
       <div class="header-dates">
         <label>
           Desde
-          <input type="date" [value]="periodo.desde" (change)="onCustomDate('desde', $event)" />
+          <solvix-dashboard-date-field
+            [value]="periodo.desde"
+            ariaLabel="Fecha desde"
+            (valueChange)="onDesdeChange($event)"
+          />
         </label>
         <label>
           Hasta
-          <input type="date" [value]="periodo.hasta" (change)="onCustomDate('hasta', $event)" />
+          <solvix-dashboard-date-field
+            [value]="periodo.hasta"
+            ariaLabel="Fecha hasta"
+            (valueChange)="onHastaChange($event)"
+          />
         </label>
       </div>
     }
 
-    <solvix-button
-      family="tech"
-      rank="secondary"
-      icon="refresh"
-      [disabled]="refreshing"
-      [loading]="refreshing"
-      ariaLabel="Actualizar"
-      (click)="refresh.emit()"
-    >
-      Actualizar
-    </solvix-button>
+    <div class="header-refresh">
+      <solvix-button
+        family="tech"
+        rank="secondary"
+        icon="refresh"
+        [disabled]="refreshing"
+        [loading]="refreshing"
+        ariaLabel="Actualizar"
+        (click)="refresh.emit()"
+      >
+        Actualizar
+      </solvix-button>
+    </div>
   </div>
 </solvix-page-header>

@@ -3,6 +3,10 @@
 }
 
 .admin-topbar {
+  /* Por encima de .admin-shell__content (z-index: 1): el dropdown vive aquí. */
+  position: relative;
+  z-index: 40;
+  flex-shrink: 0;
   height: var(--solvix-topbar-height);
   display: flex;
   align-items: center;
@@ -29,34 +33,196 @@
   position: relative;
   flex: 1;
   max-width: 28rem;
+  /* Contexto local: el panel absoluto no pelea con acciones del topbar. */
+  z-index: 1;
+  isolation: isolate;
 }
 
-.admin-topbar__search .material-symbols-outlined {
+.admin-topbar__search-icon {
   position: absolute;
   left: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
   color: var(--solvix-text-muted);
   font-size: 1.1rem;
+  pointer-events: none;
+  z-index: 1;
 }
 
-.admin-topbar__search input {
+.admin-topbar__search-input {
   width: 100%;
   box-sizing: border-box;
   background: var(--solvix-surface-low);
-  border: 1px solid var(--solvix-border-subtle);
-  border-radius: 0.25rem;
+  border: 1px solid var(--solvix-border);
+  border-radius: 0.5rem;
   color: var(--solvix-text);
-  font-family: var(--solvix-font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
-  padding: 0.45rem 0.75rem 0.45rem 2.4rem;
-  transition: border-color var(--motion-fast) var(--ease-standard);
+  font-family: var(--solvix-font);
+  font-size: 0.85rem;
+  letter-spacing: 0;
+  padding: 0.45rem 2.2rem 0.45rem 2.4rem;
+  /* Evita la X nativa de type=search (Chrome/Edge/Safari) + la custom = duplicado. */
+  appearance: none;
+  -webkit-appearance: none;
+  transition:
+    border-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard);
 }
 
-.admin-topbar__search input:focus {
-  outline: 2px solid var(--solvix-secondary);
-  outline-offset: 1px;
+.admin-topbar__search-input::-webkit-search-cancel-button,
+.admin-topbar__search-input::-webkit-search-decoration,
+.admin-topbar__search-input::-webkit-search-results-button,
+.admin-topbar__search-input::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.admin-topbar__search-input::-ms-clear {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.admin-topbar__search-input:focus {
+  outline: none;
+  border-color: var(--solvix-primary);
+  background: var(--solvix-surface);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--solvix-primary) 18%, transparent);
+}
+
+.admin-topbar__search-clear {
+  position: absolute;
+  right: 0.35rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 0;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--solvix-text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-topbar__search-clear:hover,
+.admin-topbar__search-clear:focus-visible {
+  color: var(--solvix-primary);
+  background: var(--solvix-primary-soft);
+  outline: none;
+}
+
+.admin-topbar__results {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  right: 0;
+  width: min(100%, 28rem);
+  max-height: min(22rem, 65vh);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.45rem;
+  /* Superficie 100% opaca del tema activo (sin glass del topbar). */
+  background-color: var(--solvix-surface);
+  background-image: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid var(--solvix-border);
+  border-radius: 0.65rem;
+  box-shadow:
+    var(--solvix-shadow-sm),
+    0 12px 32px color-mix(in srgb, var(--solvix-text) 14%, transparent);
+  z-index: 2;
+  pointer-events: auto;
+}
+
+.admin-topbar__status {
+  margin: 0;
+  padding: 0.75rem 0.65rem;
+  color: var(--solvix-text-muted);
+  font-size: 0.85rem;
+}
+
+.admin-topbar__status--error {
+  color: var(--solvix-error);
+}
+
+.admin-topbar__status--warn {
+  color: var(--solvix-warning);
+  font-size: 0.78rem;
+  padding-bottom: 0.35rem;
+}
+
+.admin-topbar__group + .admin-topbar__group {
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--solvix-border-subtle);
+}
+
+.admin-topbar__group-label {
+  margin: 0 0 0.25rem;
+  padding: 0.2rem 0.55rem;
+  color: var(--solvix-text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.admin-topbar__result {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.65rem;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: var(--solvix-text);
+  text-align: left;
+  padding: 0.55rem 0.6rem;
+  cursor: pointer;
+  font: inherit;
+  pointer-events: auto;
+}
+
+.admin-topbar__result .material-symbols-outlined {
+  color: var(--solvix-primary);
+  font-size: 1.2rem;
+}
+
+.admin-topbar__result-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.admin-topbar__result-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.admin-topbar__result-meta {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--solvix-text-muted);
+}
+
+.admin-topbar__result:hover,
+.admin-topbar__result.is-active,
+.admin-topbar__result:focus-visible {
+  background: var(--solvix-primary-soft);
+  outline: none;
 }
 
 .admin-topbar__actions {
@@ -163,8 +329,19 @@
 }
 
 @media (max-width: 767px) {
+  .admin-topbar {
+    height: auto;
+    min-height: var(--solvix-topbar-height);
+    flex-wrap: wrap;
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
+    row-gap: 0.55rem;
+  }
+
   .admin-topbar__search {
-    display: none;
+    order: 3;
+    flex: 1 1 100%;
+    max-width: none;
   }
 
   .admin-topbar__name {

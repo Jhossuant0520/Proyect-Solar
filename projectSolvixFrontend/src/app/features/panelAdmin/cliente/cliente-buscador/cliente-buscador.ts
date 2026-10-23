@@ -1,4 +1,13 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output
+} from '@angular/core';
 import {
   Subject,
   Subscription,
@@ -33,7 +42,8 @@ type EstadoBusqueda = 'idle' | 'preview' | 'buscando' | 'resultados' | 'vacio' |
   selector: 'app-cliente-buscador',
   standalone: true,
   templateUrl: './cliente-buscador.html',
-  styleUrl: './cliente-buscador.scss'
+  styleUrl: './cliente-buscador.scss',
+  host: { '[class.is-open]': 'panelAbierto' }
 })
 export class ClienteBuscadorComponent implements OnInit, OnDestroy {
   @Input() limite = 8;
@@ -50,6 +60,8 @@ export class ClienteBuscadorComponent implements OnInit, OnDestroy {
   resultados: ClienteResponseDTO[] = [];
   estado: EstadoBusqueda = 'idle';
   indiceActivo = -1;
+  /** El panel flotante solo se muestra mientras el usuario interactúa con el buscador. */
+  panelAbierto = false;
 
   readonly minCaracteres = MIN_CARACTERES_BUSQUEDA_CLIENTE;
   readonly previewLimite = PREVIEW_LIMITE_CLIENTE;
@@ -60,7 +72,10 @@ export class ClienteBuscadorComponent implements OnInit, OnDestroy {
   private previewCache: ClienteResponseDTO[] | null = null;
   private previewSub?: Subscription;
 
-  constructor(private clienteService: ClienteService) {}
+  constructor(
+    private clienteService: ClienteService,
+    private host: ElementRef<HTMLElement>
+  ) {}
 
   ngOnInit(): void {
     this.sub = this.consultas
@@ -115,7 +130,40 @@ export class ClienteBuscadorComponent implements OnInit, OnDestroy {
     return this.estado === 'preview' || this.estado === 'resultados';
   }
 
+  @HostListener('document:click', ['$event'])
+  onClickDocumento(event: Event): void {
+    if (this.panelAbierto && !this.host.nativeElement.contains(event.target as Node)) {
+      this.cerrarPanel();
+    }
+  }
+
+  @HostListener('focusout', ['$event'])
+  onFocusOut(event: FocusEvent): void {
+    const destino = event.relatedTarget as Node | null;
+    if (destino && !this.host.nativeElement.contains(destino)) {
+      this.cerrarPanel();
+    }
+  }
+
+  abrirPanel(): void {
+    this.panelAbierto = true;
+  }
+
+  cerrarPanel(): void {
+    this.panelAbierto = false;
+  }
+
+  iniciales(cliente: ClienteResponseDTO): string {
+    const partes = (cliente.nombre ?? '').trim().split(/\s+/).filter(Boolean);
+    if (partes.length === 0) {
+      return '?';
+    }
+    const segunda = partes.length > 1 ? partes[1].charAt(0) : '';
+    return (partes[0].charAt(0) + segunda).toUpperCase();
+  }
+
   onFocus(): void {
+    this.panelAbierto = true;
     if (this.texto.trim().length < MIN_CARACTERES_BUSQUEDA_CLIENTE) {
       this.mostrarPreview();
     }
@@ -123,6 +171,7 @@ export class ClienteBuscadorComponent implements OnInit, OnDestroy {
 
   onInput(event: Event): void {
     this.texto = (event.target as HTMLInputElement).value;
+    this.panelAbierto = true;
     const t = this.texto.trim();
     if (t.length < MIN_CARACTERES_BUSQUEDA_CLIENTE) {
       this.consultas.next(t);
@@ -163,6 +212,7 @@ export class ClienteBuscadorComponent implements OnInit, OnDestroy {
   }
 
   elegir(cliente: ClienteResponseDTO): void {
+    this.panelAbierto = false;
     this.seleccionado = cliente;
     this.texto = '';
     this.resultados = [];
@@ -207,6 +257,7 @@ export class ClienteBuscadorComponent implements OnInit, OnDestroy {
   }
 
   private resetAIdle(): void {
+    this.panelAbierto = false;
     this.texto = '';
     this.resultados = [];
     this.indiceActivo = -1;

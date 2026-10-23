@@ -1,5 +1,14 @@
 :host {
   display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+:host *,
+:host *::before,
+:host *::after {
+  box-sizing: border-box;
 }
 
 .faq {
@@ -20,9 +29,20 @@
 }
 
 .faq__container {
+  box-sizing: border-box;
   width: min(56rem, 100%);
+  max-width: 100%;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding-inline: clamp(1rem, 3.5vw, 2.5rem);
+}
+
+.faq__list,
+.faq-item,
+.faq-item__trigger,
+.faq-item__question,
+.faq-item__panel {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .faq__header {
@@ -126,6 +146,7 @@
   font-weight: 600;
   line-height: 1.35;
   color: var(--faq-text);
+  overflow-wrap: anywhere;
   transition: color 180ms ease;
 }
 
@@ -187,12 +208,6 @@
   font-size: 0.9375rem;
   line-height: 1.65;
   color: var(--faq-muted);
-}
-
-@media (min-width: 640px) {
-  .faq__container {
-    padding: 0 2rem;
-  }
 }
 
 @media (min-width: 1024px) {

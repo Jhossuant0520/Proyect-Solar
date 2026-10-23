@@ -130,7 +130,7 @@ textarea:focus {
 
 .catalogo button:hover,
 .catalogo button:focus-visible {
-  background: rgba(79, 209, 255, 0.08);
+  background: color-mix(in srgb, var(--solvix-primary) 08%, transparent);
 }
 
 .catalogo span {

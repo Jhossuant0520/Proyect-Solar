@@ -1,5 +1,14 @@
 :host {
   display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+:host *,
+:host *::before,
+:host *::after {
+  box-sizing: border-box;
 }
 
 .catalog-preview {
@@ -21,9 +30,11 @@
 }
 
 .catalog-preview__container {
-  width: min(80rem, 100%);
+  box-sizing: border-box;
+  width: min(72rem, 100%);
+  max-width: 100%;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding-inline: clamp(1rem, 3.5vw, 2.5rem);
 }
 
 .catalog-preview__header {
@@ -90,7 +101,6 @@
 }
 
 .catalog-preview__cta:hover {
-  transform: translateY(-1px);
   box-shadow: 0 8px 18px -14px rgba(0, 97, 148, 0.45);
 }
 
@@ -158,22 +168,20 @@
   border-radius: 1rem;
   background: var(--cp-card);
   box-shadow: 0 1px 3px rgba(19, 27, 46, 0.06);
-  animation: catalog-card-enter 480ms ease both;
-  animation-delay: calc(var(--card-stagger, 0) * 80ms);
   transition:
     transform 200ms ease,
     box-shadow 200ms ease;
 }
 
 .catalog-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   box-shadow:
     0 16px 28px -20px rgba(0, 97, 148, 0.4),
     0 0 0 1px color-mix(in srgb, var(--cp-primary) 10%, transparent);
 }
 
 .catalog-card:hover .catalog-card__image {
-  transform: scale(1.04);
+  transform: scale(1.02);
 }
 
 .catalog-card:hover .catalog-card__link-icon {
@@ -190,10 +198,7 @@
     color-mix(in srgb, var(--cp-card) 70%, var(--cp-border))
   );
   background-size: 200% 100%;
-  animation:
-    catalog-card-enter 480ms ease both,
-    catalog-shimmer 1.2s ease-in-out infinite;
-  animation-delay: calc(var(--card-stagger, 0) * 80ms), 0s;
+  animation: catalog-shimmer 1.2s ease-in-out infinite;
 }
 
 .catalog-card__image-wrap {
@@ -235,7 +240,8 @@
   position: absolute;
   top: 0.5rem;
   left: 0.5rem;
-  max-width: calc(100% - 1rem);
+  box-sizing: border-box;
+  max-width: min(calc(100% - 1rem), 12rem);
   padding: 0.2rem 0.45rem;
   border-radius: 0.35rem;
   background: color-mix(in srgb, var(--cp-card) 92%, transparent);
@@ -300,6 +306,7 @@
 
 .catalog-card__footer {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
@@ -343,6 +350,19 @@
   transition: transform 180ms ease;
 }
 
+@keyframes catalog-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+/*
+  Progressive enhancement: tarjetas visibles por defecto.
+  Enter solo en productos reales cuando motion + IO lo habilitan.
+*/
 @keyframes catalog-card-enter {
   from {
     opacity: 0;
@@ -354,20 +374,29 @@
   }
 }
 
-@keyframes catalog-shimmer {
-  0% {
-    background-position: 100% 0;
+@media (prefers-reduced-motion: no-preference) {
+  /* Oculto solo mientras esperamos el scroll (JS + IO habilitados). */
+  .catalog-preview.is-motion-enabled:not(.is-revealed) .catalog-card--product {
+    opacity: 0;
+    transform: translateY(12px);
   }
-  100% {
-    background-position: -100% 0;
+
+  /*
+    Animación al revelar (tarjetas ya en DOM) o al montar tras reveal
+    (si los datos llegan después del scroll).
+  */
+  .catalog-preview.is-motion-enabled.is-revealed .catalog-card--product {
+    animation: catalog-card-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--card-stagger, 0) * 80ms);
+  }
+
+  .catalog-preview.is-motion-enabled.is-revealed .catalog-card--product:hover {
+    transform: translateY(-2px);
+    transition: transform 200ms ease, box-shadow 200ms ease;
   }
 }
 
 @media (min-width: 640px) {
-  .catalog-preview__container {
-    padding: 0 2rem;
-  }
-
   .catalog-preview__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -387,25 +416,31 @@
   }
 
   .catalog-preview__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .catalog-preview__grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .catalog-card,
+  .catalog-card--product,
   .catalog-card--skeleton,
   .catalog-card__image,
   .catalog-preview__cta,
   .catalog-preview__cta-icon,
   .catalog-card__link-icon {
-    animation: none;
+    animation: none !important;
     transition: none;
-  }
-
-  .catalog-card:hover {
+    opacity: 1;
     transform: none;
   }
 
+  .catalog-card:hover,
   .catalog-card:hover .catalog-card__image,
   .catalog-card:hover .catalog-card__link-icon,
   .catalog-preview__cta:hover .catalog-preview__cta-icon {

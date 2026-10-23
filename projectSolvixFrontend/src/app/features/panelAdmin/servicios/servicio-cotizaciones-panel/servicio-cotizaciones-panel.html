@@ -1,10 +1,22 @@
 <section class="cotizaciones-panel" [class.is-compact]="compactResumen">
   <div class="cotizaciones-head">
-    <solvix-section-header
-      kicker="Economía"
-      title="Cotizaciones"
-      subtitle="Propuestas formales de esta orden. El total oficial lo calcula el servidor."
-    />
+    <div class="cotizaciones-head__title">
+      @if (cotizacionVigente; as vigente) {
+        <p class="kicker-mono">Vigente</p>
+        <h3 class="cot-main-title">
+          Cotización <span class="solvix-mono">{{ vigente.numero }}</span>
+          <span class="cot-main-type">· {{ labelTipo(vigente.tipo) }}</span>
+        </h3>
+      } @else if (!compactResumen) {
+        <solvix-section-header
+          kicker="Economía"
+          title="Cotizaciones"
+          subtitle="Propuestas formales de esta orden. El total oficial lo calcula el servidor."
+        />
+      } @else {
+        <p class="cot-empty-hint">Todavía no hay una cotización vigente.</p>
+      }
+    </div>
     <div class="head-actions">
       @if (puedeCrearInicial) {
         <solvix-button family="tech" rank="secondary" icon="add" (click)="abrirFormulario('inicial')">
@@ -19,7 +31,8 @@
     </div>
   </div>
 
-  @if (cotizacionVigente || (resumenState === 'ready' && resumen)) {
+  <!-- Resumen Subtotal/Total omitido en detalle OT: ya vive en la card de la cotización. -->
+  @if (!compactResumen && (cotizacionVigente || (resumenState === 'ready' && resumen))) {
     <section class="resumen-economico" aria-label="Resumen económico">
       <dl class="resumen-grid resumen-grid--compact">
         @if (cotizacionVigente; as vigente) {
@@ -63,115 +76,297 @@
     />
   } @else {
     @if (cotizacionVigente; as vigente) {
-      <p class="grupo-label">Cotización vigente</p>
+      <p class="grupo-label sr-only">Cotización vigente</p>
       <ul class="lista">
         <li class="card-cot" [class.is-adicional]="vigente.tipo === 'ADICIONAL'">
-          <div class="card-main">
-            <p class="tipo-banner" [class.tipo-banner--adicional]="vigente.tipo === 'ADICIONAL'">
-              {{ vigente.tipo === 'ADICIONAL' ? 'Cotización adicional' : 'Cotización inicial' }}
-            </p>
-            @if (vigente.tipo === 'ADICIONAL') {
-              <p class="tipo-hint">Ampliación de la propuesta inicial.</p>
-            }
-            <div class="card-title">
-              <strong class="solvix-mono">{{ vigente.numero }}</strong>
-              <solvix-badge [tone]="toneEstado(vigente.estado)">
-                {{ labelEstado(vigente.estado) }}
-              </solvix-badge>
+          <div class="card-top-bar">
+            <div class="card-main">
+              <p class="tipo-banner" [class.tipo-banner--adicional]="vigente.tipo === 'ADICIONAL'">
+                {{ vigente.tipo === 'ADICIONAL' ? 'Cotización adicional' : 'Cotización inicial' }}
+              </p>
+              @if (vigente.tipo === 'ADICIONAL') {
+                <p class="tipo-hint">Ampliación de la propuesta inicial.</p>
+              }
+              <div class="card-title">
+                <strong class="solvix-mono">{{ vigente.numero }}</strong>
+                @if (vigente.fechaPresentacion) {
+                  <span class="meta-chip solvix-mono">Presentada {{ fecha(vigente.fechaPresentacion) }}</span>
+                } @else if (vigente.fechaCreacion) {
+                  <span class="meta-chip solvix-mono">Creada {{ fecha(vigente.fechaCreacion) }}</span>
+                }
+                <solvix-badge [tone]="toneEstado(vigente.estado)">
+                  {{ labelEstado(vigente.estado) }}
+                </solvix-badge>
+              </div>
+              <p class="meta">
+                {{ fecha(vigente.fechaCreacion) }}
+                @if (vigente.usuarioCreacion) {
+                  · {{ vigente.usuarioCreacion }}
+                }
+              </p>
+              @if (vigente.motivoAmpliacion) {
+                <p class="motivo"><span>Motivo:</span> {{ vigente.motivoAmpliacion }}</p>
+              }
             </div>
-            <dl class="totales">
-              <div>
-                <dt>Total</dt>
-                <dd class="solvix-mono total">{{ money(vigente.total) }}</dd>
+
+            <div class="card-actions">
+              @if (accionPrimariaCotizacion(vigente) === 'presentar') {
+                <solvix-button
+                  family="tech"
+                  rank="secondary"
+                  type="button"
+                  icon="send"
+                  [disabled]="accionEnCurso"
+                  [loading]="accionTipo === 'presentar' && pdfAccionId === vigente.id"
+                  ariaLabel="Presentar cotización y generar PDF"
+                  (click)="presentar(vigente)"
+                >
+                  {{ accionTipo === 'presentar' && pdfAccionId === vigente.id
+                    ? 'Presentando y generando PDF…'
+                    : 'Presentar' }}
+                </solvix-button>
+              } @else if (accionPrimariaCotizacion(vigente) === 'editar') {
+                <solvix-button
+                  family="tech"
+                  rank="secondary"
+                  type="button"
+                  icon="edit"
+                  [disabled]="accionEnCurso"
+                  (click)="editar(vigente)"
+                >
+                  Editar
+                </solvix-button>
+              } @else if (accionPrimariaCotizacion(vigente) === 'ver-pdf') {
+                <solvix-button
+                  family="tech"
+                  rank="secondary"
+                  type="button"
+                  icon="visibility"
+                  [disabled]="accionEnCurso"
+                  [loading]="accionTipo === 'ver-pdf' && pdfAccionId === vigente.id"
+                  (click)="verPdf(vigente)"
+                >
+                  Ver
+                </solvix-button>
+              } @else {
+                <solvix-button
+                  family="tech"
+                  rank="tertiary"
+                  type="button"
+                  icon="info"
+                  (click)="toggleDetalles(vigente.id)"
+                >
+                  {{ expandidaId === vigente.id ? 'Ocultar' : 'Ver' }}
+                </solvix-button>
+              }
+              <button
+                type="button"
+                class="btn-icon-menu"
+                [matMenuTriggerFor]="menuVigente"
+                aria-label="Más acciones"
+                title="Más acciones"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">more_vert</span>
+              </button>
+              <mat-menu #menuVigente="matMenu" class="solvix-menu menu-cot-acciones" xPosition="before">
+                <button mat-menu-item type="button" class="menu-cot-item" (click)="toggleDetalles(vigente.id)">
+                  <span class="material-symbols-outlined menu-cot-item__icon" aria-hidden="true">list_alt</span>
+                  <span class="menu-cot-item__text">Ver detalles</span>
+                </button>
+                @if (vigente.puedeEditar && canManage) {
+                  <button
+                    mat-menu-item
+                    type="button"
+                    class="menu-cot-item"
+                    [disabled]="accionEnCurso"
+                    (click)="editar(vigente)"
+                  >
+                    <span class="material-symbols-outlined menu-cot-item__icon" aria-hidden="true">edit</span>
+                    <span class="menu-cot-item__text">Editar</span>
+                  </button>
+                }
+                @if (vigente.puedePresentar && canManage) {
+                  <button
+                    mat-menu-item
+                    type="button"
+                    class="menu-cot-item"
+                    [disabled]="accionEnCurso"
+                    (click)="presentar(vigente)"
+                  >
+                    <span class="material-symbols-outlined menu-cot-item__icon" aria-hidden="true">send</span>
+                    <span class="menu-cot-item__text">
+                      {{ accionTipo === 'presentar' ? 'Presentando…' : 'Presentar' }}
+                    </span>
+                  </button>
+                }
+                @if (vigente.puedeAprobar && canManage) {
+                  <button
+                    mat-menu-item
+                    type="button"
+                    class="menu-cot-item"
+                    [disabled]="accionEnCurso"
+                    (click)="aprobar(vigente)"
+                  >
+                    <span class="material-symbols-outlined menu-cot-item__icon" aria-hidden="true">check_circle</span>
+                    <span class="menu-cot-item__text">Aprobar</span>
+                  </button>
+                }
+                @if (vigente.puedeRechazar && canManage) {
+                  <button
+                    mat-menu-item
+                    type="button"
+                    class="menu-cot-item"
+                    [disabled]="accionEnCurso"
+                    (click)="rechazar(vigente)"
+                  >
+                    <span class="material-symbols-outlined menu-cot-item__icon" aria-hidden="true">cancel</span>
+                    <span class="menu-cot-item__text">Rechazar</span>
+                  </button>
+                }
+                @if (puedePdf(vigente) && docDe(vigente)) {
+                  <button
+                    mat-menu-item
+                    type="button"
+                    class="menu-cot-item"
+                    [disabled]="accionEnCurso"
+                    (click)="verPdf(vigente)"
+                  >
+                    <span class="material-symbols-outlined menu-cot-item__icon" aria-hidden="true">visibility</span>
+                    <span class="menu-cot-item__text">Ver PDF</span>
+                  </button>
+                  <button
+                    mat-menu-item
+                    type="button"
+                    class="menu-cot-item"
+                    [disabled]="accionEnCurso"
+                    (click)="descargarPdf(vigente)"
+                  >
+                    <span class="material-symbols-outlined menu-cot-item__icon" aria-hidden="true">download</span>
+                    <span class="menu-cot-item__text">Descargar PDF</span>
+                  </button>
+                } @else if (puedePdf(vigente) && canManage) {
+                  <button
+                    mat-menu-item
+                    type="button"
+                    class="menu-cot-item"
+                    [disabled]="accionEnCurso"
+                    (click)="generarPdf(vigente)"
+                  >
+                    <span class="material-symbols-outlined menu-cot-item__icon" aria-hidden="true">picture_as_pdf</span>
+                    <span class="menu-cot-item__text">
+                      {{
+                        accionTipo === 'generar-pdf' && pdfAccionId === vigente.id
+                          ? 'Generando PDF…'
+                          : 'Generar PDF'
+                      }}
+                    </span>
+                  </button>
+                }
+                @if (vigente.estado === 'BORRADOR' && canManage) {
+                  <div class="menu-cot-divider" role="separator"></div>
+                  <button
+                    mat-menu-item
+                    type="button"
+                    class="menu-cot-item menu-danger"
+                    [disabled]="accionEnCurso"
+                    (click)="eliminar(vigente)"
+                  >
+                    <span class="material-symbols-outlined menu-cot-item__icon" aria-hidden="true">delete</span>
+                    <span class="menu-cot-item__text">Eliminar</span>
+                  </button>
+                }
+              </mat-menu>
+            </div>
+          </div>
+
+          <!-- Tabla comercial de conceptos (Stitch F) -->
+          @if (tieneDetalles(vigente)) {
+            <div class="cot-table-wrap">
+              <table class="cot-table">
+                <thead>
+                  <tr>
+                    <th>Descripción de componente / mano de obra</th>
+                    <th class="col-center">Tipo</th>
+                    <th class="col-center">Cant</th>
+                    <th class="col-right">Valor unitario</th>
+                    <th class="col-right">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (d of detallesDe(vigente); track d.id) {
+                    <tr>
+                      <td>
+                        <span class="cot-item-title">{{ d.descripcion || d.productoNombreSnapshot || '—' }}</span>
+                        @if (d.descripcion && d.productoNombreSnapshot && d.descripcion !== d.productoNombreSnapshot) {
+                          <span class="cot-item-sub solvix-mono">{{ d.productoNombreSnapshot }}</span>
+                        }
+                      </td>
+                      <td class="col-center">
+                        <span class="cot-type-pill" [attr.data-tipo]="d.tipo">
+                          {{ labelDetalle(d.tipo) }}
+                        </span>
+                      </td>
+                      <td class="col-center solvix-mono">{{ d.cantidad }}</td>
+                      <td class="col-right solvix-mono">{{ money(d.precioUnitario) }}</td>
+                      <td class="col-right solvix-mono cot-item-total">{{ money(d.subtotal) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <p class="hint">Sin conceptos registrados en esta cotización.</p>
+          }
+
+          <div class="cot-footer">
+            <div class="cot-footer__obs">
+              @if (vigente.observaciones) {
+                <span class="material-symbols-outlined" aria-hidden="true">info</span>
+                <span>{{ vigente.observaciones }}</span>
+              } @else {
+                <span class="material-symbols-outlined" aria-hidden="true">verified</span>
+                <span>Importes oficiales calculados según conceptos registrados.</span>
+              }
+            </div>
+
+            <dl class="cot-totals-stack solvix-mono">
+              @if (vigente.subtotalRepuestos > 0) {
+                <div class="cot-totals-row is-sub">
+                  <dt>Repuestos:</dt>
+                  <dd>{{ money(vigente.subtotalRepuestos) }}</dd>
+                </div>
+              }
+              @if (vigente.subtotalManoObra > 0) {
+                <div class="cot-totals-row is-sub">
+                  <dt>Mano de obra:</dt>
+                  <dd>{{ money(vigente.subtotalManoObra) }}</dd>
+                </div>
+              }
+              @if (vigente.subtotalOtros > 0) {
+                <div class="cot-totals-row is-sub">
+                  <dt>Otros:</dt>
+                  <dd>{{ money(vigente.subtotalOtros) }}</dd>
+                </div>
+              }
+              <div class="cot-totals-row">
+                <dt>Subtotal:</dt>
+                <dd>{{ money(vigente.subtotal) }}</dd>
+              </div>
+              <div class="cot-totals-row is-grand totales">
+                <dt>Total cotizado:</dt>
+                <dd class="total">{{ money(vigente.total) }}</dd>
               </div>
             </dl>
-            <p class="meta">
-              {{ fecha(vigente.fechaCreacion) }}
-              @if (vigente.usuarioCreacion) {
-                · {{ vigente.usuarioCreacion }}
-              }
-            </p>
-            @if (vigente.motivoAmpliacion) {
-              <p class="motivo"><span>Motivo:</span> {{ vigente.motivoAmpliacion }}</p>
-            }
           </div>
-          <div class="card-actions">
-            @if (accionPrimariaCotizacion(vigente) === 'presentar') {
-              <solvix-button
-                family="tech"
-                rank="secondary"
-                type="button"
-                icon="send"
-                [disabled]="accionEnCurso"
-                [loading]="accionTipo === 'presentar' && pdfAccionId === vigente.id"
-                ariaLabel="Presentar cotización y generar PDF"
-                (click)="presentar(vigente)"
-              >
-                {{ accionTipo === 'presentar' && pdfAccionId === vigente.id
-                  ? 'Presentando y generando PDF…'
-                  : 'Presentar' }}
-              </solvix-button>
-            } @else if (accionPrimariaCotizacion(vigente) === 'editar') {
-              <solvix-button family="tech" rank="secondary" type="button" [disabled]="accionEnCurso" (click)="editar(vigente)">
-                Editar
-              </solvix-button>
-            } @else if (accionPrimariaCotizacion(vigente) === 'ver-pdf') {
-              <solvix-button
-                family="tech"
-                rank="secondary"
-                type="button"
-                icon="visibility"
-                [disabled]="accionEnCurso"
-                [loading]="accionTipo === 'ver-pdf' && pdfAccionId === vigente.id"
-                (click)="verPdf(vigente)"
-              >
-                Ver
-              </solvix-button>
-            } @else {
-              <solvix-button family="tech" rank="tertiary" type="button" (click)="toggleDetalles(vigente.id)">
-                {{ expandidaId === vigente.id ? 'Ocultar' : 'Ver' }}
-              </solvix-button>
-            }
-            <button type="button" class="btn-icon-menu" [matMenuTriggerFor]="menuVigente" aria-label="Más acciones">
-              <span class="material-symbols-outlined" aria-hidden="true">more_vert</span>
-            </button>
-            <mat-menu #menuVigente="matMenu">
-              <button mat-menu-item type="button" (click)="toggleDetalles(vigente.id)">Ver detalles</button>
-              @if (vigente.puedeEditar && canManage) {
-                <button mat-menu-item type="button" [disabled]="accionEnCurso" (click)="editar(vigente)">Editar</button>
-              }
-              @if (vigente.puedePresentar && canManage) {
-                <button mat-menu-item type="button" [disabled]="accionEnCurso" (click)="presentar(vigente)">
-                  {{ accionTipo === 'presentar' ? 'Presentando y generando PDF…' : 'Presentar' }}
-                </button>
-              }
-              @if (vigente.puedeAprobar && canManage) {
-                <button mat-menu-item type="button" [disabled]="accionEnCurso" (click)="aprobar(vigente)">Aprobar</button>
-              }
-              @if (vigente.puedeRechazar && canManage) {
-                <button mat-menu-item type="button" [disabled]="accionEnCurso" (click)="rechazar(vigente)">Rechazar</button>
-              }
-              @if (puedePdf(vigente) && docDe(vigente)) {
-                <button mat-menu-item type="button" [disabled]="accionEnCurso" (click)="verPdf(vigente)">Ver PDF</button>
-                <button mat-menu-item type="button" [disabled]="accionEnCurso" (click)="descargarPdf(vigente)">Descargar PDF</button>
-              } @else if (puedePdf(vigente) && canManage) {
-                <button mat-menu-item type="button" [disabled]="accionEnCurso" (click)="generarPdf(vigente)">
-                  {{ accionTipo === 'generar-pdf' && pdfAccionId === vigente.id ? 'Generando PDF…' : 'Generar PDF' }}
-                </button>
-              }
-              @if (vigente.estado === 'BORRADOR' && canManage) {
-                <button mat-menu-item type="button" [disabled]="accionEnCurso" (click)="eliminar(vigente)">Eliminar</button>
-              }
-            </mat-menu>
-          </div>
+
           @if (expandidaId === vigente.id) {
             <div class="detalles-tecnicos">
               <h4>Detalles técnicos</h4>
-              @if (!vigente.detalles.length) {
+              @if (!tieneDetalles(vigente)) {
                 <p class="hint">Sin líneas.</p>
               } @else {
                 <ul>
-                  @for (d of vigente.detalles; track d.id) {
+                  @for (d of detallesDe(vigente); track d.id) {
                     <li>
                       <span class="tipo">{{ labelDetalle(d.tipo) }}</span>
                       <span class="desc">{{ d.descripcion || d.productoNombreSnapshot || '—' }}</span>
@@ -197,35 +392,51 @@
         <ul class="lista">
           @for (cot of cotizacionesAnteriores; track cot.id) {
             <li class="card-cot is-historial" [class.is-adicional]="cot.tipo === 'ADICIONAL'">
-              <div class="card-main">
-                <p class="tipo-banner" [class.tipo-banner--adicional]="cot.tipo === 'ADICIONAL'">
-                  {{ cot.tipo === 'ADICIONAL' ? 'Cotización adicional' : 'Cotización inicial' }}
-                </p>
-                <div class="card-title">
-                  <strong class="solvix-mono">{{ cot.numero }}</strong>
-                  <solvix-badge [tone]="toneEstado(cot.estado)">{{ labelEstado(cot.estado) }}</solvix-badge>
-                </div>
-                <dl class="totales">
-                  <div>
-                    <dt>Total</dt>
-                    <dd class="solvix-mono total">{{ money(cot.total) }}</dd>
+              <div class="card-top-bar">
+                <div class="card-main">
+                  <p class="tipo-banner" [class.tipo-banner--adicional]="cot.tipo === 'ADICIONAL'">
+                    {{ cot.tipo === 'ADICIONAL' ? 'Cotización adicional' : 'Cotización inicial' }}
+                  </p>
+                  <div class="card-title">
+                    <strong class="solvix-mono">{{ cot.numero }}</strong>
+                    <solvix-badge [tone]="toneEstado(cot.estado)">{{ labelEstado(cot.estado) }}</solvix-badge>
                   </div>
-                </dl>
+                  <dl class="totales">
+                    <div>
+                      <dt>Total</dt>
+                      <dd class="solvix-mono total">{{ money(cot.total) }}</dd>
+                    </div>
+                  </dl>
+                </div>
+                <div class="card-actions">
+                  @if (puedePdf(cot) && docDe(cot)) {
+                    <solvix-button family="tech" rank="tertiary" type="button" icon="visibility" [disabled]="accionEnCurso" (click)="verPdf(cot)">
+                      Ver
+                    </solvix-button>
+                    <solvix-button family="tech" rank="tertiary" type="button" icon="download" [disabled]="accionEnCurso" (click)="descargarPdf(cot)">
+                      Descargar
+                    </solvix-button>
+                  } @else {
+                    <solvix-button family="tech" rank="tertiary" type="button" (click)="toggleDetalles(cot.id)">
+                      {{ expandidaId === cot.id ? 'Ocultar' : 'Ver' }}
+                    </solvix-button>
+                  }
+                </div>
               </div>
-              <div class="card-actions">
-                @if (puedePdf(cot) && docDe(cot)) {
-                  <solvix-button family="tech" rank="tertiary" type="button" icon="visibility" [disabled]="accionEnCurso" (click)="verPdf(cot)">
-                    Ver
-                  </solvix-button>
-                  <solvix-button family="tech" rank="tertiary" type="button" icon="download" [disabled]="accionEnCurso" (click)="descargarPdf(cot)">
-                    Descargar
-                  </solvix-button>
-                } @else {
-                  <solvix-button family="tech" rank="tertiary" type="button" (click)="toggleDetalles(cot.id)">
-                    {{ expandidaId === cot.id ? 'Ocultar' : 'Ver' }}
-                  </solvix-button>
-                }
-              </div>
+              @if (expandidaId === cot.id && tieneDetalles(cot)) {
+                <div class="detalles-tecnicos">
+                  <h4>Conceptos de {{ cot.numero }}</h4>
+                  <ul>
+                    @for (d of detallesDe(cot); track d.id) {
+                      <li>
+                        <span class="tipo">{{ labelDetalle(d.tipo) }}</span>
+                        <span class="desc">{{ d.descripcion || d.productoNombreSnapshot || '—' }}</span>
+                        <span class="solvix-mono qty">{{ d.cantidad }} × {{ money(d.precioUnitario) }} = {{ money(d.subtotal) }}</span>
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
             </li>
           }
         </ul>

@@ -1,4 +1,13 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output
+} from '@angular/core';
 import {
   Subject,
   Subscription,
@@ -33,7 +42,8 @@ type EstadoBusqueda = 'idle' | 'preview' | 'buscando' | 'resultados' | 'vacio' |
   selector: 'app-producto-buscador',
   standalone: true,
   templateUrl: './producto-buscador.html',
-  styleUrl: './producto-buscador.scss'
+  styleUrl: './producto-buscador.scss',
+  host: { '[class.is-open]': 'panelAbierto' }
 })
 export class ProductoBuscadorComponent implements OnInit, OnDestroy {
   @Input() limite = 10;
@@ -50,6 +60,8 @@ export class ProductoBuscadorComponent implements OnInit, OnDestroy {
   resultados: ProductoModel[] = [];
   estado: EstadoBusqueda = 'idle';
   indiceActivo = -1;
+  /** El panel flotante solo se muestra mientras el usuario interactúa con el buscador. */
+  panelAbierto = false;
 
   readonly money = formatMoney;
   readonly minCaracteres = MIN_CARACTERES_BUSQUEDA;
@@ -60,7 +72,10 @@ export class ProductoBuscadorComponent implements OnInit, OnDestroy {
   private previewCache: ProductoModel[] | null = null;
   private previewSub?: Subscription;
 
-  constructor(private productoService: ProductoService) {}
+  constructor(
+    private productoService: ProductoService,
+    private host: ElementRef<HTMLElement>
+  ) {}
 
   ngOnInit(): void {
     this.sub = this.consultas
@@ -111,7 +126,31 @@ export class ProductoBuscadorComponent implements OnInit, OnDestroy {
     return this.estado === 'preview' || this.estado === 'resultados';
   }
 
+  @HostListener('document:click', ['$event'])
+  onClickDocumento(event: Event): void {
+    if (this.panelAbierto && !this.host.nativeElement.contains(event.target as Node)) {
+      this.cerrarPanel();
+    }
+  }
+
+  @HostListener('focusout', ['$event'])
+  onFocusOut(event: FocusEvent): void {
+    const destino = event.relatedTarget as Node | null;
+    if (destino && !this.host.nativeElement.contains(destino)) {
+      this.cerrarPanel();
+    }
+  }
+
+  abrirPanel(): void {
+    this.panelAbierto = true;
+  }
+
+  cerrarPanel(): void {
+    this.panelAbierto = false;
+  }
+
   onFocus(): void {
+    this.panelAbierto = true;
     if (this.texto.trim().length < MIN_CARACTERES_BUSQUEDA) {
       this.mostrarPreview();
     }
@@ -119,6 +158,7 @@ export class ProductoBuscadorComponent implements OnInit, OnDestroy {
 
   onInput(event: Event): void {
     this.texto = (event.target as HTMLInputElement).value;
+    this.panelAbierto = true;
     const t = this.texto.trim();
     if (t.length < MIN_CARACTERES_BUSQUEDA) {
       this.consultas.next(t);
@@ -163,6 +203,7 @@ export class ProductoBuscadorComponent implements OnInit, OnDestroy {
       this.yaAgregado.emit(producto);
       return;
     }
+    this.panelAbierto = false;
     this.seleccionado.emit(producto);
   }
 
@@ -210,6 +251,7 @@ export class ProductoBuscadorComponent implements OnInit, OnDestroy {
   }
 
   private resetAIdle(): void {
+    this.panelAbierto = false;
     this.texto = '';
     this.resultados = [];
     this.indiceActivo = -1;

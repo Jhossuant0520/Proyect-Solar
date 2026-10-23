@@ -1,15 +1,21 @@
 <!-- SERVICES SECTION -->
-<section class="w-full py-space-xl bg-surface-container-low">
+<section
+  #servicesSection
+  class="w-full py-space-xl bg-surface-container-low"
+  [class.is-motion-enabled]="motionEnabled"
+  [class.is-revealed]="revealed"
+>
   <div class="max-w-7xl mx-auto px-margin">
-    <div class="max-w-3xl mb-space-lg">
+    <div class="svc-reveal max-w-3xl mb-space-lg" style="--reveal-i: 0">
       <span class="font-code-spec text-code-spec text-primary font-bold uppercase tracking-wider">Nuestras Capacidades</span>
       <h2 class="font-headline-xl text-headline-xl text-on-surface font-bold mt-space-xs">Soluciones integrales para tu hogar y empresa</h2>
       <p class="font-body-lg text-body-lg text-on-surface-variant mt-space-xs">Atención técnica especializada, infraestructura de seguridad y equipamiento informático.</p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
-      @for (servicio of servicios; track servicio.title) {
+      @for (servicio of servicios; track servicio.title; let i = $index) {
         <div
-          class="svc-card p-space-lg rounded-2xl bg-surface-container-lowest flex flex-col justify-between shadow-sm hover:shadow-md transition-all"
+          class="svc-card svc-reveal p-space-lg rounded-2xl bg-surface-container-lowest flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow"
+          [style.--reveal-i]="i + 1"
           [class.md:col-span-2]="servicio.wide"
           [class.lg:col-span-2]="servicio.wide"
           [class.md:flex-row]="servicio.wide"

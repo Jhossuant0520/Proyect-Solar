@@ -1,6 +1,8 @@
 import {
   Component,
+  ElementRef,
   EventEmitter,
+  HostListener,
   Input,
   OnChanges,
   OnDestroy,
@@ -49,7 +51,8 @@ type EstadoBusqueda =
   selector: 'app-equipo-buscador',
   standalone: true,
   templateUrl: './equipo-buscador.html',
-  styleUrl: './equipo-buscador.scss'
+  styleUrl: './equipo-buscador.scss',
+  host: { '[class.is-open]': 'panelAbierto' }
 })
 export class EquipoBuscadorComponent implements OnInit, OnDestroy, OnChanges {
   @Input() clienteId: number | null = null;
@@ -65,6 +68,8 @@ export class EquipoBuscadorComponent implements OnInit, OnDestroy, OnChanges {
   resultados: EquipoResponseDTO[] = [];
   estado: EstadoBusqueda = 'sin-cliente';
   indiceActivo = -1;
+  /** El panel flotante solo se muestra mientras el usuario interactúa con el buscador. */
+  panelAbierto = false;
 
   readonly minCaracteres = MIN_CARACTERES_BUSQUEDA_EQUIPO;
   readonly previewLimite = PREVIEW_LIMITE_EQUIPO;
@@ -77,7 +82,10 @@ export class EquipoBuscadorComponent implements OnInit, OnDestroy, OnChanges {
   private previewCacheClienteId: number | null | undefined;
   private previewSub?: Subscription;
 
-  constructor(private equipoService: EquipoService) {}
+  constructor(
+    private equipoService: EquipoService,
+    private host: ElementRef<HTMLElement>
+  ) {}
 
   ngOnInit(): void {
     this.sub = this.consultas
@@ -129,6 +137,7 @@ export class EquipoBuscadorComponent implements OnInit, OnDestroy, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['clienteId'] && !changes['clienteId'].firstChange) {
       this.texto = '';
+      this.panelAbierto = false;
       this.resultados = [];
       this.indiceActivo = -1;
       this.previewCache = null;
@@ -161,7 +170,31 @@ export class EquipoBuscadorComponent implements OnInit, OnDestroy, OnChanges {
     return this.estado === 'preview' || this.estado === 'resultados';
   }
 
+  @HostListener('document:click', ['$event'])
+  onClickDocumento(event: Event): void {
+    if (this.panelAbierto && !this.host.nativeElement.contains(event.target as Node)) {
+      this.cerrarPanel();
+    }
+  }
+
+  @HostListener('focusout', ['$event'])
+  onFocusOut(event: FocusEvent): void {
+    const destino = event.relatedTarget as Node | null;
+    if (destino && !this.host.nativeElement.contains(destino)) {
+      this.cerrarPanel();
+    }
+  }
+
+  abrirPanel(): void {
+    this.panelAbierto = true;
+  }
+
+  cerrarPanel(): void {
+    this.panelAbierto = false;
+  }
+
   onFocus(): void {
+    this.panelAbierto = true;
     if (this.requiereCliente && this.clienteId == null) {
       this.estado = 'sin-cliente';
       return;
@@ -173,6 +206,7 @@ export class EquipoBuscadorComponent implements OnInit, OnDestroy, OnChanges {
 
   onInput(event: Event): void {
     this.texto = (event.target as HTMLInputElement).value;
+    this.panelAbierto = true;
     const t = this.texto.trim();
     if (this.requiereCliente && this.clienteId == null) {
       this.estado = 'sin-cliente';
@@ -217,6 +251,7 @@ export class EquipoBuscadorComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   elegir(equipo: EquipoResponseDTO): void {
+    this.panelAbierto = false;
     this.seleccionado = equipo;
     this.texto = '';
     this.resultados = [];
@@ -277,6 +312,7 @@ export class EquipoBuscadorComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private resetAIdle(): void {
+    this.panelAbierto = false;
     this.texto = '';
     this.resultados = [];
     this.indiceActivo = -1;

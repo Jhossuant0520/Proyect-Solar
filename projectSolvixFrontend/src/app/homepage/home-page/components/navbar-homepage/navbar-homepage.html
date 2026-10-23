@@ -20,7 +20,6 @@
       />
       <span class="ce-nav__identity">
         <span class="ce-nav__name">Computer &amp; Electronic</span>
-        <span class="ce-nav__kicker">Tech &amp; Security</span>
       </span>
     </a>
 
@@ -53,8 +52,8 @@
       </a>
       <a class="ce-nav__cta ce-nav__cta--secondary" routerLink="/login">
         <span class="material-symbols-outlined ce-nav__cta-icon" aria-hidden="true">login</span>
-        <span class="ce-nav__cta-full">Portal de clientes</span>
-        <span class="ce-nav__cta-short">Acceso clientes</span>
+        <span class="ce-nav__cta-full">Acceso plataforma</span>
+        <span class="ce-nav__cta-short">Acceso plataforma</span>
       </a>
       <button
         type="button"
@@ -75,36 +74,38 @@
     [class.is-open]="menuOpen"
     [attr.aria-hidden]="!menuOpen"
   >
-    <nav class="ce-nav__mobile-links" aria-label="Navegación móvil">
-      @for (item of menu; track item.label) {
-        @if (item.path) {
-          <a class="ce-nav__link" [routerLink]="item.path" (click)="toggleMenu()">{{ item.label }}</a>
-        } @else if (item.fragment) {
-          <a
-            class="ce-nav__link"
-            [class.is-active]="isActive(item)"
-            routerLink="/"
-            [fragment]="item.fragment"
-            (click)="goToFragment($event, item.fragment)"
-          >
-            {{ item.label }}
-          </a>
+    <div class="ce-nav__mobile-inner">
+      <nav class="ce-nav__mobile-links" aria-label="Navegación móvil">
+        @for (item of menu; track item.label) {
+          @if (item.path) {
+            <a class="ce-nav__link" [routerLink]="item.path" (click)="toggleMenu()">{{ item.label }}</a>
+          } @else if (item.fragment) {
+            <a
+              class="ce-nav__link"
+              [class.is-active]="isActive(item)"
+              routerLink="/"
+              [fragment]="item.fragment"
+              (click)="goToFragment($event, item.fragment)"
+            >
+              {{ item.label }}
+            </a>
+          }
         }
-      }
-    </nav>
-    <div class="ce-nav__mobile-ctas">
-      <a
-        class="ce-nav__cta ce-nav__cta--primary"
-        routerLink="/"
-        fragment="contact"
-        (click)="goToFragment($event, 'contact')"
-      >
-        Solicitar soporte
-      </a>
-      <a class="ce-nav__cta ce-nav__cta--secondary" routerLink="/login" (click)="toggleMenu()">
-        <span class="material-symbols-outlined ce-nav__cta-icon" aria-hidden="true">login</span>
-        Portal de clientes
-      </a>
+      </nav>
+      <div class="ce-nav__mobile-ctas">
+        <a
+          class="ce-nav__cta ce-nav__cta--primary"
+          routerLink="/"
+          fragment="contact"
+          (click)="goToFragment($event, 'contact')"
+        >
+          Solicitar soporte
+        </a>
+        <a class="ce-nav__cta ce-nav__cta--secondary" routerLink="/login" (click)="toggleMenu()">
+          <span class="material-symbols-outlined ce-nav__cta-icon" aria-hidden="true">login</span>
+          Acceso plataforma
+        </a>
+      </div>
     </div>
   </div>
 </header>

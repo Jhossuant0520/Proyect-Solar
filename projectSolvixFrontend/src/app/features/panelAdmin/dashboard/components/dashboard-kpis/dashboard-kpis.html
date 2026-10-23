@@ -13,9 +13,9 @@
         [help]="metric.help ?? ''"
         [statusNote]="nota(metric)"
         [icon]="metric.icon"
-        [variation]="metric.variation?.texto ?? ''"
+        [variation]="variationText(metric)"
         [variationLabel]="comparacion(metric)"
-        [variationType]="metric.variation?.tipo ?? 'neutral'"
+        [variationType]="variationTypeOf(metric)"
         [tone]="tone(metric)"
         [incomplete]="isIncomplete(metric)"
       />

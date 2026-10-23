@@ -1,40 +1,73 @@
 <div class="recepcion-dialog">
   <header class="dlg-head">
-    <p class="kicker">Recepción del equipo</p>
-    <h2>Firma del cliente</h2>
+    <div class="dlg-head__lead">
+      <span class="dlg-head__badge" aria-hidden="true">
+        <span class="material-symbols-outlined">inventory_2</span>
+      </span>
+      <div class="dlg-head__copy">
+        <p class="kicker">Recepción del equipo</p>
+        <h2>Firma del cliente</h2>
+      </div>
+    </div>
+    <button type="button" class="dlg-close" aria-label="Cerrar" (click)="cancelar()">
+      <span class="material-symbols-outlined" aria-hidden="true">close</span>
+    </button>
   </header>
 
   <section class="bloque resumen" aria-label="Resumen de la recepción">
     <dl class="facts">
-      <div>
-        <dt>Cliente</dt>
-        <dd>{{ data.cliente.nombre }}</dd>
+      <div class="facts__card">
+        <span class="facts__icon" aria-hidden="true">
+          <span class="material-symbols-outlined">person</span>
+        </span>
+        <div class="facts__body">
+          <dt>Cliente</dt>
+          <dd [attr.title]="data.cliente.nombre">{{ data.cliente.nombre }}</dd>
+        </div>
       </div>
-      <div>
-        <dt>Equipo</dt>
-        <dd>{{ equipoLabel(data.equipo) }}</dd>
+
+      <div class="facts__card">
+        <span class="facts__icon" aria-hidden="true">
+          <span class="material-symbols-outlined">devices</span>
+        </span>
+        <div class="facts__body">
+          <dt>Equipo</dt>
+          <dd [attr.title]="equipoLabel(data.equipo)">{{ equipoLabel(data.equipo) }}</dd>
+        </div>
       </div>
+
       @if (data.request.problemaReportado) {
-        <div>
-          <dt>Problema</dt>
-          <dd>{{ data.request.problemaReportado }}</dd>
+        <div class="facts__card facts__card--full">
+          <span class="facts__icon facts__icon--warn" aria-hidden="true">
+            <span class="material-symbols-outlined">report</span>
+          </span>
+          <div class="facts__body">
+            <dt>Problema</dt>
+            <dd>{{ data.request.problemaReportado }}</dd>
+          </div>
         </div>
       }
     </dl>
   </section>
 
   <form class="bloque form-recepcion" [formGroup]="form" (ngSubmit)="registrar()">
-    <label class="check">
+    <label class="check" [class.is-checked]="form.controls.clienteConfirmo.value">
       <input type="checkbox" formControlName="clienteConfirmo" />
-      <span>Confirmo la recepción</span>
+      <span class="check__box" aria-hidden="true">
+        <span class="material-symbols-outlined">check</span>
+      </span>
+      <span class="check__copy">
+        <span class="check__title">Confirmo la recepción</span>
+        <span class="check__sub">Autorizo dejar el equipo en taller para revisión y diagnóstico.</span>
+      </span>
     </label>
 
     <div class="grid-2">
-      <label>
+      <label class="field">
         <span class="label-row">Nombre del firmante <span class="req">requerido</span></span>
         <input formControlName="nombreFirmante" maxlength="150" autocomplete="name" />
       </label>
-      <label>
+      <label class="field">
         <span class="label-row">Documento <span class="opt">opcional</span></span>
         <input
           formControlName="documentoFirmante"
@@ -44,13 +77,22 @@
       </label>
     </div>
 
-    <section class="firma-card" aria-label="Área de firma">
-      <h3>Firma</h3>
+    <section class="firma-card" [class.is-firmado]="firmado" aria-label="Área de firma">
+      <div class="firma-card__head">
+        <h3>
+          <span class="material-symbols-outlined" aria-hidden="true">draw</span>
+          Firma
+        </h3>
+        <span class="firma-card__hint">Traza con mouse, dedo o lápiz óptico</span>
+      </div>
       <solvix-signature-pad (firmadoChange)="onFirmadoChange($event)" />
     </section>
 
     @if (error) {
-      <p class="form-error" role="alert">{{ error }}</p>
+      <p class="form-error" role="alert">
+        <span class="material-symbols-outlined" aria-hidden="true">error</span>
+        <span>{{ error }}</span>
+      </p>
     }
 
     <div class="dlg-actions">
@@ -61,6 +103,7 @@
         family="tech"
         rank="primary"
         type="submit"
+        icon="verified"
         [loading]="enviando"
         [disabled]="!puedeRegistrar"
       >

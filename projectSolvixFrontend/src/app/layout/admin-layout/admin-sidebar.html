@@ -1,7 +1,7 @@
-<aside class="admin-sidebar" aria-label="Navegación principal">
+<aside class="admin-sidebar" [attr.aria-label]="brandKicker">
   <div class="admin-sidebar__brand">
-    <p class="admin-sidebar__name">Computer & Electronic </p>
-    <p class="admin-sidebar__kicker solvix-mono">BI Terminal</p>
+    <p class="admin-sidebar__name">{{ brandName }}</p>
+    <p class="admin-sidebar__kicker">{{ brandKicker }}</p>
   </div>
 
   <nav class="admin-sidebar__nav" #nav>
@@ -19,7 +19,8 @@
           <a
             [routerLink]="item.path"
             routerLinkActive="is-active"
-            [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
+            [routerLinkActiveOptions]="{ exact: item.exact ?? item.path === '/dashboard' }"
+            [queryParamsHandling]="preserveQuery ? 'preserve' : ''"
             class="admin-sidebar__link"
           >
             <span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span>

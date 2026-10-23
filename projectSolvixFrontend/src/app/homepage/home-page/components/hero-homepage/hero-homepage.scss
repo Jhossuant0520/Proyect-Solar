@@ -1,5 +1,14 @@
 :host {
   display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+:host *,
+:host *::before,
+:host *::after {
+  box-sizing: border-box;
 }
 
 .hero {
@@ -21,10 +30,14 @@
   --hero-secondary-fixed: #ffdf9a;
   --hero-secondary-deep: #5a4300;
 
+  /* Compensación alineada a la altura real de la navbar fija (no un padding arbitrario). */
+  --hero-nav-offset: 4.5rem;
+  --hero-top-gap: 1rem;
+
   position: relative;
   width: 100%;
   overflow-x: clip;
-  padding: 7rem 0 3.5rem;
+  padding: calc(var(--hero-nav-offset) + var(--hero-top-gap)) 0 2.75rem;
   color: var(--hero-text);
   background: linear-gradient(
     180deg,
@@ -59,32 +72,38 @@
 
 .hero__glow--side {
   top: 50%;
-  right: -12rem;
-  width: 24rem;
-  height: 24rem;
+  right: 0;
+  transform: translate(35%, -50%);
+  width: min(24rem, 55vw);
+  height: min(24rem, 55vw);
+  max-width: 100%;
   background: color-mix(in srgb, var(--hero-primary-dim) 30%, transparent);
 }
 
 .hero__container {
   position: relative;
   z-index: 1;
-  width: min(80rem, 100%);
+  box-sizing: border-box;
+  width: min(72rem, 100%);
+  max-width: 100%;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding-inline: clamp(1rem, 3.5vw, 2.5rem);
 }
 
 .hero__grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+  width: 100%;
+  min-width: 0;
 }
 
 .hero__content {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 1rem;
+  gap: 0.85rem;
   min-width: 0;
 }
 
@@ -105,24 +124,24 @@
   height: 0.5rem;
   border-radius: 50%;
   background: var(--hero-secondary-soft);
-  animation: hero-pulse 2s ease-in-out infinite;
 }
 
 .hero__badge-text {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.75rem;
+  font-size: clamp(0.65rem, 2.8vw, 0.75rem);
   font-weight: 500;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--hero-primary);
   line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .hero__title {
   margin: 0;
   max-width: 18ch;
   font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(2rem, 4.5vw, 3rem);
+  font-size: clamp(1.7rem, 7vw, 3rem);
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.02em;
@@ -150,18 +169,21 @@
 }
 
 .hero__btn {
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
+  max-width: 100%;
   min-height: 2.75rem;
-  padding: 0.7rem 1.35rem;
+  padding: 0.7rem 1.15rem;
   border-radius: 0.75rem;
   font-size: 0.875rem;
   font-weight: 600;
   line-height: 1.25;
   text-decoration: none !important;
-  white-space: nowrap;
+  white-space: normal;
+  text-align: center;
   transition:
     transform 180ms ease,
     box-shadow 180ms ease,
@@ -187,8 +209,11 @@
 }
 
 .hero__btn--primary:hover {
-  transform: translateY(-2px);
   box-shadow: 0 14px 24px -12px rgba(0, 97, 148, 0.55);
+}
+
+.hero__btn--primary:hover .hero__btn-icon {
+  transform: translateX(3px);
 }
 
 .hero__btn--secondary {
@@ -199,17 +224,17 @@
 
 .hero__btn--secondary:hover {
   background: var(--hero-surface-low);
-  transform: translateY(-1px);
   box-shadow: 0 8px 16px -12px rgba(0, 97, 148, 0.35);
 }
 
 .hero__btn--secondary:hover .hero__btn-dot {
-  transform: scale(1.25);
+  transform: scale(1.15);
 }
 
 .hero__btn-icon {
   font-size: 18px;
   line-height: 1;
+  transition: transform 180ms ease;
 }
 
 .hero__btn-dot {
@@ -256,7 +281,9 @@
 }
 
 .hero-panel {
+  box-sizing: border-box;
   width: 100%;
+  max-width: 100%;
   min-width: 0;
   padding: 1.25rem;
   border-radius: 1rem;
@@ -292,14 +319,6 @@
   height: 0.75rem;
 }
 
-.hero-panel__live-ping {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--hero-secondary) 75%, transparent);
-  animation: hero-ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-
 .hero-panel__live-dot {
   position: absolute;
   inset: 0;
@@ -308,11 +327,13 @@
 }
 
 .hero-panel__title {
+  min-width: 0;
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 2.8vw, 1rem);
   font-weight: 600;
   line-height: 1.3;
   color: var(--hero-text);
+  overflow-wrap: anywhere;
 }
 
 .hero-panel__online {
@@ -338,6 +359,7 @@
 
 .hero-panel__item {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.65rem;
@@ -374,7 +396,7 @@
 }
 
 .hero-panel__item:hover .hero-panel__icon {
-  transform: scale(1.08);
+  transform: scale(1.04);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--hero-primary) 12%, transparent);
 }
 
@@ -450,6 +472,32 @@
   overflow-wrap: anywhere;
 }
 
+/* En viewports estrechos: badge debajo del bloque texto/icono, sin cortar. */
+@media (max-width: 767px) {
+  .hero-panel {
+    padding: 1rem;
+  }
+
+  .hero-panel__item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero-panel__item-main {
+    width: 100%;
+  }
+
+  .hero-panel__badge {
+    align-self: flex-start;
+    margin-left: 0;
+  }
+
+  .hero-panel__icon {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+}
+
 .hero-panel__badge--secondary {
   color: var(--hero-secondary-deep);
 }
@@ -479,27 +527,72 @@
   background: var(--hero-primary);
 }
 
-@keyframes hero-pulse {
-  0%,
-  100% {
-    opacity: 0.7;
+/* Entrada discreta: estado base visible; animación solo con motion permitido. */
+@keyframes hero-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
   }
-  50% {
+  to {
     opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@keyframes hero-ping {
-  75%,
-  100% {
-    transform: scale(2);
-    opacity: 0;
+@media (prefers-reduced-motion: no-preference) {
+  .hero__enter--0 {
+    animation: hero-enter 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: 0ms;
+  }
+
+  .hero__enter--1 {
+    animation: hero-enter 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: 80ms;
+  }
+
+  .hero__enter--2 {
+    animation: hero-enter 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: 160ms;
+  }
+
+  .hero__enter--3 {
+    animation: hero-enter 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: 240ms;
+  }
+
+  .hero__enter--4 {
+    animation: hero-enter 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: 320ms;
+  }
+
+  .hero__enter--panel {
+    animation: hero-enter 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: 200ms;
+  }
+
+  .hero-panel__item--enter {
+    animation: hero-enter 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(280ms + var(--panel-i, 0) * 70ms);
   }
 }
 
 @media (min-width: 640px) {
-  .hero__container {
-    padding: 0 2rem;
+  .hero {
+    --hero-nav-offset: 5rem;
+    --hero-top-gap: 1.5rem;
+    padding-bottom: 3.5rem;
+  }
+
+  .hero__grid {
+    gap: 2rem;
+  }
+
+  .hero__content {
+    gap: 1rem;
+  }
+
+  .hero__btn {
+    white-space: nowrap;
   }
 
   .hero__trust-item--desktop {
@@ -507,28 +600,33 @@
   }
 }
 
-@media (min-width: 1024px) {
+/* Dos columnas solo cuando hay espacio real para el panel sin pegarlo al borde. */
+@media (min-width: 1100px) {
   .hero {
-    padding: 8rem 0 4rem;
+    --hero-top-gap: 3rem;
+    padding-bottom: 4rem;
   }
 
   .hero__grid {
-    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-    gap: 2rem;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.95fr);
+    gap: clamp(1.5rem, 2.5vw, 2.5rem);
+    align-items: center;
   }
 
   .hero__title {
     font-size: clamp(2.5rem, 3.4vw, 3rem);
   }
+
+  .hero-panel {
+    max-width: 100%;
+  }
 }
 
-@media (max-width: 420px) {
-  .hero-panel__item {
-    flex-wrap: wrap;
-  }
-
-  .hero-panel__badge {
-    margin-left: 3.15rem;
+@media (max-width: 640px) {
+  .hero__actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .hero__btn {
@@ -537,11 +635,22 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero__badge-dot,
-  .hero-panel__live-ping,
+  .hero__enter,
+  .hero-panel__item--enter,
   .hero__btn,
-  .hero__btn-dot {
-    animation: none;
+  .hero__btn-icon,
+  .hero__btn-dot,
+  .hero-panel__icon,
+  .hero-panel__icon .material-symbols-outlined {
+    animation: none !important;
     transition: none;
+  }
+
+  .hero__btn--primary:hover,
+  .hero__btn--secondary:hover,
+  .hero__btn--primary:hover .hero__btn-icon,
+  .hero-panel__item:hover .hero-panel__icon,
+  .hero-panel__item:hover .hero-panel__icon .material-symbols-outlined {
+    transform: none;
   }
 }

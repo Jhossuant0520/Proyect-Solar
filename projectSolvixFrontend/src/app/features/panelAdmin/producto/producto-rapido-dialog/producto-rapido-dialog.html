@@ -1,8 +1,18 @@
-<div class="producto-rapido">
-  <header class="dlg-head">
-    <p class="kicker">Catálogo</p>
-    <h2>Crear producto</h2>
-    <p>Quedará seleccionado en la línea al guardarlo.</p>
+<div class="ce-dlg producto-rapido">
+  <header class="ce-dlg__head">
+    <div class="ce-dlg__lead">
+      <span class="ce-dlg__badge" aria-hidden="true">
+        <span class="material-symbols-outlined">inventory_2</span>
+      </span>
+      <div class="ce-dlg__copy">
+        <p class="ce-dlg__kicker">Catálogo</p>
+        <h2>Crear producto</h2>
+        <p class="ce-dlg__sub">Quedará seleccionado en la línea al guardarlo.</p>
+      </div>
+    </div>
+    <button type="button" class="ce-dlg__close" aria-label="Cerrar" (click)="cancelar()">
+      <span class="material-symbols-outlined" aria-hidden="true">close</span>
+    </button>
   </header>
 
   <form class="dlg-form" [formGroup]="form" (ngSubmit)="guardar()">
@@ -91,11 +101,11 @@
       <p class="form-error full" role="alert">{{ error }}</p>
     }
 
-    <div class="dlg-actions full">
+    <div class="ce-dlg__actions full">
       <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
         Cancelar
       </solvix-button>
-      <solvix-button family="tech" rank="primary" type="submit" [disabled]="enviando">
+      <solvix-button family="tech" rank="primary" type="submit" icon="add" [disabled]="enviando">
         {{ enviando ? 'Creando…' : 'Crear producto' }}
       </solvix-button>
     </div>

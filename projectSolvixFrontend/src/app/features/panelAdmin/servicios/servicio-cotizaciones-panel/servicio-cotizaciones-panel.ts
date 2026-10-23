@@ -47,7 +47,8 @@ import {
 } from './cotizacion-form-dialog/cotizacion-form-dialog';
 import {
   CotizacionConfirmarDialogComponent,
-  CotizacionConfirmarDialogData
+  CotizacionConfirmarDialogData,
+  CotizacionDecisionDialogResult
 } from './cotizacion-confirmar-dialog/cotizacion-confirmar-dialog';
 import {
   CotizacionRechazarDialogComponent,
@@ -61,6 +62,7 @@ export type CotizacionPanelIntent =
   | 'crear-adicional'
   | 'presentar'
   | 'aprobar'
+  | 'decision'
   | 'scroll';
 
 export interface CotizacionesPanelChange {
@@ -99,6 +101,7 @@ export class ServicioCotizacionesPanelComponent implements OnChanges {
   @Input() canManage = true;
   /** Resumen económico más compacto (detalle C.3). */
   @Input() compactResumen = false;
+  @Input() clienteNombre: string | null = null;
 
   @Output() readonly cotizacionesChange = new EventEmitter<CotizacionesPanelChange>();
   /** Cuando present/approve/reject mueve el estado de la OT. */
@@ -366,10 +369,74 @@ export class ServicioCotizacionesPanelComponent implements OnChanges {
           this.feedback.warning('No hay una cotización pendiente de aprobación.');
         }
         break;
+      case 'decision':
+        if (this.cotizacionAprobable) {
+          this.registrarDecisionCliente(this.cotizacionAprobable);
+        } else {
+          this.feedback.warning('No hay una cotización pendiente de aprobación.');
+        }
+        break;
       case 'scroll':
       default:
         break;
     }
+  }
+
+  registrarDecisionCliente(cotizacion: CotizacionServicioResponseDTO): void {
+    if (!cotizacion.puedeAprobar || this.accionEnCurso) {
+      return;
+    }
+    const ref = this.dialog.open(CotizacionConfirmarDialogComponent, {
+      width: '500px',
+      maxWidth: '96vw',
+      panelClass: 'solvix-dialog-panel',
+      backdropClass: 'solvix-dialog-backdrop',
+      data: {
+        modo: 'decision',
+        numero: cotizacion.numero,
+        clienteNombre: this.clienteNombre,
+        totalFormateado: this.money(cotizacion.total),
+        permiteRechazar: cotizacion.puedeRechazar
+      } satisfies CotizacionConfirmarDialogData
+    });
+    ref.afterClosed().subscribe((result?: boolean | CotizacionDecisionDialogResult) => {
+      if (!result || this.accionEnCurso) {
+        return;
+      }
+      if (result === true || (typeof result === 'object' && result.decision === 'aprobar')) {
+        this.accionEnCurso = true;
+        this.cotizacionService.aprobar(this.ordenId, cotizacion.id).subscribe({
+          next: () => {
+            this.accionEnCurso = false;
+            this.feedback.success('Cotización aprobada.');
+            this.cargar();
+            this.ordenActualizada.emit();
+          },
+          error: err => {
+            this.accionEnCurso = false;
+            this.feedback.error(mensajeErrorServicio(err, 'No pudimos aprobar la cotización.'));
+          }
+        });
+        return;
+      }
+      if (typeof result === 'object' && result.decision === 'rechazar') {
+        this.accionEnCurso = true;
+        this.cotizacionService
+          .rechazar(this.ordenId, cotizacion.id, { observacion: result.observacion ?? null })
+          .subscribe({
+            next: () => {
+              this.accionEnCurso = false;
+              this.feedback.success('Cotización rechazada.');
+              this.cargar();
+              this.ordenActualizada.emit();
+            },
+            error: err => {
+              this.accionEnCurso = false;
+              this.feedback.error(mensajeErrorServicio(err, 'No pudimos rechazar la cotización.'));
+            }
+          });
+      }
+    });
   }
 
   abrirFormulario(modo: CotizacionFormModo, cotizacion?: CotizacionServicioResponseDTO): void {
@@ -540,6 +607,14 @@ export class ServicioCotizacionesPanelComponent implements OnChanges {
         }
       });
     });
+  }
+
+  tieneDetalles(cot: CotizacionServicioResponseDTO | null | undefined): boolean {
+    return Array.isArray(cot?.detalles) && cot.detalles.length > 0;
+  }
+
+  detallesDe(cot: CotizacionServicioResponseDTO | null | undefined) {
+    return Array.isArray(cot?.detalles) ? cot.detalles : [];
   }
 
   toggleDetalles(id: number): void {

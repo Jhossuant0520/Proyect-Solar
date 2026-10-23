@@ -1,32 +1,112 @@
-.cotizacion-confirm-dialog {
-  min-width: min(420px, 92vw);
-  padding: 1.25rem 1.35rem 1.1rem;
-  color: var(--color-text-primary, var(--solvix-text));
-  background: var(--color-surface-1, var(--solvix-surface));
+@use '../../../../../../styles/solvix-dialog' as d;
+
+@include d.dialog;
+
+.ce-dlg {
+  min-width: min(440px, 92vw);
+  max-width: 520px;
 }
 
-.dlg-head h2 {
-  margin: 0 0 0.35rem;
-  font-size: 1.15rem;
-  color: var(--color-primary, var(--solvix-primary));
-}
-
-.dlg-head p {
-  margin: 0;
-  color: var(--color-text-secondary, var(--solvix-text-secondary));
-  font-size: 0.92rem;
-  line-height: 1.4;
+.ref {
+  color: var(--solvix-primary, #006194);
 }
 
 .numero {
-  margin: 0.55rem 0 0;
-  color: var(--solvix-neon, var(--color-primary));
-  font-size: 0.88rem;
+  margin: 0;
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.55rem;
+  background: var(--solvix-primary-soft, #cce5ff);
+  color: var(--solvix-primary, #006194);
+  font-size: 0.9375rem;
+  font-weight: 700;
 }
 
-.dlg-actions {
-  display: flex;
-  justify-content: flex-end;
+.field-kicker {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--solvix-text-muted, #5a6570);
+  margin-bottom: 0.45rem;
+}
+
+.decision-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.6rem;
-  margin-top: 1.1rem;
+}
+
+.decision-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.7rem 0.75rem;
+  border-radius: 0.65rem;
+  border: 1.5px solid var(--solvix-border, #d7e3f0);
+  background: var(--solvix-surface-low, #eef4f9);
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.decision-card input[type='radio'] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.decision-card__icon {
+  flex: 0 0 auto;
+  font-size: 1.2rem;
+  color: var(--solvix-text-muted, #5a6570);
+}
+
+.decision-card__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.decision-card__copy strong {
+  font-size: 0.8125rem;
+  color: var(--solvix-text, #131b2e);
+}
+
+.decision-card__copy span {
+  font-size: 0.72rem;
+  line-height: 1.3;
+  color: var(--solvix-text-muted, #5a6570);
+}
+
+.decision-card--approve.is-selected {
+  border-color: var(--solvix-success, #047857);
+  background: var(--solvix-success-soft, #ecfdf5);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--solvix-success, #047857) 16%, transparent);
+}
+
+.decision-card--approve.is-selected .decision-card__icon,
+.decision-card--approve.is-selected .decision-card__copy strong {
+  color: var(--solvix-success, #047857);
+}
+
+.decision-card--reject.is-selected {
+  border-color: var(--solvix-error, #ba1a1a);
+  background: var(--solvix-danger-soft, #fef2f2);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--solvix-error, #ba1a1a) 16%, transparent);
+}
+
+.decision-card--reject.is-selected .decision-card__icon,
+.decision-card--reject.is-selected .decision-card__copy strong {
+  color: var(--solvix-error, #ba1a1a);
+}
+
+@media (max-width: 560px) {
+  .decision-grid {
+    grid-template-columns: 1fr;
+  }
 }

@@ -3,6 +3,8 @@ export interface AdminNavItem {
   path: string;
   icon: string;
   adminOnly: boolean;
+  /** Si se omite, exact solo aplica a `/dashboard`. */
+  exact?: boolean;
 }
 
 export interface AdminNavGroup {

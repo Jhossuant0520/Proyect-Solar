@@ -22,6 +22,13 @@ export function aplicarPreset(preset: PeriodoPreset, actual: PeriodoFiltro): Per
 
 export const REPORTES_HUB_CARDS = [
   {
+    id: 'analisis',
+    path: '/dashboard/analisis',
+    icon: 'monitoring',
+    title: 'Análisis detallado',
+    subtitle: 'Vistas analíticas del Dashboard con gráficas a espacio completo.'
+  },
+  {
     id: 'ventas',
     path: '/reportes/ventas',
     icon: 'point_of_sale',

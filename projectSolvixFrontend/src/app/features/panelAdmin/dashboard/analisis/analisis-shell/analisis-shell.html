@@ -1,0 +1,9 @@
+<section class="analisis-shell">
+  <solvix-dashboard-header
+    [periodo]="periodo()"
+    [refreshing]="refreshing"
+    (periodoChange)="onPeriodo($event)"
+    (refresh)="onRefresh()"
+  />
+  <router-outlet />
+</section>

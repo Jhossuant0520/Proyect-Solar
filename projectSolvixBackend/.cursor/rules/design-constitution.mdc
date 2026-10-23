@@ -1,0 +1,18 @@
+---
+description: Consultar la constitución global de diseño antes de UI o Stitch; respetar identidad por proyecto
+alwaysApply: true
+---
+
+# Design Constitution — criterios globales
+
+Antes de **diseñar, rediseñar, generar en Stitch o modificar interfaces**:
+
+1. Leer el maestro global: `design-system/DESIGN_CONSTITUTION.md` (raíz del monorepo Solvix). Desde `projectSolvixFrontend` o `projectSolvixBackend` la ruta relativa es `../design-system/DESIGN_CONSTITUTION.md`.
+2. Si existe un `DESIGN.md` de la **superficie o marca** en la que se trabaja, leerlo y aplicarlo. No inventar un `DESIGN.md` ni una identidad nueva solo porque falte el archivo.
+3. Identificar el **perfil de interfaz** (página pública, catálogo, dashboard/admin, formulario/flujo, móvil, editorial) y adaptar densidad, composición y componentes a ese perfil.
+4. Aplicar los **criterios globales** de la constitución (anti-genérico justificado, proceso de investigación, tres direcciones cuando la pantalla sea nueva e importante, accesibilidad, aprobación antes de cambiar diseños existentes).
+5. **No asumir que SOLVIX (solar / cyber-minimalista) es el estilo predeterminado.** Cada marca o producto conserva su identidad. Las rules `solvix-*` valen para el producto SOLVIX; no sustituyen la constitución ni la identidad de Computer & Electronic, Joyería u otros.
+6. **Stitch MCP no hereda automáticamente** las rules de Cursor. Si se usa Stitch, incluir en el prompt los principios globales y del `DESIGN.md` pertinentes de forma explícita.
+7. No transferir paleta, tipografía, efectos o componentes de un proyecto a otro sin decisión documentada en el `DESIGN.md` correspondiente.
+
+Al implementar en código: respetar arquitectura, lógica y convenciones del repositorio; no reinterpretar una dirección de arte aprobada sin autorización.

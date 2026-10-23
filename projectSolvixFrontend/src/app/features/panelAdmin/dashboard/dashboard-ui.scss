@@ -1,8 +1,9 @@
 .dash-panel {
   background: var(--solvix-panel);
-  backdrop-filter: blur(16px);
+  backdrop-filter: none;
   border: 1px solid var(--solvix-border);
-  border-radius: var(--solvix-radius);
+  border-radius: var(--solvix-radius-card);
+  box-shadow: var(--solvix-shadow-sm);
   padding: 1.25rem 1.35rem;
   position: relative;
   overflow: hidden;
@@ -15,8 +16,13 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--solvix-primary), transparent);
-  opacity: 0.55;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--solvix-primary) 55%, transparent),
+    transparent
+  );
+  opacity: 0.4;
 }
 
 .dash-chips {

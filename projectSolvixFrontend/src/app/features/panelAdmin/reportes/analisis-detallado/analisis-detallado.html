@@ -1,0 +1,83 @@
+<section class="analisis-page">
+  <solvix-page-header icon="insights"
+    kicker="Análisis"
+    title="Análisis detallado"
+    subtitle="Visualizaciones operativas con el mismo origen de datos del Dashboard."
+  >
+    <a class="analisis-back" routerLink="/dashboard">Volver al resumen</a>
+    <a class="analisis-back" routerLink="/reportes">Reportes CSV</a>
+  </solvix-page-header>
+
+  <solvix-dashboard-header
+    [periodo]="periodo()"
+    [refreshing]="refreshing()"
+    (periodoChange)="onPeriodo($event)"
+    (refresh)="onRefresh()"
+  />
+
+  <section class="analisis-block" aria-labelledby="comercial-title">
+    <h2 id="comercial-title" class="analisis-block__title">Comercial</h2>
+    <solvix-sales-evolution
+      [points]="serie()"
+      [metrica]="metrica()"
+      [agrupacion]="agrupacion()"
+      [state]="serieState()"
+      (metricaChange)="metrica.set($event)"
+      (agrupacionChange)="onAgrupacion($event)"
+      (retry)="loadAll()"
+    />
+    <div class="analisis-split">
+      <solvix-category-performance
+        [categories]="categorias()"
+        [state]="categoriaState()"
+        (retry)="loadAll()"
+      />
+      <solvix-top-products
+        [products]="ranking()"
+        [criterio]="criterio()"
+        [state]="rankingState()"
+        (criterioChange)="onCriterio($event)"
+        (retry)="loadAll()"
+      />
+    </div>
+  </section>
+
+  <section class="analisis-block" aria-labelledby="productos-title">
+    <h2 id="productos-title" class="analisis-block__title">Productos e inventario</h2>
+    <div class="analisis-split">
+      <solvix-low-performance-products
+        [products]="revision()"
+        [state]="revisionState()"
+        (retry)="loadAll()"
+      />
+      <solvix-abc-analysis
+        [classes]="abc()"
+        [state]="abcState()"
+        detailLink="/reportes/inventario"
+        detailLabel="Ver detalle ABC"
+        (retry)="loadAll()"
+      />
+    </div>
+    <solvix-inventory-health
+      [data]="inventario()"
+      [state]="inventarioState()"
+      (retry)="loadAll()"
+    />
+  </section>
+
+  <section class="analisis-block" aria-labelledby="insights-title">
+    <h2 id="insights-title" class="analisis-block__title">Señales del negocio</h2>
+    <solvix-business-insights
+      [insights]="insights()"
+      [state]="insightsState()"
+      (retry)="loadAll()"
+    />
+  </section>
+
+  <p class="analisis-note">
+    Abastecimiento (compras y gastos) está en
+    <a routerLink="/reportes/compras">Reportes · Compras</a>.
+    El detalle tabular ABC está en
+    <a routerLink="/reportes/inventario">Reportes · Inventario</a>.
+  </p>
+</section>

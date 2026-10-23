@@ -140,6 +140,50 @@ export class DocumentoOrdenServicioService {
     window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
   }
 
+  /**
+   * Dispara el diálogo de impresión del PDF (iframe oculto).
+   * Más fiable que abrir pestaña + print: el visor PDF nativo a menudo no dispara `load`.
+   */
+  imprimirPdf(blob: Blob): void {
+    const url = URL.createObjectURL(blob);
+    const iframe = document.createElement('iframe');
+    iframe.setAttribute('title', 'Imprimir documento');
+    iframe.style.cssText =
+      'position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;pointer-events:none;';
+    iframe.src = url;
+    document.body.appendChild(iframe);
+
+    let printed = false;
+    const cleanup = (): void => {
+      iframe.remove();
+      URL.revokeObjectURL(url);
+    };
+
+    const tryPrint = (): void => {
+      if (printed) {
+        return;
+      }
+      printed = true;
+      try {
+        const frameWin = iframe.contentWindow;
+        if (!frameWin) {
+          window.open(url, '_blank', 'noopener,noreferrer');
+          window.setTimeout(cleanup, 90_000);
+          return;
+        }
+        frameWin.focus();
+        frameWin.print();
+      } catch {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
+      window.setTimeout(cleanup, 90_000);
+    };
+
+    iframe.addEventListener('load', () => window.setTimeout(tryPrint, 300), { once: true });
+    // Fallback si el blob PDF no dispara `load` en el iframe
+    window.setTimeout(tryPrint, 1500);
+  }
+
   /** Dispara descarga con nombre amigable. */
   descargarBlobComoArchivo(blob: Blob, nombreArchivo: string): void {
     const url = URL.createObjectURL(blob);

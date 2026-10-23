@@ -1,0 +1,21 @@
+<section class="analisis-view">
+  <h2 class="analisis-view__heading">Inventario y alertas</h2>
+  <div class="analisis-view__stack">
+    <solvix-inventory-health
+      [data]="inventario()"
+      [state]="inventarioState()"
+      (retry)="retry()"
+    />
+    <solvix-low-performance-products
+      [products]="revision()"
+      [state]="revisionState()"
+      (retry)="retry()"
+    />
+  </div>
+  <p class="analisis-view__note">
+    La gestión de productos y movimientos está en
+    <a routerLink="/productos">Productos</a>
+    e
+    <a routerLink="/inventario">Inventario</a>.
+  </p>
+</section>

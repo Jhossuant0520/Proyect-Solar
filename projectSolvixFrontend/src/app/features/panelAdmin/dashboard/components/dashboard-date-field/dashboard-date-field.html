@@ -1,0 +1,123 @@
+<div class="date-field">
+  <button
+    #trigger
+    type="button"
+    class="date-field__trigger"
+    [attr.aria-label]="ariaLabel + ': ' + displayLabel"
+    [attr.aria-expanded]="open"
+    aria-haspopup="dialog"
+    (click)="toggle()"
+  >
+    <span class="date-field__value">{{ displayLabel }}</span>
+    <span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>
+  </button>
+
+  @if (open) {
+    <div
+      #panel
+      class="date-field__panel"
+      role="dialog"
+      [attr.aria-label]="'Calendario ' + ariaLabel"
+      tabindex="-1"
+      (keydown)="onPanelKeydown($event)"
+    >
+      <div class="date-field__nav">
+        <div class="date-field__title-group">
+          <button
+            type="button"
+            class="date-field__title-btn"
+            [attr.aria-expanded]="mode === 'months'"
+            aria-label="Elegir mes"
+            (click)="toggleMonthPicker()"
+          >
+            {{ monthTitle }}
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_drop_down</span>
+          </button>
+          <div class="date-field__year-spin" role="group" aria-label="Cambiar año">
+            <button type="button" class="date-field__spin" aria-label="Año siguiente" (click)="nextYear()">
+              <span class="material-symbols-outlined" aria-hidden="true">keyboard_arrow_up</span>
+            </button>
+            <button type="button" class="date-field__spin" aria-label="Año anterior" (click)="prevYear()">
+              <span class="material-symbols-outlined" aria-hidden="true">keyboard_arrow_down</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="date-field__month-arrows">
+          <button type="button" class="date-field__nav-btn" aria-label="Mes anterior" (click)="prevMonth()">
+            <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+          </button>
+          <button type="button" class="date-field__nav-btn" aria-label="Mes siguiente" (click)="nextMonth()">
+            <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+          </button>
+        </div>
+      </div>
+
+      @if (mode === 'days') {
+        <div class="date-field__body" [attr.data-slide]="slideDir">
+          <div class="date-field__weekdays" aria-hidden="true">
+            @for (day of weekdays; track day) {
+              <span>{{ day }}</span>
+            }
+          </div>
+
+          <div class="date-field__grid" role="grid" [attr.aria-label]="monthTitle">
+            @for (day of days; track day.iso) {
+              <button
+                type="button"
+                class="date-field__day"
+                role="gridcell"
+                [class.is-outside]="!day.inMonth"
+                [class.is-today]="day.isToday"
+                [class.is-selected]="day.isSelected"
+                [class.is-focused]="day.iso === focusedIso"
+                [attr.aria-selected]="day.isSelected"
+                [attr.aria-current]="day.isToday ? 'date' : null"
+                [attr.tabindex]="day.iso === focusedIso ? 0 : -1"
+                (click)="selectDay(day)"
+                (focus)="focusedIso = day.iso"
+              >
+                {{ day.day }}
+              </button>
+            }
+          </div>
+        </div>
+      } @else if (mode === 'months') {
+        <div class="date-field__picker" role="listbox" aria-label="Meses">
+          @for (month of months; track month; let i = $index) {
+            <button
+              type="button"
+              class="date-field__picker-item"
+              role="option"
+              [class.is-active]="i === viewMonth.getMonth()"
+              [attr.aria-selected]="i === viewMonth.getMonth()"
+              (click)="pickMonth(i)"
+            >
+              {{ month }}
+            </button>
+          }
+        </div>
+      } @else {
+        <div class="date-field__picker date-field__picker--years" role="listbox" aria-label="Años">
+          @for (year of yearOptions; track year) {
+            <button
+              type="button"
+              class="date-field__picker-item"
+              role="option"
+              [class.is-active]="year === viewMonth.getFullYear()"
+              [attr.aria-selected]="year === viewMonth.getFullYear()"
+              (click)="pickYear(year)"
+            >
+              {{ year }}
+            </button>
+          }
+        </div>
+      }
+
+      <div class="date-field__footer">
+        <button type="button" class="date-field__link" (click)="clearDate()">Borrar</button>
+        <button type="button" class="date-field__link" (click)="selectToday()">Hoy</button>
+      </div>
+    </div>
+  }
+</div>
