@@ -18,9 +18,12 @@
   /* Evita texto claro de UA por html[data-theme=dark] / color-scheme: dark. */
   color-scheme: light;
 
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+
   position: relative;
   isolation: isolate;
   overflow: clip;
+  overflow-anchor: none;
   min-height: 100vh;
   padding: 2rem 1.25rem 4rem;
   background: var(--ce-bg);
@@ -536,6 +539,7 @@
   position: absolute;
   top: calc(100% + 0.4rem);
   right: 0;
+  transform-origin: top right;
   z-index: 20;
   width: max(100%, 18rem);
   max-width: min(24rem, calc(100vw - 2.5rem));
@@ -885,13 +889,11 @@
   border: 1px solid var(--ce-border);
   box-shadow: 0 1px 3px rgba(19, 27, 46, 0.06);
   transition:
-    transform 200ms ease,
     box-shadow 200ms ease,
     border-color 200ms ease;
 }
 
 .card:hover {
-  transform: translateY(-2px);
   box-shadow:
     0 16px 28px -20px rgba(0, 97, 148, 0.35),
     0 0 0 1px color-mix(in srgb, var(--ce-primary) 12%, transparent);
@@ -1034,26 +1036,68 @@
   white-space: nowrap;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .catalog.is-motion-enabled:not(.is-revealed) .card {
+@keyframes catalog-rise {
+  from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(10px);
   }
-
-  .catalog.is-motion-enabled.is-revealed .card {
+  to {
     opacity: 1;
     transform: translateY(0);
-    transition:
-      opacity 420ms cubic-bezier(0.22, 1, 0.36, 1),
-      transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 200ms ease,
-      border-color 200ms ease;
-    transition-delay: calc(var(--card-i, 0) * 70ms);
+  }
+}
+
+@keyframes catalog-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .catalog.is-enter .catalog-back {
+    animation: catalog-rise 240ms var(--ease-out) both;
   }
 
-  .catalog.is-motion-enabled.is-revealed .card:hover {
-    transform: translateY(-2px);
-    transition-delay: 0ms;
+  .catalog.is-enter .catalog-header {
+    animation: catalog-rise 280ms var(--ease-out) both;
+    animation-delay: 40ms;
+  }
+
+  .catalog.is-enter .catalog-toolbar {
+    animation: catalog-rise 280ms var(--ease-out) both;
+    animation-delay: 80ms;
+  }
+
+  .catalog.is-enter .card {
+    animation: catalog-rise 300ms var(--ease-out) both;
+    animation-delay: calc(120ms + min(var(--card-i, 0), 7) * 40ms);
+    transition: none;
+  }
+
+  .cat-select__menu {
+    animation: catalog-menu-in 160ms var(--ease-out) both;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .card {
+      transition:
+        transform 180ms var(--ease-out),
+        box-shadow 200ms ease,
+        border-color 200ms ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+    }
+
+    .catalog.is-enter .card:hover {
+      transform: none;
+    }
   }
 }
 
@@ -1135,7 +1179,11 @@
   }
 
   .card,
-  .catalog.is-motion-enabled .card {
+  .catalog.is-enter .card,
+  .catalog.is-enter .catalog-back,
+  .catalog.is-enter .catalog-header,
+  .catalog.is-enter .catalog-toolbar,
+  .cat-select__menu {
     opacity: 1;
     transform: none;
   }

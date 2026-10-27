@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subject, switchMap, takeUntil } from 'rxjs';
@@ -8,7 +8,8 @@ import { formatMoney } from '../../../../../features/panelAdmin/dashboard/utils/
 import { resolverUrlMedia } from '../../../../../core/utils/media-url';
 import {
   enlaceWhatsAppProducto,
-  labelDisponibilidad
+  labelDisponibilidad,
+  subirPaginaAlInicio
 } from '../catalogo-ui';
 
 type DetalleViewState = 'LOADING' | 'SUCCESS' | 'ERROR';
@@ -20,7 +21,7 @@ type DetalleViewState = 'LOADING' | 'SUCCESS' | 'ERROR';
   templateUrl: './catalog-detail.html',
   styleUrl: './catalog-detail.scss'
 })
-export class CatalogDetail implements OnInit, OnDestroy {
+export class CatalogDetail implements OnInit, AfterViewInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   viewState: DetalleViewState = 'LOADING';
@@ -37,6 +38,7 @@ export class CatalogDetail implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    subirPaginaAlInicio();
     this.route.paramMap
       .pipe(
         switchMap(params => {
@@ -53,12 +55,18 @@ export class CatalogDetail implements OnInit, OnDestroy {
           this.producto = producto;
           this.whatsappUrl = enlaceWhatsAppProducto(producto);
           this.viewState = 'SUCCESS';
+          subirPaginaAlInicio();
         },
         error: () => {
           this.producto = null;
           this.viewState = 'ERROR';
         }
       });
+  }
+
+  ngAfterViewInit(): void {
+    subirPaginaAlInicio();
+    setTimeout(() => subirPaginaAlInicio());
   }
 
   ngOnDestroy(): void {

@@ -1,9 +1,9 @@
 import {
+  AfterViewInit,
   ChangeDetectorRef,
   Component,
   ElementRef,
   HostListener,
-  NgZone,
   OnDestroy,
   OnInit,
   ViewChild,
@@ -20,7 +20,8 @@ import { resolverUrlMedia } from '../../../../core/utils/media-url';
 import { prefersReducedMotion } from '../../../../shared/utils/count-up';
 import {
   filtrarProductosCatalogo,
-  labelDisponibilidad
+  labelDisponibilidad,
+  subirPaginaAlInicio
 } from './catalogo-ui';
 
 type CatalogoViewState = 'LOADING' | 'SUCCESS' | 'EMPTY' | 'ERROR';
@@ -32,10 +33,9 @@ type CatalogoViewState = 'LOADING' | 'SUCCESS' | 'EMPTY' | 'ERROR';
   templateUrl: './catalog.html',
   styleUrl: './catalog.scss'
 })
-export class Catalog implements OnInit, OnDestroy {
+export class Catalog implements OnInit, AfterViewInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
   private readonly cdr = inject(ChangeDetectorRef);
-  private readonly zone = inject(NgZone);
   private readonly catalogoService = inject(CatalogoService);
 
   viewState: CatalogoViewState = 'LOADING';
@@ -45,9 +45,8 @@ export class Catalog implements OnInit, OnDestroy {
   busqueda = '';
   imagenesRotas = new Set<number>();
 
-  /** Enter de cards: visible por defecto; motion solo tras SUCCESS + no-PRM. */
-  motionEnabled = false;
-  revealed = false;
+  /** Entrada de la página: una sola vez al cargar. No se repite al filtrar. */
+  entrando = false;
 
   private safetyTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -66,7 +65,14 @@ export class Catalog implements OnInit, OnDestroy {
   readonly labelDisponibilidad = labelDisponibilidad;
 
   ngOnInit(): void {
+    subirPaginaAlInicio();
     this.cargar();
+  }
+
+  ngAfterViewInit(): void {
+    subirPaginaAlInicio();
+    // El navegador aplica el scroll heredado después del primer pintado.
+    setTimeout(() => subirPaginaAlInicio());
   }
 
   ngOnDestroy(): void {
@@ -125,8 +131,7 @@ export class Catalog implements OnInit, OnDestroy {
 
   cargar(): void {
     this.clearSafetyTimer();
-    this.motionEnabled = false;
-    this.revealed = false;
+    this.entrando = false;
     this.viewState = 'LOADING';
     this.imagenesRotas.clear();
 
@@ -140,17 +145,20 @@ export class Catalog implements OnInit, OnDestroy {
           this.productos = productos;
           this.categorias = categorias;
           this.viewState = productos.length === 0 ? 'EMPTY' : 'SUCCESS';
+          if (this.viewState === 'SUCCESS' && !prefersReducedMotion()) {
+            this.entrando = true;
+          }
           this.cdr.detectChanges();
-          if (this.viewState === 'SUCCESS') {
-            this.setupReveal();
+          subirPaginaAlInicio();
+          if (this.entrando) {
+            this.programarFinEntrada();
           }
         },
         error: () => {
           this.productos = [];
           this.categorias = [];
           this.viewState = 'ERROR';
-          this.motionEnabled = false;
-          this.revealed = false;
+          this.entrando = false;
         }
       });
   }
@@ -273,11 +281,20 @@ export class Catalog implements OnInit, OnDestroy {
     this.scrollOpcionActiva();
   }
 
+  /** Mueve solo el menú. `scrollIntoView` también desplaza la página. */
   private scrollOpcionActiva(): void {
-    const el = this.categoriaListbox?.nativeElement.querySelector<HTMLElement>(
-      `#${this.opcionId(this.categoriaIndiceActivo)}`
-    );
-    el?.scrollIntoView({ block: 'nearest' });
+    const menu = this.categoriaListbox?.nativeElement;
+    const el = menu?.querySelector<HTMLElement>(`#${this.opcionId(this.categoriaIndiceActivo)}`);
+    if (!menu || !el) {
+      return;
+    }
+    const menuRect = menu.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    if (elRect.top < menuRect.top) {
+      menu.scrollTop -= menuRect.top - elRect.top;
+    } else if (elRect.bottom > menuRect.bottom) {
+      menu.scrollTop += elRect.bottom - menuRect.bottom;
+    }
   }
 
   onImagenError(productoId: number): void {
@@ -292,50 +309,14 @@ export class Catalog implements OnInit, OnDestroy {
     return resolverUrlMedia(producto.imagenUrl);
   }
 
-  /**
-   * En /Catalogo la página ya está en viewport.
-   * Animamos al llegar SUCCESS (stagger), no al scroll.
-   */
-  private setupReveal(): void {
-    if (prefersReducedMotion()) {
-      return;
-    }
-
-    try {
-      this.motionEnabled = true;
-      this.revealed = false;
+  /** Quita la clase al terminar para que buscar no vuelva a animar las tarjetas. */
+  private programarFinEntrada(): void {
+    this.clearSafetyTimer();
+    this.safetyTimer = setTimeout(() => {
+      this.entrando = false;
+      this.safetyTimer = null;
       this.cdr.markForCheck();
-
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          this.zone.run(() => this.markRevealed());
-        });
-      });
-
-      this.safetyTimer = setTimeout(() => {
-        if (this.motionEnabled && !this.revealed) {
-          this.zone.run(() => this.failOpen());
-        }
-      }, 2000);
-    } catch {
-      this.failOpen();
-    }
-  }
-
-  private markRevealed(): void {
-    if (this.revealed) {
-      return;
-    }
-    this.revealed = true;
-    this.cdr.markForCheck();
-    this.clearSafetyTimer();
-  }
-
-  private failOpen(): void {
-    this.motionEnabled = false;
-    this.revealed = false;
-    this.cdr.markForCheck();
-    this.clearSafetyTimer();
+    }, 760);
   }
 
   private clearSafetyTimer(): void {
