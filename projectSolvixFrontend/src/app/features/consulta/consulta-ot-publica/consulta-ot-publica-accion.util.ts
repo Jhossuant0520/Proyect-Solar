@@ -6,7 +6,7 @@ import { HttpErrorResponse } from '@angular/common/http';
  */
 export function mensajeErrorAccionPublicaCotizacion(error: unknown): string {
   if (!(error instanceof HttpErrorResponse)) {
-    return 'No se pudo completar la acción. Intenta de nuevo o contacta al taller.';
+    return 'No se pudo completar la acción. Intenta de nuevo o contacta a Lab de ingeniería.';
   }
   if (error.status === 429) {
     return 'Se alcanzó el límite de intentos. Espera unos minutos y vuelve a intentarlo.';
@@ -32,7 +32,7 @@ export function mensajeErrorAccionPublicaCotizacion(error: unknown): string {
   if (error.status === 400) {
     return mensajeBackendO(error, 'No se pudo completar la acción con la cotización actual.');
   }
-  return 'No se pudo completar la acción. Intenta de nuevo o contacta al taller.';
+  return 'No se pudo completar la acción. Intenta de nuevo o contacta a Lab de ingeniería.';
 }
 
 function mensajeBackendO(error: HttpErrorResponse, fallback: string): string {

@@ -54,11 +54,26 @@ export class ConsultaOtPublicaComponent implements OnInit {
   buscandoOrden = false;
   errorBusqueda = '';
 
-  /** Duración de la transición ambiental (en ms). En Karma tests es 0 para ejecución sincrónica. */
+  /** Duración de la transición ambiental (en ms). Lenta y sutil en cliente (2500ms), 0 en tests. */
   duracionLoaderMs: number =
     typeof window !== 'undefined' && (window as unknown as { __karma__?: unknown }).__karma__
       ? 0
-      : 1600;
+      : 2500;
+
+  /** Control de la primera vista interactiva con el token */
+  mostrarIntroBienvenida: boolean =
+    typeof window !== 'undefined' && (window as unknown as { __karma__?: unknown }).__karma__
+      ? false
+      : true;
+  desvaneciendoIntro = false;
+
+  continuarAOrden(): void {
+    this.desvaneciendoIntro = true;
+    setTimeout(() => {
+      this.mostrarIntroBienvenida = false;
+      this.desvaneciendoIntro = false;
+    }, 380);
+  }
 
   vistaCotizacion: VistaCotizacion = 'cerrada';
   cotizacion: ConsultaCotizacionOtPublicaDTO | null = null;
@@ -129,7 +144,7 @@ export class ConsultaOtPublicaComponent implements OnInit {
 
   detalleFase(codigo: string, estado: string): string {
     if (codigo === 'RECEPCION') {
-      return 'Ingreso a taller y registro';
+      return 'Ingreso a Lab de ingeniería y registro';
     }
     if (codigo === 'DIAGNOSTICO') {
       return estado === 'completada' ? 'Pruebas en banco técnico' : 'Evaluación técnica';
@@ -141,7 +156,7 @@ export class ConsultaOtPublicaComponent implements OnInit {
       return estado === 'actual' ? 'Intervención en curso' : 'Intervención técnica certificada';
     }
     if (codigo === 'ENTREGA') {
-      return estado === 'actual' ? 'Listo para entrega en taller' : 'Control de calidad y entrega';
+      return estado === 'actual' ? 'Listo para entrega en Lab de ingeniería' : 'Control de calidad y entrega';
     }
     return '';
   }
@@ -308,7 +323,7 @@ export class ConsultaOtPublicaComponent implements OnInit {
       error: () => {
         this.cotizacion = null;
         this.vistaCotizacion = 'error';
-        this.cotizacionError = 'No pudimos cargar la cotización. Contáctanos al taller.';
+        this.cotizacionError = 'No pudimos cargar la cotización. Contáctanos a Lab de ingeniería.';
       }
     });
   }
@@ -439,14 +454,18 @@ export class ConsultaOtPublicaComponent implements OnInit {
 
   /** Inicia la consulta respetando la transición ambiental C&E */
   private iniciarCargaConAmbient(): void {
+    const errorFallback = () => {
+      this.faseExperiencia = 'bienvenida';
+      this.errorBusqueda =
+        'No pudimos mostrar la orden con ese enlace o ya no es válido. Ingresa aquí el código para buscarla:';
+    };
+
     if (this.duracionLoaderMs <= 0) {
       this.cargarConsulta(
         () => {
           this.faseExperiencia = 'seguimiento';
         },
-        () => {
-          this.faseExperiencia = 'seguimiento';
-        }
+        errorFallback
       );
       return;
     }
@@ -468,11 +487,9 @@ export class ConsultaOtPublicaComponent implements OnInit {
         const elapsed = Date.now() - start;
         const wait = Math.max(0, this.duracionLoaderMs - elapsed);
         if (wait > 0) {
-          setTimeout(() => {
-            this.faseExperiencia = 'seguimiento';
-          }, wait);
+          setTimeout(errorFallback, wait);
         } else {
-          this.faseExperiencia = 'seguimiento';
+          errorFallback();
         }
       }
     );
@@ -504,6 +521,7 @@ export class ConsultaOtPublicaComponent implements OnInit {
         this.ux = estadoOrdenUx(dto.estadoCodigo);
         this.state = 'ready';
         this.faseExperiencia = 'seguimiento';
+        this.mostrarIntroBienvenida = false;
         if (!this.puedeVerCotizacion) {
           this.vistaCotizacion = 'cerrada';
           this.cotizacion = null;
