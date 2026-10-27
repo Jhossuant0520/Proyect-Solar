@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -108,15 +109,144 @@ describe('ServicioFormComponent — wizard', () => {
     expect(fixture.nativeElement.querySelector('app-equipo-buscador')).not.toBeNull();
   }));
 
-  it('crea cliente inline y lo preselecciona', fakeAsync(() => {
+  it('Estado A: al seleccionar un cliente existente oculta formulario y botón de nuevo cliente, y permite continuar', fakeAsync(() => {
     fixture.detectChanges();
     tick();
+
+    // Sin cliente: muestra buscador y botón Nuevo cliente, Continuar deshabilitado
+    expect(fixture.nativeElement.querySelector('app-cliente-buscador')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Nuevo cliente');
+    const btnContinuar = fixture.nativeElement.querySelector('.wizard-actions solvix-button button') as HTMLButtonElement;
+    expect(btnContinuar.disabled).toBeTrue();
+
+    // Selecciona cliente
+    component.onClienteSeleccionado(clienteAna);
+    fixture.detectChanges();
+
+    // Formulario oculto, botón Nuevo cliente oculto, Continuar habilitado
+    expect(component.mostrarCrearCliente).toBeFalse();
+    expect(fixture.nativeElement.querySelector('.inline-form')).toBeNull();
+    expect(fixture.nativeElement.textContent).not.toContain('Nuevo cliente');
+    expect(fixture.nativeElement.textContent).not.toContain('Guardar cliente');
+    expect(btnContinuar.disabled).toBeFalse();
+
+    component.continuarDesdeCliente();
+    fixture.detectChanges();
+    expect(component.paso).toBe(2);
+  }));
+
+  it('Estado B: permite crear persona natural con campos del contrato real', fakeAsync(() => {
+    fixture.detectChanges();
+    tick();
+
     component.abrirCrearCliente();
-    component.clienteInline.setValue({ nombre: 'Nuevo', telefono: '', numeroDocumento: '' });
+    fixture.detectChanges();
+
+    expect(component.clienteInline.controls.tipoCliente.value).toBe('PERSONA');
+    expect(component.clienteInline.controls.tipoDocumento.value).toBe('CC');
+
+    component.clienteInline.patchValue({
+      nombre: 'Pedro Pérez',
+      numeroDocumento: '1098765432',
+      telefono: '3109876543',
+      email: 'pedro@ejemplo.com',
+      notas: 'Cliente referido'
+    });
+
     component.guardarClienteInline();
     tick();
-    expect(clienteService.crear).toHaveBeenCalled();
+
+    expect(clienteService.crear).toHaveBeenCalledWith({
+      nombre: 'Pedro Pérez',
+      tipoCliente: 'PERSONA',
+      tipoDocumento: 'CC',
+      numeroDocumento: '1098765432',
+      telefono: '3109876543',
+      email: 'pedro@ejemplo.com',
+      notas: 'Cliente referido',
+      activo: true
+    });
     expect(component.form.controls.clienteId.value).toBe(55);
+    expect(component.paso).toBe(2);
+  }));
+
+  it('Estado B: permite crear empresa con razón social y NIT', fakeAsync(() => {
+    fixture.detectChanges();
+    tick();
+
+    component.abrirCrearCliente();
+    component.onTipoClienteChange('EMPRESA');
+    fixture.detectChanges();
+
+    expect(component.clienteInline.controls.tipoCliente.value).toBe('EMPRESA');
+    expect(component.clienteInline.controls.tipoDocumento.value).toBe('NIT');
+
+    component.clienteInline.patchValue({
+      nombre: 'Soluciones Tecnológicas S.A.S.',
+      numeroDocumento: '901234567-8',
+      telefono: '6012345678',
+      email: 'contacto@soluciones.com',
+      notas: 'Contacto: Ing. Mauricio Gómez'
+    });
+
+    component.guardarClienteInline();
+    tick();
+
+    expect(clienteService.crear).toHaveBeenCalledWith({
+      nombre: 'Soluciones Tecnológicas S.A.S.',
+      tipoCliente: 'EMPRESA',
+      tipoDocumento: 'NIT',
+      numeroDocumento: '901234567-8',
+      telefono: '6012345678',
+      email: 'contacto@soluciones.com',
+      notas: 'Contacto: Ing. Mauricio Gómez',
+      activo: true
+    });
+    expect(component.paso).toBe(2);
+  }));
+
+  it('Estado C: mientras se crea cliente, Continuar no aparece, Cancelar restaura estado y evita envíos duplicados', fakeAsync(() => {
+    fixture.detectChanges();
+    tick();
+
+    component.abrirCrearCliente();
+    fixture.detectChanges();
+
+    // Continuar no debe aparecer mientras la creación esté pendiente
+    const botones = fixture.nativeElement.querySelectorAll('solvix-button');
+    const textoBotones = Array.from(botones).map((b: any) => b.textContent?.trim());
+    expect(textoBotones).toContain('Cancelar');
+    expect(textoBotones).toContain('Guardar cliente');
+    expect(textoBotones).not.toContain('Continuar');
+
+    // Cancelar devuelve al estado anterior sin avanzar ni guardar
+    component.cancelarCrearCliente();
+    fixture.detectChanges();
+    expect(component.mostrarCrearCliente).toBeFalse();
+    expect(component.paso).toBe(1);
+    expect(clienteService.crear).not.toHaveBeenCalled();
+
+    // Guardado con error mantiene los datos ingresados
+    component.abrirCrearCliente();
+    component.clienteInline.patchValue({ nombre: 'Empresa Duplicada', numeroDocumento: '123' });
+    clienteService.crear.and.returnValue(throwError(() => new HttpErrorResponse({
+      error: 'Ya existe un cliente con ese documento.',
+      status: 400
+    })));
+
+    component.guardarClienteInline();
+    tick();
+
+    expect(component.creandoCliente).toBeFalse();
+    expect(component.inlineError).toContain('Ya existe un cliente');
+    expect(component.clienteInline.controls.nombre.value).toBe('Empresa Duplicada');
+    expect(component.paso).toBe(1);
+
+    // Evita envíos duplicados mientras está en proceso
+    component.creandoCliente = true;
+    clienteService.crear.calls.reset();
+    component.guardarClienteInline();
+    expect(clienteService.crear).not.toHaveBeenCalled();
   }));
 
   it('crea equipo inline y lo preselecciona', fakeAsync(() => {

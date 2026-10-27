@@ -12,6 +12,8 @@ export class FooterHomepage {
   currentYear = new Date().getFullYear();
   /** Slot para el PNG oficial. Colocar el archivo en `public/LogoEmpresa1.png`. */
   readonly logoSrc = '/LogoEmpresa1.png';
-  readonly whatsappLabel = '+57 317 290 1206';
-  readonly whatsappUrl = 'https://wa.me/573172901206';
+  readonly whatsappLabel = '+57 302 5499616';
+  readonly whatsappUrl = 'https://wa.me/573025499616';
+  readonly direccion = 'B.Gaitan Calle 50 #53-04';
+  readonly telefono = '+57 302 5499616';
 }

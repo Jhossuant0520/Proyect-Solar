@@ -78,4 +78,12 @@ describe('LoginComponent', () => {
 
     expect(authServiceMock.login).toHaveBeenCalledWith('juan', 'pass123');
   });
+
+  it('no debe mostrar la opción de registrarse o crear cuenta', () => {
+    const elemento = fixture.nativeElement as HTMLElement;
+    expect(elemento.querySelector('a[routerLink="/register"]')).toBeNull();
+    expect(elemento.querySelector('.link-register')).toBeNull();
+    expect(elemento.textContent).not.toContain('Crear cuenta');
+    expect(elemento.textContent).not.toContain('Registrarse');
+  });
 });

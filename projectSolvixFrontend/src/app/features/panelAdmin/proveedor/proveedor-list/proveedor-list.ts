@@ -116,7 +116,14 @@ export class ProveedorListComponent implements OnInit {
       return;
     }
     const ref = this.dialog.open(DialogoConfirmacionDelete, {
-      data: { mensaje: '¿Desactivar este proveedor? Seguirá en el historial de compras.' },
+      data: {
+        titulo: '¿Desactivar este proveedor?',
+        kicker: 'Estado del proveedor',
+        mensaje: '¿Desactivar este proveedor? Seguirá en el historial de compras.',
+        icono: 'domain_disabled',
+        tipo: 'warning',
+        confirmText: 'Desactivar proveedor'
+      },
       panelClass: 'solvix-dialog-panel',
       backdropClass: 'solvix-dialog-backdrop'
     });

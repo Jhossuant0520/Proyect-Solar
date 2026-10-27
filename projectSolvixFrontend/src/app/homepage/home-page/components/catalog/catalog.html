@@ -29,6 +29,7 @@
     </div>
 
     @if (viewState === 'LOADING') {
+      <div class="skeleton-toolbar" aria-hidden="true"></div>
       <div class="catalog-loading" aria-busy="true">
         @for (i of [1, 2, 3, 4, 5, 6]; track i) {
           <div class="skeleton-card"></div>
@@ -50,43 +51,151 @@
     }
 
     @if (viewState === 'SUCCESS') {
-      <div class="catalog-toolbar">
-        <div class="filters" role="tablist" aria-label="Categorías">
-          <button
-            type="button"
-            [class.active]="categoriaSeleccionadaId === null"
-            (click)="seleccionarCategoria(null)"
-          >
-            Todos
-          </button>
-          @for (cat of categorias; track cat.id) {
+      <div class="catalog-toolbar" role="search" aria-label="Buscar y filtrar productos">
+        <div class="catalog-toolbar__controls">
+          <div class="search" [class.search--filled]="tieneBusqueda">
+            <span class="material-symbols-outlined search__icon" aria-hidden="true">search</span>
+            <label for="catalog-search" class="visually-hidden">Buscar productos</label>
+            <input
+              #searchInput
+              id="catalog-search"
+              type="search"
+              [(ngModel)]="busqueda"
+              placeholder="Buscar por nombre, marca o descripción"
+              autocomplete="off"
+              enterkeyhint="search"
+              aria-controls="catalog-results"
+            />
+            @if (tieneBusqueda) {
+              <button
+                type="button"
+                id="catalog-search-clear"
+                class="search__clear"
+                aria-label="Borrar búsqueda"
+                (click)="limpiarBusqueda()"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">close</span>
+              </button>
+            }
+          </div>
+
+          <div class="cat-select" [class.cat-select--open]="categoriaMenuAbierto">
+            <span id="catalog-cat-label" class="visually-hidden">Categoría</span>
             <button
+              #categoriaTrigger
               type="button"
-              [class.active]="categoriaSeleccionadaId === cat.id"
-              (click)="seleccionarCategoria(cat.id)"
+              id="catalog-cat-trigger"
+              class="cat-select__trigger"
+              [class.cat-select__trigger--active]="categoriaSeleccionadaId !== null"
+              aria-haspopup="listbox"
+              [attr.aria-expanded]="categoriaMenuAbierto"
+              aria-controls="catalog-cat-listbox"
+              aria-labelledby="catalog-cat-label catalog-cat-trigger"
+              (click)="toggleMenuCategoria()"
+              (keydown)="onTriggerKeydown($event)"
             >
-              {{ cat.nombre }}
+              <span class="material-symbols-outlined cat-select__lead" aria-hidden="true">category</span>
+              <span class="cat-select__value">{{ etiquetaCategoria }}</span>
+              <span class="material-symbols-outlined cat-select__chevron" aria-hidden="true">expand_more</span>
             </button>
-          }
+
+            @if (categoriaMenuAbierto) {
+              <ul
+                #categoriaListbox
+                id="catalog-cat-listbox"
+                class="cat-select__menu"
+                role="listbox"
+                tabindex="-1"
+                aria-labelledby="catalog-cat-label"
+                [attr.aria-activedescendant]="opcionId(categoriaIndiceActivo)"
+                (keydown)="onListboxKeydown($event)"
+              >
+                <li
+                  [id]="opcionId(0)"
+                  role="option"
+                  class="cat-select__option"
+                  [class.is-active]="categoriaIndiceActivo === 0"
+                  [class.is-selected]="categoriaSeleccionadaId === null"
+                  [attr.aria-selected]="categoriaSeleccionadaId === null"
+                  (click)="elegirOpcion(0)"
+                  (mouseenter)="categoriaIndiceActivo = 0"
+                >
+                  <span class="cat-select__option-label">Todas las categorías</span>
+                  <span class="cat-select__count">{{ conteoCategoria(null) }}</span>
+                  <span class="material-symbols-outlined cat-select__check" aria-hidden="true">check</span>
+                </li>
+                @for (cat of categorias; track cat.id; let i = $index) {
+                  <li
+                    [id]="opcionId(i + 1)"
+                    role="option"
+                    class="cat-select__option"
+                    [class.is-active]="categoriaIndiceActivo === i + 1"
+                    [class.is-selected]="categoriaSeleccionadaId === cat.id"
+                    [attr.aria-selected]="categoriaSeleccionadaId === cat.id"
+                    (click)="elegirOpcion(i + 1)"
+                    (mouseenter)="categoriaIndiceActivo = i + 1"
+                  >
+                    <span class="cat-select__option-label">{{ cat.nombre }}</span>
+                    <span class="cat-select__count">{{ conteoCategoria(cat.id) }}</span>
+                    <span class="material-symbols-outlined cat-select__check" aria-hidden="true">check</span>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
         </div>
 
-        <label class="search">
-          <span class="visually-hidden">Buscar productos</span>
-          <input
-            type="search"
-            [(ngModel)]="busqueda"
-            placeholder="Buscar por nombre, marca o descripción"
-            autocomplete="off"
-          />
-        </label>
+        <div class="catalog-toolbar__meta">
+          <p class="catalog-count" aria-live="polite" id="catalog-count">
+            @if (filtrosActivos) {
+              <strong>{{ productosFiltrados.length }}</strong>
+              de {{ productos.length }} {{ productos.length === 1 ? 'producto' : 'productos' }}
+            } @else {
+              <strong>{{ productos.length }}</strong>
+              {{ productos.length === 1 ? 'producto disponible' : 'productos disponibles' }}
+            }
+          </p>
+
+          @if (filtrosActivos) {
+            <div class="catalog-active">
+              @if (categoriaSeleccionada) {
+                <span class="filter-pill">
+                  <span class="filter-pill__label">{{ categoriaSeleccionada.nombre }}</span>
+                  <button
+                    type="button"
+                    class="filter-pill__remove"
+                    [attr.aria-label]="'Quitar filtro ' + categoriaSeleccionada.nombre"
+                    (click)="seleccionarCategoria(null)"
+                  >
+                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                  </button>
+                </span>
+              }
+              <button
+                type="button"
+                id="catalog-clear-filters"
+                class="catalog-clear"
+                (click)="limpiarFiltros()"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">filter_alt_off</span>
+                Limpiar filtros
+              </button>
+            </div>
+          }
+        </div>
       </div>
 
       @if (mostrarVacioFiltro) {
         <div class="catalog-state catalog-state--filter">
+          <span class="material-symbols-outlined catalog-state__icon" aria-hidden="true">search_off</span>
           <p>No hay productos con ese filtro.</p>
+          <p class="catalog-state__hint">Prueba con otra búsqueda o revisa todas las categorías.</p>
+          <button type="button" class="catalog-btn catalog-btn--primary" (click)="limpiarFiltros()">
+            Ver todo el catálogo
+          </button>
         </div>
       } @else {
-        <div class="catalog-grid">
+        <div class="catalog-grid" id="catalog-results">
           @for (producto of productosFiltrados; track producto.id; let i = $index) {
             <article class="card" [style.--card-i]="i">
               <div class="image-box">

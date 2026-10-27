@@ -56,52 +56,213 @@
         />
 
         @if (!mostrarCrearCliente) {
-          <solvix-button
-            family="tech"
-            rank="secondary"
-            icon="person_add"
-            matTooltip="Registrar un cliente nuevo sin salir del flujo"
-            (click)="abrirCrearCliente()"
-          >
-            Crear cliente
-          </solvix-button>
+          @if (!clienteSeleccionado) {
+            <div class="cliente-opciones-extra">
+              <solvix-button
+                family="tech"
+                rank="secondary"
+                icon="person_add"
+                matTooltip="Registrar un cliente nuevo sin salir del flujo"
+                (click)="abrirCrearCliente()"
+              >
+                Nuevo cliente
+              </solvix-button>
+            </div>
+          }
+
+          @if (submitError) {
+            <p class="form-error">{{ submitError }}</p>
+          }
+
+          <div class="wizard-actions">
+            <solvix-button
+              family="tech"
+              rank="primary"
+              icon="arrow_forward"
+              [disabled]="!clienteSeleccionado"
+              (click)="continuarDesdeCliente()"
+            >
+              Continuar
+            </solvix-button>
+          </div>
         } @else {
           <form class="inline-form" [formGroup]="clienteInline" (ngSubmit)="guardarClienteInline()">
-            <p class="inline-title">Nuevo cliente</p>
-            <label>
-              Nombre <span class="req">requerido</span>
-              <input formControlName="nombre" maxlength="150" />
-            </label>
-            <label>
-              Documento
-              <input formControlName="numeroDocumento" maxlength="40" />
-            </label>
-            <label>
-              Teléfono
-              <input formControlName="telefono" maxlength="40" />
-            </label>
+            <div class="inline-header">
+              <p class="inline-title">Nuevo cliente</p>
+              <div class="tipo-cliente-selector" role="radiogroup" aria-label="Tipo de cliente">
+                <button
+                  type="button"
+                  class="tipo-cliente-btn"
+                  [class.is-active]="clienteInline.controls.tipoCliente.value === 'PERSONA'"
+                  (click)="onTipoClienteChange('PERSONA')"
+                >
+                  <span class="material-symbols-outlined" aria-hidden="true">person</span>
+                  Persona natural
+                </button>
+                <button
+                  type="button"
+                  class="tipo-cliente-btn"
+                  [class.is-active]="clienteInline.controls.tipoCliente.value === 'EMPRESA'"
+                  (click)="onTipoClienteChange('EMPRESA')"
+                >
+                  <span class="material-symbols-outlined" aria-hidden="true">business</span>
+                  Empresa / Persona jurídica
+                </button>
+              </div>
+            </div>
+
+            @if (clienteInline.controls.tipoCliente.value === 'PERSONA') {
+              <label>
+                Nombre completo <span class="req">requerido</span>
+                <input
+                  formControlName="nombre"
+                  maxlength="150"
+                  placeholder="Ej. Carlos Pérez Gómez"
+                  autocomplete="name"
+                />
+              </label>
+
+              <div class="form-row-2">
+                <label>
+                  Tipo de documento
+                  <select formControlName="tipoDocumento">
+                    @for (doc of tiposDocumentoPersona; track doc.id) {
+                      <option [value]="doc.id">{{ doc.label }}</option>
+                    }
+                  </select>
+                </label>
+                <label>
+                  Número de documento
+                  <input
+                    formControlName="numeroDocumento"
+                    maxlength="40"
+                    placeholder="Ej. 1020304050"
+                  />
+                </label>
+              </div>
+
+              <div class="form-row-2">
+                <label>
+                  Teléfono / Celular
+                  <input
+                    formControlName="telefono"
+                    maxlength="40"
+                    type="tel"
+                    placeholder="Ej. 300 123 4567"
+                    autocomplete="tel"
+                  />
+                </label>
+                <label>
+                  Correo electrónico
+                  <input
+                    formControlName="email"
+                    maxlength="150"
+                    type="email"
+                    placeholder="carlos@ejemplo.com"
+                    autocomplete="email"
+                  />
+                </label>
+              </div>
+
+              <label>
+                Notas u observaciones (opcional)
+                <input
+                  formControlName="notas"
+                  maxlength="500"
+                  placeholder="Observaciones adicionales del cliente"
+                />
+              </label>
+            } @else {
+              <label>
+                Razón social / Nombre de empresa <span class="req">requerido</span>
+                <input
+                  formControlName="nombre"
+                  maxlength="150"
+                  placeholder="Ej. Tecnología y Servicios S.A.S."
+                  autocomplete="organization"
+                />
+              </label>
+
+              <div class="form-row-2">
+                <label>
+                  Tipo de documento
+                  <select formControlName="tipoDocumento">
+                    @for (doc of tiposDocumentoEmpresa; track doc.id) {
+                      <option [value]="doc.id">{{ doc.label }}</option>
+                    }
+                  </select>
+                </label>
+                <label>
+                  NIT / Identificación tributaria
+                  <input
+                    formControlName="numeroDocumento"
+                    maxlength="40"
+                    placeholder="Ej. 900.123.456-1"
+                  />
+                </label>
+              </div>
+
+              <div class="form-row-2">
+                <label>
+                  Teléfono de contacto
+                  <input
+                    formControlName="telefono"
+                    maxlength="40"
+                    type="tel"
+                    placeholder="Ej. 601 234 5678"
+                    autocomplete="tel"
+                  />
+                </label>
+                <label>
+                  Correo electrónico
+                  <input
+                    formControlName="email"
+                    maxlength="150"
+                    type="email"
+                    placeholder="contacto@empresa.com"
+                    autocomplete="email"
+                  />
+                </label>
+              </div>
+
+              <label>
+                Contacto / Representante / Notas (opcional)
+                <input
+                  formControlName="notas"
+                  maxlength="500"
+                  placeholder="Nombre de la persona de contacto o representante, observaciones"
+                />
+              </label>
+            }
+
+            @if (clienteInline.controls.nombre.touched && clienteInline.controls.nombre.invalid) {
+              <p class="form-error">
+                {{ clienteInline.controls.tipoCliente.value === 'EMPRESA' ? 'La razón social es obligatoria.' : 'El nombre es obligatorio.' }}
+              </p>
+            }
+            @if (clienteInline.controls.email.touched && clienteInline.controls.email.invalid) {
+              <p class="form-error">El correo electrónico no tiene un formato válido.</p>
+            }
+
             @if (inlineError) {
               <p class="form-error">{{ inlineError }}</p>
             }
+
             <div class="inline-actions">
-              <solvix-button family="tech" rank="tertiary" type="button" (click)="mostrarCrearCliente = false">
+              <solvix-button family="tech" rank="tertiary" type="button" (click)="cancelarCrearCliente()">
                 Cancelar
               </solvix-button>
-              <solvix-button family="tech" rank="primary" type="submit" [disabled]="creandoCliente">
+              <solvix-button
+                family="tech"
+                rank="primary"
+                type="submit"
+                [disabled]="clienteInline.invalid || creandoCliente"
+              >
                 {{ creandoCliente ? 'Guardando…' : 'Guardar cliente' }}
               </solvix-button>
             </div>
           </form>
         }
-
-        @if (submitError) {
-          <p class="form-error">{{ submitError }}</p>
-        }
-        <div class="wizard-actions">
-          <solvix-button family="tech" rank="primary" icon="arrow_forward" (click)="continuarDesdeCliente()">
-            Continuar
-          </solvix-button>
-        </div>
       </section>
     }
 

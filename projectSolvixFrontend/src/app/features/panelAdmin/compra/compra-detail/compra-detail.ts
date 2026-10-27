@@ -135,7 +135,14 @@ export class CompraDetailComponent implements OnInit {
       return;
     }
     const ref = this.dialog.open(DialogoConfirmacionDelete, {
-      data: { mensaje: '¿Completar esta compra? El inventario entra ahora y el sistema actualiza el costo vigente.' },
+      data: {
+        titulo: '¿Completar esta compra?',
+        kicker: 'Ingreso a inventario',
+        mensaje: '¿Completar esta compra? El inventario entra ahora y el sistema actualiza el costo vigente.',
+        icono: 'inventory_2',
+        tipo: 'primary',
+        confirmText: 'Completar compra'
+      },
       panelClass: 'solvix-dialog-panel',
       backdropClass: 'solvix-dialog-backdrop'
     });
@@ -164,7 +171,14 @@ export class CompraDetailComponent implements OnInit {
       return;
     }
     const ref = this.dialog.open(DialogoConfirmacionDelete, {
-      data: { mensaje: '¿Cancelar esta compra pendiente? No entra inventario ni cambia el costo.' },
+      data: {
+        titulo: '¿Cancelar esta compra?',
+        kicker: 'Cancelar compra',
+        mensaje: '¿Cancelar esta compra pendiente? No entra inventario ni cambia el costo.',
+        icono: 'cancel',
+        tipo: 'warning',
+        confirmText: 'Sí, cancelar compra'
+      },
       panelClass: 'solvix-dialog-panel',
       backdropClass: 'solvix-dialog-backdrop'
     });

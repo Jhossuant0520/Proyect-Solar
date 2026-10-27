@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
 import { ConsultaOtPublicaComponent } from './consulta-ot-publica';
 import { DocumentoOrdenServicioService } from '../../../core/services/documento-orden-servicio.service';
@@ -415,6 +415,125 @@ describe('ConsultaOtPublicaComponent (FASE C.2 / 3.15.9.3-C)', () => {
     emptyFixture.detectChanges();
     expect(emptyFixture.componentInstance.state).toBe('sin-token');
     expect(emptyTokenService.consultaOtPublica).not.toHaveBeenCalled();
+  });
+
+  describe('Centro de Experiencia C&E (Bienvenida y Consulta Rápida)', () => {
+    let emptyFixture: ComponentFixture<ConsultaOtPublicaComponent>;
+    let emptyComp: ConsultaOtPublicaComponent;
+    let router: Router;
+
+    beforeEach(async () => {
+      await TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({
+        imports: [ConsultaOtPublicaComponent],
+        providers: [
+          provideRouter([]),
+          { provide: DocumentoOrdenServicioService, useValue: documentoService },
+          { provide: SolvixFeedbackService, useValue: feedback },
+          { provide: SolvixActionRevealService, useValue: actionReveal },
+          {
+            provide: ActivatedRoute,
+            useValue: { snapshot: { paramMap: { get: () => '' } } }
+          }
+        ]
+      }).compileComponents();
+
+      router = TestBed.inject(Router);
+      spyOn(router, 'navigate');
+      emptyFixture = TestBed.createComponent(ConsultaOtPublicaComponent);
+      emptyComp = emptyFixture.componentInstance;
+    });
+
+    it('presenta la bienvenida con los cuatro beneficios y el buscador rápido cuando no hay token en ruta', fakeAsync(() => {
+      emptyFixture.detectChanges();
+      tick();
+      emptyFixture.detectChanges();
+
+      expect(emptyComp.faseExperiencia).toBe('bienvenida');
+      const text = emptyFixture.nativeElement.textContent as string;
+      expect(text).toContain('Tu equipo está en las mejores manos');
+      expect(text).toContain('En tiempo real');
+      expect(text).toContain('5 etapas claras');
+      expect(text).toContain('Claridad total');
+      expect(text).toContain('Tú decides');
+      expect(text).toContain('Consulta de Orden Rápida');
+    }));
+
+    it('valida que el código no esté vacío al consultar', fakeAsync(() => {
+      emptyFixture.detectChanges();
+      tick();
+      emptyFixture.detectChanges();
+
+      emptyComp.codigoOrdenInput = '   ';
+      emptyComp.consultarCodigo();
+      tick();
+      emptyFixture.detectChanges();
+
+      expect(emptyComp.errorBusqueda).toContain('ingresa el código o token');
+      expect(documentoService.consultaOtPublica).not.toHaveBeenCalled();
+    }));
+
+    it('extrae el token cuando el usuario pega una URL completa de consulta', fakeAsync(() => {
+      documentoService.consultaOtPublica.and.returnValue(
+        of(dtoBase({ numero: 'OS-2026-000099', estadoCodigo: 'REPARADO' }))
+      );
+      emptyFixture.detectChanges();
+      tick();
+      emptyFixture.detectChanges();
+
+      emptyComp.codigoOrdenInput = 'https://midominio.com/consulta/ot/token-extraido-123';
+      emptyComp.consultarCodigo();
+      tick();
+      emptyFixture.detectChanges();
+
+      expect(documentoService.consultaOtPublica).toHaveBeenCalledWith('token-extraido-123');
+      expect(emptyComp.faseExperiencia).toBe('seguimiento');
+      expect(emptyComp.data?.numero).toBe('OS-2026-000099');
+      expect(router.navigate).toHaveBeenCalledWith(['/consulta/ot', 'token-extraido-123'], {
+        replaceUrl: false
+      });
+    }));
+
+    it('muestra error de búsqueda cuando el token no existe sin romper la bienvenida', fakeAsync(() => {
+      documentoService.consultaOtPublica.and.returnValue(throwError(() => ({ status: 404 })));
+      emptyFixture.detectChanges();
+      tick();
+      emptyFixture.detectChanges();
+
+      emptyComp.codigoOrdenInput = 'token-inexistente';
+      emptyComp.consultarCodigo();
+      tick();
+      emptyFixture.detectChanges();
+
+      expect(emptyComp.faseExperiencia).toBe('bienvenida');
+      expect(emptyComp.errorBusqueda).toContain('No encontramos ninguna orden con este código');
+      expect(emptyFixture.nativeElement.textContent).toContain(
+        'No encontramos ninguna orden con este código'
+      );
+    }));
+
+    it('limpia el código y error al invocar limpiarCodigo()', fakeAsync(() => {
+      emptyComp.codigoOrdenInput = 'token-123';
+      emptyComp.errorBusqueda = 'Error previo';
+      emptyComp.limpiarCodigo();
+      expect(emptyComp.codigoOrdenInput).toBe('');
+      expect(emptyComp.errorBusqueda).toBe('');
+    }));
+
+    it('permite volver de seguimiento a la bienvenida mediante volverABienvenida()', fakeAsync(() => {
+      emptyComp.faseExperiencia = 'seguimiento';
+      emptyComp.volverABienvenida();
+      expect(emptyComp.faseExperiencia).toBe('bienvenida');
+      expect(router.navigate).toHaveBeenCalledWith(['/consulta/ot'], { replaceUrl: false });
+    }));
+
+    it('respeta la transición de carga ambiental cuando duracionLoaderMs > 0', fakeAsync(() => {
+      emptyComp.duracionLoaderMs = 450;
+      emptyComp.ngOnInit();
+      expect(emptyComp.faseExperiencia).toBe('inicializando');
+      tick(450);
+      expect(emptyComp.faseExperiencia).toBe('bienvenida');
+    }));
   });
 });
 

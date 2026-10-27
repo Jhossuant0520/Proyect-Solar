@@ -164,8 +164,13 @@ export class ProductoList implements OnInit {
     }
     const dialogRef = this.dialog.open(DialogoConfirmacionDelete, {
       data: {
+        titulo: '¿Desactivar este producto?',
+        kicker: 'Estado del catálogo',
         mensaje: '¿Desactivar este producto? No se borra: su historial se conserva, '
-          + 'pero no podrá usarse en ventas ni cotizaciones nuevas.'
+          + 'pero no podrá usarse en ventas ni cotizaciones nuevas.',
+        icono: 'inventory_2',
+        tipo: 'warning',
+        confirmText: 'Desactivar producto'
       },
       panelClass: 'solvix-dialog-panel',
       backdropClass: 'solvix-dialog-backdrop'

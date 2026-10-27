@@ -52,6 +52,13 @@ export const routes: Routes = [
 
   // Consulta pública OT / documento (QR) — sin auth
   {
+    path: 'consulta/ot',
+    loadComponent: () =>
+      import('./features/consulta/consulta-ot-publica/consulta-ot-publica').then(
+        m => m.ConsultaOtPublicaComponent
+      )
+  },
+  {
     path: 'consulta/ot/:token',
     loadComponent: () =>
       import('./features/consulta/consulta-ot-publica/consulta-ot-publica').then(

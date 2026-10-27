@@ -189,7 +189,12 @@ export class ClienteEquiposPanelComponent implements OnChanges {
     }
     const ref = this.dialog.open(DialogoConfirmacionDelete, {
       data: {
-        mensaje: '¿Desactivar este equipo? Seguirá visible en el historial de órdenes.'
+        titulo: '¿Desactivar este equipo?',
+        kicker: 'Estado del equipo',
+        mensaje: '¿Desactivar este equipo? Seguirá visible en el historial de órdenes.',
+        icono: 'devices',
+        tipo: 'warning',
+        confirmText: 'Desactivar equipo'
       },
       panelClass: 'solvix-dialog-panel',
       backdropClass: 'solvix-dialog-backdrop'

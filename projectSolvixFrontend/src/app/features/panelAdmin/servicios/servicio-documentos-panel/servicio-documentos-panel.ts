@@ -470,8 +470,12 @@ export class ServicioDocumentosPanelComponent implements OnChanges, OnDestroy {
       panelClass: 'solvix-dialog-panel',
       backdropClass: 'solvix-dialog-backdrop',
       data: {
-        mensaje:
-          `¿Regenerar el PDF de ${tipo}? Se crea una versión nueva y se conserva la anterior.`
+        titulo: `Regenerar PDF de ${tipo}`,
+        kicker: 'Documento de servicio',
+        mensaje: `¿Regenerar el PDF de ${tipo}? Se crea una versión nueva y se conserva la anterior.`,
+        icono: 'refresh',
+        tipo: 'primary',
+        confirmText: 'Regenerar PDF'
       }
     });
     ref.afterClosed().subscribe(ok => {

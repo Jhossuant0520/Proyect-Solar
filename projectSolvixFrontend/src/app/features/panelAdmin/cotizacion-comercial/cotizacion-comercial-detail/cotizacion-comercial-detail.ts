@@ -257,9 +257,20 @@ export class CotizacionComercialDetailComponent implements OnInit {
     this.cargarDocumentos();
   }
 
-  private confirmar(mensaje: string, accion: () => void): void {
+  private confirmar(
+    mensaje: string,
+    accion: () => void,
+    opciones?: { titulo?: string; kicker?: string; icono?: string; tipo?: 'primary' | 'warning' | 'danger'; confirmText?: string }
+  ): void {
     this.dialog.open(DialogoConfirmacionDelete, {
-      data: { mensaje },
+      data: {
+        mensaje,
+        titulo: opciones?.titulo ?? '¿Confirmar acción?',
+        kicker: opciones?.kicker ?? 'Confirmar operación',
+        icono: opciones?.icono ?? (mensaje.toLowerCase().includes('anular') ? 'block' : 'help_outline'),
+        tipo: opciones?.tipo ?? (mensaje.toLowerCase().includes('anular') ? 'warning' : 'primary'),
+        confirmText: opciones?.confirmText ?? (mensaje.toLowerCase().includes('anular') ? 'Anular cotización' : 'Confirmar')
+      },
       panelClass: 'solvix-dialog-panel',
       backdropClass: 'solvix-dialog-backdrop'
     }).afterClosed().subscribe(ok => {

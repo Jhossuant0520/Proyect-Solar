@@ -112,7 +112,14 @@ export class VentaDetailComponent implements OnInit {
       return;
     }
     const ref = this.dialog.open(DialogoConfirmacionDelete, {
-      data: { mensaje: '¿Completar esta venta? El inventario se descuenta ahora.' },
+      data: {
+        titulo: '¿Completar esta venta?',
+        kicker: 'Finalizar venta',
+        mensaje: '¿Completar esta venta? El inventario se descuenta ahora.',
+        icono: 'check_circle',
+        tipo: 'primary',
+        confirmText: 'Completar venta'
+      },
       panelClass: 'solvix-dialog-panel',
       backdropClass: 'solvix-dialog-backdrop'
     });
@@ -139,7 +146,14 @@ export class VentaDetailComponent implements OnInit {
       return;
     }
     const ref = this.dialog.open(DialogoConfirmacionDelete, {
-      data: { mensaje: '¿Cancelar esta venta pendiente? No se descuenta inventario.' },
+      data: {
+        titulo: '¿Cancelar esta venta?',
+        kicker: 'Cancelar venta',
+        mensaje: '¿Cancelar esta venta pendiente? No se descuenta inventario.',
+        icono: 'cancel',
+        tipo: 'warning',
+        confirmText: 'Sí, cancelar venta'
+      },
       panelClass: 'solvix-dialog-panel',
       backdropClass: 'solvix-dialog-backdrop'
     });

@@ -124,4 +124,108 @@ describe('Catalog', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Sin imagen');
   }));
+
+  describe('barra de búsqueda y selector de categorías', () => {
+    const inversor: CatalogoProducto = {
+      ...producto,
+      id: 2,
+      nombre: 'Inversor 3kW',
+      marca: 'Growatt',
+      descripcion: 'On-grid',
+      categoriaId: 20,
+      categoriaNombre: 'Inversores',
+      disponibilidad: 'AGOTADO'
+    };
+
+    beforeEach(() => {
+      catalogoService.listarProductos.and.returnValue(of([producto, inversor]));
+      catalogoService.listarCategorias.and.returnValue(of([
+        { id: 10, codigo: 'PAN', nombre: 'Paneles' },
+        { id: 20, codigo: 'INV', nombre: 'Inversores' }
+      ]));
+    });
+
+    function el(): HTMLElement {
+      return fixture.nativeElement as HTMLElement;
+    }
+
+    it('sustituye los chips por un selector con «Todas las categorías»', fakeAsync(() => {
+      fixture.detectChanges();
+      tick();
+      fixture.detectChanges();
+      expect(el().querySelector('.filters')).toBeNull();
+      const trigger = el().querySelector<HTMLButtonElement>('#catalog-cat-trigger')!;
+      expect(trigger.textContent).toContain('Todas las categorías');
+      expect(trigger.getAttribute('aria-expanded')).toBe('false');
+      expect(el().querySelector('#catalog-count')!.textContent).toContain('2');
+    }));
+
+    it('abre, selecciona con ratón y cierra el desplegable', fakeAsync(() => {
+      fixture.detectChanges();
+      tick();
+      fixture.detectChanges();
+
+      el().querySelector<HTMLButtonElement>('#catalog-cat-trigger')!.click();
+      fixture.detectChanges();
+      const opciones = el().querySelectorAll<HTMLElement>('[role="option"]');
+      expect(opciones.length).toBe(3);
+
+      opciones[2].click();
+      fixture.detectChanges();
+      expect(component.categoriaSeleccionadaId).toBe(20);
+      expect(component.categoriaMenuAbierto).toBeFalse();
+      expect(el().querySelector('[role="listbox"]')).toBeNull();
+      expect(el().querySelector('#catalog-cat-trigger')!.textContent).toContain('Inversores');
+      expect(component.productosFiltrados.map(p => p.id)).toEqual([2]);
+    }));
+
+    it('permite seleccionar con teclado y cerrar con Escape', fakeAsync(() => {
+      fixture.detectChanges();
+      tick();
+      fixture.detectChanges();
+
+      const trigger = el().querySelector<HTMLButtonElement>('#catalog-cat-trigger')!;
+      trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+      fixture.detectChanges();
+      const listbox = el().querySelector<HTMLElement>('[role="listbox"]')!;
+      expect(listbox).toBeTruthy();
+
+      listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+      listbox.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+      fixture.detectChanges();
+      expect(component.categoriaSeleccionadaId).toBe(10);
+      expect(component.categoriaMenuAbierto).toBeFalse();
+
+      component.abrirMenuCategoria();
+      fixture.detectChanges();
+      el().querySelector<HTMLElement>('[role="listbox"]')!
+        .dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      fixture.detectChanges();
+      expect(component.categoriaMenuAbierto).toBeFalse();
+      expect(component.categoriaSeleccionadaId).toBe(10);
+    }));
+
+    it('combina búsqueda y categoría y muestra vacío recuperable', fakeAsync(() => {
+      fixture.detectChanges();
+      tick();
+
+      component.seleccionarCategoria(10);
+      component.busqueda = 'growatt';
+      fixture.detectChanges();
+      expect(component.productosFiltrados.length).toBe(0);
+      expect(el().textContent).toContain('No hay productos con ese filtro.');
+
+      component.seleccionarCategoria(20);
+      fixture.detectChanges();
+      expect(component.productosFiltrados.map(p => p.id)).toEqual([2]);
+      expect(el().querySelector('#catalog-count')!.textContent).toContain('1');
+
+      el().querySelector<HTMLButtonElement>('#catalog-clear-filters')!.click();
+      fixture.detectChanges();
+      expect(component.busqueda).toBe('');
+      expect(component.categoriaSeleccionadaId).toBeNull();
+      expect(component.productosFiltrados.length).toBe(2);
+      expect(el().querySelector('#catalog-clear-filters')).toBeNull();
+    }));
+  });
 });

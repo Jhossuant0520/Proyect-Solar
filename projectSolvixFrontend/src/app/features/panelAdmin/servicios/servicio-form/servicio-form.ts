@@ -16,11 +16,12 @@ import { EquipoBuscadorComponent } from '../equipo-buscador/equipo-buscador';
 import { ClienteService } from '../../../../core/services/cliente.service';
 import { EquipoService } from '../../../../core/services/equipo.service';
 import { OrdenServicioService } from '../../../../core/services/orden-servicio.service';
-import { ClienteResponseDTO } from '../../../../core/models/cliente.models';
+import { ClienteResponseDTO, TipoCliente, TipoDocumento } from '../../../../core/models/cliente.models';
 import { EquipoResponseDTO, TipoEquipo } from '../../../../core/models/equipo.models';
 import { aOrdenServicioRequest } from '../servicio-mapper';
 import { equipoOpcionLabel, mapHttpError, mensajeErrorServicio, TIPOS_EQUIPO } from '../servicio-ui';
 import { SolvixFeedbackService } from '../../../../shared/services/solvix-feedback.service';
+import { mensajeErrorCliente } from '../../cliente/cliente-ui';
 import {
   ServicioRecepcionDialogComponent,
   ServicioRecepcionDialogData
@@ -64,6 +65,24 @@ export class ServicioFormComponent implements OnInit {
 
   readonly tipos = TIPOS_EQUIPO;
   readonly labelEquipo = equipoOpcionLabel;
+
+  readonly tiposCliente = [
+    { id: 'PERSONA' as const, label: 'Persona natural' },
+    { id: 'EMPRESA' as const, label: 'Empresa / Persona jurídica' }
+  ];
+
+  readonly tiposDocumentoPersona: { id: TipoDocumento; label: string }[] = [
+    { id: 'CC', label: 'Cédula de ciudadanía' },
+    { id: 'CE', label: 'Cédula de extranjería' },
+    { id: 'PASAPORTE', label: 'Pasaporte' },
+    { id: 'NINGUNO', label: 'Sin documento' }
+  ];
+
+  readonly tiposDocumentoEmpresa: { id: TipoDocumento; label: string }[] = [
+    { id: 'NIT', label: 'NIT' },
+    { id: 'NINGUNO', label: 'Sin documento' }
+  ];
+
   readonly form;
   readonly clienteInline;
   readonly equipoInline;
@@ -88,9 +107,13 @@ export class ServicioFormComponent implements OnInit {
       observaciones: ['', Validators.maxLength(1000)]
     });
     this.clienteInline = this.fb.group({
+      tipoCliente: ['PERSONA' as 'PERSONA' | 'EMPRESA', Validators.required],
       nombre: ['', [Validators.required, Validators.maxLength(150)]],
+      tipoDocumento: ['CC' as TipoDocumento | ''],
+      numeroDocumento: ['', Validators.maxLength(40)],
       telefono: ['', Validators.maxLength(40)],
-      numeroDocumento: ['', Validators.maxLength(40)]
+      email: ['', [Validators.email, Validators.maxLength(150)]],
+      notas: ['', Validators.maxLength(500)]
     });
     this.equipoInline = this.fb.group({
       tipoEquipo: ['PORTATIL' as TipoEquipo, Validators.required],
@@ -157,11 +180,34 @@ export class ServicioFormComponent implements OnInit {
     }
   }
 
+  onTipoClienteChange(tipo: 'PERSONA' | 'EMPRESA'): void {
+    this.clienteInline.controls.tipoCliente.setValue(tipo);
+    if (tipo === 'EMPRESA') {
+      this.clienteInline.controls.tipoDocumento.setValue('NIT');
+    } else {
+      this.clienteInline.controls.tipoDocumento.setValue('CC');
+    }
+  }
+
   abrirCrearCliente(): void {
     this.mostrarCrearCliente = true;
     this.mostrarCrearEquipo = false;
     this.inlineError = '';
-    this.clienteInline.reset({ nombre: '', telefono: '', numeroDocumento: '' });
+    this.submitError = '';
+    this.clienteInline.reset({
+      tipoCliente: 'PERSONA',
+      nombre: '',
+      tipoDocumento: 'CC',
+      numeroDocumento: '',
+      telefono: '',
+      email: '',
+      notas: ''
+    });
+  }
+
+  cancelarCrearCliente(): void {
+    this.mostrarCrearCliente = false;
+    this.inlineError = '';
   }
 
   abrirCrearEquipo(): void {
@@ -181,18 +227,30 @@ export class ServicioFormComponent implements OnInit {
 
   guardarClienteInline(): void {
     this.inlineError = '';
-    if (this.clienteInline.invalid || this.creandoCliente) {
+    if (this.creandoCliente) {
+      return;
+    }
+    if (this.clienteInline.invalid) {
       this.clienteInline.markAllAsTouched();
       return;
     }
     const v = this.clienteInline.getRawValue();
     this.creandoCliente = true;
+
+    const tipoDoc = v.tipoDocumento && v.tipoDocumento !== 'NINGUNO'
+      ? (v.tipoDocumento as TipoDocumento)
+      : null;
+    const numDoc = (v.numeroDocumento ?? '').trim() || null;
+
     this.clienteService
       .crear({
         nombre: (v.nombre ?? '').trim(),
-        tipoCliente: 'PERSONA',
+        tipoCliente: v.tipoCliente,
+        tipoDocumento: tipoDoc,
+        numeroDocumento: numDoc,
         telefono: (v.telefono ?? '').trim() || null,
-        numeroDocumento: (v.numeroDocumento ?? '').trim() || null,
+        email: (v.email ?? '').trim() || null,
+        notas: (v.notas ?? '').trim() || null,
         activo: true
       })
       .subscribe({
@@ -201,10 +259,11 @@ export class ServicioFormComponent implements OnInit {
           this.mostrarCrearCliente = false;
           this.onClienteSeleccionado(creado);
           this.feedback.success('Cliente registrado.');
+          this.continuarDesdeCliente();
         },
         error: error => {
           this.creandoCliente = false;
-          this.inlineError = mensajeErrorServicio(error, 'No pudimos registrar el cliente.');
+          this.inlineError = mensajeErrorCliente(error, 'No pudimos registrar el cliente.');
         }
       });
   }

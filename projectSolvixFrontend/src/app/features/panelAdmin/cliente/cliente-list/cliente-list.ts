@@ -128,7 +128,14 @@ export class ClienteListComponent implements OnInit {
       return;
     }
     const ref = this.dialog.open(DialogoConfirmacionDelete, {
-      data: { mensaje: '¿Desactivar este cliente? Seguirá en el historial de ventas.' },
+      data: {
+        titulo: '¿Desactivar este cliente?',
+        kicker: 'Estado del cliente',
+        mensaje: '¿Desactivar este cliente? Seguirá en el historial de ventas y servicios.',
+        icono: 'person_off',
+        tipo: 'warning',
+        confirmText: 'Desactivar cliente'
+      },
       panelClass: 'solvix-dialog-panel',
       backdropClass: 'solvix-dialog-backdrop'
     });

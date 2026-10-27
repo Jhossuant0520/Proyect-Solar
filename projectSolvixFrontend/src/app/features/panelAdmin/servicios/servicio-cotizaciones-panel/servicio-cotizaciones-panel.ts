@@ -587,7 +587,12 @@ export class ServicioCotizacionesPanelComponent implements OnChanges {
       panelClass: 'solvix-dialog-panel',
       backdropClass: 'solvix-dialog-backdrop',
       data: {
-        mensaje: `¿Eliminar el borrador ${cotizacion.numero}? Esta acción no se puede deshacer.`
+        titulo: '¿Eliminar borrador?',
+        kicker: 'Acción destructiva',
+        mensaje: `¿Eliminar el borrador ${cotizacion.numero}? Esta acción no se puede deshacer.`,
+        icono: 'delete',
+        tipo: 'danger',
+        confirmText: 'Eliminar borrador'
       }
     });
     ref.afterClosed().subscribe(ok => {

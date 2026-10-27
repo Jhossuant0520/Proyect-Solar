@@ -1,9 +1,12 @@
 import {
   ChangeDetectorRef,
   Component,
+  ElementRef,
+  HostListener,
   NgZone,
   OnDestroy,
   OnInit,
+  ViewChild,
   inject
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -48,6 +51,17 @@ export class Catalog implements OnInit, OnDestroy {
 
   private safetyTimer: ReturnType<typeof setTimeout> | null = null;
 
+  /** Selector de categorías (listbox ligero, sin dependencias). */
+  categoriaMenuAbierto = false;
+  /** Índice activo en las opciones: 0 = «Todas», i+1 = categorias[i]. */
+  categoriaIndiceActivo = 0;
+
+  @ViewChild('categoriaTrigger') private categoriaTrigger?: ElementRef<HTMLButtonElement>;
+  @ViewChild('categoriaListbox') private categoriaListbox?: ElementRef<HTMLUListElement>;
+  @ViewChild('searchInput') private searchInput?: ElementRef<HTMLInputElement>;
+
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+
   readonly formatMoney = formatMoney;
   readonly labelDisponibilidad = labelDisponibilidad;
 
@@ -72,6 +86,41 @@ export class Catalog implements OnInit, OnDestroy {
     return this.viewState === 'SUCCESS'
       && this.productos.length > 0
       && this.productosFiltrados.length === 0;
+  }
+
+  get categoriaSeleccionada(): CatalogoCategoria | null {
+    if (this.categoriaSeleccionadaId == null) {
+      return null;
+    }
+    return this.categorias.find(c => c.id === this.categoriaSeleccionadaId) ?? null;
+  }
+
+  get etiquetaCategoria(): string {
+    return this.categoriaSeleccionada?.nombre ?? 'Todas las categorías';
+  }
+
+  get tieneBusqueda(): boolean {
+    return this.busqueda.trim().length > 0;
+  }
+
+  get filtrosActivos(): boolean {
+    return this.tieneBusqueda || this.categoriaSeleccionadaId != null;
+  }
+
+  get totalOpcionesCategoria(): number {
+    return this.categorias.length + 1;
+  }
+
+  /** Número de productos por categoría (sobre el catálogo completo). */
+  conteoCategoria(id: number | null): number {
+    if (id == null) {
+      return this.productos.length;
+    }
+    return this.productos.filter(p => p.categoriaId === id).length;
+  }
+
+  opcionId(index: number): string {
+    return `catalog-cat-opt-${index}`;
   }
 
   cargar(): void {
@@ -108,6 +157,127 @@ export class Catalog implements OnInit, OnDestroy {
 
   seleccionarCategoria(id: number | null): void {
     this.categoriaSeleccionadaId = id;
+  }
+
+  limpiarBusqueda(): void {
+    this.busqueda = '';
+    this.searchInput?.nativeElement.focus();
+  }
+
+  limpiarFiltros(): void {
+    this.busqueda = '';
+    this.categoriaSeleccionadaId = null;
+    this.cerrarMenuCategoria(false);
+  }
+
+  /* ---------- Selector de categorías ---------- */
+
+  toggleMenuCategoria(): void {
+    if (this.categoriaMenuAbierto) {
+      this.cerrarMenuCategoria(true);
+    } else {
+      this.abrirMenuCategoria();
+    }
+  }
+
+  abrirMenuCategoria(indice?: number): void {
+    this.categoriaMenuAbierto = true;
+    this.categoriaIndiceActivo = indice ?? this.indiceSeleccionado();
+    this.cdr.detectChanges();
+    this.categoriaListbox?.nativeElement.focus();
+    this.scrollOpcionActiva();
+  }
+
+  cerrarMenuCategoria(devolverFoco: boolean): void {
+    if (!this.categoriaMenuAbierto) {
+      return;
+    }
+    this.categoriaMenuAbierto = false;
+    if (devolverFoco) {
+      this.categoriaTrigger?.nativeElement.focus();
+    }
+  }
+
+  elegirOpcion(index: number): void {
+    const id = index === 0 ? null : this.categorias[index - 1]?.id ?? null;
+    this.seleccionarCategoria(id);
+    this.cerrarMenuCategoria(true);
+  }
+
+  onTriggerKeydown(event: KeyboardEvent): void {
+    switch (event.key) {
+      case 'ArrowDown':
+      case 'ArrowUp':
+        event.preventDefault();
+        this.abrirMenuCategoria();
+        break;
+    }
+  }
+
+  onListboxKeydown(event: KeyboardEvent): void {
+    const ultimo = this.totalOpcionesCategoria - 1;
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        this.moverActivo(Math.min(this.categoriaIndiceActivo + 1, ultimo));
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        this.moverActivo(Math.max(this.categoriaIndiceActivo - 1, 0));
+        break;
+      case 'Home':
+        event.preventDefault();
+        this.moverActivo(0);
+        break;
+      case 'End':
+        event.preventDefault();
+        this.moverActivo(ultimo);
+        break;
+      case 'Enter':
+      case ' ':
+        event.preventDefault();
+        this.elegirOpcion(this.categoriaIndiceActivo);
+        break;
+      case 'Escape':
+        event.preventDefault();
+        this.cerrarMenuCategoria(true);
+        break;
+      case 'Tab':
+        this.cerrarMenuCategoria(false);
+        break;
+    }
+  }
+
+  @HostListener('document:pointerdown', ['$event'])
+  onDocumentPointerDown(event: Event): void {
+    if (!this.categoriaMenuAbierto) {
+      return;
+    }
+    const select = (this.host.nativeElement as HTMLElement).querySelector('.cat-select');
+    if (select && !select.contains(event.target as Node)) {
+      this.cerrarMenuCategoria(false);
+    }
+  }
+
+  private indiceSeleccionado(): number {
+    if (this.categoriaSeleccionadaId == null) {
+      return 0;
+    }
+    const i = this.categorias.findIndex(c => c.id === this.categoriaSeleccionadaId);
+    return i >= 0 ? i + 1 : 0;
+  }
+
+  private moverActivo(index: number): void {
+    this.categoriaIndiceActivo = index;
+    this.cdr.detectChanges();
+    this.scrollOpcionActiva();
+  }
+
+  private scrollOpcionActiva(): void {
+    const el = this.categoriaListbox?.nativeElement.querySelector<HTMLElement>(
+      `#${this.opcionId(this.categoriaIndiceActivo)}`
+    );
+    el?.scrollIntoView({ block: 'nearest' });
   }
 
   onImagenError(productoId: number): void {

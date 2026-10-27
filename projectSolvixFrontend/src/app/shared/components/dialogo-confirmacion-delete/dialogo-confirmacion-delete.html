@@ -1,12 +1,12 @@
-<div class="ce-dlg is-danger">
+<div class="ce-dlg" [class.is-danger]="esDanger" [class.is-warning]="esWarning">
   <header class="ce-dlg__head">
     <div class="ce-dlg__lead">
       <span class="ce-dlg__badge" aria-hidden="true">
-        <span class="material-symbols-outlined">delete</span>
+        <span class="material-symbols-outlined">{{ icono }}</span>
       </span>
       <div class="ce-dlg__copy">
-        <p class="ce-dlg__kicker">Acción destructiva</p>
-        <h2>Confirmación</h2>
+        <p class="ce-dlg__kicker">{{ kicker }}</p>
+        <h2>{{ titulo }}</h2>
       </div>
     </div>
     <button type="button" class="ce-dlg__close" aria-label="Cerrar" (click)="cerrar(false)">
@@ -15,15 +15,15 @@
   </header>
 
   <div class="ce-dlg__body">
-    <p class="ce-dlg__text">{{ data.mensaje }}</p>
+    <p class="ce-dlg__text">{{ mensaje }}</p>
   </div>
 
   <div class="ce-dlg__actions">
     <solvix-button family="tech" rank="tertiary" type="button" (click)="cerrar(false)">
-      Cancelar
+      {{ cancelText }}
     </solvix-button>
-    <solvix-button family="tech" rank="danger" type="button" icon="delete" (click)="cerrar(true)">
-      Confirmar
+    <solvix-button family="tech" [rank]="confirmRank" type="button" [icon]="icono" (click)="cerrar(true)">
+      {{ confirmText }}
     </solvix-button>
   </div>
 </div>
