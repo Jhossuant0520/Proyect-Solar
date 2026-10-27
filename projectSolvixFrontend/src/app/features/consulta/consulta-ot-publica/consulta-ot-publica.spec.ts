@@ -165,6 +165,30 @@ describe('ConsultaOtPublicaComponent (FASE C.2 / 3.15.9.3-C)', () => {
     expect(documentoService.consultaCotizacionOtPublica).toHaveBeenCalledWith('token-abc');
   }));
 
+  it('permite al cliente continuar desde el overlay interactivo de mejores manos al ingresar con token', fakeAsync(() => {
+    fixture.detectChanges();
+    tick();
+    fixture.detectChanges();
+
+    component.mostrarIntroBienvenida = true;
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('Tu equipo está en las mejores manos');
+    expect(text).toContain('En tiempo real');
+    expect(text).toContain('5 etapas claras');
+    expect(text).toContain('Claridad total');
+    expect(text).toContain('Tú decides');
+    expect(text).toContain('Continuar a la consulta de mi OT');
+
+    component.continuarAOrden();
+    expect(component.desvaneciendoIntro).toBeTrue();
+    tick(380);
+    fixture.detectChanges();
+    expect(component.mostrarIntroBienvenida).toBeFalse();
+    expect(component.desvaneciendoIntro).toBeFalse();
+  }));
+
   it('otros estados no ofrecen cotización ni acciones', fakeAsync(() => {
     documentoService.consultaOtPublica.and.returnValue(
       of(
@@ -352,7 +376,7 @@ describe('ConsultaOtPublicaComponent (FASE C.2 / 3.15.9.3-C)', () => {
     expect(component.enviandoAccion).toBeFalse();
   }));
 
-  it('muestra contacto del taller y alias como Referencia', fakeAsync(() => {
+  it('muestra contacto de Lab de ingeniería y alias como Referencia', fakeAsync(() => {
     documentoService.consultaOtPublica.and.returnValue(
       of(dtoBase({ estadoCodigo: 'LISTO', cotizacionDisponible: false }))
     );
@@ -361,7 +385,7 @@ describe('ConsultaOtPublicaComponent (FASE C.2 / 3.15.9.3-C)', () => {
     fixture.detectChanges();
 
     const text = fixture.nativeElement.textContent as string;
-    expect(text).toContain('Contacto del taller');
+    expect(text).toContain('Contacto de Lab de ingeniería');
     expect(text).toContain('+57 300 0000000');
     expect(text).toContain('Referencia');
     expect(text).toContain('Laptop Contabilidad');
@@ -444,19 +468,19 @@ describe('ConsultaOtPublicaComponent (FASE C.2 / 3.15.9.3-C)', () => {
       emptyComp = emptyFixture.componentInstance;
     });
 
-    it('presenta la bienvenida con los cuatro beneficios y el buscador rápido cuando no hay token en ruta', fakeAsync(() => {
+    it('presenta el portal de búsqueda de órdenes cuando no hay token en ruta', fakeAsync(() => {
       emptyFixture.detectChanges();
       tick();
       emptyFixture.detectChanges();
 
       expect(emptyComp.faseExperiencia).toBe('bienvenida');
       const text = emptyFixture.nativeElement.textContent as string;
-      expect(text).toContain('Tu equipo está en las mejores manos');
-      expect(text).toContain('En tiempo real');
-      expect(text).toContain('5 etapas claras');
-      expect(text).toContain('Claridad total');
-      expect(text).toContain('Tú decides');
+      expect(text).toContain('Buscador de Órdenes de Servicio');
       expect(text).toContain('Consulta de Orden Rápida');
+      expect(text).toContain('Código o enlace');
+      expect(text).toContain('Rastreo inmediato');
+      expect(text).toContain('Diagnóstico y cotización');
+      expect(text).toContain('Lab de ingeniería');
     }));
 
     it('valida que el código no esté vacío al consultar', fakeAsync(() => {

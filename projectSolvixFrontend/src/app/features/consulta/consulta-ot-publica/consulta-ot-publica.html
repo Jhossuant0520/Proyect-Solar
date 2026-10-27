@@ -1,35 +1,25 @@
 <section class="ce-page">
   <!-- Fondo ambiental con gradientes radiales difuminados y profundidad sutil -->
+  <div class="ce-glow ce-glow--darkblue" aria-hidden="true"></div>
   <div class="ce-glow ce-glow--primary" aria-hidden="true"></div>
   <div class="ce-glow ce-glow--cyan" aria-hidden="true"></div>
   <div class="ce-glow ce-glow--accent" aria-hidden="true"></div>
   <div class="ce-grid-pattern" aria-hidden="true"></div>
 
-  <!-- Barra superior: Marca C&E y selector de tema -->
-  <header class="ce-topbar" [class.ce-topbar--tracking]="faseExperiencia === 'seguimiento'">
-    <div class="ce-brand">
-      <a routerLink="/" class="ce-brand-link" aria-label="Ir al inicio de Computer & Electronic">
-        <img src="/LogoEmpresa1.png" alt="Logo C&E" class="ce-brand-logo" />
-      </a>
-      <div class="ce-brand-text">
-        <span class="ce-brand-title">Centro de Experiencia C&amp;E</span>
-        <span class="ce-brand-subtitle">CONSULTA DE SERVICIO TÉCNICO OFICIAL</span>
+  <!-- Barra superior: Marca C&E oficial -->
+  @if (faseExperiencia !== 'inicializando') {
+    <header class="ce-topbar" [class.ce-topbar--tracking]="faseExperiencia === 'seguimiento'">
+      <div class="ce-brand">
+        <a routerLink="/" class="ce-brand-link" aria-label="Ir al inicio de Computer & Electronic">
+          <img src="/LogoEmpresa1.png" alt="Logo C&E" class="ce-brand-logo" />
+        </a>
+        <div class="ce-brand-text">
+          <span class="ce-brand-title">Centro de Experiencia C&amp;E</span>
+          <span class="ce-brand-subtitle">CONSULTA DE SERVICIO TÉCNICO OFICIAL</span>
+        </div>
       </div>
-    </div>
-
-    <div class="ce-topbar-actions">
-      @if (faseExperiencia === 'seguimiento') {
-        <button
-          type="button"
-          class="ce-btn-volver"
-          (click)="volverABienvenida()"
-        >
-          <span class="material-symbols-outlined" aria-hidden="true">search</span>
-          <span>Consultar otra orden</span>
-        </button>
-      }
-    </div>
-  </header>
+    </header>
+  }
 
   <!-- PRIMER MOMENTO: Transición de carga ambiental -->
   @if (faseExperiencia === 'inicializando') {
@@ -68,65 +58,23 @@
     </div>
   }
 
-  <!-- SEGUNDO MOMENTO: Bienvenida al Centro de Experiencia -->
+  <!-- SEGUNDO MOMENTO: Buscador Oficial de Órdenes de Servicio Técnico (Ruta /consulta/ot sin token) -->
   @if (faseExperiencia === 'bienvenida') {
     <main class="ce-main-container ce-fade-in">
-      <article class="ce-welcome-card">
+      <article class="ce-welcome-card ce-search-landing-card">
         <header class="ce-welcome-header">
           <div class="ce-badge">
-            <span class="material-symbols-outlined ce-badge-icon" aria-hidden="true">verified</span>
-            <span>PORTAL DE ATENCIÓN Y SEGUIMIENTO</span>
+            <span class="material-symbols-outlined ce-badge-icon" aria-hidden="true">manage_search</span>
+            <span>PORTAL DE BÚSQUEDA Y RASTREO TÉCNICO</span>
           </div>
-          <h1 class="ce-main-title">Tu equipo está en las mejores manos</h1>
+          <h1 class="ce-main-title">Buscador de Órdenes de Servicio</h1>
           <p class="ce-main-subtitle">
-            Monitorea en tiempo real el avance de tu orden de servicio técnico, conoce los diagnósticos
-            especializados y mantén el control de cada etapa de tu reparación.
+            Rastrea el avance de tu equipo en tiempo real, consulta los diagnósticos de laboratorio,
+            revisa presupuestos y mantén el control de cada etapa de tu servicio técnico.
           </p>
         </header>
 
-        <section class="ce-benefits-grid" aria-label="Beneficios del Centro de Experiencia">
-          <div class="ce-benefit-card" style="--stagger: 0ms">
-            <div class="ce-benefit-icon-box">
-              <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
-            </div>
-            <h2 class="ce-benefit-title">En tiempo real</h2>
-            <p class="ce-benefit-desc">
-              Consulta el estado actual de tu orden y el avance de tu equipo al instante.
-            </p>
-          </div>
-
-          <div class="ce-benefit-card" style="--stagger: 70ms">
-            <div class="ce-benefit-icon-box">
-              <span class="material-symbols-outlined" aria-hidden="true">linear_scale</span>
-            </div>
-            <h2 class="ce-benefit-title">5 etapas claras</h2>
-            <p class="ce-benefit-desc">
-              Recepción, diagnóstico, cotización y aprobación, reparación y entrega.
-            </p>
-          </div>
-
-          <div class="ce-benefit-card" style="--stagger: 140ms">
-            <div class="ce-benefit-icon-box">
-              <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
-            </div>
-            <h2 class="ce-benefit-title">Claridad total</h2>
-            <p class="ce-benefit-desc">
-              Comprende qué sucede y cuál es el siguiente paso programado en tu servicio.
-            </p>
-          </div>
-
-          <div class="ce-benefit-card" style="--stagger: 210ms">
-            <div class="ce-benefit-icon-box">
-              <span class="material-symbols-outlined" aria-hidden="true">how_to_reg</span>
-            </div>
-            <h2 class="ce-benefit-title">Tú decides</h2>
-            <p class="ce-benefit-desc">
-              Conoce cuándo se requiere la aprobación o alguna acción de tu parte.
-            </p>
-          </div>
-        </section>
-
-        <!-- SECCIÓN: Consulta de Orden Rápida -->
+        <!-- SECCIÓN PROTAGÓNICA: Campo de Búsqueda de Orden -->
         <section class="ce-quick-search-card" aria-labelledby="titulo-consulta-rapida">
           <div class="ce-quick-search-header">
             <div class="ce-search-kicker">
@@ -134,7 +82,7 @@
               <h2 id="titulo-consulta-rapida">Consulta de Orden Rápida</h2>
             </div>
             <p class="ce-search-info">
-              Ingresa el código o token asignado a tu orden de servicio técnico.
+              Ingresa el código alfanumérico o pega el enlace asignado a tu orden.
             </p>
           </div>
 
@@ -147,7 +95,7 @@
                 class="ce-search-input"
                 [(ngModel)]="codigoOrdenInput"
                 name="codigoOrden"
-                placeholder="Ej. 5c9a72b… o enlace de consulta"
+                placeholder="Ej. 5c9a72b… o pega el enlace de consulta"
                 autocomplete="off"
                 spellcheck="false"
                 [disabled]="buscandoOrden"
@@ -174,9 +122,9 @@
             >
               @if (buscandoOrden) {
                 <span class="ce-btn-spinner" aria-hidden="true"></span>
-                <span>Consultando…</span>
+                <span>Buscando orden…</span>
               } @else {
-                <span>Continuar a mi consulta</span>
+                <span>Buscar mi orden</span>
                 <span class="material-symbols-outlined ce-btn-icon" aria-hidden="true">arrow_forward</span>
               }
             </button>
@@ -190,10 +138,53 @@
           }
 
           <div class="ce-search-footer-hint">
-            <span class="material-symbols-outlined" aria-hidden="true">info</span>
+            <span class="material-symbols-outlined" aria-hidden="true">help_outline</span>
             <p>
               ¿Dónde encuentro mi código? Lo encuentras en el comprobante impreso entregado en recepción
-              o en el enlace del mensaje de WhatsApp enviado por Computer & Electronic.
+              o en el enlace del mensaje de WhatsApp enviado por Computer &amp; Electronic.
+            </p>
+          </div>
+        </section>
+
+        <!-- 4 CARDS GUÍA DE BÚSQUEDA Y SERVICIO -->
+        <section class="ce-benefits-grid ce-benefits-grid--search" aria-label="Beneficios del buscador de orden">
+          <div class="ce-benefit-card" style="--stagger: 0ms">
+            <div class="ce-benefit-icon-box">
+              <span class="material-symbols-outlined" aria-hidden="true">pin</span>
+            </div>
+            <h2 class="ce-benefit-title">Código o enlace</h2>
+            <p class="ce-benefit-desc">
+              Ingresa el código alfanumérico o abre el link directo de tu comprobante oficial.
+            </p>
+          </div>
+
+          <div class="ce-benefit-card" style="--stagger: 70ms">
+            <div class="ce-benefit-icon-box">
+              <span class="material-symbols-outlined" aria-hidden="true">bolt</span>
+            </div>
+            <h2 class="ce-benefit-title">Rastreo inmediato</h2>
+            <p class="ce-benefit-desc">
+              Accede al estado actualizado de tu equipo directamente en nuestro laboratorio técnico.
+            </p>
+          </div>
+
+          <div class="ce-benefit-card" style="--stagger: 140ms">
+            <div class="ce-benefit-icon-box">
+              <span class="material-symbols-outlined" aria-hidden="true">fact_check</span>
+            </div>
+            <h2 class="ce-benefit-title">Diagnóstico y cotización</h2>
+            <p class="ce-benefit-desc">
+              Revisa fallas detectadas, repuestos cotizados y autoriza presupuestos en línea.
+            </p>
+          </div>
+
+          <div class="ce-benefit-card" style="--stagger: 210ms">
+            <div class="ce-benefit-icon-box">
+              <span class="material-symbols-outlined" aria-hidden="true">support_agent</span>
+            </div>
+            <h2 class="ce-benefit-title">Lab de ingeniería</h2>
+            <p class="ce-benefit-desc">
+              Comunícate directamente por WhatsApp o teléfono con nuestros ingenieros encargados.
             </p>
           </div>
         </section>
@@ -201,9 +192,97 @@
     </main>
   }
 
-  <!-- TERCER MOMENTO: Seguimiento Completo del Servicio Técnico (Referencia Stitch screen(2).png) -->
+  <!-- TERCER MOMENTO: Seguimiento Completo del Servicio Técnico -->
   @if (faseExperiencia === 'seguimiento') {
-    <main class="ce-tracking-view ce-fade-in">
+    <!-- OVERLAY INTERACTIVO: Primera vista tras cargar ("Tu equipo está en las mejores manos") -->
+    @if (mostrarIntroBienvenida) {
+      <div
+        class="ce-intro-overlay"
+        [class.ce-intro-overlay--fadeout]="desvaneciendoIntro"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="intro-titulo"
+      >
+        <article class="ce-welcome-card ce-intro-modal ce-fade-in-up">
+          <!-- Fondo ambiental dinámico y notorio en movimiento -->
+          <div class="ce-intro-ambient" aria-hidden="true">
+            <div class="ce-intro-orb ce-intro-orb--1"></div>
+            <div class="ce-intro-orb ce-intro-orb--2"></div>
+            <div class="ce-intro-orb ce-intro-orb--3"></div>
+            <div class="ce-intro-orb ce-intro-orb--4"></div>
+            <div class="ce-intro-mesh-pattern"></div>
+          </div>
+
+          <header class="ce-welcome-header">
+            <div class="ce-badge">
+              <span class="material-symbols-outlined ce-badge-icon" aria-hidden="true">verified</span>
+              <span>PORTAL DE ATENCIÓN Y SEGUIMIENTO</span>
+            </div>
+            <h1 id="intro-titulo" class="ce-main-title">Tu equipo está en las mejores manos</h1>
+            <p class="ce-main-subtitle">
+              Monitorea en tiempo real el avance de tu orden de servicio técnico, conoce los diagnósticos
+              especializados y mantén el control de cada etapa de tu reparación.
+            </p>
+          </header>
+
+          <section class="ce-benefits-grid" aria-label="Beneficios del Centro de Experiencia">
+            <div class="ce-benefit-card" style="--stagger: 0ms">
+              <div class="ce-benefit-icon-box">
+                <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+              </div>
+              <h2 class="ce-benefit-title">En tiempo real</h2>
+              <p class="ce-benefit-desc">
+                Consulta el estado actual de tu orden y el avance de tu equipo al instante.
+              </p>
+            </div>
+
+            <div class="ce-benefit-card" style="--stagger: 70ms">
+              <div class="ce-benefit-icon-box">
+                <span class="material-symbols-outlined" aria-hidden="true">linear_scale</span>
+              </div>
+              <h2 class="ce-benefit-title">5 etapas claras</h2>
+              <p class="ce-benefit-desc">
+                Recepción, diagnóstico, cotización y aprobación, reparación y entrega.
+              </p>
+            </div>
+
+            <div class="ce-benefit-card" style="--stagger: 140ms">
+              <div class="ce-benefit-icon-box">
+                <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+              </div>
+              <h2 class="ce-benefit-title">Claridad total</h2>
+              <p class="ce-benefit-desc">
+                Comprende qué sucede y cuál es el siguiente paso programado en tu servicio.
+              </p>
+            </div>
+
+            <div class="ce-benefit-card" style="--stagger: 210ms">
+              <div class="ce-benefit-icon-box">
+                <span class="material-symbols-outlined" aria-hidden="true">how_to_reg</span>
+              </div>
+              <h2 class="ce-benefit-title">Tú decides</h2>
+              <p class="ce-benefit-desc">
+                Conoce cuándo se requiere la aprobación o alguna acción de tu parte.
+              </p>
+            </div>
+          </section>
+
+          <div class="ce-intro-action-wrap">
+            <button
+              type="button"
+              id="btn-continuar-orden"
+              class="ce-btn-intro-continuar"
+              (click)="continuarAOrden()"
+            >
+              <span>Continuar a la consulta de mi OT</span>
+              <span class="material-symbols-outlined ce-btn-intro-icon" aria-hidden="true">arrow_forward</span>
+            </button>
+          </div>
+        </article>
+      </div>
+    }
+
+    <main class="ce-tracking-view ce-fade-in" [class.ce-tracking-view--blurred]="mostrarIntroBienvenida">
       @if (state === 'loading') {
         <div class="ce-state-wrapper">
           <solvix-loading-state label="Consultando tu orden de servicio…" />
@@ -322,9 +401,9 @@
                 } @else if (data.estadoCodigo === 'REQUIERE_APROBACION_ADICIONAL') {
                   <a
                     class="btn btn-primary ce-btn-cta"
-                    href="#contacto-taller"
+                    href="#contacto-laboratorio"
                   >
-                    <span>Contactar taller</span>
+                    <span>Contactar Lab de ingeniería</span>
                     <span class="material-symbols-outlined text-[18px]" aria-hidden="true">chat</span>
                   </a>
                 }
@@ -509,7 +588,7 @@
                     <h3 class="ce-identity-title">{{ tituloPanelAccion }}</h3>
                   </div>
                   <p class="ce-identity-help">
-                    Para confirmar, ingresa el documento de identidad y el teléfono registrados en el taller.
+                    Para confirmar, ingresa el documento de identidad y el teléfono registrados en Lab de ingeniería.
                   </p>
 
                   <form class="ce-identity-form" [formGroup]="identidadForm" (ngSubmit)="confirmarAccion()">
@@ -636,13 +715,13 @@
                       data.estadoCodigo === 'PENDIENTE_APROBACION'
                         ? 'Si estás de acuerdo con la cotización, autoriza el inicio del servicio para proceder con la orden.'
                         : data.estadoCodigo === 'LISTO'
-                          ? 'Tu equipo está terminado. Acércate con tu documento de identidad para retirarlo en el taller.'
+                          ? 'Tu equipo está terminado. Acércate con tu documento de identidad para retirarlo en Lab de ingeniería.'
                           : data.estadoCodigo === 'REQUIERE_APROBACION_ADICIONAL'
                             ? 'Durante la intervención técnica apareció un hallazgo que requiere tu visto bueno. Contáctanos.'
                             : ux.accionCliente
                     }}
                   } @else {
-                    No por ahora. El taller sigue trabajando en tu equipo y te notificaremos ante cualquier novedad.
+                    No por ahora. Lab de ingeniería sigue trabajando en tu equipo y te notificaremos ante cualquier novedad.
                   }
                 </p>
               </div>
@@ -697,7 +776,7 @@
                       rel="noopener noreferrer"
                     >
                       <span class="material-symbols-outlined text-[18px]" aria-hidden="true">chat</span>
-                      <span>Contactar taller por WhatsApp</span>
+                      <span>Contactar Lab de ingeniería por WhatsApp</span>
                     </a>
                   }
                 } @else {
@@ -718,7 +797,7 @@
                 <h3 class="ce-pickup-title">Indicaciones de entrega</h3>
               </div>
               <p class="ce-pickup-text">
-                Acércate al taller con tu documento de identidad. Si alguien más retira el equipo, confirma con nosotros antes de llegar.
+                Acércate a Lab de ingeniería con tu documento de identidad. Si alguien más retira el equipo, confirma con nosotros antes de llegar.
               </p>
               @if (contacto.direccion; as direccion) {
                 <p class="ce-pickup-address">
@@ -728,11 +807,11 @@
             </section>
           }
 
-          <!-- 7. ASISTENCIA TÉCNICA Y CONTACTO DEL TALLER -->
+          <!-- 7. ASISTENCIA TÉCNICA Y CONTACTO DE LAB DE INGENIERÍA -->
           @if (mostrarBloqueContacto) {
             @if (contacto; as c) {
               <section
-                id="contacto-taller"
+                id="contacto-laboratorio"
                 class="ce-support-card"
                 [class.ce-support-card--highlight]="destacarContacto"
                 aria-labelledby="contacto-titulo"
@@ -742,10 +821,10 @@
                     <span class="material-symbols-outlined text-[22px]" aria-hidden="true">support_agent</span>
                   </div>
                   <div class="ce-support-text-wrap">
-                    <div class="ce-support-kicker">Contacto del taller</div>
+                    <div class="ce-support-kicker">Contacto de Lab de ingeniería</div>
                     <h3 id="contacto-titulo" class="ce-support-title">¿Necesitas asistencia técnica?</h3>
                     <p class="ce-support-desc">
-                      Nuestro equipo de taller está disponible para resolver tus inquietudes sobre la orden.
+                      Nuestro equipo de Lab de ingeniería está disponible para resolver tus inquietudes sobre la orden.
                     </p>
                   </div>
                 </div>
@@ -759,7 +838,7 @@
                       rel="noopener noreferrer"
                     >
                       <span class="material-symbols-outlined text-[18px]" aria-hidden="true">chat</span>
-                      <span>WhatsApp Taller</span>
+                      <span>WhatsApp Lab de ingeniería</span>
                     </a>
                   }
                   @if (c.telefono && telHref(c.telefono); as href) {
@@ -773,24 +852,6 @@
                   }
                 </div>
               </section>
-
-              <!-- Footer de Garantía y Horario -->
-              <div class="ce-trust-footer">
-                <div class="ce-trust-item">
-                  <span class="material-symbols-outlined text-emerald-700 text-[17px]" aria-hidden="true">verified_user</span>
-                  <span>Servicio garantizado bajo estándar de calidad y respaldo oficial C&amp;E.</span>
-                </div>
-                @if (c.direccion) {
-                  <div class="ce-trust-item">
-                    <span class="material-symbols-outlined text-primary text-[17px]" aria-hidden="true">location_on</span>
-                    <span>Taller: {{ c.direccion }}</span>
-                  </div>
-                }
-                <div class="ce-trust-item">
-                  <span class="material-symbols-outlined text-outline text-[17px]" aria-hidden="true">schedule</span>
-                  <span>Horario de Laboratorio: Lunes a Viernes 09:00 - 18:30 hrs</span>
-                </div>
-              </div>
             }
           }
 
@@ -799,32 +860,34 @@
     </main>
   }
 
-  <!-- Footer General Limpio -->
-  <footer class="ce-global-footer">
-    <div class="ce-footer-content">
-      <div class="ce-footer-brand">
-        <img src="/LogoEmpresa1.png" alt="Logo C&E" class="ce-footer-logo" />
-        <span class="ce-footer-brand-text">Centro de Experiencia C&amp;E • Consulta Pública de Servicios Técnicos</span>
+  <!-- Footer General Oficial Limpio (Único footer, visible cuando no hay overlays activos) -->
+  @if (faseExperiencia !== 'inicializando' && (!mostrarIntroBienvenida || faseExperiencia !== 'seguimiento')) {
+    <footer class="ce-global-footer">
+      <div class="ce-footer-content">
+        <div class="ce-footer-brand">
+          <img src="/LogoEmpresa1.png" alt="Logo C&E" class="ce-footer-logo" />
+          <span class="ce-footer-brand-text">Centro de Experiencia C&amp;E • Consulta Pública de Servicios Técnicos</span>
+        </div>
+        <div class="ce-footer-info">
+          <span class="ce-footer-info-item">
+            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">location_on</span>
+            <span>{{ direccionTaller }}</span>
+          </span>
+          <span class="ce-footer-divider" aria-hidden="true">•</span>
+          <a class="ce-footer-info-item ce-footer-link" [href]="waHref(whatsappTaller)" target="_blank" rel="noopener noreferrer">
+            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">chat</span>
+            <span>WhatsApp: {{ whatsappTaller }}</span>
+          </a>
+          <span class="ce-footer-divider" aria-hidden="true">•</span>
+          <a class="ce-footer-info-item ce-footer-link" [href]="telHref(telefonoTaller)">
+            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">call</span>
+            <span>Tel: {{ telefonoTaller }}</span>
+          </a>
+        </div>
+        <div class="ce-footer-copy font-mono">
+          © {{ anioActual }} C&amp;E Servicios Técnicos. Todos los derechos reservados.
+        </div>
       </div>
-      <div class="ce-footer-info">
-        <span class="ce-footer-info-item">
-          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">location_on</span>
-          <span>{{ direccionTaller }}</span>
-        </span>
-        <span class="ce-footer-divider" aria-hidden="true">•</span>
-        <a class="ce-footer-info-item ce-footer-link" [href]="waHref(whatsappTaller)" target="_blank" rel="noopener noreferrer">
-          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">chat</span>
-          <span>WhatsApp: {{ whatsappTaller }}</span>
-        </a>
-        <span class="ce-footer-divider" aria-hidden="true">•</span>
-        <a class="ce-footer-info-item ce-footer-link" [href]="telHref(telefonoTaller)">
-          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">call</span>
-          <span>Tel: {{ telefonoTaller }}</span>
-        </a>
-      </div>
-      <div class="ce-footer-copy font-mono">
-        © {{ anioActual }} C&amp;E Servicios Técnicos. Todos los derechos reservados.
-      </div>
-    </div>
-  </footer>
+    </footer>
+  }
 </section>

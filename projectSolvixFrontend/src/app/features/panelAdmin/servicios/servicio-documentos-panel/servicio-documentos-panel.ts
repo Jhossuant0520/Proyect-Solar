@@ -11,7 +11,6 @@ import { SolvixFeedbackService } from '../../../../shared/services/solvix-feedba
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subscription, of, timer } from 'rxjs';
 import { catchError, filter, finalize, map, switchMap, take } from 'rxjs/operators';
-import { SolvixBadgeComponent } from '../../../../shared/components/solvix-badge/solvix-badge';
 import { SolvixButtonComponent } from '../../../../shared/components/solvix-button/solvix-button';
 import { SolvixEmptyStateComponent } from '../../../../shared/components/solvix-empty-state/solvix-empty-state';
 import { SolvixErrorStateComponent } from '../../../../shared/components/solvix-error-state/solvix-error-state';
@@ -72,7 +71,6 @@ const POLL_MAX_TICKS = 10;
     MatSnackBarModule,
     MatTooltipModule,
     SolvixButtonComponent,
-    SolvixBadgeComponent,
     SolvixLoadingStateComponent,
     SolvixEmptyStateComponent,
     SolvixErrorStateComponent
