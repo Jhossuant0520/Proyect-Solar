@@ -142,12 +142,15 @@ Secrets referenciados (sin valores): `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD
 | Push / merge | **No realizados** |
 | Rama lista para revisión | **Sí** |
 
-### Estado Git esperado al cierre
+### Estado Git al cierre
 
 ```text
 branch: update/computer-electronic-current-version
-based on: main (ae02a11 …)
+commit:  a50b7a1 Recover Computer & Electronic tree under version control and align CI paths.
+based on: main (ae02a11)
 remote: origin → Proyect-Solar (sin push de esta rama)
+working tree: limpio (0 untracked)
+tracked: computerElectronicFrontend/src = 487 · computerElectronicBackend/src = 435 · projectSolvix* = 0
 ```
 
 ---
