@@ -1,0 +1,117 @@
+﻿<section class="reporte-page">
+  <ce-page-header icon="bar_chart"
+    kicker="Reportes"
+    title="Ventas"
+    subtitle="Resumen del período según Analytics. Exporta el CSV con tu sesión ADMIN."
+  >
+    <ce-button family="tech" rank="tertiary" icon="arrow_back" (click)="volver()">
+      Hub
+    </ce-button>
+    <ce-button
+      family="tech"
+      rank="primary"
+      icon="download"
+      [disabled]="exportando || state === 'loading'"
+      (click)="exportar()"
+    >
+      {{ exportando ? 'Exportando…' : 'Exportar CSV' }}
+    </ce-button>
+  </ce-page-header>
+
+  <div class="filtros">
+    <label>
+      Período
+      <select
+        [ngModel]="periodo.preset"
+        (ngModelChange)="onPreset($event)"
+      >
+        @for (p of presets; track p.id) {
+          <option [ngValue]="p.id">{{ p.label }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      Desde
+      <input type="date" [(ngModel)]="periodo.desde" (change)="marcarPersonalizado()" />
+    </label>
+    <label>
+      Hasta
+      <input type="date" [(ngModel)]="periodo.hasta" (change)="marcarPersonalizado()" />
+    </label>
+    <label>
+      Agrupación
+      <select [(ngModel)]="agrupacion">
+        @for (a of agrupaciones; track a.id) {
+          <option [ngValue]="a.id">{{ a.label }}</option>
+        }
+      </select>
+    </label>
+    <div class="filtros-actions">
+      <ce-button family="tech" rank="secondary" (click)="cargar()">Aplicar</ce-button>
+    </div>
+  </div>
+
+  @if (state === 'loading') {
+    <ce-loading-state label="Cargando reporte de ventas." />
+  } @else if (state === 'error') {
+    <ce-error-state [title]="errorTitle" [message]="errorMessage" (retry)="cargar()" />
+  } @else if (state === 'empty') {
+    <ce-empty-state
+      icon="point_of_sale"
+      title="Sin ventas en el período"
+      message="Ajusta las fechas o registra ventas completadas para ver el reporte."
+    />
+  } @else if (kpis) {
+    <div class="kpi-grid">
+      <ce-metric-card label="Ventas brutas" [value]="money(kpis.ventasBrutas)" icon="payments" />
+      <ce-metric-card label="Devoluciones" [value]="money(kpis.devoluciones)" icon="assignment_return" />
+      <ce-metric-card label="Ventas netas" [value]="money(kpis.ventasNetas)" icon="trending_up" tone="success" />
+      <ce-metric-card label="Ganancia bruta" [value]="money(kpis.gananciaBruta)" icon="savings" />
+      <ce-metric-card label="Margen bruto" [value]="percent(kpis.margenBruto)" icon="percent" />
+      <ce-metric-card label="Pedidos" [value]="qty(kpis.pedidos)" icon="receipt_long" />
+      <ce-metric-card label="Ticket promedio" [value]="money(kpis.ticketPromedio)" icon="confirmation_number" />
+    </div>
+
+    <section class="panel">
+      <ce-section-header
+        kicker="Serie"
+        title="Evolución temporal"
+        subtitle="Puntos ya agregados por el Analytics Engine."
+      />
+      <div class="table-wrap desktop-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Etiqueta</th>
+              <th class="is-num">Ventas</th>
+              <th class="is-num">Devoluciones</th>
+              <th class="is-num">Netas</th>
+              <th class="is-num">Ganancia</th>
+              <th class="is-num">Pedidos</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of puntos; track $index) {
+              <tr>
+                <td>{{ p.etiqueta }}</td>
+                <td class="is-num">{{ money(p.ventas) }}</td>
+                <td class="is-num">{{ money(p.devoluciones) }}</td>
+                <td class="is-num">{{ money(p.ventasNetas) }}</td>
+                <td class="is-num">{{ money(p.ganancia) }}</td>
+                <td class="is-num">{{ p.pedidos }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <ul class="mobile-lines">
+        @for (p of puntos; track $index) {
+          <li>
+            <strong>{{ p.etiqueta }}</strong>
+            <span>Netas {{ money(p.ventasNetas) }} · Pedidos {{ p.pedidos }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</section>

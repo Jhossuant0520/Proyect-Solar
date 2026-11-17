@@ -1,0 +1,37 @@
+---
+description: UX writing, números y presentación de resultados en Computer & Electronic
+alwaysApply: true
+---
+
+# Computer & Electronic — UX writing y resultados
+
+Principio rector: **Computer & Electronic no oculta la operación. La hace comprensible.**
+
+El usuario común debe entender el panel sin conocimientos técnicos profundos. Un usuario técnico debe poder acceder a toda la información operativa y de auditoría.
+
+Alcance: solo este frontend.
+
+## UX writing
+
+1. Palabras simples.
+2. Tiempo presente.
+3. Simplificar valores numéricos en la capa visible.
+4. Ser consciente del lenguaje técnico. Traducir cuando haga falta.
+   - `numeroOt` → "Número de orden"
+   - `fechaRecepcion` → "Fecha de recepción"
+5. Jerarquía visual en botones.
+6. Botones y labels en una sola línea siempre que sea posible.
+7. Consistencia de estilos y colores.
+
+## Números
+
+Simplificar visualmente. Mantener precisión completa en detalles técnicos.
+
+- Visible: `1250000.5` → `$1.250.000,50` (o el formato de moneda del módulo)
+- Detalle técnico: valor completo / sin redondeo prematuro en capa 3
+
+## Resultados importantes
+
+Usar: número grande + unidad clara + descripción corta + estado visual.
+
+Ejemplo: `12` / Órdenes pendientes

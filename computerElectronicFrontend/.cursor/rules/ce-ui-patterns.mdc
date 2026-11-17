@@ -1,0 +1,43 @@
+---
+description: Capas de resultado, botones, progressive disclosure y componentes reutilizables Computer & Electronic
+alwaysApply: true
+---
+
+# Computer & Electronic — Patrones de interfaz
+
+Principio rector: **Computer & Electronic no oculta la operación. La hace comprensible.**
+
+Alcance: solo este frontend (`computerElectronicFrontend`). No aplicar a SOLVIX, Joyería ni otras marcas.
+
+## Inteligencia de interfaz
+
+Los resultados operativos y de negocio se presentan en capas:
+
+1. **Capa 1** — Resultado fácil de entender
+2. **Capa 2** — Resumen útil (estado, totales, próximos pasos)
+3. **Capa 3** — Detalles técnicos
+
+Nunca obligar al usuario común a leer códigos, IDs o trazas para entender el resultado.
+Nunca eliminar la información técnica existente para quien la necesite.
+
+## Progressive disclosure
+
+Usar "Ver detalles técnicos" (o equivalente) para mostrar: IDs, fechas exactas, trazabilidad, montos desglosados, validaciones, configuración avanzada.
+
+## Botones — jerarquía
+
+- **PRIMARY** → acción principal
+- **SECONDARY** → acción complementaria
+- **TERTIARY** → acción secundaria
+- **DANGER** → acción destructiva
+
+No usar múltiples botones primarios compitiendo entre sí.
+
+Familias oficiales (una por pantalla): **Cyber-Glow**, **Glass-Precision**, **Tech-Minimal**.
+Skill: `.cursor/skills/ce-buttons/SKILL.md`
+
+## Componentes reutilizables
+
+Si un patrón aparece en más de una pantalla, extraer componente. Ejemplos canónicos:
+
+`ce-metric-card`, `ce-card`, `ce-badge`, `ce-section-header`, `ce-page-header`, `ce-loading-state`, `ce-error-state`, `ce-empty-state`, `ce-button`, `ce-snack`, `ce-progress-fases`, `ce-signature-pad`, `ce-theme-toggle`, `ce-field-help`

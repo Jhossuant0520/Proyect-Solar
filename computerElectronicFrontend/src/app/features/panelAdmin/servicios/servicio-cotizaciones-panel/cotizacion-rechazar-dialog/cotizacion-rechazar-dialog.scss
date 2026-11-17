@@ -1,0 +1,11 @@
+﻿@use '../../../../../../styles/dialog' as d;
+
+@include d.dialog;
+
+.ce-dlg {
+  min-width: min(420px, 92vw);
+}
+
+.ce-dlg__actions {
+  margin-top: 0.25rem;
+}

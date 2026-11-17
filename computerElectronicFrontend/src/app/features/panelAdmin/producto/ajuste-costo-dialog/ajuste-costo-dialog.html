@@ -1,0 +1,73 @@
+﻿<div class="ce-dlg">
+  <header class="ce-dlg__head">
+    <div class="ce-dlg__lead">
+      <span class="ce-dlg__badge" aria-hidden="true">
+        <span class="material-symbols-outlined">payments</span>
+      </span>
+      <div class="ce-dlg__copy">
+        <p class="ce-dlg__kicker">Inventario</p>
+        <h2>Ajustar costo</h2>
+        <p class="ce-dlg__sub">{{ data.nombre }}</p>
+      </div>
+    </div>
+    <button type="button" class="ce-dlg__close" aria-label="Cerrar" (click)="cancelar()">
+      <span class="material-symbols-outlined" aria-hidden="true">close</span>
+    </button>
+  </header>
+
+  <form class="ce-dlg__body" [formGroup]="form" (ngSubmit)="aplicar()">
+    <p class="ce-dlg__note">
+      <span class="material-symbols-outlined" aria-hidden="true">info</span>
+      <span>Este ajuste no cambia el stock. El inventario sigue en {{ data.stockActual }} unidades.</span>
+    </p>
+
+    <label class="ce-field">
+      Costo actual
+      <input
+        class="ce-input"
+        type="text"
+        [value]="data.costoConocido ? money(data.costoActual) : 'Sin costo'"
+        disabled
+      />
+    </label>
+
+    <label class="ce-field">
+      Nuevo costo
+      <input class="ce-input" type="number" formControlName="costoNuevo" min="0" step="1" placeholder="0" />
+    </label>
+    @if (form.controls.costoNuevo.touched && form.controls.costoNuevo.invalid) {
+      <p class="field-error">El costo no puede ser negativo.</p>
+    }
+    @if (costoIgual) {
+      <p class="field-error">El costo indicado es el que ya está vigente.</p>
+    }
+
+    <label class="ce-field">
+      Motivo
+      <select class="ce-input" formControlName="motivo">
+        <option value="" disabled>Selecciona un motivo</option>
+        @for (motivo of motivos; track motivo.id) {
+          <option [value]="motivo.id">{{ motivo.label }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="ce-field">
+      Observaciones <span class="ce-opt">opcional</span>
+      <textarea class="ce-input" formControlName="observaciones" rows="3" maxlength="500" placeholder="Opcional"></textarea>
+    </label>
+
+    @if (error) {
+      <p class="form-error" role="alert">{{ error }}</p>
+    }
+
+    <div class="ce-dlg__actions">
+      <ce-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
+        Cancelar
+      </ce-button>
+      <ce-button family="tech" rank="primary" type="submit" icon="check" [disabled]="enviando || form.invalid || costoIgual">
+        Aplicar ajuste
+      </ce-button>
+    </div>
+  </form>
+</div>

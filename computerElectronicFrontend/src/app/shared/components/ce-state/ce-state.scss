@@ -1,0 +1,65 @@
+﻿.ce-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 16rem;
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: 2rem 1rem;
+}
+
+.ce-state__icon {
+  font-size: 2rem;
+  color: var(--color-primary);
+}
+
+.ce-state h2 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.ce-state p {
+  margin: 0;
+  max-width: 28rem;
+  font-family: var(--font-sans);
+  color: var(--color-text-muted);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.ce-state--error .ce-state__icon {
+  color: var(--color-danger);
+}
+
+.ce-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: min(28rem, 100%);
+}
+
+.ce-skeleton__bar {
+  display: block;
+  height: 0.75rem;
+  border-radius: 0.25rem;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary-soft),
+    color-mix(in srgb, var(--color-primary) 22%, transparent),
+    var(--color-primary-soft)
+  );
+  background-size: 200% 100%;
+  animation: ce-shimmer 1.4s ease-in-out infinite;
+}
+
+.ce-skeleton__bar--short {
+  width: 60%;
+}
+
+/* ce-shimmer: definición canónica en styles/_motion.scss (equivalente; unificada en 8H-2). */

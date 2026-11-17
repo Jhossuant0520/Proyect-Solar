@@ -1,7 +1,0 @@
-@use '../../../../styles/solvix-dialog' as d;
-
-@include d.dialog;
-
-.ce-dlg {
-  min-width: min(22rem, 90vw);
-}

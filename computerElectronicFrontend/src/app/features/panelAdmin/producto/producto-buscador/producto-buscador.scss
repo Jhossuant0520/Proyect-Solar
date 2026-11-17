@@ -1,0 +1,65 @@
+﻿@use '../../../../../styles/buscador' as b;
+
+@include b.buscador;
+
+/* Producto: nombre + meta a la izquierda, precio a la derecha */
+.resultados button {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'nombre precio'
+    'meta precio';
+  gap: 0.1rem 0.75rem;
+  align-items: center;
+}
+
+.nombre {
+  grid-area: nombre;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.meta {
+  grid-area: meta;
+}
+
+.precio {
+  grid-area: precio;
+  font-family: var(--font-mono, 'JetBrains Mono', ui-monospace, monospace);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-primary, #006194);
+  white-space: nowrap;
+}
+
+.badge-agregado {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--color-success, #1a7f4b);
+  background: color-mix(in srgb, var(--color-success, #1a7f4b) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-success, #1a7f4b) 32%, transparent);
+}
+
+.resultados button.is-agregado {
+  border-color: color-mix(in srgb, var(--color-success, #1a7f4b) 32%, transparent);
+}
+
+@media (max-width: 767px) {
+  .resultados button {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'nombre'
+      'meta'
+      'precio';
+  }
+
+  .precio {
+    justify-self: start;
+  }
+}

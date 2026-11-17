@@ -14,7 +14,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./projectSolvixFrontend
+        working-directory: ./computerElectronicFrontend
 
     steps:
       - name: Checkout repository
@@ -25,7 +25,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: ./projectSolvixFrontend/package-lock.json
+          cache-dependency-path: ./computerElectronicFrontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -37,13 +37,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -f dist/projectSolarFishFrontend/browser/index.html
-          find dist/projectSolarFishFrontend/browser -maxdepth 1 -type f -regex '.*/(main.*\.js|polyfills.*\.js|styles.*\.css)$' | grep -q .
-          find dist/projectSolarFishFrontend/browser -maxdepth 1 -type f -name 'chunk-*.js' | grep -q .
+          test -f dist/computerElectronicFrontend/browser/index.html
+          find dist/computerElectronicFrontend/browser -maxdepth 1 -type f -regex '.*/(main.*\.js|polyfills.*\.js|styles.*\.css)$' | grep -q .
+          find dist/computerElectronicFrontend/browser -maxdepth 1 -type f -name 'chunk-*.js' | grep -q .
           python - <<'PY'
           import hashlib, json
           from pathlib import Path
-          base = Path('dist/projectSolarFishFrontend/browser')
+          base = Path('dist/computerElectronicFrontend/browser')
           manifest = {}
           for p in sorted(base.rglob('*')):
               if p.is_file() and '.git' not in p.parts and p.name not in {'.ftp-deploy-sync-state.json','.ftp-deploy-sync-state-test.json'}:
@@ -101,7 +101,7 @@ jobs:
           for name in names:
               if name in {'.well-known', '.ftp-deploy-sync-state.json', '.ftp-deploy-sync-state-test.json'}:
                   continue
-              if name in {'assets', 'browser', 'projectSolarFishFrontend'}:
+              if name in {'assets', 'browser', 'projectSolarFishFrontend', 'computerElectronicFrontend'}:
                   remove_tree(name)
                   try:
                       ftp.rmd(name)
@@ -132,7 +132,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftps
           port: 21
-          local-dir: ./projectSolvixFrontend/dist/projectSolarFishFrontend/browser/
+          local-dir: ./computerElectronicFrontend/dist/computerElectronicFrontend/browser/
           server-dir: /
           state-name: .ftp-deploy-sync-state-test.json
           exclude: |
@@ -141,4 +141,5 @@ jobs:
             **/.github/**
             .well-known/**
             projectSolarFishFrontend/**
+            computerElectronicFrontend/**
             browser/**

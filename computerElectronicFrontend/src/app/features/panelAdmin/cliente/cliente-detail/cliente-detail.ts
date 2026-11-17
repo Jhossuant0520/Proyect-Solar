@@ -1,0 +1,196 @@
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { CeBadgeComponent } from '../../../../shared/components/ce-badge/ce-badge';
+import { CeButtonComponent } from '../../../../shared/components/ce-button/ce-button';
+import { CeEmptyStateComponent } from '../../../../shared/components/ce-empty-state/ce-empty-state';
+import { CeErrorStateComponent } from '../../../../shared/components/ce-error-state/ce-error-state';
+import { CeLoadingStateComponent } from '../../../../shared/components/ce-loading-state/ce-loading-state';
+import { CePageHeaderComponent } from '../../../../shared/components/ce-page-header/ce-page-header';
+import { CeSectionHeaderComponent } from '../../../../shared/components/ce-section-header/ce-section-header';
+import { DialogoConfirmacionDelete } from '../../../../shared/components/dialogo-confirmacion-delete/dialogo-confirmacion-delete';
+import { FeedbackService } from '../../../../shared/services/feedback.service';
+import { ClienteService } from '../../../../core/services/cliente.service';
+import { VentaService } from '../../../../core/services/venta.service';
+import { ClienteResponseDTO } from '../../../../core/models/cliente.models';
+import { DevolucionVentaResponseDTO, VentaResponseDTO } from '../../../../core/models/venta.models';
+import { formatImporte, labelEstadoDevolucion, labelEstadoVenta, labelMetodoPago, labelMotivoDevolucion, toneEstadoDevolucion, toneEstadoVenta } from '../../venta/venta-ui';
+import { formatFechaCorta } from '../../producto/producto-ui';
+import { aRequestConEstado, ordenarPorFechaDesc, rutaDevolucion, rutaVenta } from '../cliente-mapper';
+import {
+  MENSAJE_CONSUMIDOR_RESERVADO,
+  NOTA_HISTORIAL,
+  documentoVisible,
+  esConsumidorFinal,
+  labelTipoCliente,
+  mensajeErrorCliente,
+  puedeDesactivarCliente,
+  puedeEditarCliente
+} from '../cliente-ui';
+import { ClienteEquiposPanelComponent } from '../cliente-equipos-panel/cliente-equipos-panel';
+
+type BloqueEstado = 'loading' | 'ready' | 'empty' | 'error';
+
+@Component({
+  selector: 'app-cliente-detail',
+  standalone: true,
+  templateUrl: './cliente-detail.html',
+  styleUrl: './cliente-detail.scss',
+  imports: [
+    RouterLink,
+    MatDialogModule,
+    MatSnackBarModule,
+    CePageHeaderComponent,
+    CeSectionHeaderComponent,
+    CeButtonComponent,
+    CeBadgeComponent,
+    CeLoadingStateComponent,
+    CeEmptyStateComponent,
+    CeErrorStateComponent,
+    ClienteEquiposPanelComponent
+  ]
+})
+export class ClienteDetailComponent implements OnInit {
+  cliente: ClienteResponseDTO | null = null;
+  ventas: VentaResponseDTO[] = [];
+  devoluciones: DevolucionVentaResponseDTO[] = [];
+  state: 'loading' | 'ready' | 'error' = 'loading';
+  ventasState: BloqueEstado = 'loading';
+  devolucionesState: BloqueEstado = 'loading';
+
+  readonly tipo = labelTipoCliente;
+  readonly documento = documentoVisible;
+  readonly fecha = formatFechaCorta;
+  readonly money = formatImporte;
+  readonly estadoVenta = labelEstadoVenta;
+  readonly tonoVenta = toneEstadoVenta;
+  readonly estadoDevolucion = labelEstadoDevolucion;
+  readonly tonoDevolucion = toneEstadoDevolucion;
+  readonly motivo = labelMotivoDevolucion;
+  readonly pago = labelMetodoPago;
+  readonly notaHistorial = NOTA_HISTORIAL;
+  readonly mensajeReservado = MENSAJE_CONSUMIDOR_RESERVADO;
+  readonly reservado = esConsumidorFinal;
+  readonly rutaVenta = rutaVenta;
+  readonly rutaDevolucion = rutaDevolucion;
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private clienteService: ClienteService,
+    private ventaService: VentaService,
+    private dialog: MatDialog,
+    private feedback: FeedbackService
+  ) {}
+
+  ngOnInit(): void {
+    this.cargar();
+  }
+
+  get clienteId(): number | null {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    return Number.isFinite(id) && id > 0 ? id : null;
+  }
+
+  cargar(): void {
+    const id = this.clienteId;
+    if (id == null) {
+      this.state = 'error';
+      return;
+    }
+    this.state = 'loading';
+    this.clienteService.obtenerPorId(id).subscribe({
+      next: cliente => {
+        this.cliente = cliente;
+        this.state = 'ready';
+        this.cargarVentas(id);
+        this.cargarDevoluciones(id);
+      },
+      error: () => {
+        this.state = 'error';
+      }
+    });
+  }
+
+  editar(): void {
+    if (this.cliente == null || !puedeEditarCliente(this.cliente)) {
+      return;
+    }
+    this.router.navigate(['/clientes', this.cliente.id, 'editar']);
+  }
+
+  desactivar(): void {
+    if (this.cliente == null || !puedeDesactivarCliente(this.cliente)) {
+      return;
+    }
+    const cliente = this.cliente;
+    const ref = this.dialog.open(DialogoConfirmacionDelete, {
+      data: {
+        titulo: '¿Desactivar este cliente?',
+        kicker: 'Estado del cliente',
+        mensaje: '¿Desactivar este cliente? Seguirá en el historial de ventas y servicios.',
+        icono: 'person_off',
+        tipo: 'warning',
+        confirmText: 'Desactivar cliente'
+      },
+      panelClass: 'ce-dialog-panel',
+      backdropClass: 'ce-dialog-backdrop'
+    });
+    ref.afterClosed().subscribe(resultado => {
+      if (resultado !== true) {
+        return;
+      }
+      this.clienteService.desactivar(cliente.id, aRequestConEstado(cliente, false)).subscribe({
+        next: actualizado => {
+          this.cliente = actualizado;
+          this.feedback.warning('Cliente actualizado');
+        },
+        error: err => {
+          this.feedback.error(mensajeErrorCliente(err, 'No pudimos desactivar este cliente.'), 4000);
+        }
+      });
+    });
+  }
+
+  activar(): void {
+    if (this.cliente == null || esConsumidorFinal(this.cliente) || this.cliente.activo) {
+      return;
+    }
+    this.clienteService.actualizar(this.cliente.id, aRequestConEstado(this.cliente, true)).subscribe({
+      next: actualizado => {
+        this.cliente = actualizado;
+        this.feedback.success('Cliente actualizado');
+      },
+      error: err => {
+        this.feedback.error(mensajeErrorCliente(err, 'No pudimos activar este cliente.'), 4000);
+      }
+    });
+  }
+
+  private cargarVentas(id: number): void {
+    this.ventasState = 'loading';
+    this.ventaService.listar({ clienteId: id, tamano: 50 }).subscribe({
+      next: pagina => {
+        this.ventas = ordenarPorFechaDesc(pagina.contenido);
+        this.ventasState = pagina.contenido.length === 0 ? 'empty' : 'ready';
+      },
+      error: () => {
+        this.ventasState = 'error';
+      }
+    });
+  }
+
+  private cargarDevoluciones(id: number): void {
+    this.devolucionesState = 'loading';
+    this.ventaService.listarDevolucionesPorCliente(id).subscribe({
+      next: items => {
+        this.devoluciones = ordenarPorFechaDesc(items);
+        this.devolucionesState = items.length === 0 ? 'empty' : 'ready';
+      },
+      error: () => {
+        this.devolucionesState = 'error';
+      }
+    });
+  }
+}

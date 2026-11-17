@@ -1,0 +1,1070 @@
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { CeBadgeComponent } from '../../../../shared/components/ce-badge/ce-badge';
+import { CeButtonComponent } from '../../../../shared/components/ce-button/ce-button';
+import { CeErrorStateComponent } from '../../../../shared/components/ce-error-state/ce-error-state';
+import { CeLoadingStateComponent } from '../../../../shared/components/ce-loading-state/ce-loading-state';
+import { CeSectionHeaderComponent } from '../../../../shared/components/ce-section-header/ce-section-header';
+import { CeProgressFasesComponent } from '../../../../shared/components/ce-progress-fases/ce-progress-fases';
+import { OrdenServicioService } from '../../../../core/services/orden-servicio.service';
+import {
+  HistorialEstadoOrdenServicioResponseDTO,
+  OrdenServicioResponseDTO,
+  RepuestoOrdenServicioResponseDTO,
+  TransicionOrdenServicioResponseDTO
+} from '../../../../core/models/orden-servicio.models';
+import { aRequestActualizacionTextos, valoresDesdeOrden } from '../servicio-mapper';
+import {
+  AccionWorkflowUi,
+  CAMPOS_TECNICOS,
+  CampoTecnicoId,
+  EtapaTrazabilidadUi,
+  PrioridadAntiguedadUi,
+  accionCancelarDesde,
+  accionNuevaFalla,
+  accionPrincipalDesde,
+  accionSecundariaEspera,
+  calcularPrioridadPorAntiguedad,
+  campoTecnicoDestacado,
+  construirTrazabilidadOperativa,
+  contarRepuestosPendientes,
+  equipoResumen,
+  esEstadoTerminal,
+  esResumenTecnicoCompleto,
+  formatFechaOrden,
+  labelEstadoOrden,
+  labelEstadoRepuesto,
+  labelTipoEquipo,
+  mapHttpError,
+  mensajeCambioEstado,
+  mensajeErrorServicio,
+  puedeEditarTextos,
+  puedeEditarCampoTecnico,
+  hintCampoBloqueado,
+  tipoAccionWorkflow,
+  toneEstadoOrden,
+  toneEstadoRepuesto,
+  valorTextoTecnico,
+  textosTecnicosSinCambios
+} from '../servicio-ui';
+import {
+  FasePublicaOrden,
+  SeccionDetalleId,
+  documentoRelevantePorEstado,
+  estadoOrdenUx,
+  resumenFaseActual,
+  seccionesAbiertasPorEstado
+} from '../estado-orden-ux';
+import { ActionRevealService } from '../../../../shared/services/action-reveal.service';
+import { FeedbackService } from '../../../../shared/services/feedback.service';
+import {
+  TransicionEstadoDialogComponent,
+  TransicionEstadoDialogResult,
+  modoDialogoDesdeTipo
+} from '../transicion-estado-dialog/transicion-estado-dialog';
+import {
+  ServicioEntregaDialogComponent,
+  ServicioEntregaDialogData
+} from '../servicio-entrega-dialog/servicio-entrega-dialog';
+import {
+  CotizacionPanelIntent,
+  CotizacionesPanelChange,
+  DocumentoCotizacionEsperado,
+  ServicioCotizacionesPanelComponent
+} from '../servicio-cotizaciones-panel/servicio-cotizaciones-panel';
+import { CotizacionServicioResponseDTO } from '../../../../core/models/cotizacion-servicio.models';
+import { formatMoney } from '../../dashboard/utils/dashboard-format';
+import {
+  EsperarDocumentoOpts,
+  ServicioDocumentosPanelComponent
+} from '../servicio-documentos-panel/servicio-documentos-panel';
+import { CotizacionServicioService } from '../../../../core/services/cotizacion-servicio.service';
+import { environment } from '../../../../../environments/environment';
+import {
+  MSG_TELEFONO_INVALIDO_WHATSAPP,
+  PlantillaWhatsAppAsistido,
+  construirMensajeWhatsAppAsistido,
+  enlaceClickToChat,
+  normalizarTelefonoWa,
+  puedePlantillaCotizacion,
+  puedePlantillaEquipoListo,
+  puedePlantillaRecepcion,
+  urlConsultaOtPublica
+} from '../whatsapp-asistido.util';
+
+@Component({
+  selector: 'app-servicio-detail',
+  standalone: true,
+  templateUrl: './servicio-detail.html',
+  styleUrl: './servicio-detail.scss',
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    MatSnackBarModule,
+    MatDialogModule,
+    MatMenuModule,
+    MatButtonModule,
+    CeBadgeComponent,
+    CeButtonComponent,
+    CeSectionHeaderComponent,
+    CeLoadingStateComponent,
+    CeErrorStateComponent,
+    CeProgressFasesComponent,
+    ServicioCotizacionesPanelComponent,
+    ServicioDocumentosPanelComponent
+  ]
+})
+export class ServicioDetailComponent implements OnInit {
+  @ViewChild('panelTecnico') panelTecnico?: ElementRef<HTMLElement>;
+  @ViewChild('panelCotizaciones') panelCotizaciones?: ElementRef<HTMLElement>;
+  @ViewChild('previewWhatsAppCard') previewWhatsAppCard?: ElementRef<HTMLElement>;
+  @ViewChild(ServicioCotizacionesPanelComponent)
+  cotizacionesPanel?: ServicioCotizacionesPanelComponent;
+  @ViewChild(ServicioDocumentosPanelComponent)
+  documentosPanel?: ServicioDocumentosPanelComponent;
+
+  orden: OrdenServicioResponseDTO | null = null;
+  cotizacionesLista: CotizacionServicioResponseDTO[] = [];
+  historial: HistorialEstadoOrdenServicioResponseDTO[] = [];
+  historialState: 'idle' | 'loading' | 'ready' | 'empty' | 'error' = 'idle';
+  historialCompleto = false;
+  state: 'loading' | 'ready' | 'error' = 'loading';
+  editando = false;
+  guardando = false;
+  cambiandoEstado = false;
+  esperarComprobante = false;
+  whatsappHighlight = false;
+  errorTitle = 'No pudimos cargar esta orden.';
+  errorMessage = 'La orden no existe o no está disponible.';
+  editError = '';
+  estadoError = '';
+  historialError = '';
+  guiaTecnica = '';
+  pendingRepuestos = 0;
+  pendientesResumen: string[] = [];
+  repuestosItems: RepuestoOrdenServicioResponseDTO[] = [];
+  secciones: Record<SeccionDetalleId, boolean> = seccionesAbiertasPorEstado(null);
+  faseAlCancelar: FasePublicaOrden | null = null;
+
+  readonly form;
+  readonly campos = CAMPOS_TECNICOS;
+  readonly fecha = formatFechaOrden;
+  readonly money = formatMoney;
+  readonly estadoLabel = labelEstadoOrden;
+  readonly estadoTone = toneEstadoOrden;
+  readonly repuestoLabel = labelEstadoRepuesto;
+  readonly repuestoTone = toneEstadoRepuesto;
+  readonly equipo = equipoResumen;
+  readonly tipoEquipo = labelTipoEquipo;
+  readonly puedeEditar = puedeEditarTextos;
+  readonly valorCampo = valorTextoTecnico;
+
+  constructor(
+    private fb: FormBuilder,
+    private route: ActivatedRoute,
+    private router: Router,
+    private dialog: MatDialog,
+    private ordenServicioService: OrdenServicioService,
+    private cotizacionServicioService: CotizacionServicioService,
+    private feedback: FeedbackService,
+    private actionReveal: ActionRevealService,
+    private cdr: ChangeDetectorRef
+  ) {
+    this.form = this.fb.group({
+      problemaReportado: ['', Validators.maxLength(2000)],
+      diagnostico: ['', Validators.maxLength(2000)],
+      trabajoRealizado: ['', Validators.maxLength(2000)],
+      observaciones: ['', Validators.maxLength(1000)]
+    });
+  }
+
+  ngOnInit(): void {
+    this.esperarComprobante =
+      this.route.snapshot.queryParamMap.get('esperarComprobante') === '1';
+    if (this.esperarComprobante) {
+      void this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { esperarComprobante: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true
+      });
+    }
+    this.cargar();
+  }
+
+  get ordenId(): number | null {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    return Number.isFinite(id) && id > 0 ? id : null;
+  }
+
+  get ux() {
+    return estadoOrdenUx(this.orden?.estado);
+  }
+
+  get resumenFase() {
+    return resumenFaseActual(this.orden?.estado);
+  }
+
+  get campoDestacado(): CampoTecnicoId | null {
+    return this.orden ? campoTecnicoDestacado(this.orden.estado) : null;
+  }
+
+  get esResumenCompleto(): boolean {
+    return this.orden ? esResumenTecnicoCompleto(this.orden.estado) : false;
+  }
+
+  get hayCambiosTextos(): boolean {
+    if (!this.orden) {
+      return false;
+    }
+    return !textosTecnicosSinCambios(this.orden, this.textosDelForm());
+  }
+
+  get accionPrincipal(): AccionWorkflowUi | null {
+    return this.orden ? accionPrincipalDesde(this.orden.estado) : null;
+  }
+
+  get accionCancelar(): AccionWorkflowUi | null {
+    return this.orden ? accionCancelarDesde(this.orden.estado) : null;
+  }
+
+  get accionEspera(): AccionWorkflowUi | null {
+    return this.orden ? accionSecundariaEspera(this.orden.estado) : null;
+  }
+
+  get accionFalla(): AccionWorkflowUi | null {
+    return this.orden ? accionNuevaFalla(this.orden.estado) : null;
+  }
+
+  get puedeGestionarRepuestos(): boolean {
+    return this.orden ? !esEstadoTerminal(this.orden.estado) : false;
+  }
+
+  get enDiagnostico(): boolean {
+    return this.orden?.estado === 'EN_DIAGNOSTICO';
+  }
+
+  get enReparacion(): boolean {
+    return this.orden?.estado === 'EN_REPARACION';
+  }
+
+  get requiereAprobacionAdicional(): boolean {
+    return this.orden?.estado === 'REQUIERE_APROBACION_ADICIONAL';
+  }
+
+  get diagnosticoYaDiligenciado(): boolean {
+    return !!(this.orden?.diagnostico ?? '').trim();
+  }
+
+  puedeEditarCampo(campoId: CampoTecnicoId): boolean {
+    return this.orden ? puedeEditarCampoTecnico(this.orden.estado, campoId) : false;
+  }
+
+  hintBloqueado(campoId: CampoTecnicoId): string | null {
+    return this.orden ? hintCampoBloqueado(this.orden.estado, campoId) : null;
+  }
+
+  get historialReciente(): HistorialEstadoOrdenServicioResponseDTO[] {
+    return this.historial.slice(0, 3);
+  }
+
+  get hayMasHistorial(): boolean {
+    return this.historial.length > 3;
+  }
+
+  get documentoRelevante() {
+    return documentoRelevantePorEstado(this.orden?.estado);
+  }
+
+  get requisitosPendientes(): string[] {
+    const items: string[] = [];
+    if (!this.orden) {
+      return items;
+    }
+    if (this.orden.estado === 'EN_DIAGNOSTICO' && !this.diagnosticoYaDiligenciado) {
+      items.push('Falta registrar el diagnóstico técnico.');
+    }
+    if (this.orden.estado === 'EN_REPARACION' && this.pendingRepuestos > 0) {
+      items.push(
+        this.pendingRepuestos === 1
+          ? 'Hay 1 repuesto pendiente de consumir.'
+          : `Hay ${this.pendingRepuestos} repuestos pendientes de consumir.`
+      );
+    }
+    if (this.orden.estado === 'ESPERA_REPUESTO') {
+      items.push(
+        this.pendingRepuestos > 0
+          ? `Repuestos pendientes: ${this.pendingRepuestos}.`
+          : 'Resolver la espera de repuesto para continuar.'
+      );
+    }
+    if (this.orden.estado === 'EN_REPARACION' && !(this.orden.trabajoRealizado ?? '').trim()) {
+      items.push('Completa el trabajo realizado antes de marcar como listo.');
+    }
+    return items;
+  }
+
+  get hayMenuMasAcciones(): boolean {
+    return !!(this.accionCancelar || this.accionEspera || this.accionFalla);
+  }
+
+  /** WhatsApp asistido: requiere token + teléfono válidos (panel ADMIN). */
+  get puedePrepararWhatsApp(): boolean {
+    if (!this.orden) {
+      return false;
+    }
+    const token = (this.orden.tokenConsulta ?? '').trim();
+    return !!token && !!normalizarTelefonoWa(this.orden.clienteTelefono);
+  }
+
+  get mostrarWhatsAppRecepcion(): boolean {
+    return puedePlantillaRecepcion(this.orden?.estado);
+  }
+
+  get mostrarWhatsAppCotizacion(): boolean {
+    return puedePlantillaCotizacion(this.orden?.estado);
+  }
+
+  get mostrarWhatsAppEquipoListo(): boolean {
+    return puedePlantillaEquipoListo(this.orden?.estado);
+  }
+
+  get hayOpcionesWhatsApp(): boolean {
+    return (
+      this.mostrarWhatsAppRecepcion ||
+      this.mostrarWhatsAppCotizacion ||
+      this.mostrarWhatsAppEquipoListo
+    );
+  }
+
+  get prioridadOperativa(): PrioridadAntiguedadUi | null {
+    if (!this.orden) {
+      return null;
+    }
+    return calcularPrioridadPorAntiguedad(this.orden.fechaRecepcion, this.orden.estado);
+  }
+
+  get etapasTrazabilidad(): EtapaTrazabilidadUi[] {
+    return construirTrazabilidadOperativa(this.orden, this.historial);
+  }
+
+  get ultimoResponsable(): string | null {
+    if (this.historial.length > 0 && this.historial[0].usuario) {
+      return this.historial[0].usuario;
+    }
+    return this.orden?.createdBy ?? null;
+  }
+
+  get cotizacionDestacada(): CotizacionServicioResponseDTO | null {
+    const activas = this.cotizacionesLista.filter(
+      c => c.estado === 'BORRADOR' || c.estado === 'PENDIENTE_APROBACION'
+    );
+    if (activas.length) {
+      return activas[activas.length - 1];
+    }
+    const aprobadas = this.cotizacionesLista.filter(c => c.estado === 'APROBADA');
+    return aprobadas.length ? aprobadas[aprobadas.length - 1] : null;
+  }
+
+  get plantillaContextualWhatsApp(): PlantillaWhatsAppAsistido {
+    if (this.mostrarWhatsAppCotizacion) {
+      return 'cotizacion';
+    }
+    if (this.mostrarWhatsAppEquipoListo) {
+      return 'equipoListo';
+    }
+    return 'recepcion';
+  }
+
+  get labelPlantillaContextualWhatsApp(): string {
+    switch (this.plantillaContextualWhatsApp) {
+      case 'cotizacion':
+        return 'Notificación de cotización';
+      case 'equipoListo':
+        return 'Aviso de equipo listo';
+      default:
+        return 'Confirmación de recepción';
+    }
+  }
+
+  get telefonoWaNormalizado(): string | null {
+    return normalizarTelefonoWa(this.orden?.clienteTelefono);
+  }
+
+  get telefonoWaFormateado(): string {
+    const raw = (this.orden?.clienteTelefono ?? '').trim();
+    if (!raw) {
+      return 'Sin teléfono registrado';
+    }
+    const norm = this.telefonoWaNormalizado;
+    if (norm && norm.length === 12 && norm.startsWith('57')) {
+      return `+57 ${norm.slice(2, 5)} ${norm.slice(5, 8)} ${norm.slice(8)}`;
+    }
+    return raw;
+  }
+
+  get vistaPreviaMensajeWhatsApp(): string {
+    if (!this.orden) {
+      return '';
+    }
+    const token = (this.orden.tokenConsulta ?? '').trim();
+    const urlConsulta = token
+      ? urlConsultaOtPublica(environment.publicWebBaseUrl, token)
+      : `${environment.publicWebBaseUrl}/consulta/ot/…`;
+    return construirMensajeWhatsAppAsistido(this.plantillaContextualWhatsApp, {
+      nombre: this.orden.clienteNombre,
+      ordenNumero: this.orden.numero,
+      urlConsulta,
+      cotizacionNumero: this.cotizacionDestacada?.numero ?? null
+    });
+  }
+
+  copiarCodigoOrden(): void {
+    const codigo = this.orden?.numero;
+    if (!codigo) {
+      return;
+    }
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      navigator.clipboard
+        .writeText(codigo)
+        .then(() => this.feedback.info(`Código ${codigo} copiado al portapapeles.`))
+        .catch(() => this.feedback.info(`Código: ${codigo}`));
+      return;
+    }
+    this.feedback.info(`Código: ${codigo}`);
+  }
+
+  irAPreviewWhatsApp(): void {
+    const el = this.previewWhatsAppCard?.nativeElement;
+    if (!el) {
+      return;
+    }
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    this.whatsappHighlight = true;
+    setTimeout(() => {
+      this.whatsappHighlight = false;
+    }, 1400);
+  }
+
+  abrirWhatsAppContextual(): void {
+    this.prepararWhatsApp(this.plantillaContextualWhatsApp);
+  }
+
+  onCotizacionesPanelChange(ev: CotizacionesPanelChange): void {
+    queueMicrotask(() => {
+      this.cotizacionesLista = ev.items ?? [];
+      this.cdr.markForCheck();
+    });
+  }
+
+  cargar(): void {
+    const id = this.ordenId;
+    if (id == null) {
+      this.state = 'error';
+      return;
+    }
+    this.state = 'loading';
+    this.editando = false;
+    this.editError = '';
+    this.estadoError = '';
+    this.guiaTecnica = '';
+    this.ordenServicioService.obtenerPorId(id).subscribe({
+      next: orden => {
+        this.aplicarOrden(orden);
+        this.state = 'ready';
+        this.cargarHistorial(id);
+      },
+      error: error => {
+        const mapped = mapHttpError(error, 'No pudimos cargar esta orden.');
+        this.errorTitle = mapped.title;
+        this.errorMessage = mapped.message;
+        this.state = 'error';
+      }
+    });
+  }
+
+  cargarHistorial(id: number): void {
+    this.historialState = 'loading';
+    this.historialError = '';
+    this.ordenServicioService.listarHistorial(id).subscribe({
+      next: items => {
+        this.historial = items;
+        this.historialState = items.length ? 'ready' : 'empty';
+        this.actualizarFaseCancelacion(items);
+      },
+      error: error => {
+        this.historial = [];
+        this.historialState = 'error';
+        this.historialError = mensajeErrorServicio(error, 'No pudimos cargar el historial.');
+      }
+    });
+  }
+
+  volver(): void {
+    this.router.navigate(['/servicios']);
+  }
+
+  /**
+   * Prepara Click-to-Chat. No envía; no toca NotificationDispatcher.
+   */
+  prepararWhatsApp(plantilla: PlantillaWhatsAppAsistido): void {
+    if (!this.orden) {
+      return;
+    }
+    const telefono = normalizarTelefonoWa(this.orden.clienteTelefono);
+    if (!telefono) {
+      this.feedback.warning(MSG_TELEFONO_INVALIDO_WHATSAPP);
+      return;
+    }
+    const token = (this.orden.tokenConsulta ?? '').trim();
+    if (!token) {
+      this.feedback.warning('No hay enlace de consulta pública para esta orden.');
+      return;
+    }
+
+    if (plantilla === 'cotizacion') {
+      this.prepararWhatsAppCotizacion(telefono, token);
+      return;
+    }
+
+    this.abrirClickToChat(plantilla, telefono, token, null);
+  }
+
+  /** Feedback al abrir el menú si faltan datos (ítems disabled no disparan click). */
+  avisarWhatsAppSiNoListo(): void {
+    if (!this.orden || this.puedePrepararWhatsApp) {
+      return;
+    }
+    if (!normalizarTelefonoWa(this.orden.clienteTelefono)) {
+      this.feedback.warning(MSG_TELEFONO_INVALIDO_WHATSAPP);
+      return;
+    }
+    if (!(this.orden.tokenConsulta ?? '').trim()) {
+      this.feedback.warning('No hay enlace de consulta pública para esta orden.');
+    }
+  }
+
+  private prepararWhatsAppCotizacion(telefono: string, token: string): void {
+    const ordenId = this.orden?.id;
+    if (ordenId == null) {
+      return;
+    }
+    this.cotizacionServicioService.listar(ordenId).subscribe({
+      next: lista => {
+        const pendiente = [...lista]
+          .reverse()
+          .find(c => c.estado === 'PENDIENTE_APROBACION');
+        if (!pendiente?.numero) {
+          this.feedback.warning('No hay una cotización pendiente para avisar al cliente.');
+          return;
+        }
+        this.abrirClickToChat('cotizacion', telefono, token, pendiente.numero);
+      },
+      error: () => {
+        this.feedback.error('No pudimos cargar la cotización para preparar WhatsApp.');
+      }
+    });
+  }
+
+  private abrirClickToChat(
+    plantilla: PlantillaWhatsAppAsistido,
+    telefono: string,
+    token: string,
+    cotizacionNumero: string | null
+  ): void {
+    if (!this.orden) {
+      return;
+    }
+    const urlConsulta = urlConsultaOtPublica(environment.publicWebBaseUrl, token);
+    const mensaje = construirMensajeWhatsAppAsistido(plantilla, {
+      nombre: this.orden.clienteNombre,
+      ordenNumero: this.orden.numero,
+      urlConsulta,
+      cotizacionNumero
+    });
+    const href = enlaceClickToChat(telefono, mensaje);
+    window.open(href, '_blank', 'noopener,noreferrer');
+  }
+
+  toggleSeccion(id: SeccionDetalleId): void {
+    this.secciones = { ...this.secciones, [id]: !this.secciones[id] };
+  }
+
+  abrirSeccion(id: SeccionDetalleId): void {
+    this.secciones = { ...this.secciones, [id]: true };
+  }
+
+  esCampoDestacado(campo: CampoTecnicoId): boolean {
+    return this.campoDestacado === campo;
+  }
+
+  tieneTexto(campo: CampoTecnicoId): boolean {
+    if (!this.orden) {
+      return false;
+    }
+    return !!(this.valorCampo(this.orden, campo) ?? '').trim();
+  }
+
+  iniciarEdicion(campo?: CampoTecnicoId): void {
+    if (!this.orden || !puedeEditarTextos(this.orden.estado)) {
+      return;
+    }
+    this.patchForm(this.orden);
+    this.editError = '';
+    this.editando = true;
+    this.abrirSeccion('tecnico');
+    if (campo) {
+      this.enfocarCampo(campo);
+    }
+  }
+
+  cancelarEdicion(): void {
+    if (this.orden) {
+      this.patchForm(this.orden);
+    }
+    this.editando = false;
+    this.editError = '';
+  }
+
+  guardarTextos(): void {
+    if (!this.orden || this.guardando || this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    // D.13: diagnóstico completo sincroniza workflow (RECEPCIONADO|EN_DIAGNOSTICO → DIAGNOSTICADO).
+    if (this.debeCompletarDiagnosticoAlGuardar()) {
+      this.guardarDiagnosticoCompleto();
+      return;
+    }
+    if (!this.hayCambiosTextos) {
+      this.editando = false;
+      this.editError = '';
+      return;
+    }
+
+    this.guardando = true;
+    this.editError = '';
+    const textos = this.textosDelForm();
+    const request = aRequestActualizacionTextos(this.orden, textos);
+
+    this.ordenServicioService.actualizar(this.orden.id, request).subscribe({
+      next: orden => {
+        this.aplicarOrden(orden, false);
+        this.editando = false;
+        this.guardando = false;
+        this.feedback.success('Información técnica guardada.');
+      },
+      error: error => {
+        this.guardando = false;
+        this.editError = mensajeErrorServicio(error, 'No pudimos guardar los cambios.');
+      }
+    });
+  }
+
+  /**
+   * True cuando guardar la ficha debe usar completarDiagnostico (no PUT actualizar).
+   * Evita datos técnicos con OT aún en RECEPCIONADO / EN_DIAGNOSTICO.
+   */
+  private debeCompletarDiagnosticoAlGuardar(): boolean {
+    if (!this.orden) {
+      return false;
+    }
+    const estado = this.orden.estado;
+    if (estado !== 'RECEPCIONADO' && estado !== 'EN_DIAGNOSTICO') {
+      return false;
+    }
+    return !!(this.form.controls.diagnostico.value ?? '').trim();
+  }
+
+  guardarDiagnosticoCompleto(): void {
+    if (!this.orden || this.cambiandoEstado || this.guardando) {
+      return;
+    }
+    const diagnostico = (this.form.controls.diagnostico.value ?? '').trim();
+    if (!diagnostico) {
+      this.iniciarEdicion('diagnostico');
+      this.guiaTecnica = 'Completa el diagnóstico técnico para continuar.';
+      return;
+    }
+    this.cambiandoEstado = true;
+    this.guardando = true;
+    this.estadoError = '';
+    this.guiaTecnica = '';
+    const trabajo = (this.form.controls.trabajoRealizado.value ?? '').trim();
+    this.ordenServicioService
+      .completarDiagnostico(this.orden.id, {
+        problemaReportado: this.form.controls.problemaReportado.value ?? null,
+        diagnostico,
+        trabajoRealizado: trabajo || null,
+        observaciones: this.form.controls.observaciones.value ?? null
+      })
+      .subscribe({
+        next: t => {
+          this.onTransicionOk(t, 'Diagnóstico registrado.');
+          this.abrirSeccion('cotizaciones');
+          this.actionReveal.reveal(this.panelCotizaciones, { highlight: true });
+        },
+        error: error => this.onTransicionError(error)
+      });
+  }
+
+  ejecutarAccionPrincipal(): void {
+    if (!this.orden || !this.accionPrincipal || this.cambiandoEstado || this.editando) {
+      return;
+    }
+    const accion = this.accionPrincipal;
+    const estado = this.orden.estado;
+
+    if (estado === 'EN_DIAGNOSTICO') {
+      this.irAlDiagnostico();
+      return;
+    }
+
+    if (estado === 'DIAGNOSTICADO') {
+      this.irACotizaciones('crear-inicial');
+      return;
+    }
+    if (estado === 'COTIZADO') {
+      this.irACotizaciones('presentar');
+      return;
+    }
+    if (estado === 'PENDIENTE_APROBACION') {
+      this.irACotizaciones('decision');
+      return;
+    }
+    if (estado === 'REQUIERE_APROBACION_ADICIONAL') {
+      this.irACotizaciones('crear-adicional');
+      return;
+    }
+
+    if (accion.destino === 'LISTO') {
+      this.intentarMarcarListo();
+      return;
+    }
+
+    const tipo = tipoAccionWorkflow(accion.destino);
+    if (tipo === 'gestionarEntrega' || (estado === 'LISTO' && accion.destino === 'ENTREGADO')) {
+      this.abrirEntrega();
+      return;
+    }
+
+    if (
+      tipo === 'crearCotizacion' ||
+      tipo === 'presentarCotizacion' ||
+      tipo === 'aprobarCotizacion' ||
+      tipo === 'cotizacionAdicional'
+    ) {
+      this.irACotizaciones('scroll');
+      return;
+    }
+
+    if (tipo === 'directa') {
+      this.ejecutarCambioDirecto(accion.destino);
+      return;
+    }
+
+    if (tipo === 'confirmacion') {
+      this.abrirDialogo(accion, 'confirmacion', this.mensajeConfirmacion(accion));
+      return;
+    }
+
+    const modo = modoDialogoDesdeTipo(tipo);
+    if (modo) {
+      this.abrirDialogo(accion, modo);
+    } else {
+      this.ejecutarCambioDirecto(accion.destino);
+    }
+  }
+
+  irACotizaciones(intent: CotizacionPanelIntent = 'scroll'): void {
+    this.abrirSeccion('cotizaciones');
+    queueMicrotask(() => this.cotizacionesPanel?.ejecutarIntent(intent));
+  }
+
+  onCotizacionOrdenActualizada(): void {
+    this.cargar();
+  }
+
+  onDocumentoCotizacionEsperado(ev: DocumentoCotizacionEsperado): void {
+    const opts: EsperarDocumentoOpts = {
+      tipo: ev.tipo,
+      cotizacionId: ev.cotizacionId
+    };
+    this.abrirSeccion('documentos');
+    queueMicrotask(() => this.documentosPanel?.esperarDocumento(opts));
+  }
+
+  refrescarDocumentos(): void {
+    this.documentosPanel?.cargar();
+  }
+
+  abrirEntrega(): void {
+    if (!this.orden || this.orden.estado !== 'LISTO' || this.cambiandoEstado) {
+      return;
+    }
+    const ref = this.dialog.open(ServicioEntregaDialogComponent, {
+      width: '680px',
+      maxWidth: '96vw',
+      panelClass: 'ce-dialog-panel',
+      backdropClass: 'ce-dialog-backdrop',
+      data: {
+        orden: this.orden,
+        repuestos: this.repuestosItems
+      } satisfies ServicioEntregaDialogData
+    });
+    ref.afterClosed().subscribe(result => {
+      if (!result?.orden) {
+        return;
+      }
+      this.aplicarOrden(result.orden);
+      this.editando = false;
+      this.feedback.success(result.mensaje || 'Entrega registrada. Orden cerrada.');
+      this.cargarHistorial(result.orden.id);
+      this.abrirSeccion('documentos');
+      queueMicrotask(() => {
+        this.documentosPanel?.esperarDocumento({ tipo: 'ACTA_ENTREGA' });
+      });
+    });
+  }
+
+  ejecutarAccionEspera(): void {
+    if (!this.accionEspera || this.pendingRepuestos <= 0) {
+      this.estadoError =
+        'No existen repuestos pendientes que justifiquen poner la orden en espera.';
+      return;
+    }
+    this.abrirDialogo(this.accionEspera, 'esperaRepuesto');
+  }
+
+  ejecutarAccionFalla(): void {
+    if (!this.accionFalla) {
+      return;
+    }
+    this.abrirDialogo(this.accionFalla, 'nuevaFalla');
+  }
+
+  ejecutarAccionCancelar(): void {
+    if (!this.accionCancelar) {
+      return;
+    }
+    this.abrirDialogo(this.accionCancelar, 'motivoCancelacion');
+  }
+
+  irAlDiagnostico(): void {
+    this.iniciarEdicion('diagnostico');
+    if (this.diagnosticoYaDiligenciado) {
+      this.guiaTecnica = 'El diagnóstico ya está diligenciado. Guarda la ficha para continuar.';
+    } else {
+      this.guiaTecnica = 'Escribe el diagnóstico técnico y pulsa Guardar diagnóstico.';
+    }
+  }
+
+  private intentarMarcarListo(): void {
+    if (!this.orden) {
+      return;
+    }
+    const trabajo = (
+      this.form.controls.trabajoRealizado.value ??
+      this.orden.trabajoRealizado ??
+      ''
+    ).trim();
+    if (!trabajo) {
+      this.iniciarEdicion('trabajoRealizado');
+      this.guiaTecnica = 'Completa el trabajo realizado antes de marcar la orden como lista.';
+      return;
+    }
+    this.cambiandoEstado = true;
+    this.estadoError = '';
+    this.ordenServicioService
+      .completarReparacion(this.orden.id, {
+        trabajoRealizado: trabajo,
+        observaciones: this.form.controls.observaciones.value ?? null
+      })
+      .subscribe({
+        next: t => this.onTransicionOk(t, 'Reparación completada.'),
+        error: error => this.onTransicionError(error)
+      });
+  }
+
+  private ejecutarCambioDirecto(destino: AccionWorkflowUi['destino']): void {
+    if (!this.orden) {
+      return;
+    }
+    this.cambiandoEstado = true;
+    this.estadoError = '';
+    this.ordenServicioService.cambiarEstado(this.orden.id, { nuevoEstado: destino }).subscribe({
+      next: t => {
+        this.onTransicionOk(t);
+        if (destino === 'EN_DIAGNOSTICO') {
+          queueMicrotask(() => this.irAlDiagnostico());
+        }
+        if (destino === 'EN_REPARACION') {
+          this.abrirSeccion('tecnico');
+        }
+      },
+      error: error => this.onTransicionError(error)
+    });
+  }
+
+  private abrirDialogo(
+    accion: AccionWorkflowUi,
+    modo: NonNullable<ReturnType<typeof modoDialogoDesdeTipo>>,
+    mensajeConfirmacion?: string
+  ): void {
+    const ref = this.dialog.open(TransicionEstadoDialogComponent, {
+      width: '460px',
+      panelClass: 'ce-dialog-panel',
+      backdropClass: 'ce-dialog-backdrop',
+      data: {
+        accion,
+        modo,
+        pendientesResumen: modo === 'esperaRepuesto' ? this.pendientesResumen : undefined,
+        mensajeConfirmacion
+      }
+    });
+    ref.afterClosed().subscribe((result?: TransicionEstadoDialogResult) => {
+      if (!result || !this.orden) {
+        return;
+      }
+      this.aplicarResultadoDialogo(accion, result);
+    });
+  }
+
+  private aplicarResultadoDialogo(
+    accion: AccionWorkflowUi,
+    result: TransicionEstadoDialogResult
+  ): void {
+    if (!this.orden) {
+      return;
+    }
+    this.cambiandoEstado = true;
+    this.estadoError = '';
+
+    if (accion.destino === 'REQUIERE_APROBACION_ADICIONAL') {
+      this.ordenServicioService
+        .registrarNuevaFalla(this.orden.id, {
+          nuevaFalla: result.nuevaFalla ?? '',
+          observacion: result.observacion
+        })
+        .subscribe({
+          next: t => this.onTransicionOk(t, 'Nueva falla registrada.'),
+          error: error => this.onTransicionError(error)
+        });
+      return;
+    }
+
+    this.ordenServicioService
+      .cambiarEstado(this.orden.id, {
+        nuevoEstado: result.nuevoEstado,
+        motivo: result.motivo ?? undefined,
+        observacion: result.observacion
+      })
+      .subscribe({
+        next: t => this.onTransicionOk(t),
+        error: error => this.onTransicionError(error)
+      });
+  }
+
+  private onTransicionOk(transicion: TransicionOrdenServicioResponseDTO, snack?: string): void {
+    this.aplicarOrden(transicion.orden);
+    this.editando = false;
+    this.cambiandoEstado = false;
+    this.guardando = false;
+    this.guiaTecnica = '';
+    this.feedback.success(
+      snack ||
+        mensajeCambioEstado(transicion.estadoAnterior, transicion.estadoNuevo)
+    );
+    this.cargarHistorial(transicion.orden.id);
+  }
+
+  private onTransicionError(error: unknown): void {
+    this.cambiandoEstado = false;
+    this.guardando = false;
+    this.estadoError = mensajeErrorServicio(error, 'No pudimos cambiar el estado.');
+  }
+
+  private mensajeConfirmacion(accion: AccionWorkflowUi): string {
+    if (accion.destino === 'ENTREGADO') {
+      return '¿Confirmas que el equipo fue entregado al cliente?';
+    }
+    if (accion.destino === 'CERRADO') {
+      return '¿Confirmas que deseas cerrar la orden de servicio?';
+    }
+    return accion.descripcion;
+  }
+
+  private enfocarCampo(campo: CampoTecnicoId): void {
+    requestAnimationFrame(() => {
+      const el = document.querySelector<HTMLTextAreaElement>(
+        `[data-campo="${campo}"] textarea, textarea[formcontrolname="${campo}"]`
+      );
+      el?.focus();
+    });
+  }
+
+  private textosDelForm(): Record<CampoTecnicoId, string> {
+    return {
+      problemaReportado: this.form.controls.problemaReportado.value ?? '',
+      diagnostico: this.form.controls.diagnostico.value ?? '',
+      trabajoRealizado: this.form.controls.trabajoRealizado.value ?? '',
+      observaciones: this.form.controls.observaciones.value ?? ''
+    };
+  }
+
+  private patchForm(orden: OrdenServicioResponseDTO): void {
+    const valores = valoresDesdeOrden(orden);
+    this.form.patchValue({
+      problemaReportado: valores.problemaReportado,
+      diagnostico: valores.diagnostico,
+      trabajoRealizado: valores.trabajoRealizado,
+      observaciones: valores.observaciones
+    });
+  }
+
+  private aplicarOrden(orden: OrdenServicioResponseDTO, resetSecciones = true): void {
+    this.orden = orden;
+    this.patchForm(orden);
+    if (resetSecciones) {
+      this.secciones = seccionesAbiertasPorEstado(orden.estado);
+    }
+    this.cargarRepuestos(orden.id);
+  }
+
+  /** Datos de dominio para workflow/entrega; sin card visual de repuestos (D.11). */
+  private cargarRepuestos(ordenId: number): void {
+    this.ordenServicioService.listarRepuestos(ordenId).subscribe({
+      next: items => this.aplicarDatosRepuestos(items),
+      error: () => this.aplicarDatosRepuestos([])
+    });
+  }
+
+  private aplicarDatosRepuestos(items: RepuestoOrdenServicioResponseDTO[]): void {
+    this.repuestosItems = items;
+    this.pendingRepuestos = contarRepuestosPendientes(items);
+    this.pendientesResumen = items
+      .filter(l => !l.anulado && (l.cantidadPendiente ?? 0) > 0)
+      .map(l => {
+        const nombre = l.productoNombre ?? `Producto #${l.productoId}`;
+        return `${nombre} — pendiente: ${l.cantidadPendiente}`;
+      });
+  }
+
+  private actualizarFaseCancelacion(items: HistorialEstadoOrdenServicioResponseDTO[]): void {
+    if (this.orden?.estado !== 'CANCELADO') {
+      this.faseAlCancelar = null;
+      return;
+    }
+    const cancel = items.find(i => i.estadoNuevo === 'CANCELADO');
+    if (!cancel?.estadoAnterior) {
+      this.faseAlCancelar = null;
+      return;
+    }
+    this.faseAlCancelar = estadoOrdenUx(cancel.estadoAnterior).fase;
+  }
+}

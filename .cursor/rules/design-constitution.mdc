@@ -7,7 +7,7 @@ alwaysApply: true
 
 Antes de **diseñar, rediseñar, generar en Stitch o modificar interfaces**:
 
-1. Leer el maestro global: `design-system/DESIGN_CONSTITUTION.md` (raíz del monorepo Solvix). Desde `projectSolvixFrontend` o `projectSolvixBackend` la ruta relativa es `../design-system/DESIGN_CONSTITUTION.md`.
+1. Leer el maestro global: `design-system/DESIGN_CONSTITUTION.md` (raíz del monorepo). Desde `computerElectronicFrontend` o `computerElectronicBackend` la ruta relativa es `../design-system/DESIGN_CONSTITUTION.md`.
 2. Si existe un `DESIGN.md` de la **superficie o marca** en la que se trabaja, leerlo y aplicarlo. No inventar un `DESIGN.md` ni una identidad nueva solo porque falte el archivo.
 3. Identificar el **perfil de interfaz** (página pública, catálogo, dashboard/admin, formulario/flujo, móvil, editorial) y adaptar densidad, composición y componentes a ese perfil.
 4. Aplicar los **criterios globales** de la constitución (anti-genérico justificado, proceso de investigación, tres direcciones cuando la pantalla sea nueva e importante, accesibilidad, aprobación antes de cambiar diseños existentes).

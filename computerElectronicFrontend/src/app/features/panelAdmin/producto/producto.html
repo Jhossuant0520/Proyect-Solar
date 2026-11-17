@@ -1,0 +1,276 @@
+﻿<section class="producto-form-page">
+  <ce-page-header icon="package_2"
+    kicker="Catálogo"
+    [title]="modoEdicion ? 'Editar producto' : 'Nuevo producto'"
+    [subtitle]="modoEdicion ? 'El costo vigente se corrige con un ajuste, no desde este formulario.' : 'El costo inicial queda registrado al crear el producto.'"
+  >
+    @if (modoEdicion) {
+      <ce-button family="tech" rank="secondary" icon="sync" type="button" (click)="ajustarCosto()">
+        Ajustar costo
+      </ce-button>
+    }
+  </ce-page-header>
+
+  @if (modoEdicion && loadState === 'loading') {
+    <ce-loading-state label="Cargando producto." />
+  } @else if (modoEdicion && loadState === 'error') {
+    <ce-error-state
+      title="No pudimos cargar este producto."
+      message="Puede que no exista o que no tengas permiso."
+      (retry)="reintentarCarga()"
+    />
+  } @else {
+    <form class="form-panel" [formGroup]="productoForm" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+        <label>
+          <span class="label-row">
+            Nombre
+            <span class="req">Obligatorio</span>
+          </span>
+          <input type="text" formControlName="nombre" maxlength="150" />
+        </label>
+        <label>
+          <span class="label-row">
+            Marca
+            <span class="req">Obligatorio</span>
+          </span>
+          <input type="text" formControlName="marca" maxlength="100" />
+        </label>
+        <label>
+          <span class="label-row">
+            Código de barras
+            <span class="opt">Opcional</span>
+            <ce-field-help text="El código de barras permite identificar rápidamente este producto." />
+          </span>
+          <input
+            type="text"
+            formControlName="codigoBarras"
+            maxlength="50"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="Ej. 7701234567890"
+          />
+          <span class="hint">Opcional. Puedes escribirlo o usar un lector de código de barras.</span>
+        </label>
+        <label>
+          <span class="label-row">
+            Categoría
+            <span class="req">Obligatorio</span>
+            <ce-field-help text="Agrupa el producto. Elige una de las categorías activas del sistema." />
+          </span>
+          <select formControlName="categoriaId">
+            <option [ngValue]="null" disabled>Selecciona una categoría</option>
+            @for (categoria of categorias; track categoria.id) {
+              <option [ngValue]="categoria.id">{{ categoria.nombre }}</option>
+            }
+          </select>
+        </label>
+        @if (!modoEdicion) {
+          <label>
+            <span class="label-row">
+              Costo actual
+              <span class="opt">Opcional</span>
+              <ce-field-help text="Lo que te costó el producto al crearlo. Si lo dejas vacío, el costo queda desconocido. También acepta 240.000." />
+            </span>
+            <input
+              type="text"
+              inputmode="decimal"
+              [value]="costoTexto"
+              (input)="onMontoInput('costoActual', $event)"
+              (blur)="onMontoBlur('costoActual')"
+              placeholder="Opcional"
+            />
+            <span class="hint">Vacío = costo desconocido. No es lo mismo que cero.</span>
+          </label>
+        } @else {
+          <div class="readonly">
+            <span class="hint">Costo actual</span>
+            <strong>{{ costoConocido ? money(costoVigente) : 'Sin costo' }}</strong>
+            <span class="hint">No se edita desde aquí. Usa ajustar costo.</span>
+          </div>
+        }
+
+        <label>
+          <span class="label-row">
+            Recargo sobre costo
+            <span class="opt">Calculadora</span>
+            <ce-field-help text="Porcentaje de recargo sobre el costo (no es margen sobre ventas). Solo calcula un precio sugerido; no se guarda." />
+          </span>
+          <div class="recargo-row">
+            <input
+              type="text"
+              inputmode="decimal"
+              [value]="recargoTexto"
+              (input)="onRecargoInput($event)"
+              (blur)="onRecargoBlur()"
+              placeholder="Ej. 30"
+              aria-label="Recargo sobre costo en porcentaje"
+            />
+            <span class="recargo-suffix">%</span>
+          </div>
+          <span class="hint">Modificable. Ejemplo: 20, 25, 30, 40. No se persiste.</span>
+        </label>
+
+        <div class="readonly sugerido-block">
+          <span class="hint">Precio sugerido</span>
+          <strong class="ce-mono">{{ precioSugerido != null ? money(precioSugerido) : '—' }}</strong>
+          <span class="hint">costo × (1 + recargo / 100). Solo referencia.</span>
+          <ce-button
+            family="tech"
+            rank="secondary"
+            type="button"
+            [disabled]="precioSugerido == null"
+            (click)="usarPrecioSugerido()"
+          >
+            Usar precio sugerido
+          </ce-button>
+        </div>
+
+        <label>
+          <span class="label-row">
+            Precio de venta
+            <span class="req">Obligatorio</span>
+            <ce-field-help text="Es el precio que se cobra al cliente. El sugerido no lo sobrescribe: solo cambia si usas el botón o lo editas tú. Puedes escribir 240000 o 240.000." />
+          </span>
+          <input
+            type="text"
+            inputmode="decimal"
+            [value]="precioTexto"
+            (input)="onMontoInput('precioVentaActual', $event)"
+            (blur)="onMontoBlur('precioVentaActual')"
+            placeholder="240.000"
+          />
+          <span class="hint">Control total del usuario. Acepta puntos de miles.</span>
+        </label>
+
+        @if (!modoEdicion) {
+          <label>
+            <span class="label-row">
+              Stock inicial
+              <span class="opt">Opcional</span>
+              <ce-field-help text="Unidades que ya tienes al registrar el producto. El sistema las guarda como un movimiento de inventario. Cero es válido." />
+            </span>
+            <input type="number" formControlName="stockInicial" min="0" step="1" />
+            <span class="hint">Queda registrado como movimiento de inventario.</span>
+          </label>
+        } @else {
+          <div class="readonly">
+            <span class="hint">Stock actual</span>
+            <strong>{{ stockActual }}</strong>
+            <span class="hint">Se mueve con compras, ventas o ajustes de inventario.</span>
+          </div>
+        }
+
+        <div class="full imagen-block">
+          <label class="imagen-label">
+            <span class="label-row">
+              Imagen del producto
+              <span class="opt">Opcional</span>
+              <ce-field-help text="Puedes subir una imagen desde tu equipo o pegar una URL. El sistema guarda una sola referencia en imagenUrl." />
+            </span>
+          </label>
+          <p class="hint">Puedes subir una imagen desde tu equipo o pegar una URL.</p>
+
+          <div class="imagen-options">
+            <div class="file-pick">
+              <input
+                #imagenInput
+                class="sr-only"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                (change)="onArchivoSeleccionado($event)"
+              />
+              <button
+                type="button"
+                class="btn-tech-secondary imagen-upload-btn"
+                (click)="imagenInput.click()"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">upload_file</span>
+                {{ archivoImagen ? 'Cambiar imagen' : 'Elegir imagen' }}
+              </button>
+              @if (archivoImagen) {
+                <span class="archivo-nombre" [title]="archivoImagen.name">{{ archivoImagen.name }}</span>
+              } @else {
+                <span class="hint">JPG, PNG o WEBP · máx. 2 MB</span>
+              }
+            </div>
+
+            <label class="url-pick">
+              <span class="hint">O pega una URL de imagen</span>
+              <input
+                type="text"
+                formControlName="imagenUrl"
+                maxlength="500"
+                placeholder="https://"
+                (input)="onImagenUrlChange()"
+              />
+            </label>
+          </div>
+
+          @if (errorImagen) {
+            <p class="imagen-error">{{ errorImagen }}</p>
+          }
+
+          @if (avisoImagenParcial) {
+            <div class="imagen-aviso">
+              <p>{{ avisoImagenParcial }}</p>
+              @if (archivoImagen && productoId) {
+                <ce-button family="tech" rank="secondary" type="button" (click)="reintentarImagen()">
+                  Reintentar imagen
+                </ce-button>
+              }
+            </div>
+          }
+
+          @if (previewVisible && !previewFallida) {
+            <div class="imagen-preview">
+              <img [src]="previewVisible" alt="Vista previa" (error)="onPreviewError()" />
+              <ce-button family="tech" rank="tertiary" type="button" (click)="quitarImagen()">
+                Eliminar imagen
+              </ce-button>
+            </div>
+          } @else if (previewFallida) {
+            <div class="imagen-preview imagen-preview--error">
+              <p>{{ mensajeErrorPreview }}</p>
+              <ce-button family="tech" rank="tertiary" type="button" (click)="quitarImagen()">
+                Quitar URL
+              </ce-button>
+            </div>
+          } @else if (eliminarImagen) {
+            <p class="hint">La imagen se eliminará al guardar.</p>
+          }
+        </div>
+
+        <label class="full">
+          <span class="label-row">
+            Descripción
+            <span class="opt">Opcional</span>
+            <ce-field-help text="Texto libre para el cliente o para tu equipo. No es obligatorio. Si lo dejas vacío, el producto se guarda igual." />
+          </span>
+          <textarea formControlName="descripcion" rows="4" maxlength="2000" placeholder="Opcional. Ejemplo: panel 550 W, 24 V."></textarea>
+        </label>
+        <label class="toggle full">
+          <input type="checkbox" formControlName="activo" />
+          <span>
+            <span class="label-row">
+              Visible en catálogo
+              <ce-field-help text="No se guarda en un archivo. Marca el producto como activo en la base de datos. Si está activo, se puede vender y comprar. Si lo desactivas, queda oculto para el público y no aparece al armar una venta o una compra." />
+            </span>
+            <span class="hint">
+              Activo: se puede vender y comprar. Inactivo: queda oculto. El estado se guarda en el producto, no en un archivo.
+            </span>
+          </span>
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <ce-button family="tech" rank="tertiary" type="button" (click)="onCancel()">
+          Cancelar
+        </ce-button>
+        <ce-button family="tech" rank="primary" type="submit" [disabled]="productoForm.invalid || guardando">
+          {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
+        </ce-button>
+      </div>
+    </form>
+  }
+</section>

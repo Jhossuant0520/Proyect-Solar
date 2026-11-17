@@ -1,0 +1,237 @@
+package com.newproject.jhocadi.projectComputerElectronicBackend.service.BusinessService.ModulComercialService;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.util.Objects;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.newproject.jhocadi.projectComputerElectronicBackend.dtos.BusinessDtos.ModulComercialDtos.DetalleVentaRequestDTO;
+import com.newproject.jhocadi.projectComputerElectronicBackend.dtos.BusinessDtos.ModulComercialDtos.PaginaResponseDTO;
+import com.newproject.jhocadi.projectComputerElectronicBackend.dtos.BusinessDtos.ModulComercialDtos.VentaRequestDTO;
+import com.newproject.jhocadi.projectComputerElectronicBackend.dtos.BusinessDtos.ModulComercialDtos.VentaResponseDTO;
+import com.newproject.jhocadi.projectComputerElectronicBackend.exception.BusinessException;
+import com.newproject.jhocadi.projectComputerElectronicBackend.model.BusinessModel.ModulComercialModel.Cliente;
+import com.newproject.jhocadi.projectComputerElectronicBackend.model.BusinessModel.ModulComercialModel.DetalleVenta;
+import com.newproject.jhocadi.projectComputerElectronicBackend.model.BusinessModel.ModulComercialModel.EstadoVenta;
+import com.newproject.jhocadi.projectComputerElectronicBackend.model.BusinessModel.ModulComercialModel.MetodoPago;
+import com.newproject.jhocadi.projectComputerElectronicBackend.model.BusinessModel.ModulComercialModel.ReferenciaMovimiento;
+import com.newproject.jhocadi.projectComputerElectronicBackend.model.BusinessModel.ModulComercialModel.TipoMovimientoInventario;
+import com.newproject.jhocadi.projectComputerElectronicBackend.model.BusinessModel.ModulComercialModel.TipoSecuencia;
+import com.newproject.jhocadi.projectComputerElectronicBackend.model.BusinessModel.ModulComercialModel.Venta;
+import com.newproject.jhocadi.projectComputerElectronicBackend.model.BusinessModel.ModulProductoModel.Producto;
+import com.newproject.jhocadi.projectComputerElectronicBackend.repository.BusinessRepo.ModulComercialRepo.VentaRepository;
+import com.newproject.jhocadi.projectComputerElectronicBackend.repository.BusinessRepo.ModulComercialRepo.VentaSpecifications;
+import com.newproject.jhocadi.projectComputerElectronicBackend.repository.BusinessRepo.ModulProductoRepo.ProductoRepository;
+
+import lombok.RequiredArgsConstructor;
+
+/**
+ * Reglas de venta.
+ *
+ * <p>El precio se congela al crear la línea y el costo al completar la venta, que es el
+ * momento en que el inventario se consume. Un costo desconocido se marca explícitamente
+ * para que analytics no lo interprete como margen del 100%.
+ *
+ * <p>Las devoluciones viven en {@code DevolucionVentaService}: son un documento propio y
+ * nunca modifican el importe histórico de la venta.
+ */
+@Service
+@RequiredArgsConstructor
+public class VentaService {
+
+    private final VentaRepository ventaRepository;
+    private final ProductoRepository productoRepository;
+    private final ClienteService clienteService;
+    private final InventarioService inventarioService;
+    private final SecuenciaDocumentoService secuenciaService;
+
+    @Transactional
+    public VentaResponseDTO crear(VentaRequestDTO request, String usuario) {
+        Cliente cliente = resolverCliente(request.getClienteId());
+        LocalDateTime fecha = request.getFecha() != null ? request.getFecha() : LocalDateTime.now();
+
+        Venta venta = Venta.builder()
+            .numero(secuenciaService.siguienteNumero(TipoSecuencia.VENTA, fecha))
+            .fecha(fecha)
+            .cliente(cliente)
+            .estado(EstadoVenta.PENDIENTE)
+            .metodoPago(request.getMetodoPago() != null ? request.getMetodoPago() : MetodoPago.EFECTIVO)
+            .observaciones(request.getObservaciones())
+            .createdBy(usuario)
+            .build();
+
+        for (DetalleVentaRequestDTO linea : request.getDetalles()) {
+            venta.agregarDetalle(construirDetalle(linea));
+        }
+
+        aplicarTotales(venta, request.getDescuento());
+
+        return VentaResponseDTO.fromEntity(Objects.requireNonNull(ventaRepository.save(venta)));
+    }
+
+    /**
+     * Completa la venta de forma atómica: valida stock, congela el costo aplicado,
+     * genera los movimientos de salida y cambia el estado.
+     */
+    @Transactional
+    public VentaResponseDTO completar(Long id, String usuario) {
+        Venta venta = buscarOFallar(id);
+
+        if (venta.getEstado() != EstadoVenta.PENDIENTE) {
+            throw new BusinessException(
+                "Solo se puede completar una venta en estado PENDIENTE. Estado actual: " + venta.getEstado() + ".");
+        }
+
+        for (DetalleVenta detalle : venta.getDetalles()) {
+            Producto producto = detalle.getProducto();
+
+            BigDecimal costoAplicado = producto.getCostoActual();
+            detalle.setCostoUnitario(costoAplicado);
+            detalle.setCostoConocido(costoAplicado != null);
+
+            inventarioService.registrarMovimiento(
+                producto,
+                TipoMovimientoInventario.VENTA,
+                detalle.getCantidad(),
+                ReferenciaMovimiento.VENTA,
+                venta.getId(),
+                costoAplicado,
+                usuario,
+                "Venta " + venta.getNumero());
+        }
+
+        venta.setEstado(EstadoVenta.COMPLETADA);
+        venta.setFechaCompletada(LocalDateTime.now());
+
+        return VentaResponseDTO.fromEntity(ventaRepository.save(venta));
+    }
+
+    @Transactional
+    public VentaResponseDTO cancelar(Long id) {
+        Venta venta = buscarOFallar(id);
+
+        if (venta.getEstado() != EstadoVenta.PENDIENTE) {
+            throw new BusinessException(
+                "Solo se puede cancelar una venta PENDIENTE. Una venta completada debe devolverse.");
+        }
+
+        venta.setEstado(EstadoVenta.CANCELADA);
+        venta.setFechaAnulada(LocalDateTime.now());
+
+        return VentaResponseDTO.fromEntity(ventaRepository.save(venta));
+    }
+
+    private static final int TAMANO_DEFAULT_PAGINA = 20;
+    private static final int TAMANO_MAXIMO_PAGINA = 50;
+
+    @Transactional(readOnly = true)
+    public PaginaResponseDTO<VentaResponseDTO> listar(
+            String q,
+            Long clienteId,
+            EstadoVenta estado,
+            LocalDateTime desde,
+            LocalDateTime hasta,
+            Integer pagina,
+            Integer tamano) {
+
+        if (desde != null && hasta != null && desde.isAfter(hasta)) {
+            throw new BusinessException("La fecha inicial no puede ser posterior a la fecha final.");
+        }
+
+        int numeroPagina = pagina != null && pagina > 0 ? pagina : 0;
+        int tamanoPagina = tamano != null
+            ? Math.min(Math.max(tamano, 1), TAMANO_MAXIMO_PAGINA)
+            : TAMANO_DEFAULT_PAGINA;
+
+        return PaginaResponseDTO.desde(
+            ventaRepository.findAll(
+                VentaSpecifications.conFiltros(q, clienteId, estado, desde, hasta),
+                PageRequest.of(
+                    numeroPagina,
+                    tamanoPagina,
+                    Sort.by(Sort.Order.desc("fecha"), Sort.Order.desc("id")))),
+            VentaResponseDTO::fromEntity);
+    }
+
+    @Transactional(readOnly = true)
+    public VentaResponseDTO obtenerPorId(Long id) {
+        return VentaResponseDTO.fromEntity(buscarOFallar(id));
+    }
+
+    private Cliente resolverCliente(Long clienteId) {
+        if (clienteId == null) {
+            return clienteService.obtenerOCrearConsumidorFinal();
+        }
+
+        Cliente cliente = clienteService.buscarOFallar(clienteId);
+        if (!cliente.isActivo()) {
+            throw new BusinessException("El cliente seleccionado está inactivo.");
+        }
+        return cliente;
+    }
+
+    private DetalleVenta construirDetalle(DetalleVentaRequestDTO linea) {
+        Producto producto = productoRepository.findById(Objects.requireNonNull(linea.getProductoId()))
+            .orElseThrow(() -> new BusinessException("El producto " + linea.getProductoId() + " no existe."));
+
+        if (!producto.isActivo()) {
+            throw new BusinessException("El producto '" + producto.getNombre() + "' está inactivo.");
+        }
+
+        BigDecimal precioUnitario = escalar(
+            linea.getPrecioUnitario() != null ? linea.getPrecioUnitario() : producto.getPrecioVentaActual());
+        BigDecimal descuentoLinea = escalar(
+            linea.getDescuentoLinea() != null ? linea.getDescuentoLinea() : BigDecimal.ZERO);
+
+        BigDecimal bruto = precioUnitario.multiply(BigDecimal.valueOf(linea.getCantidad()));
+        if (descuentoLinea.compareTo(bruto) > 0) {
+            throw new BusinessException(
+                "El descuento de la línea '" + producto.getNombre() + "' supera su valor bruto.");
+        }
+
+        return DetalleVenta.builder()
+            .producto(producto)
+            .productoNombre(producto.getNombre())
+            .categoriaCodigo(producto.getCategoria() != null ? producto.getCategoria().getCodigo() : null)
+            .cantidad(linea.getCantidad())
+            .precioUnitario(precioUnitario)
+            .costoUnitario(null)
+            .costoConocido(false)
+            .descuentoLinea(descuentoLinea)
+            .subtotal(escalar(bruto.subtract(descuentoLinea)))
+            .cantidadDevuelta(0)
+            .build();
+    }
+
+    private void aplicarTotales(Venta venta, BigDecimal descuentoCabecera) {
+        BigDecimal subtotal = venta.getDetalles().stream()
+            .map(d -> d.getSubtotal())
+            .reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+
+        BigDecimal descuento = escalar(descuentoCabecera != null ? descuentoCabecera : BigDecimal.ZERO);
+
+        if (descuento.compareTo(subtotal) > 0) {
+            throw new BusinessException("El descuento no puede superar el subtotal de la venta.");
+        }
+
+        venta.setSubtotal(escalar(subtotal));
+        venta.setDescuento(descuento);
+        venta.setTotal(escalar(subtotal.subtract(descuento)));
+    }
+
+    private Venta buscarOFallar(Long id) {
+        return ventaRepository.findById(Objects.requireNonNull(id))
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venta no encontrada."));
+    }
+
+    private BigDecimal escalar(BigDecimal valor) {
+        return valor.setScale(2, RoundingMode.HALF_UP);
+    }
+}

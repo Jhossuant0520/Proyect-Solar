@@ -1,0 +1,252 @@
+import { Routes } from '@angular/router';
+import { HomePage } from './homepage/home-page/home-page';
+import { LoginComponent } from './features/access/login/login';
+import { Register } from './features/access/register/register';
+import { VerificarEmail } from './features/access/verificar-email/verificar-email';
+import { SolicitarReenvio } from './features/access/solicitar-reenvio/solicitar-reenvio';
+import { DashboardComponent } from './features/panelAdmin/dashboard/dashboard';
+import { MiCuenta } from './features/access/mi-cuenta/mi-cuenta';
+import { authGuard } from './core/guards/auth-guard';
+import { adminGuard } from './core/guards/admin-guard';
+import { Catalog } from './homepage/home-page/components/catalog/catalog';
+import { CatalogDetail } from './homepage/home-page/components/catalog/catalog-detail/catalog-detail';
+import { ProductoComponent } from './features/panelAdmin/producto/producto';
+import { ProductoList } from './features/panelAdmin/producto/producto-list/producto-list';
+import { AdminLayoutComponent } from './layout/admin-layout/admin-layout';
+import { ProductoDetailComponent } from './features/panelAdmin/producto/producto-detail/producto-detail';
+import { VentaListComponent } from './features/panelAdmin/venta/venta-list/venta-list';
+import { VentaFormComponent } from './features/panelAdmin/venta/venta-form/venta-form';
+import { VentaDetailComponent } from './features/panelAdmin/venta/venta-detail/venta-detail';
+import { VentaDevolucionFormComponent } from './features/panelAdmin/venta/venta-devolucion-form/venta-devolucion-form';
+import { VentaDevolucionDetailComponent } from './features/panelAdmin/venta/venta-devolucion-detail/venta-devolucion-detail';
+import { CompraListComponent } from './features/panelAdmin/compra/compra-list/compra-list';
+import { CompraFormComponent } from './features/panelAdmin/compra/compra-form/compra-form';
+import { CompraDetailComponent } from './features/panelAdmin/compra/compra-detail/compra-detail';
+import { CompraDevolucionFormComponent } from './features/panelAdmin/compra/compra-devolucion-form/compra-devolucion-form';
+import { CompraDevolucionDetailComponent } from './features/panelAdmin/compra/compra-devolucion-detail/compra-devolucion-detail';
+import { InventarioComponent } from './features/panelAdmin/inventario/inventario';
+import { CxpListComponent } from './features/panelAdmin/cxp/cxp-list/cxp-list';
+import { CxpDetailComponent } from './features/panelAdmin/cxp/cxp-detail/cxp-detail';
+import { ClienteListComponent } from './features/panelAdmin/cliente/cliente-list/cliente-list';
+import { ClienteFormComponent } from './features/panelAdmin/cliente/cliente-form/cliente-form';
+import { ClienteDetailComponent } from './features/panelAdmin/cliente/cliente-detail/cliente-detail';
+import { ProveedorListComponent } from './features/panelAdmin/proveedor/proveedor-list/proveedor-list';
+import { ProveedorFormComponent } from './features/panelAdmin/proveedor/proveedor-form/proveedor-form';
+import { ProveedorDetailComponent } from './features/panelAdmin/proveedor/proveedor-detail/proveedor-detail';
+import { ServicioListComponent } from './features/panelAdmin/servicios/servicio-list/servicio-list';
+import { ServicioFormComponent } from './features/panelAdmin/servicios/servicio-form/servicio-form';
+import { ServicioDetailComponent } from './features/panelAdmin/servicios/servicio-detail/servicio-detail';
+
+export const routes: Routes = [
+  { path: '', component: HomePage },
+  { path: 'Catalogo', component: Catalog },
+  { path: 'Catalogo/:id', component: CatalogDetail },
+  { path: 'login', component: LoginComponent },
+  { path: 'register', component: Register },
+  { path: 'verificar-email/:token', component: VerificarEmail },
+  { path: 'solicitar-reenvio', component: SolicitarReenvio },
+
+  // Consulta pública OT / documento (QR) — sin auth
+  {
+    path: 'consulta/ot',
+    loadComponent: () =>
+      import('./features/consulta/consulta-ot-publica/consulta-ot-publica').then(
+        m => m.ConsultaOtPublicaComponent
+      )
+  },
+  {
+    path: 'consulta/ot/:token',
+    loadComponent: () =>
+      import('./features/consulta/consulta-ot-publica/consulta-ot-publica').then(
+        m => m.ConsultaOtPublicaComponent
+      )
+  },
+  {
+    path: 'consulta/documento/:token',
+    loadComponent: () =>
+      import('./features/consulta/consulta-documento-publica/consulta-documento-publica').then(
+        m => m.ConsultaDocumentoPublicaComponent
+      )
+  },
+  {
+    path: 'consulta/cotizacion/:token',
+    loadComponent: () =>
+      import('./features/consulta/consulta-cotizacion-publica/consulta-cotizacion-publica').then(
+        m => m.ConsultaCotizacionPublicaComponent
+      )
+  },
+
+  {
+    path: '',
+    component: AdminLayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      { path: 'dashboard', component: DashboardComponent },
+      {
+        path: 'dashboard/analisis',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/panelAdmin/dashboard/analisis/analisis-shell/analisis-shell').then(
+            m => m.AnalisisShellComponent
+          ),
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/panelAdmin/dashboard/analisis/analisis-hub/analisis-hub').then(
+                m => m.AnalisisHubComponent
+              )
+          },
+          {
+            path: 'evolucion',
+            loadComponent: () =>
+              import('./features/panelAdmin/dashboard/analisis/analisis-evolucion/analisis-evolucion').then(
+                m => m.AnalisisEvolucionComponent
+              )
+          },
+          {
+            path: 'categorias',
+            loadComponent: () =>
+              import('./features/panelAdmin/dashboard/analisis/analisis-categorias/analisis-categorias').then(
+                m => m.AnalisisCategoriasComponent
+              )
+          },
+          {
+            path: 'productos',
+            loadComponent: () =>
+              import('./features/panelAdmin/dashboard/analisis/analisis-productos/analisis-productos').then(
+                m => m.AnalisisProductosComponent
+              )
+          },
+          {
+            path: 'inventario',
+            loadComponent: () =>
+              import('./features/panelAdmin/dashboard/analisis/analisis-inventario/analisis-inventario').then(
+                m => m.AnalisisInventarioComponent
+              )
+          },
+          {
+            path: 'abc',
+            loadComponent: () =>
+              import('./features/panelAdmin/dashboard/analisis/analisis-abc/analisis-abc').then(
+                m => m.AnalisisAbcComponent
+              )
+          },
+          {
+            path: 'abastecimiento',
+            loadComponent: () =>
+              import(
+                './features/panelAdmin/dashboard/analisis/analisis-abastecimiento/analisis-abastecimiento'
+              ).then(m => m.AnalisisAbastecimientoComponent)
+          }
+        ]
+      },
+      { path: 'mi-cuenta', component: MiCuenta },
+
+      { path: 'productos', component: ProductoList, canActivate: [adminGuard] },
+      { path: 'productos/nuevo', component: ProductoComponent, canActivate: [adminGuard] },
+      { path: 'productos/:id/editar', component: ProductoComponent, canActivate: [adminGuard] },
+      { path: 'productos/:id', component: ProductoDetailComponent, canActivate: [adminGuard] },
+
+      { path: 'ventas', component: VentaListComponent, canActivate: [adminGuard] },
+      { path: 'ventas/nueva', component: VentaFormComponent, canActivate: [adminGuard] },
+      { path: 'ventas/:id/devolucion', component: VentaDevolucionFormComponent, canActivate: [adminGuard] },
+      { path: 'ventas/:id/devoluciones/:devolucionId', component: VentaDevolucionDetailComponent, canActivate: [adminGuard] },
+      { path: 'ventas/:id', component: VentaDetailComponent, canActivate: [adminGuard] },
+
+      {
+        path: 'cotizaciones',
+        loadComponent: () =>
+          import('./features/panelAdmin/cotizacion-comercial/cotizacion-comercial-list/cotizacion-comercial-list')
+            .then(m => m.CotizacionComercialListComponent),
+        canActivate: [adminGuard]
+      },
+      {
+        path: 'cotizaciones/nueva',
+        loadComponent: () =>
+          import('./features/panelAdmin/cotizacion-comercial/cotizacion-comercial-form/cotizacion-comercial-form')
+            .then(m => m.CotizacionComercialFormComponent),
+        canActivate: [adminGuard]
+      },
+      {
+        path: 'cotizaciones/:id/editar',
+        loadComponent: () =>
+          import('./features/panelAdmin/cotizacion-comercial/cotizacion-comercial-form/cotizacion-comercial-form')
+            .then(m => m.CotizacionComercialFormComponent),
+        canActivate: [adminGuard]
+      },
+      {
+        path: 'cotizaciones/:id',
+        loadComponent: () =>
+          import('./features/panelAdmin/cotizacion-comercial/cotizacion-comercial-detail/cotizacion-comercial-detail')
+            .then(m => m.CotizacionComercialDetailComponent),
+        canActivate: [adminGuard]
+      },
+
+      { path: 'compras', component: CompraListComponent, canActivate: [adminGuard] },
+      { path: 'compras/nueva', component: CompraFormComponent, canActivate: [adminGuard] },
+      { path: 'compras/:id/devolucion', component: CompraDevolucionFormComponent, canActivate: [adminGuard] },
+      { path: 'compras/:id/devoluciones/:devolucionId', component: CompraDevolucionDetailComponent, canActivate: [adminGuard] },
+      { path: 'compras/:id', component: CompraDetailComponent, canActivate: [adminGuard] },
+
+      { path: 'cxp', component: CxpListComponent, canActivate: [adminGuard] },
+      { path: 'cxp/:id', component: CxpDetailComponent, canActivate: [adminGuard] },
+
+      { path: 'clientes', component: ClienteListComponent, canActivate: [adminGuard] },
+      { path: 'clientes/nuevo', component: ClienteFormComponent, canActivate: [adminGuard] },
+      { path: 'clientes/:id/editar', component: ClienteFormComponent, canActivate: [adminGuard] },
+      { path: 'clientes/:id', component: ClienteDetailComponent, canActivate: [adminGuard] },
+
+      { path: 'proveedores', component: ProveedorListComponent, canActivate: [adminGuard] },
+      { path: 'proveedores/nuevo', component: ProveedorFormComponent, canActivate: [adminGuard] },
+      { path: 'proveedores/:id/editar', component: ProveedorFormComponent, canActivate: [adminGuard] },
+      { path: 'proveedores/:id', component: ProveedorDetailComponent, canActivate: [adminGuard] },
+
+      { path: 'servicios', component: ServicioListComponent, canActivate: [adminGuard] },
+      { path: 'servicios/nueva', component: ServicioFormComponent, canActivate: [adminGuard] },
+      { path: 'servicios/:id', component: ServicioDetailComponent, canActivate: [adminGuard] },
+
+      { path: 'inventario', component: InventarioComponent, canActivate: [adminGuard] },
+
+      {
+        path: 'reportes',
+        loadComponent: () =>
+          import('./features/panelAdmin/reportes/reportes-hub/reportes-hub').then(
+            m => m.ReportesHubComponent
+          ),
+        canActivate: [adminGuard]
+      },
+      { path: 'reportes/analisis', redirectTo: 'dashboard/analisis', pathMatch: 'full' },
+      {
+        path: 'reportes/ventas',
+        loadComponent: () =>
+          import('./features/panelAdmin/reportes/reporte-ventas/reporte-ventas').then(
+            m => m.ReporteVentasComponent
+          ),
+        canActivate: [adminGuard]
+      },
+      {
+        path: 'reportes/compras',
+        loadComponent: () =>
+          import('./features/panelAdmin/reportes/reporte-compras/reporte-compras').then(
+            m => m.ReporteComprasComponent
+          ),
+        canActivate: [adminGuard]
+      },
+      {
+        path: 'reportes/inventario',
+        loadComponent: () =>
+          import('./features/panelAdmin/reportes/reporte-inventario/reporte-inventario').then(
+            m => m.ReporteInventarioComponent
+          ),
+        canActivate: [adminGuard]
+      },
+
+      { path: 'producto', redirectTo: 'productos/nuevo', pathMatch: 'full' },
+      { path: 'listaproductos', redirectTo: 'productos', pathMatch: 'full' },
+      { path: 'editar-producto/:id', redirectTo: 'productos/:id/editar' }
+    ]
+  },
+
+  { path: '**', redirectTo: 'login' }
+];

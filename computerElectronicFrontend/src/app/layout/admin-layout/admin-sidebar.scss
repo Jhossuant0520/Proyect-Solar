@@ -1,0 +1,184 @@
+:host {
+  display: contents;
+}
+
+.admin-sidebar {
+  width: var(--sidebar-width);
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface-1);
+  border-right: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  padding: 1.25rem 0.75rem;
+}
+
+.admin-sidebar__brand {
+  padding: 0 1rem 1.5rem;
+}
+
+.admin-sidebar__name {
+  margin: 0;
+  color: var(--ce-deep, var(--color-primary));
+  font-family: var(--font-sans);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.admin-sidebar__kicker {
+  margin: 0.4rem 0 0;
+  color: var(--color-primary);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.admin-sidebar__nav {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  overflow: visible;
+}
+
+.admin-sidebar__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.admin-sidebar__group:not(:first-child) {
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-border-subtle) 80%, transparent);
+}
+
+.admin-sidebar__group-label {
+  padding: 0.15rem 1rem 0.35rem;
+  color: var(--color-text-muted);
+  opacity: 0.72;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  user-select: none;
+}
+
+/* Pill deslizante: solo relleno suave, sin borde (evita doble contorno con el enlace). */
+.admin-sidebar__indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--color-primary-soft) 78%, var(--color-surface-1));
+  border: 0;
+  box-shadow: inset 3px 0 0 var(--color-primary);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--motion-normal) var(--ease-emphasized),
+    height var(--motion-normal) var(--ease-emphasized),
+    opacity var(--motion-fast) var(--ease-standard);
+  z-index: 0;
+}
+
+.admin-sidebar__indicator.is-ready {
+  opacity: 1;
+}
+
+.admin-sidebar__link {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  border: 1px solid transparent;
+  background: transparent;
+  outline: none;
+  transition:
+    background-color var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard);
+}
+
+.admin-sidebar__link .material-symbols-outlined,
+.admin-sidebar__label {
+  transition:
+    color var(--motion-fast) var(--ease-standard),
+    font-variation-settings var(--motion-fast) var(--ease-standard);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .admin-sidebar__link:hover:not(.is-active) {
+    color: var(--color-text-primary);
+    background: var(--color-neutral-soft);
+  }
+
+  .admin-sidebar__link:hover:not(.is-active) .material-symbols-outlined {
+    color: var(--color-primary);
+  }
+}
+
+/* Pulsación / foco de ratón: sin anillo (evita doble contorno con el pill activo). */
+.admin-sidebar__link:active,
+.admin-sidebar__link:focus:not(:focus-visible) {
+  outline: none !important;
+  outline-width: 0 !important;
+  box-shadow: none;
+}
+
+/* Teclado: indicador de foco accesible, distinto del estado activo. */
+.admin-sidebar__link:focus-visible {
+  color: var(--color-text-primary);
+  outline: 2px solid var(--color-focus, var(--color-primary));
+  outline-offset: 2px;
+}
+
+.admin-sidebar__link.is-active {
+  color: var(--ce-deep, var(--color-primary));
+  background: transparent;
+  border-color: transparent;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+.admin-sidebar__link.is-active .material-symbols-outlined {
+  color: var(--color-primary);
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.admin-sidebar__link.is-active:focus-visible {
+  outline-offset: 2px;
+}
+
+@media (max-width: 1023px) {
+  .admin-sidebar {
+    height: 100%;
+    max-height: 100vh;
+    overflow: hidden;
+  }
+
+  .admin-sidebar__nav {
+    flex: 1;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-sidebar__indicator {
+    transition: none;
+  }
+}

@@ -1,0 +1,42 @@
+﻿@use '../../../../../styles/buscador' as b;
+
+@include b.buscador;
+
+/* Avatar con iniciales: identifica rápido al cliente en la lista */
+.opcion {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 0.65rem;
+}
+
+.opcion__avatar {
+  grid-row: 1 / span 2;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-soft, #cce5ff);
+  color: var(--color-primary, #006194);
+  font-family: var(--font-sans, 'Space Grotesk', system-ui, sans-serif);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition:
+    background var(--motion-fast, 140ms) ease,
+    color var(--motion-fast, 140ms) ease;
+}
+
+.resultados button:hover .opcion__avatar,
+.resultados button:focus-visible .opcion__avatar,
+.resultados button.is-active .opcion__avatar {
+  background: var(--color-primary, #006194);
+  color: #fff;
+}
+
+.opcion .nombre,
+.opcion .meta {
+  grid-column: 2;
+}

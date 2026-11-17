@@ -1,0 +1,186 @@
+﻿<section class="detalle-page">
+  @if (state === 'loading') {
+    <ce-loading-state label="Cargando producto." />
+  } @else if (state === 'error' || !producto) {
+    <ce-error-state
+      title="No pudimos cargar este producto."
+      message="El producto no existe o no está disponible."
+      (retry)="cargar()"
+    />
+  } @else {
+    <header class="detalle-head">
+      <div>
+        <div class="head-meta">
+          <ce-badge [tone]="producto.activo ? 'success' : 'neutral'">
+            {{ producto.activo ? 'Activo' : 'Inactivo' }}
+          </ce-badge>
+          <span class="ce-mono id">ID {{ producto.id }}</span>
+        </div>
+        <h1>{{ producto.nombre }}</h1>
+      </div>
+      <div class="head-actions">
+        <ce-button family="tech" rank="tertiary" icon="warehouse" (click)="irAInventario()">
+          Inventario
+        </ce-button>
+        <ce-button family="tech" rank="tertiary" icon="history" (click)="irAHistorial()">
+          Historial
+        </ce-button>
+        <ce-button family="tech" rank="secondary" icon="edit_note" (click)="editar()">
+          Editar
+        </ce-button>
+        <ce-button family="tech" rank="primary" icon="sync" (click)="ajustarCosto()">
+          Ajustar costo
+        </ce-button>
+      </div>
+    </header>
+
+    <div class="detalle-grid">
+      <div class="col">
+        <section class="panel">
+          <ce-section-header kicker="Ficha" title="Información general" />
+          <dl class="facts">
+            <div>
+              <dt>Marca</dt>
+              <dd>{{ producto.marca }}</dd>
+            </div>
+            <div>
+              <dt>Código de barras</dt>
+              <dd class="ce-mono">{{ labelCodigo(producto.codigoBarras) }}</dd>
+            </div>
+            <div>
+              <dt>Categoría</dt>
+              <dd>{{ producto.categoriaNombre }}</dd>
+            </div>
+            <div>
+              <dt>Estado</dt>
+              <dd>{{ producto.activo ? 'Activo' : 'Inactivo' }}</dd>
+            </div>
+          </dl>
+          <p class="desc">{{ producto.descripcion || 'Sin descripción.' }}</p>
+        </section>
+
+        <section class="panel">
+          <ce-section-header
+            kicker="Catálogo"
+            title="Información comercial"
+            subtitle="El costo vigente no se edita aquí."
+          />
+          <div class="commerce">
+            <article>
+              <span class="hint">Precio de venta actual</span>
+              <strong class="ce-mono">{{ money(producto.precioVentaActual) }}</strong>
+            </article>
+            <article>
+              <span class="hint">Costo actual</span>
+              <div class="costo-row">
+                <strong class="ce-mono">
+                  {{ producto.costoConocido ? money(producto.costoActual) : 'Sin costo' }}
+                </strong>
+                <ce-button family="tech" rank="tertiary" icon="sync" (click)="ajustarCosto()">
+                  Ajustar costo
+                </ce-button>
+              </div>
+              <p class="hint">Controlado por compras o por un ajuste explícito. No cambia el stock.</p>
+            </article>
+            <article class="sugerido-calc">
+              <span class="hint">Recargo sobre costo (calculadora)</span>
+              <div class="recargo-row">
+                <input
+                  type="text"
+                  inputmode="decimal"
+                  [value]="recargoTexto"
+                  (input)="onRecargoInput($event)"
+                  (blur)="onRecargoBlur()"
+                  placeholder="Ej. 30"
+                  aria-label="Recargo sobre costo en porcentaje"
+                />
+                <span class="recargo-suffix">%</span>
+              </div>
+              <span class="hint">Precio sugerido</span>
+              <strong class="ce-mono">{{ precioSugerido != null ? money(precioSugerido) : '—' }}</strong>
+              <p class="hint">Solo referencia. No se guarda el porcentaje. Para aplicar el sugerido, edita el producto.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel" id="historial-costo">
+          <ce-section-header
+            kicker="Trazabilidad"
+            title="Historial de costo"
+            subtitle="Solo ajustes registrados en inventario."
+          />
+          @if (ajustesState === 'loading') {
+            <ce-loading-state label="Cargando historial de costo." />
+          } @else if (ajustesState === 'error') {
+            <ce-error-state title="No pudimos cargar el historial de costo." (retry)="cargar()" />
+          } @else if (ajustesState === 'empty') {
+            <p class="empty-line">Aún no hay ajustes de costo para este producto.</p>
+          } @else {
+            <ul class="timeline">
+              @for (ajuste of ajustes; track ajuste.id) {
+                <li>
+                  <div class="timeline__top">
+                    <strong>{{ motivo(ajuste.motivo) }}</strong>
+                    <span class="ce-mono">{{ fecha(ajuste.fecha) }}</span>
+                  </div>
+                  <p class="ce-mono">
+                    {{ money(ajuste.costoAnterior) }} → {{ money(ajuste.costoNuevo) }}
+                  </p>
+                  <p class="hint">Stock al ajustar: {{ ajuste.stockAlAjustar }} unidades</p>
+                  @if (ajuste.observaciones) {
+                    <p>{{ ajuste.observaciones }}</p>
+                  }
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      </div>
+
+      <aside class="col">
+        <section class="panel image-panel">
+          @if (urlImagen(producto) && !imagenFallida) {
+            <img
+              [src]="urlImagen(producto)"
+              [alt]="producto.nombre"
+              (error)="onImagenError()"
+            />
+          } @else if (imagenFallida) {
+            <p class="image-fallback">{{ mensajeImagenFalla }}</p>
+          } @else {
+            <p class="image-fallback">Sin imagen</p>
+          }
+        </section>
+
+        <section class="panel">
+          <ce-section-header kicker="Bodega" title="Inventario" />
+          <span class="hint">Stock actual</span>
+          <p class="stock ce-mono">{{ producto.stockActual ?? 0 }} <small>unidades</small></p>
+
+          <h3 class="subhead">Movimientos</h3>
+          @if (movimientosState === 'loading') {
+            <ce-loading-state label="Cargando movimientos." />
+          } @else if (movimientosState === 'error') {
+            <p class="empty-line">No pudimos cargar los movimientos.</p>
+          } @else if (movimientosState === 'empty') {
+            <p class="empty-line">Aún no hay movimientos de inventario.</p>
+          } @else {
+            <ul class="moves">
+              @for (movimiento of movimientos; track movimiento.id) {
+                <li>
+                  <span [class.entrada]="movimiento.direccion === 'ENTRADA'" [class.salida]="movimiento.direccion === 'SALIDA'">
+                    {{ signo(movimiento) }}{{ movimiento.cantidad }}
+                  </span>
+                  <span>{{ tipoMovimiento(movimiento.tipo) }}</span>
+                  <span class="ce-mono">{{ movimiento.stockAnterior }} → {{ movimiento.stockNuevo }}</span>
+                  <span>{{ costoHistorico(movimiento.costoProductoResultante) }}</span>
+                  <span class="ce-mono">{{ fecha(movimiento.fecha) }}</span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      </aside>
+    </div>
+  }
+</section>

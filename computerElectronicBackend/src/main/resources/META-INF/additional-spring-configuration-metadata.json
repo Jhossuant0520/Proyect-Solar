@@ -1,0 +1,212 @@
+{
+  "properties": [
+    {
+      "name": "app.storage.account.photos-dir",
+      "type": "java.lang.String",
+      "description": "Directorio local para fotos de perfil de cuenta.",
+      "defaultValue": "uploads/avatares"
+    },
+    {
+      "name": "app.storage.products.images-dir",
+      "type": "java.lang.String",
+      "description": "Directorio local para imágenes de producto.",
+      "defaultValue": "uploads/productos"
+    },
+    {
+      "name": "app.storage.services.signatures-dir",
+      "type": "java.lang.String",
+      "description": "Directorio local para firmas de entrega de servicio técnico.",
+      "defaultValue": "uploads/servicios/firmas"
+    },
+    {
+      "name": "app.storage.services.documents-dir",
+      "type": "java.lang.String",
+      "description": "Directorio local para PDFs de documentos de servicio técnico.",
+      "defaultValue": "uploads/servicios/documentos"
+    },
+    {
+      "name": "app.frontend.base-url",
+      "type": "java.lang.String",
+      "description": "URL pública del frontend (sin slash final) usada en QR y enlaces.",
+      "defaultValue": "http://localhost:4200"
+    },
+    {
+      "name": "app.security.rate-limit.max-attempts",
+      "type": "java.lang.Integer",
+      "description": "Intentos máximos por token+IP en acciones públicas de consulta.",
+      "defaultValue": 8
+    },
+    {
+      "name": "app.security.rate-limit.window-seconds",
+      "type": "java.lang.Integer",
+      "description": "Ventana en segundos del rate limit de consulta pública.",
+      "defaultValue": 300
+    },
+    {
+      "name": "app.security.rate-limit.trust-forwarded-headers",
+      "type": "java.lang.Boolean",
+      "description": "Si true, usa X-Forwarded-For para rate limit. Solo activar detrás de un proxy confiable que controle el header.",
+      "defaultValue": false
+    },
+    {
+      "name": "app.security.rate-limit.auth.login.max-attempts",
+      "type": "java.lang.Integer",
+      "description": "Intentos máximos de login por IP en la ventana configurada.",
+      "defaultValue": 10
+    },
+    {
+      "name": "app.security.rate-limit.auth.login.window-seconds",
+      "type": "java.lang.Integer",
+      "description": "Ventana en segundos del rate limit de login.",
+      "defaultValue": 900
+    },
+    {
+      "name": "app.security.rate-limit.auth.registro.max-attempts",
+      "type": "java.lang.Integer",
+      "description": "Registros máximos por IP en la ventana configurada.",
+      "defaultValue": 5
+    },
+    {
+      "name": "app.security.rate-limit.auth.registro.window-seconds",
+      "type": "java.lang.Integer",
+      "description": "Ventana en segundos del rate limit de registro.",
+      "defaultValue": 3600
+    },
+    {
+      "name": "app.security.rate-limit.auth.reenviar-verificacion.max-attempts",
+      "type": "java.lang.Integer",
+      "description": "Reenvíos de verificación máximos por IP en la ventana configurada.",
+      "defaultValue": 3
+    },
+    {
+      "name": "app.security.rate-limit.auth.reenviar-verificacion.window-seconds",
+      "type": "java.lang.Integer",
+      "description": "Ventana en segundos del rate limit de reenvío de verificación.",
+      "defaultValue": 3600
+    },
+    {
+      "name": "app.cors.allowed-origin-patterns",
+      "type": "java.lang.String",
+      "description": "Orígenes CORS permitidos, separados por coma."
+    },
+    {
+      "name": "app.company.name",
+      "type": "java.lang.String",
+      "description": "Nombre comercial en PDFs de servicio técnico."
+    },
+    {
+      "name": "app.company.subtitle",
+      "type": "java.lang.String",
+      "description": "Subtítulo / línea de servicios en documentos PDF."
+    },
+    {
+      "name": "app.company.lab-label",
+      "type": "java.lang.String",
+      "description": "Etiqueta de laboratorio en documentos PDF."
+    },
+    {
+      "name": "app.company.phone",
+      "type": "java.lang.String",
+      "description": "Teléfono corporativo para documentos PDF."
+    },
+    {
+      "name": "app.company.whatsapp",
+      "type": "java.lang.String",
+      "description": "WhatsApp corporativo para documentos PDF."
+    },
+    {
+      "name": "app.company.email",
+      "type": "java.lang.String",
+      "description": "Correo corporativo para documentos PDF."
+    },
+    {
+      "name": "app.company.address",
+      "type": "java.lang.String",
+      "description": "Dirección corporativa para documentos PDF."
+    },
+    {
+      "name": "app.company.website",
+      "type": "java.lang.String",
+      "description": "Sitio web corporativo para documentos PDF."
+    },
+    {
+      "name": "app.company.tax-id",
+      "type": "java.lang.String",
+      "description": "Identificación fiscal (NIT) para documentos PDF."
+    },
+    {
+      "name": "app.company.logo-classpath",
+      "type": "java.lang.String",
+      "description": "Classpath del logo usado en PDFs.",
+      "defaultValue": "static/branding/LogoEmpresa1-pdf.png"
+    },
+    {
+      "name": "app.company.footer-text",
+      "type": "java.lang.String",
+      "description": "Texto de pie de página en documentos PDF."
+    },
+    {
+      "name": "app.company.document-meta-left",
+      "type": "java.lang.String",
+      "description": "Meta superior izquierda en documentos de servicio."
+    },
+    {
+      "name": "app.company.document-meta-right",
+      "type": "java.lang.String",
+      "description": "Meta superior derecha en documentos de servicio."
+    },
+    {
+      "name": "app.company.reception-receipt-kicker",
+      "type": "java.lang.String",
+      "description": "Kicker del comprobante de recepción."
+    },
+    {
+      "name": "app.company.reception-receipt-clauses",
+      "type": "java.lang.String",
+      "description": "Cláusulas legales del comprobante de recepción."
+    },
+    {
+      "name": "app.company.delivery-act-kicker",
+      "type": "java.lang.String",
+      "description": "Kicker del acta de entrega."
+    },
+    {
+      "name": "app.company.delivery-act-clauses",
+      "type": "java.lang.String",
+      "description": "Cláusulas legales del acta de entrega."
+    },
+    {
+      "name": "app.software.developed-by",
+      "type": "java.lang.String",
+      "description": "Nombre del desarrollador en pie de PDF."
+    },
+    {
+      "name": "app.software.developer-role",
+      "type": "java.lang.String",
+      "description": "Rol del desarrollador en pie de PDF."
+    },
+    {
+      "name": "app.inventory.cost-policy",
+      "type": "java.lang.String",
+      "description": "Política de costeo de inventario (p. ej. ULTIMO_COSTO).",
+      "defaultValue": "ULTIMO_COSTO"
+    },
+    {
+      "name": "app.analytics.timezone",
+      "type": "java.lang.String",
+      "description": "Zona horaria para analytics y periodos por defecto.",
+      "defaultValue": "America/Bogota"
+    },
+    {
+      "name": "app.security.jwt.secret",
+      "type": "java.lang.String",
+      "description": "Secreto HMAC para firmar JWT. En perfil prod debe venir solo de JWT_SECRET (sin default). Mínimo 32 bytes."
+    },
+    {
+      "name": "app.security.jwt.expiration-ms",
+      "type": "java.lang.Long",
+      "description": "Caducidad del JWT en milisegundos.",
+      "defaultValue": 86400000
+    }
+  ]
+}
