@@ -1,0 +1,137 @@
+﻿@use '../../../../../styles/dialog' as d;
+
+@include d.dialog;
+
+.producto-rapido {
+  min-width: min(480px, 94vw);
+  max-width: 32rem;
+}
+
+.dlg-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem 0.85rem;
+  margin-top: 0.85rem;
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  min-width: 0;
+}
+
+.label-row {
+  display: flex;
+  gap: 0.35rem;
+  align-items: baseline;
+}
+
+.req {
+  color: var(--color-primary);
+  font-size: 0.7rem;
+}
+
+.opt {
+  color: var(--color-text-muted);
+  opacity: 0.85;
+  font-size: 0.7rem;
+}
+
+input,
+select {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  padding: 0.5rem 0.65rem;
+  font: inherit;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+  line-height: 1.35;
+}
+
+.recargo-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.recargo-row input {
+  flex: 1;
+}
+
+.recargo-suffix {
+  font-family: var(--font-mono, monospace);
+  color: var(--color-text-secondary);
+}
+
+.sugerido-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+}
+
+.sugerido-block strong {
+  font-size: 1.05rem;
+  color: var(--color-text-primary);
+}
+
+.btn-usar-sugerido {
+  align-self: flex-start;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg);
+  color: var(--color-primary);
+  padding: 0.35rem 0.7rem;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.btn-usar-sugerido:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.form-error {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: 0.85rem;
+}
+
+.ce-dlg__actions {
+  margin-top: 0.15rem;
+}
+
+@media (max-width: 560px) {
+  .producto-rapido {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .dlg-form {
+    grid-template-columns: 1fr;
+  }
+
+  .ce-dlg__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}

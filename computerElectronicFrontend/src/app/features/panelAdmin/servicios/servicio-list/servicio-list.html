@@ -1,0 +1,429 @@
+﻿<section class="servicios-page">
+  <ce-page-header
+    icon="handyman"
+    kicker="Taller"
+    title="Servicios técnicos"
+    subtitle="Órdenes de taller: cliente, equipo, estado y seguimiento operativo."
+  >
+    <ce-button family="tech" rank="primary" icon="add" (click)="nueva()">
+      Nueva orden
+    </ce-button>
+  </ce-page-header>
+
+  <div class="kpi-grid" aria-label="Indicadores del taller">
+    <ce-metric-card
+      label="Total en taller"
+      [value]="'' + totalActivas"
+      [countValue]="totalActivas"
+      formato="quantity"
+      icon="laptop_mac"
+      hint="Órdenes activas (sin entregadas, cerradas ni canceladas)"
+      [incomplete]="operativasError"
+    />
+    <ce-metric-card
+      label="Pendientes de aprobación"
+      [value]="'' + pendientesAprobacion"
+      [countValue]="pendientesAprobacion"
+      formato="quantity"
+      icon="request_quote"
+      tone="warning"
+      [hint]="kpiPendientesHint"
+      [incomplete]="operativasError"
+    />
+    <ce-metric-card
+      label="En reparación"
+      [value]="'' + enReparacion"
+      [countValue]="enReparacion"
+      formato="quantity"
+      icon="build"
+      [hint]="kpiReparacionHint"
+      [incomplete]="operativasError"
+    />
+    <ce-metric-card
+      label="Tiempo promedio"
+      value="Sin dato"
+      icon="timer"
+      hint="El sistema no calcula aún un SLA promedio fiable"
+      [incomplete]="true"
+    />
+  </div>
+
+  <div class="filter-panel">
+    <div class="filter-bar">
+      <label class="search">
+        <span class="material-symbols-outlined" aria-hidden="true">search</span>
+        <input
+          type="search"
+          [value]="search"
+          (input)="onSearch($event)"
+          placeholder="Buscar por número, cliente, documento o equipo"
+          aria-label="Buscar órdenes de servicio"
+        />
+      </label>
+      <div class="filtro-cliente">
+        <app-cliente-buscador
+          [seleccionado]="filtroCliente"
+          [limite]="8"
+          [mostrarHintSinSeleccion]="false"
+          etiquetaSinCliente="Cliente: todos"
+          placeholder="Filtrar por cliente…"
+          (seleccionadoChange)="onCliente($event)"
+        />
+      </div>
+      <select
+        [value]="filtroPrioridad"
+        (change)="onPrioridad($event)"
+        aria-label="Prioridad por antigüedad"
+      >
+        @for (p of prioridades; track p.id) {
+          <option [value]="p.id">{{ p.label }}</option>
+        }
+      </select>
+      <select class="filtro-estado-select" [value]="filtroEstado" (change)="onEstado($event)" aria-label="Estado">
+        <option value="">Estado: todos</option>
+        @for (estado of estados; track estado.id) {
+          <option [value]="estado.id">{{ estado.label }}</option>
+        }
+      </select>
+      <button
+        type="button"
+        class="btn-refresh"
+        (click)="refrescar()"
+        title="Actualizar"
+        aria-label="Actualizar listado"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+      </button>
+      @if (hayFiltros) {
+        <button type="button" class="clear" (click)="limpiarFiltros()">Limpiar filtros</button>
+      }
+    </div>
+
+    <div class="estado-chips" role="group" aria-label="Filtrar por estado">
+      @for (chip of chipsEstado; track chip.id) {
+        <button
+          type="button"
+          class="estado-chip"
+          [class.is-active]="filtroEstado === chip.id"
+          [attr.aria-pressed]="filtroEstado === chip.id"
+          (click)="seleccionarChipEstado(chip.id)"
+        >
+          <span>{{ chip.label }}</span>
+          @if (chip.count != null) {
+            <span class="estado-chip__count">{{ chip.count }}</span>
+          }
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (state === 'loading') {
+    <ce-loading-state label="Cargando órdenes de servicio." />
+  } @else if (state === 'error') {
+    <ce-error-state
+      [title]="errorTitle"
+      [message]="errorMessage"
+      (retry)="cargar()"
+    />
+  } @else if (state === 'empty') {
+    <ce-empty-state
+      icon="build"
+      title="Aún no hay órdenes de servicio."
+      message="Registra la primera orden del taller."
+      actionLabel="Nueva orden"
+      actionIcon="add"
+      (action)="nueva()"
+    />
+  } @else if (ordenes.length === 0) {
+    <ce-empty-state
+      icon="search_off"
+      title="No encontramos órdenes con estos filtros."
+      message="Prueba con otro número, cliente, estado o prioridad."
+      actionLabel="Limpiar filtros"
+      (action)="limpiarFiltros()"
+    />
+  } @else {
+    <div class="table-panel">
+      @if (filtroPrioridad) {
+        <p class="table-note">
+          Filtrando por prioridad entre órdenes activas del taller.
+        </p>
+      }
+      <div class="table-wrap table-wrap--fit desktop-table">
+        <table class="svc-table">
+          <caption class="sr-only">Lista de órdenes de servicio</caption>
+          <colgroup>
+            <col class="col-ot" />
+            <col class="col-cliente" />
+            <col class="col-equipo" />
+            <col class="col-estado" />
+            <col class="col-prio" />
+            <col class="col-acc" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>N.º orden</th>
+              <th>Cliente</th>
+              <th>Equipo y falla</th>
+              <th>Estado taller</th>
+              <th>Prioridad</th>
+              <th><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (orden of ordenes; track orden.id) {
+              <tr>
+                <td>
+                  <strong class="ce-mono ot-id">{{ orden.numero }}</strong>
+                </td>
+                <td>
+                  <span class="cell-main" [attr.title]="orden.clienteNombre">{{ orden.clienteNombre }}</span>
+                  @if (orden.clienteTelefono) {
+                    <span class="cell-sub ce-mono">{{ orden.clienteTelefono }}</span>
+                  }
+                </td>
+                <td>
+                  <span class="cell-main" [attr.title]="equipo(orden)">{{ equipo(orden) }}</span>
+                  <span class="cell-sub" [attr.title]="falla(orden)">{{ falla(orden) }}</span>
+                </td>
+                <td>
+                  <ce-badge [tone]="estadoTone(orden.estado)">
+                    {{ estadoLabel(orden.estado) }}
+                  </ce-badge>
+                </td>
+                <td>
+                  @if (prioridad(orden); as prio) {
+                    @if (prio.activa) {
+                      <span
+                        class="prio-chip"
+                        [attr.data-prio]="prio.codigo"
+                        [attr.title]="prio.label + ' · ' + prio.resumenEdad"
+                        [attr.aria-label]="prio.label + ', ' + prio.resumenEdad"
+                      >
+                        <span class="material-symbols-outlined prio-chip__icon" aria-hidden="true">
+                          {{ iconoPrioridad(prio.codigo) }}
+                        </span>
+                        <span class="ce-mono prio-chip__days">{{ prio.dias }}d</span>
+                      </span>
+                    } @else {
+                      <span
+                        class="prio-chip prio-chip--closed"
+                        [attr.title]="prio.label + ' · ' + prio.resumenEdad"
+                        [attr.aria-label]="prio.label + ', ' + prio.resumenEdad"
+                      >
+                        <span class="material-symbols-outlined prio-chip__icon" aria-hidden="true">
+                          check_circle
+                        </span>
+                        <span class="ce-mono prio-chip__days">{{ prio.dias }}d</span>
+                      </span>
+                    }
+                  } @else {
+                    <span class="muted">—</span>
+                  }
+                </td>
+                <td class="actions">
+                  <ce-button
+                    family="tech"
+                    rank="secondary"
+                    icon="visibility"
+                    ariaLabel="Ver detalle"
+                    (click)="abrir(orden.id)"
+                  />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <ul class="mobile-cards">
+        @for (orden of ordenes; track orden.id) {
+          <li
+            class="card ce-card-interactive"
+            (click)="abrir(orden.id)"
+            (keyup.enter)="abrir(orden.id)"
+            tabindex="0"
+            role="button"
+          >
+            <div class="card-top">
+              <strong class="ce-mono">{{ orden.numero }}</strong>
+              <div class="card-badges">
+                @if (prioridad(orden); as prio) {
+                  @if (prio.activa) {
+                    <span
+                      class="prio-chip"
+                      [attr.data-prio]="prio.codigo"
+                      [attr.title]="prio.label + ' · ' + prio.resumenEdad"
+                      [attr.aria-label]="prio.label + ', ' + prio.resumenEdad"
+                    >
+                      <span class="material-symbols-outlined prio-chip__icon" aria-hidden="true">
+                        {{ iconoPrioridad(prio.codigo) }}
+                      </span>
+                      <span class="ce-mono prio-chip__days">{{ prio.dias }}d</span>
+                    </span>
+                  }
+                }
+                <ce-badge [tone]="estadoTone(orden.estado)">
+                  {{ estadoLabel(orden.estado) }}
+                </ce-badge>
+              </div>
+            </div>
+            <p>{{ orden.clienteNombre }}</p>
+            <p class="muted">{{ equipo(orden) }}</p>
+            <p class="muted">{{ falla(orden) }}</p>
+            <p class="muted ce-mono">{{ fecha(orden.fechaRecepcion) }}</p>
+          </li>
+        }
+      </ul>
+
+      <div class="pager" role="navigation" aria-label="Paginación de órdenes">
+        <p class="pager-meta">
+          Página {{ pagina + 1 }} de {{ totalPaginas || 1 }}
+          · {{ totalElementos }} resultado{{ totalElementos === 1 ? '' : 's' }}
+        </p>
+        <div class="pager-actions">
+          <ce-button
+            family="tech"
+            rank="tertiary"
+            type="button"
+            [disabled]="!hayAnterior"
+            (click)="irAPagina(-1)"
+          >
+            Anterior
+          </ce-button>
+          <ce-button
+            family="tech"
+            rank="tertiary"
+            type="button"
+            [disabled]="!haySiguiente"
+            (click)="irAPagina(1)"
+          >
+            Siguiente
+          </ce-button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="ops-panels" aria-label="Paneles operativos del taller">
+    <article class="ops-panel ops-panel--age">
+      <header class="ops-panel__head">
+        <div>
+          <h2>Antigüedad de órdenes</h2>
+          <p>Distribución de órdenes activas por días desde la recepción.</p>
+        </div>
+        <span class="ops-panel__badge">
+          @if (operativasCargando) {
+            …
+          } @else {
+            {{ distribucion.totalActivas }} OT{{ distribucion.totalActivas === 1 ? '' : 's' }} activa{{ distribucion.totalActivas === 1 ? '' : 's' }}
+          }
+        </span>
+      </header>
+
+      @if (operativasCargando) {
+        <p class="ops-panel__empty">Calculando distribución…</p>
+      } @else if (operativasError) {
+        <p class="ops-panel__empty">No pudimos cargar la distribución. Usa Actualizar para reintentar.</p>
+      } @else if (distribucion.totalActivas === 0) {
+        <p class="ops-panel__empty">No hay órdenes activas para distribuir.</p>
+      } @else {
+        <ul class="age-bars">
+          @for (grupo of distribucion.grupos; track grupo.codigo) {
+            <li>
+              <button
+                type="button"
+                class="age-bar"
+                [attr.data-prio]="grupo.codigo"
+                [class.is-active]="filtroPrioridad === grupo.codigo"
+                [attr.aria-pressed]="filtroPrioridad === grupo.codigo"
+                (click)="filtrarPorGrupoAntiguedad(grupo.codigo)"
+              >
+                <div class="age-bar__meta">
+                  <span class="age-bar__label">
+                    <span class="age-bar__dot" aria-hidden="true"></span>
+                    {{ grupo.label }}
+                    <span class="age-bar__range">({{ grupo.rango }})</span>
+                  </span>
+                  <span class="age-bar__count ce-mono">
+                    {{ grupo.cantidad }} · {{ grupo.porcentaje }}%
+                  </span>
+                </div>
+                <div class="age-bar__track" aria-hidden="true">
+                  <div class="age-bar__fill" [style.width]="anchoBarra(grupo)"></div>
+                </div>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+
+      <p class="ops-panel__foot">
+        <span class="material-symbols-outlined" aria-hidden="true">info</span>
+        Antigüedad calculada desde la fecha de recepción.
+        @if (operativasTruncadas) {
+          <span> El recuento de barras puede ser parcial si hay más de 500 órdenes por estado.</span>
+        }
+      </p>
+    </article>
+
+    <article class="ops-panel ops-panel--queue">
+      <header class="ops-panel__head">
+        <div>
+          <h2>Órdenes que requieren atención</h2>
+          <p>Hasta cinco órdenes activas con seguimiento prioritario.</p>
+        </div>
+        <span class="ops-panel__badge ops-panel__badge--alert">
+          @if (operativasCargando) {
+            …
+          } @else {
+            {{ colaAtencion.length }} en cola
+          }
+        </span>
+      </header>
+
+      @if (operativasCargando) {
+        <p class="ops-panel__empty">Preparando cola…</p>
+      } @else if (operativasError) {
+        <p class="ops-panel__empty">No pudimos armar la cola. Usa Actualizar para reintentar.</p>
+      } @else if (colaAtencion.length === 0) {
+        <p class="ops-panel__empty">No hay órdenes que requieran atención inmediata según las reglas actuales.</p>
+      } @else {
+        <ul class="attn-list">
+          @for (item of colaAtencion; track item.id) {
+            <li class="attn-item">
+              <div class="attn-item__body">
+                <div class="attn-item__top">
+                  <span class="ce-mono attn-item__ot">{{ item.numero }}</span>
+                  <span class="attn-item__title">{{ item.titulo }}</span>
+                  <span
+                    class="prio-chip"
+                    [attr.data-prio]="item.prioridad.codigo"
+                    [attr.title]="item.prioridad.label + ' · ' + item.prioridad.resumenEdad"
+                    [attr.aria-label]="item.prioridad.label + ', ' + item.prioridad.resumenEdad"
+                  >
+                    <span class="material-symbols-outlined prio-chip__icon" aria-hidden="true">
+                      {{ iconoPrioridad(item.prioridad.codigo) }}
+                    </span>
+                    <span class="ce-mono prio-chip__days">{{ item.dias }}d</span>
+                  </span>
+                </div>
+                <p class="attn-item__motivo">Motivo: {{ item.motivo }}</p>
+              </div>
+              <ce-button family="tech" rank="tertiary" (click)="abrir(item.id)">
+                Ver orden
+              </ce-button>
+            </li>
+          }
+        </ul>
+      }
+
+      <div class="ops-panel__actions">
+        <button type="button" class="link-urgencias" (click)="verUrgencias()">
+          Ver urgencias por antigüedad
+          <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+        </button>
+      </div>
+    </article>
+  </div>
+</section>

@@ -1,15 +1,15 @@
-name: Maven CI (Solvix Backend)
+name: Maven CI (Computer & Electronic Backend)
 
 on:
   push:
     branches: [main]
     paths:
-      - "projectSolvixBackend/**"
+      - "computerElectronicBackend/**"
       - ".github/workflows/maven-ci.yml"
   pull_request:
     branches: [main]
     paths:
-      - "projectSolvixBackend/**"
+      - "computerElectronicBackend/**"
       - ".github/workflows/maven-ci.yml"
 
 jobs:
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: projectSolvixBackend
+        working-directory: computerElectronicBackend
 
     steps:
       - name: Checkout

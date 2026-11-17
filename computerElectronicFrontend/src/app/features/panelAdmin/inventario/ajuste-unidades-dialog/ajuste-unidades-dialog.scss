@@ -1,0 +1,18 @@
+﻿@use '../../../../../styles/dialog' as d;
+
+@include d.dialog;
+
+.ce-dlg {
+  max-width: 28rem;
+}
+
+.field-error,
+.form-error {
+  margin: 0;
+  color: var(--color-danger, #ba1a1a);
+  font-size: 0.78rem;
+}
+
+.ce-dlg__actions {
+  margin-top: 0.15rem;
+}

@@ -1,0 +1,190 @@
+﻿<section class="venta-form-page">
+  <ce-page-header icon="point_of_sale"
+    kicker="Comercial"
+    title="Nueva venta"
+    subtitle="Arma la venta. El sistema confirma totales, stock y precios al registrar."
+  >
+    <ce-button family="tech" rank="tertiary" icon="arrow_back" (click)="cancelar()">
+      Volver
+    </ce-button>
+  </ce-page-header>
+
+    <form [formGroup]="form" (ngSubmit)="registrar()" class="form-layout">
+      <div class="col">
+        <section class="panel">
+          <ce-section-header kicker="Cabecera" title="Cliente y pago" />
+          <div class="form-grid">
+            <div class="campo full">
+              <span class="campo-label">Cliente</span>
+              <app-cliente-buscador
+                [seleccionado]="cliente"
+                (seleccionadoChange)="onClienteSeleccionado($event)"
+              />
+            </div>
+            <label>
+              Método de pago
+              <select formControlName="metodoPago">
+                @for (metodo of metodos; track metodo.id) {
+                  <option [ngValue]="metodo.id">{{ metodo.label }}</option>
+                }
+              </select>
+            </label>
+            <label>
+              Descuento de la venta
+              <input type="number" formControlName="descuento" min="0" step="0.01" />
+              <span class="hint">Monto, no porcentaje. El sistema no acepta un descuento mayor al subtotal.</span>
+            </label>
+            <label class="full">
+              Observaciones
+              <textarea formControlName="observaciones" rows="3" maxlength="1000"></textarea>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel">
+          <ce-section-header
+            kicker="Productos"
+            title="Líneas de la venta"
+            subtitle="La cantidad no puede superar el stock disponible. El sistema lo confirma otra vez al completar."
+          />
+
+          <label class="search">
+            <span class="material-symbols-outlined" aria-hidden="true">search</span>
+            <input
+              type="search"
+              [value]="busquedaProducto"
+              (input)="onBuscarProducto($event)"
+              (keydown.enter)="onBusquedaEnter($event)"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="Nombre, ID o código de barras"
+              aria-label="Buscar producto por nombre, ID o código de barras"
+            />
+          </label>
+          <span class="hint">Escribe el código o usa un lector de barras. Enter agrega el producto.</span>
+
+          @if (buscandoCodigo || busquedaEstado === 'buscando') {
+            <p class="empty-line" role="status">Buscando producto…</p>
+          } @else if (busquedaEstado === 'error') {
+            <p class="empty-line form-error" role="alert">No pudimos buscar productos. Intenta de nuevo.</p>
+          } @else if (busquedaEstado === 'idle' && busquedaProducto.trim()) {
+            <p class="empty-line">Escribe al menos {{ minCaracteres }} caracteres o pulsa Enter con el código.</p>
+          } @else if (busquedaEstado !== 'idle' && productosFiltrados.length === 0) {
+            <p class="empty-line">No hay productos activos que coincidan. Prueba Enter si es un código de barras.</p>
+          } @else if (productosFiltrados.length > 0) {
+            <ul class="catalogo">
+              @for (producto of productosFiltrados; track producto.id) {
+                <li>
+                  <button type="button" (click)="agregarProducto(producto)">
+                    <strong>{{ producto.nombre }}</strong>
+                    <span>
+                      {{ money(producto.precioVentaActual) }} · {{ producto.stockActual ?? 0 }} u.
+                      @if (producto.codigoBarras) {
+                        · {{ producto.codigoBarras }}
+                      }
+                    </span>
+                  </button>
+                </li>
+              }
+            </ul>
+            @if (resultados.length >= limiteBusqueda) {
+              <p class="empty-line">Mostrando los primeros {{ limiteBusqueda }}. Escribe más para afinar.</p>
+            }
+          }
+
+          @if (detalles.length === 0) {
+            <p class="empty-line">Agrega al menos un producto para registrar la venta.</p>
+          } @else {
+            <div class="lineas" formArrayName="detalles">
+              @for (linea of detalles.controls; track $index; let i = $index) {
+                <article class="linea" [formGroupName]="i" [attr.data-linea-index]="i">
+                  <header>
+                    <div>
+                      <strong>{{ linea.get('productoNombre')?.value }}</strong>
+                      <span class="hint">
+                        Precio de catálogo {{ money(linea.get('precioCatalogo')?.value) }}.
+                        Stock actual {{ linea.get('stockActual')?.value }} u.
+                        @if (linea.get('productoCodigoBarras')?.value) {
+                          Código {{ linea.get('productoCodigoBarras')?.value }}.
+                        }
+                      </span>
+                    </div>
+                    <button type="button" class="icon-btn" (click)="quitarLinea(i)" aria-label="Quitar producto">
+                      <span class="material-symbols-outlined">close</span>
+                    </button>
+                  </header>
+                  <div class="linea-grid">
+                    <label>
+                      Cantidad
+                      <input
+                        type="number"
+                        formControlName="cantidad"
+                        min="1"
+                        [attr.max]="linea.get('stockActual')?.value"
+                        step="1"
+                        [attr.aria-invalid]="linea.hasError('stockInsuficiente')"
+                      />
+                      @if (linea.hasError('stockInsuficiente')) {
+                        <span class="hint form-error" role="alert">
+                          Stock insuficiente: disponible {{ linea.get('stockActual')?.value }} u.
+                        </span>
+                      }
+                    </label>
+                    <label>
+                      Precio unitario
+                      <input type="number" formControlName="precioUnitario" min="0" step="0.01" />
+                    </label>
+                    <label>
+                      Descuento de línea
+                      <input type="number" formControlName="descuentoLinea" min="0" step="0.01" />
+                    </label>
+                  </div>
+                </article>
+              }
+            </div>
+          }
+        </section>
+      </div>
+
+      <aside class="col">
+        <section class="panel sticky">
+          <ce-section-header
+            kicker="Resumen"
+            title="Valores a enviar"
+            subtitle="El sistema calcula subtotal y total al registrar."
+          />
+          <dl class="facts">
+            <div>
+              <dt>Productos</dt>
+              <dd>{{ detalles.length }}</dd>
+            </div>
+            <div>
+              <dt>Descuento de cabecera</dt>
+              <dd>{{ money(form.get('descuento')?.value) }}</dd>
+            </div>
+          </dl>
+          <p class="hint">
+            No mostramos un total estimado. El total oficial llega cuando el sistema registra la venta.
+          </p>
+
+          @if (submitState === 'error' && submitError) {
+            <p class="form-error" role="alert">{{ submitError }}</p>
+          }
+
+          <div class="form-actions">
+            <ce-button family="tech" rank="tertiary" type="button" (click)="cancelar()">
+              Cancelar
+            </ce-button>
+            <ce-button
+              family="tech"
+              rank="primary"
+              type="submit"
+              [disabled]="submitState === 'processing'"
+            >
+              {{ submitState === 'processing' ? 'Registrando…' : 'Registrar venta' }}
+            </ce-button>
+          </div>
+        </section>
+      </aside>
+    </form>
+</section>

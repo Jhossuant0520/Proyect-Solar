@@ -1,0 +1,15 @@
+# Copiar a application-local.properties (gitignored) en la raíz del módulo backend.
+# Spring Boot lo importa vía spring.config.import en application.properties.
+# No versionar secretos reales.
+#
+# Para producción use SPRING_PROFILES_ACTIVE=prod y variables de entorno
+# (JWT_SECRET, DB_URL, DB_USERNAME, DB_PASSWORD). No use este archivo en prod.
+
+# spring.datasource.url=jdbc:mysql://localhost:3306/solarfishdb
+# spring.datasource.username=root
+# spring.datasource.password=
+
+spring.mail.username=
+spring.mail.password=
+
+# app.security.jwt.secret=

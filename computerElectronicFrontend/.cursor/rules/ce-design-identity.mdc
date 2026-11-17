@@ -1,0 +1,42 @@
+---
+description: Identidad visual y paleta oficial Computer & Electronic (tokens canónicos del frontend)
+alwaysApply: true
+---
+
+# Computer & Electronic — Identidad y paleta
+
+Principio rector: **Computer & Electronic no oculta la operación. La hace comprensible.**
+
+Estética del panel: precisión, tecnología y claridad operativa. No convertir la interfaz en un dashboard SaaS genérico.
+
+Alcance: **exclusivo** de Computer & Electronic. No transferir esta paleta a SOLVIX, Joyería El Tío u otros productos. Respetar `design-system/DESIGN_CONSTITUTION.md` para la diferenciación multi-marca.
+
+## Tokens oficiales (canónicos)
+
+Preferir `--color-*`, `--ce-*` y nombres neutrales. Los `--solvix-*` son aliases legacy de valor; no introducirlos en código nuevo.
+
+```scss
+--color-bg: /* ← --solvix-bg */ #020617;
+--color-surface-1: /* ← --solvix-surface */ #0f172a;
+--color-primary: /* ← --solvix-primary */ #4fd1ff;
+--color-secondary: /* ← --solvix-secondary */ #38bdf8;
+--ce-neon: /* ← --solvix-neon */ #00e5ff;
+--ce-deep: /* ← --solvix-deep */ #003366;
+--color-text-primary: #ffffff;
+--color-text-secondary: #cfe9ff;
+--color-text-muted: #94a3b8;
+```
+
+Persistencia de tema: clave `ce-theme` (`CE_THEME_STORAGE_KEY`). Compatibilidad de lectura con `solvix-theme` legacy.
+
+Antes de crear un color: 1) buscar token equivalente, 2) reutilizarlo, 3) si no existe, evaluar si debe ser token en `_tokens.scss`.
+
+## Uso de colores
+
+- `#4fd1ff` (primary): acciones principales, títulos destacados, iconos, bordes importantes, marca
+- `#38bdf8` (secondary): navegación, interacción secundaria, elementos activos, hover
+- `#00e5ff` (neon / `--ce-neon`): highlights, indicadores importantes, elementos especiales
+- `#003366` (deep / `--ce-deep`): profundidad, gradientes, superficies secundarias
+- Verde: éxito, operación válida, sistema compatible
+- Ámbar: advertencias
+- Rojo: errores

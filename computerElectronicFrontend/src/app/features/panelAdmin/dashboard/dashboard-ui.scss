@@ -1,0 +1,112 @@
+.dash-panel {
+  background: var(--color-panel);
+  backdrop-filter: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+  padding: 1.25rem 1.35rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.dash-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-primary) 55%, transparent),
+    transparent
+  );
+  opacity: 0.4;
+}
+
+.dash-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.dash-chip {
+  background: var(--color-surface-2);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.7rem;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard);
+}
+
+.dash-chip:hover,
+.dash-chip:focus-visible {
+  color: var(--color-text-primary);
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.dash-chip.is-active {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-hover, var(--color-primary));
+  border-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
+  font-weight: 700;
+}
+
+.dash-table-wrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.dash-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 36rem;
+}
+
+.dash-table th,
+.dash-table td {
+  padding: 0.75rem 0.65rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.dash-table th {
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  background: var(--color-surface-2);
+}
+
+.dash-table td {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.dash-table .is-num {
+  text-align: right;
+  font-family: var(--font-mono);
+}
+
+.dash-table tbody tr:hover {
+  background: var(--color-row-hover);
+}
+
+@media (max-width: 767px) {
+  .dash-table {
+    min-width: 28rem;
+  }
+}

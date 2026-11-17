@@ -1,0 +1,140 @@
+﻿
+
+
+
+@use './styles/tokens';
+@use './styles/motion';
+@use './styles/buttons';
+@use './styles/scrollbars';
+@use './styles/snackbar';
+@use './styles/material-theme';
+@use './styles/a11y';
+@use './styles/theme-light';
+@use './styles/admin-ce';
+
+@tailwind utilities;
+
+:root {
+  --app-bg-color: var(--color-bg);
+}
+
+html, body {
+  background: var(--app-bg-color);
+  background-color: var(--app-bg-color);
+  color: var(--color-text-primary);
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Transición discreta al cambiar tema (sin animar layout). */
+html,
+body,
+.admin-shell,
+.admin-topbar,
+.admin-sidebar,
+.mat-mdc-dialog-surface,
+.mat-mdc-menu-panel,
+.mat-mdc-select-panel,
+.ce-snack .mdc-snackbar__surface {
+  transition:
+    background-color var(--motion-fast, 140ms) var(--ease-standard, ease),
+    color var(--motion-fast, 140ms) var(--ease-standard, ease),
+    border-color var(--motion-fast, 140ms) var(--ease-standard, ease),
+    box-shadow var(--motion-fast, 140ms) var(--ease-standard, ease);
+}
+
+button,
+input,
+select,
+textarea,
+optgroup,
+option {
+  font-family: inherit;
+}
+
+/* D.14 — color de valor tipado según tema (dark: claro / light: oscuro). */
+input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='submit']):not([type='button']):not([type='reset']):not([type='file']):not([type='image']),
+textarea,
+select {
+  color: var(--color-text-primary);
+  caret-color: var(--color-primary);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.9;
+}
+
+option,
+optgroup {
+  color: var(--color-text-primary);
+  background: var(--color-surface-elevated);
+}
+
+/* Compatibilidad con Angular Material dialogs */
+.mat-mdc-dialog-container,
+.mat-dialog-container {
+  overflow: hidden !important;
+}
+
+/* ==========================================================================
+   ESTILOS GLOBALES PARA EL MENÚ DESPLEGABLE (SolarFish Glassmorphism)
+   ========================================================================== */
+.sf-select-panel {
+  background: var(--select-panel-bg) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--shadow), inset 0 0 15px var(--color-primary-soft) !important;
+
+  .mat-mdc-option {
+    color: var(--color-text-secondary) !important;
+
+    &:hover {
+      background: var(--color-primary-soft) !important;
+    }
+  }
+
+  .mat-mdc-option.mdc-list-item--selected {
+    background: var(--color-primary-soft) !important;
+
+    .mdc-list-item__primary-text {
+      color: var(--color-primary) !important;
+      font-weight: 600;
+    }
+  }
+}
+
+.ce-dialog-panel .mat-mdc-dialog-container,
+.solvix-dialog-panel .mat-mdc-dialog-container,
+.ce-dialog-panel .mat-mdc-dialog-surface,
+.solvix-dialog-panel .mat-mdc-dialog-surface {
+  background: var(--color-surface-elevated) !important;
+  box-shadow: var(--shadow), 0 0 0 1px var(--color-border) !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: 14px !important;
+  color: var(--color-text-primary);
+}
+
+.ce-dialog-panel .mat-mdc-dialog-surface,
+.solvix-dialog-panel .mat-mdc-dialog-surface {
+  max-height: min(90vh, 900px);
+  overflow: auto !important;
+}
+
+.ce-dialog-backdrop,
+.solvix-dialog-backdrop {
+  background: var(--color-overlay) !important;
+}

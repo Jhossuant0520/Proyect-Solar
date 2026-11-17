@@ -1,0 +1,255 @@
+﻿<section class="documentos-panel" [class.is-compact]="layoutCompacto">
+  <div class="documentos-head">
+    <div class="doc-header-main">
+      <div class="doc-icon-badge" aria-hidden="true">
+        <span class="material-symbols-outlined">folder_open</span>
+      </div>
+      <div class="doc-header-copy">
+        <p class="doc-header-kicker">Archivo</p>
+        <h3 class="doc-header-title">Documentos asociados</h3>
+      </div>
+    </div>
+    <span class="doc-counter ce-mono">{{ totalRegistros }} registros</span>
+  </div>
+
+  @if (state === 'loading') {
+    <ce-loading-state label="Cargando documentos..." />
+  } @else if (state === 'error') {
+    <ce-error-state
+      title="No pudimos cargar los documentos."
+      [message]="errorMessage"
+      (retry)="cargar()"
+    />
+  } @else if (state === 'esperando_comprobante') {
+    <div class="espera-card" role="status" aria-live="polite">
+      <h3 class="espera-titulo">Comprobante de recepción</h3>
+      <ce-loading-state label="Generando comprobante…" />
+      <p class="espera-hint">Esto puede tardar unos segundos.</p>
+    </div>
+  } @else {
+    @if (state === 'comprobante_timeout') {
+      <div class="timeout-card" role="alert">
+        <ce-empty-state
+          icon="description"
+          title="El comprobante no pudo generarse automáticamente."
+          message="La orden quedó creada. Puedes reintentar la generación ahora."
+        />
+        @if (canManage) {
+          <div class="timeout-actions">
+            <ce-button
+              family="tech"
+              rank="primary"
+              type="button"
+              icon="refresh"
+              [disabled]="accionEnCurso"
+              [loading]="esAccionLoading('comprobante')"
+              ariaLabel="Reintentar generación del comprobante"
+              (click)="reintentarGeneracion()"
+            >
+              {{ esAccionLoading('comprobante') ? 'Generando comprobante…' : 'Reintentar generación' }}
+            </ce-button>
+          </div>
+        }
+      </div>
+    }
+
+    @if (esperandoDoc) {
+      <div class="espera-card" role="status" aria-live="polite">
+        <h3 class="espera-titulo">{{ labelEsperando }}</h3>
+        @if (!esperandoDocTimeout) {
+          <ce-loading-state [label]="labelGenerandoEsperado()" />
+          <p class="espera-hint">Esto puede tardar unos segundos.</p>
+        } @else {
+          <p class="espera-hint">No apareció todavía. Puedes reintentar la generación.</p>
+          @if (canManage) {
+            <div class="timeout-actions">
+              <ce-button
+                family="tech"
+                rank="primary"
+                type="button"
+                icon="refresh"
+                [disabled]="accionEnCurso"
+                [loading]="esAccionLoading('generar-esperado')"
+                ariaLabel="Generar documento pendiente"
+                (click)="generarDocumentoEsperadoManual()"
+              >
+                {{ esAccionLoading('generar-esperado') ? labelGenerandoEsperado() : 'Generar documento' }}
+              </ce-button>
+            </div>
+          }
+        }
+      </div>
+    }
+
+    @if (mostrarSlots) {
+      <div class="slots" role="list">
+        @for (slot of slotsDocumentales; track slot.tipo) {
+          <section
+            class="slot"
+            [class]="'slot tipo-' + claseTipo(slot.tipo)"
+            [class.is-relevante]="slot.relevante"
+            [class.is-pendiente]="!slot.vigente"
+            role="listitem"
+            [attr.aria-label]="slot.titulo"
+          >
+            @if (slot.vigente; as doc) {
+              <div class="card-doc" [class.is-nuevo]="esRecienGenerado(doc)" [attr.data-doc-id]="doc.id">
+                <div class="doc-row-lead">
+                  <span class="doc-type-badge" aria-hidden="true">
+                    <span class="material-symbols-outlined">picture_as_pdf</span>
+                  </span>
+                  <div class="doc-copy">
+                    <strong class="card-title-text">{{ tituloDoc(doc) }}</strong>
+                    <p class="meta ce-mono">{{ metaLinea(doc) }}</p>
+                    @if (esRecienGenerado(doc) || slot.relevante) {
+                      <div class="doc-tags" aria-label="Estado del documento">
+                        @if (esRecienGenerado(doc)) {
+                          <span class="doc-tag doc-tag--nuevo">Nuevo</span>
+                        }
+                        @if (slot.relevante) {
+                          <span class="doc-tag doc-tag--relevante">Relevante</span>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <div class="card-actions card-actions--icons">
+                  <button
+                    type="button"
+                    class="btn-doc-icon"
+                    [disabled]="accionEnCurso"
+                    [attr.aria-label]="'Imprimir ' + tituloDoc(doc)"
+                    matTooltip="Imprimir"
+                    (click)="imprimir(doc)"
+                  >
+                    @if (accionTipo === 'imprimir' && docAccionId === doc.id) {
+                      <span class="material-symbols-outlined is-spin" aria-hidden="true">progress_activity</span>
+                    } @else {
+                      <span class="material-symbols-outlined" aria-hidden="true">print</span>
+                    }
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-doc-icon"
+                    [disabled]="accionEnCurso"
+                    [attr.aria-label]="'Descargar ' + tituloDoc(doc)"
+                    matTooltip="Descargar"
+                    (click)="descargar(doc)"
+                  >
+                    @if (accionTipo === 'descargar' && docAccionId === doc.id) {
+                      <span class="material-symbols-outlined is-spin" aria-hidden="true">progress_activity</span>
+                    } @else {
+                      <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                    }
+                  </button>
+                  @if (canManage) {
+                    <button
+                      type="button"
+                      class="btn-doc-icon"
+                      [disabled]="accionEnCurso"
+                      aria-label="Regenerar PDF"
+                      matTooltip="Regenerar"
+                      (click)="regenerar(doc)"
+                    >
+                      @if (esAccionLoading('regenerar', doc.id)) {
+                        <span class="material-symbols-outlined is-spin" aria-hidden="true">progress_activity</span>
+                      } @else {
+                        <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+                      }
+                    </button>
+                  }
+                </div>
+              </div>
+
+              @if (slot.anteriores.length) {
+                <button
+                  type="button"
+                  class="btn-versiones"
+                  (click)="toggleVersiones(slot.tipo)"
+                  [attr.aria-expanded]="versionesAbiertasDe(slot.tipo)"
+                >
+                  Versiones anteriores ({{ slot.anteriores.length }})
+                  <span class="material-symbols-outlined" aria-hidden="true">
+                    {{ versionesAbiertasDe(slot.tipo) ? 'expand_less' : 'expand_more' }}
+                  </span>
+                </button>
+                @if (versionesAbiertasDe(slot.tipo)) {
+                  <ul class="lista-anteriores">
+                    @for (prev of slot.anteriores; track prev.id) {
+                      <li class="card-doc is-historial" [attr.data-doc-id]="prev.id">
+                        <div class="doc-row-lead">
+                          <span class="doc-type-badge is-muted" aria-hidden="true">
+                            <span class="material-symbols-outlined">description</span>
+                          </span>
+                          <div class="doc-copy">
+                            <div class="card-title">
+                              <strong>{{ tituloDoc(prev) }}</strong>
+                              <span class="meta-chip ce-mono">v{{ prev.version }}</span>
+                            </div>
+                            <p class="meta ce-mono">{{ metaLinea(prev) }}</p>
+                          </div>
+                        </div>
+                        <div class="card-actions card-actions--icons">
+                          <button
+                            type="button"
+                            class="btn-doc-icon"
+                            [disabled]="accionEnCurso"
+                            [attr.aria-label]="'Imprimir ' + tituloDoc(prev)"
+                            matTooltip="Imprimir"
+                            (click)="imprimir(prev)"
+                          >
+                            <span class="material-symbols-outlined" aria-hidden="true">print</span>
+                          </button>
+                          <button
+                            type="button"
+                            class="btn-doc-icon"
+                            [disabled]="accionEnCurso"
+                            [attr.aria-label]="'Descargar ' + tituloDoc(prev)"
+                            matTooltip="Descargar"
+                            (click)="descargar(prev)"
+                          >
+                            <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                          </button>
+                        </div>
+                      </li>
+                    }
+                  </ul>
+                }
+              }
+            } @else {
+              <div class="slot-pendiente">
+                <div class="slot-pendiente__row">
+                  <div class="doc-row-lead">
+                    <span class="doc-type-badge is-pending" aria-hidden="true">
+                      <span class="material-symbols-outlined">schedule</span>
+                    </span>
+                    <div class="doc-copy">
+                      <p class="slot-titulo">{{ slot.titulo }}</p>
+                      <p class="slot-hint">{{ slot.pendienteMsg }}</p>
+                    </div>
+                  </div>
+                  <span class="doc-inactive-pill ce-mono">Pendiente</span>
+                </div>
+                @if (slot.tipo === 'COMPROBANTE_RECEPCION' && canManage && state === 'comprobante_pendiente') {
+                  <ce-button
+                    family="tech"
+                    rank="secondary"
+                    type="button"
+                    icon="picture_as_pdf"
+                    [disabled]="accionEnCurso"
+                    [loading]="esAccionLoading('comprobante')"
+                    ariaLabel="Generar comprobante de recepción"
+                    (click)="reintentarGeneracion()"
+                  >
+                    {{ esAccionLoading('comprobante') ? 'Generando comprobante…' : 'Generar comprobante' }}
+                  </ce-button>
+                }
+              </div>
+            }
+          </section>
+        }
+      </div>
+    }
+  }
+</section>

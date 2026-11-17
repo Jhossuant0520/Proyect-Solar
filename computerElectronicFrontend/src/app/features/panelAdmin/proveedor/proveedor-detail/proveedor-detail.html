@@ -1,0 +1,175 @@
+﻿<section class="detalle-page">
+  @if (state === 'loading') {
+    <ce-loading-state label="Cargando proveedor." />
+  } @else if (state === 'error' || !proveedor) {
+    <ce-error-state
+      title="No pudimos cargar este proveedor."
+      message="Puede que no exista o que no tengas permiso."
+      (retry)="cargar()"
+    />
+  } @else {
+    <ce-page-header icon="store"
+      kicker="Comercial"
+      [title]="razon(proveedor)"
+      subtitle="Ficha empresarial y compras relacionadas."
+    >
+      @if (proveedor.activo) {
+        <ce-button family="tech" rank="danger" icon="block" (click)="desactivar()">
+          Desactivar
+        </ce-button>
+      } @else {
+        <ce-button family="tech" rank="secondary" icon="check_circle" (click)="activar()">
+          Activar
+        </ce-button>
+      }
+      <ce-button family="tech" rank="primary" icon="edit" (click)="editar()">
+        Editar
+      </ce-button>
+    </ce-page-header>
+
+    @if (!proveedor.activo) {
+      <p class="aviso" role="status">
+        Este proveedor está inactivo. No se puede usar en compras nuevas; el historial sigue visible.
+      </p>
+    }
+
+    <section class="panel">
+      <ce-section-header kicker="Ficha" title="Información empresarial" />
+      <dl class="facts">
+        <div>
+          <dt>Estado</dt>
+          <dd>
+            <ce-badge [tone]="proveedor.activo ? 'success' : 'neutral'">
+              {{ proveedor.activo ? 'Activo' : 'Inactivo' }}
+            </ce-badge>
+          </dd>
+        </div>
+        <div>
+          <dt>NIT</dt>
+          <dd>{{ documento(proveedor) }}</dd>
+        </div>
+        <div>
+          <dt>Nombre comercial</dt>
+          <dd>{{ proveedor.nombreComercial || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Condición habitual</dt>
+          <dd>
+            {{ condicion(proveedor.condicionPago) }}
+            @if (proveedor.diasCredito != null) {
+              <span class="sub"> · {{ proveedor.diasCredito }} días</span>
+            }
+          </dd>
+        </div>
+        <div>
+          <dt>Teléfono</dt>
+          <dd>{{ proveedor.telefono || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Tel. alternativo</dt>
+          <dd>{{ proveedor.telefonoAlternativo || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Correo</dt>
+          <dd>{{ proveedor.email || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Web</dt>
+          <dd>{{ proveedor.web || '—' }}</dd>
+        </div>
+        <div class="full">
+          <dt>Dirección</dt>
+          <dd>
+            {{ proveedor.direccion || '—' }}
+            @if (proveedor.ciudad || proveedor.departamento) {
+              <span class="sub">
+                {{ ubicacionVisible(proveedor) }}
+              </span>
+            }
+          </dd>
+        </div>
+        <div class="full">
+          <dt>Notas</dt>
+          <dd>{{ proveedor.notas || 'Sin notas' }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="panel">
+      <ce-section-header
+        kicker="Personas"
+        title="Contactos externos"
+        subtitle="Representantes del proveedor. No son usuarios del sistema."
+      />
+      @if (contactosVisibles.length === 0) {
+        <ce-empty-state
+          icon="contacts"
+          title="Sin contactos registrados."
+          message="Puedes agregar asesores comerciales o de facturación al editar."
+        />
+      } @else {
+        <ul class="contactos">
+          @for (contacto of contactosVisibles; track contacto.id) {
+            <li>
+              <div>
+                <strong>{{ contacto.nombre }}</strong>
+                <span class="sub">
+                  {{ tipoContacto(contacto.tipoContacto) }}
+                  @if (contacto.cargo) { · {{ contacto.cargo }} }
+                </span>
+              </div>
+              <div class="meta">
+                <span>{{ contacto.celular || contacto.telefono || 'Sin teléfono' }}</span>
+                <span>{{ contacto.email || 'Sin correo' }}</span>
+              </div>
+              <div class="badges">
+                @if (contacto.principal) {
+                  <ce-badge tone="warning">Principal</ce-badge>
+                }
+                <ce-badge [tone]="contacto.activo ? 'success' : 'neutral'">
+                  {{ contacto.activo ? 'Activo' : 'Inactivo' }}
+                </ce-badge>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <section class="panel">
+      <ce-section-header
+        kicker="Operaciones"
+        title="Compras relacionadas"
+        subtitle="Historial reutilizado desde el módulo de compras."
+      />
+      @if (comprasState === 'loading') {
+        <ce-loading-state label="Cargando compras." />
+      } @else if (comprasState === 'error') {
+        <ce-error-state title="No pudimos cargar las compras." (retry)="cargar()" />
+      } @else if (comprasState === 'empty') {
+        <ce-empty-state
+          icon="shopping_cart"
+          title="Este proveedor no tiene compras."
+          message="Las compras aparecen aquí cuando se registran contra este proveedor."
+        />
+      } @else {
+        <ul class="historial">
+          @for (compra of compras; track compra.id) {
+            <li>
+              <div>
+                @if (rutaCompra(compra.id); as ruta) {
+                  <a [routerLink]="ruta"><strong>{{ compra.numero }}</strong></a>
+                } @else {
+                  <strong>{{ compra.numero }}</strong>
+                }
+                <span class="sub">{{ fecha(compra.fecha) }}</span>
+              </div>
+              <span class="ce-mono">{{ money(compra.total) }}</span>
+              <ce-badge [tone]="tonoCompra(compra.estado)">{{ estadoCompra(compra.estado) }}</ce-badge>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+</section>

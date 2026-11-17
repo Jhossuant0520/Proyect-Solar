@@ -1,0 +1,93 @@
+import { Component } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { finalize } from 'rxjs/operators';
+import { UserService } from '../../../core/services/user.service';
+
+@Component({
+  selector: 'app-register',
+  standalone: true,
+  imports: [ReactiveFormsModule, RouterLink],
+  templateUrl: './register.html',
+  styleUrls: ['./register.scss']
+})
+export class Register {
+
+  form: FormGroup;
+
+  cargando = false;
+  errorMensaje = '';
+  registroExitoso = false;
+
+  showPassword = false;
+  showConfirm = false;
+
+  constructor(
+    private fb: FormBuilder,
+    private userService: UserService,
+    private router: Router
+  ) {
+    this.form = this.fb.group({
+      nombreUsuario: ['', [Validators.required, Validators.minLength(3)]],
+      email: ['', [Validators.required, Validators.email]],
+      passwordUsuario: ['', [Validators.required, Validators.minLength(8)]],
+      confirmarPassword: ['', Validators.required]
+    }, { validators: this.passwordMatchValidator });
+  }
+
+  get f() {
+    return this.form.controls;
+  }
+
+  private passwordMatchValidator(g: AbstractControl): ValidationErrors | null {
+    const pass = g.get('passwordUsuario')?.value;
+    const confirm = g.get('confirmarPassword')?.value;
+
+    return pass === confirm ? null : { passwordsMismatch: true };
+  }
+
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirm(): void {
+    this.showConfirm = !this.showConfirm;
+  }
+
+  onSubmit(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.cargando = true;
+    this.errorMensaje = '';
+
+    const datos = {
+      nombreUsuario: this.form.get('nombreUsuario')?.value,
+      email: this.form.get('email')?.value,
+      passwordUsuario: this.form.get('passwordUsuario')?.value
+    };
+
+    this.userService.registrar(datos)
+      .pipe(finalize(() => this.cargando = false))
+      .subscribe({
+        next: () => {
+          this.registroExitoso = true;
+
+          setTimeout(() => {
+            this.router.navigate(['/login']);
+          }, 2000);
+        },
+        error: (err) => {
+          const body = err?.error;
+          if (typeof body === 'string' && body.trim()) {
+            this.errorMensaje = body;
+          } else {
+            this.errorMensaje =
+              body?.mensaje || body?.message || 'Error al registrar';
+          }
+        }
+      });
+  }
+}

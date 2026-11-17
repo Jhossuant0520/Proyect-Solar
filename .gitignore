@@ -26,9 +26,13 @@ target/
 Thumbs.db
 
 # =========================
-# VARIABLES DE ENTORNO
+# VARIABLES DE ENTORNO / SECRETOS LOCALES
 # =========================
 .env
+.env.*
+!.env.example
+application-local.properties
+**/application-local.properties
 
 # =========================
 # ARCHIVOS SUBIDOS
